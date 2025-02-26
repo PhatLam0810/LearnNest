@@ -1,0 +1,10 @@
+.ant-modal,
+.ant-modal-content {
+  min-height: 90vh;
+  width: 90vw;
+  margin: 0;
+  top: 0;
+}
+.ant-input-group-addon .ant-btn {
+  background-color: #ef405c;
+}

@@ -1,0 +1,75 @@
+import { StyleSheet, typography } from '@styles';
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 8,
+    minWidth: '19.6%',
+    marginBottom: 6,
+  },
+  image: {
+    width: '100%',
+    height: 170,
+
+    objectFit: 'contain',
+    aspectRatio: 16 / 9,
+    // backgroundColor: 'gray',
+    borderRadius: 8,
+  },
+  title: {
+    ...typography.subTitle1,
+    fontWeight: '500',
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  desc: {
+    ...typography.subTitle2,
+    fontWeight: '300',
+    color: '#BABABA',
+    marginBottom: 4,
+  },
+  type: {
+    position: 'absolute',
+    top: 12,
+    left: 10,
+    ...typography.body2,
+    backgroundColor: '#FFFFFFFF',
+    borderRadius: 8,
+    paddingLeft: 8,
+    paddingRight: 8,
+    paddingTop: 2,
+    paddingBottom: 2,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  btn: {
+    position: 'absolute',
+    top: 20,
+    zIndex: 2,
+    right: 16,
+    height: 24,
+    ...typography.body2,
+    backgroundColor: '#FFFFFFFF',
+    borderRadius: 8,
+    paddingLeft: 8,
+    paddingRight: 8,
+    paddingTop: 2,
+    paddingBottom: 2,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  tags: {
+    ...typography.body2,
+    fontSize: 12,
+    color: '#8D8D8D',
+  },
+});
+
+export default styles;

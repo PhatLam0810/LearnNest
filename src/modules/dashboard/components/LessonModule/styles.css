@@ -1,0 +1,23 @@
+.lesson-item {
+  background-color: #fff;
+  margin: 8px 0;
+  padding: 8px 16px;
+}
+.lesson-item-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.lesson-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ant-collapse-header {
+  align-items: center;
+}
+.anticon.anticon-right.ant-collapse-arrow {
+  font-size: 16px !important;
+}

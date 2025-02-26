@@ -1,0 +1,7 @@
+.ant-menu-item-selected {
+  color: #fff !important;
+  background-color: #ef405c !important;
+}
+.ant-menu-item:not(.ant-menu-item-disabled):focus-visible {
+  outline: none !important;
+}

@@ -1,0 +1,255 @@
+'use client';
+import React, { useEffect, useRef, useState } from 'react';
+import { Text, View } from 'react-native-web';
+import styles from './styles';
+import {
+  Button,
+  Dropdown,
+  Input,
+  MenuProps,
+  Modal,
+  Space,
+  Table,
+  TableProps,
+  Tag,
+} from 'antd';
+import { messageApi, useAppPagination, useWindowSize } from '@hooks';
+import { PlusOutlined } from '@ant-design/icons';
+import { AddLibraryContent, ModalBulkData } from '~mdAdmin/components';
+import { adminQuery } from '~mdAdmin/redux';
+import { Library } from '~mdDashboard/types';
+import LibraryDetailItem from '~mdDashboard/pages/SubLessonDetailPage/_components/LibraryDetailItem';
+
+const LibraryManage = () => {
+  const divRef = useRef(null);
+
+  const [height, setHeight] = useState(0);
+  const [selectedItem, setSelectedItem] = useState<Library>(null);
+  const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
+  const [isVisibleModalBulk, setIsVisibleModalBulk] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+
+  const [data, setData] = useState<Library>(null);
+
+  const { listItem, currentData, refresh, fetchData, search } =
+    useAppPagination<Library>({
+      apiUrl: 'library/getAllLibrary',
+    });
+
+  const [deleteItem] = adminQuery.useDeleteLibraryMutation();
+  const [bulkLibraryFromYoutube, { isLoading: isLoadingBulkYoutube }] =
+    adminQuery.useBulkLibraryFromYoutubeMutation();
+
+  const [bulkLibraryFromGoogleDrive, { isLoading: isLoadingBulkGG }] =
+    adminQuery.useBulkLibraryFromGoogleDriveMutation();
+
+  const columns: TableProps<Library>['columns'] = [
+    {
+      title: 'Title',
+      dataIndex: 'title',
+      key: 'title',
+    },
+    {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+    },
+    {
+      title: 'Category',
+      dataIndex: 'libraryType',
+      key: 'libraryType',
+      render: value => {
+        return <p>{value?.name}</p>;
+      },
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle" onClick={e => e.stopPropagation()}>
+          <a
+            onClick={() => {
+              setSelectedItem(record);
+              setOpenDelete(true);
+            }}>
+            Delete
+          </a>
+          <a
+            onClick={() => {
+              setSelectedItem(record);
+              setIsVisibleModalAdd(true);
+            }}>
+            Update
+          </a>
+        </Space>
+      ),
+    },
+    {
+      key: 'more',
+    },
+  ];
+
+  useEffect(() => {
+    if (divRef.current) {
+      setHeight(divRef.current.offsetHeight);
+    }
+  }, []);
+
+  const onCloseModalAdd = () => {
+    setSelectedItem(null);
+    setIsVisibleModalAdd(false);
+  };
+
+  const onCloseDelete = () => {
+    setOpenDelete(false);
+  };
+
+  const { Search } = Input;
+
+  const items: MenuProps['items'] = [
+    {
+      key: '1',
+      label: <a onClick={() => setIsVisibleModalAdd(true)}>Add Library</a>,
+    },
+    {
+      key: '2',
+      label: <a onClick={() => setIsVisibleModalBulk(true)}>Bulk Library</a>,
+    },
+    {
+      key: '3',
+      label: (
+        <a
+          onClick={() => {
+            messageApi.loading('Bulk...', 0);
+            bulkLibraryFromYoutube()
+              .unwrap()
+              .then(res => {
+                messageApi.destroy();
+                messageApi.success('Bulk successfully!');
+                refresh();
+              })
+              .catch(res => {
+                messageApi.destroy();
+                messageApi.error('Bulk error!');
+              });
+          }}>
+          Bulk From Youtube
+        </a>
+      ),
+    },
+    {
+      key: '4',
+      label: (
+        <a
+          onClick={() => {
+            messageApi.loading('Bulk...', 0);
+            bulkLibraryFromGoogleDrive()
+              .unwrap()
+              .then(res => {
+                messageApi.destroy();
+                messageApi.success('Bulk successfully!');
+                refresh();
+              })
+              .catch(res => {
+                messageApi.destroy();
+                messageApi.error('Bulk error!');
+              });
+          }}>
+          Add From Google Drive
+        </a>
+      ),
+    },
+  ];
+  return (
+    <View style={styles.container}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+        <Search
+          placeholder="input search text"
+          onSearch={search}
+          style={{ width: '50%' }}
+          allowClear
+        />
+        <View style={{ alignSelf: 'flex-end', flexDirection: 'row', gap: 8 }}>
+          <Dropdown menu={{ items }}>
+            <Button type="default">
+              <PlusOutlined />
+            </Button>
+          </Dropdown>
+        </View>
+      </View>
+      <View ref={divRef} style={{ flex: 1 }}>
+        <Table
+          scroll={{ y: height - 100 }}
+          columns={columns}
+          dataSource={listItem}
+          onChange={res => {
+            fetchData({ pageNum: res.current });
+          }}
+          onRow={record => {
+            return {
+              onClick: () => {
+                setData(record);
+              },
+            };
+          }}
+          pagination={{
+            current: currentData?.pageNum,
+            pageSize: currentData?.pageSize,
+            total: currentData?.totalRecords,
+          }}
+          style={{ cursor: 'pointer' }}
+        />
+      </View>
+      <Modal
+        open={isVisibleModalAdd}
+        onCancel={onCloseModalAdd}
+        onClose={onCloseModalAdd}
+        footer={null}
+        title="Add Library">
+        <AddLibraryContent initialValues={selectedItem} />
+      </Modal>
+
+      <Modal
+        title="Delete Library"
+        open={openDelete}
+        onCancel={onCloseDelete}
+        onClose={onCloseDelete}
+        onOk={() => {
+          deleteItem({ _id: selectedItem?._id })
+            .unwrap()
+            .then(res => {
+              refresh();
+              onCloseDelete();
+            });
+        }}>
+        <Text>{`Delete Library: ${selectedItem?.title}`}</Text>
+      </Modal>
+      <ModalBulkData
+        title="Bulk Library"
+        isVisible={isVisibleModalBulk}
+        setIsVisible={setIsVisibleModalBulk}
+        onOk={data => {}}
+      />
+      <Modal
+        width={'80%'}
+        closeIcon={null}
+        styles={{
+          content: { padding: 0, backgroundColor: 'transparent' },
+        }}
+        centered
+        style={{ aspectRatio: 16 / 9 }}
+        footer={null}
+        open={!!data}
+        onCancel={() => setData(null)}>
+        <LibraryDetailItem data={data} />
+      </Modal>
+    </View>
+  );
+};
+
+export default LibraryManage;

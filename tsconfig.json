@@ -1,0 +1,48 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@utils": ["./src/utils"],
+      "@redux": ["./src/redux"],
+      "@redux/*": ["./src/redux/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@public": ["./src/public"],
+      "@public/*": ["./src/public/*"],
+      "@components": ["./src/components"],
+      "@components/*": ["./src/components/*"],
+      "@services": ["./src/services"],
+      "@services/*": ["./src/services/*"],
+      "@hooks": ["./src/hooks"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@styles": ["./src/styles"],
+      "~mdDashboard": ["./src/modules/dashboard"],
+      "~mdDashboard/*": ["./src/modules/dashboard/*"],
+      "~mdAuth": ["./src/modules/auth"],
+      "~mdAuth/*": ["./src/modules/auth/*"],
+      "~mdAdmin": ["./src/modules/admin"],
+      "~mdAdmin/*": ["./src/modules/admin/*"],
+
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

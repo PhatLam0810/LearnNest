@@ -1,0 +1,90 @@
+import { dmSans, inter, StyleSheet, typography } from '@styles';
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 20,
+  },
+  headerTitle: {
+    fontWeight: '600',
+    fontSize: 22.78,
+  },
+  chip: {
+    ...typography.subTitle1,
+  },
+  categoryItem: {
+    paddingTop: 7,
+    paddingBottom: 7,
+    paddingLeft: 12,
+    paddingRight: 12,
+    borderRadius: 8,
+    backgroundColor: '#FFF',
+  },
+  categoryItemName: {
+    ...typography.subTitle2,
+    color: '#212121',
+  },
+  title: {
+    fontFamily: inter.style.fontFamily,
+    fontWeight: '600',
+    fontSize: 22.78,
+    letterSpacing: 0.01,
+    color: '#000',
+  },
+  description: {
+    ...typography.body1,
+    color: '#8D8D8D',
+    paddingBottom: 12,
+  },
+  whatLearnTitle: {
+    ...typography.subTitle1,
+    color: '#FFA726',
+  },
+  skillLearnedItem: {
+    ...typography.body2,
+    color: '#21212199',
+  },
+  lessonContent: {
+    marginTop: 30,
+    paddingTop: 24,
+    paddingBottom: 24,
+    gap: 12,
+  },
+  lessonContentTitle: {
+    fontFamily: inter.style.fontFamily,
+    fontWeight: '400',
+    fontSize: 22.25,
+    letterSpacing: 0.01,
+    color: '#000',
+  },
+  buttonModule: {
+    flexDirection: 'row',
+    paddingLeft: 16,
+    paddingRight: 16,
+    borderRadius: 8,
+    paddingTop: 8,
+    paddingBottom: 8,
+    backgroundColor: 'white',
+    gap: 16,
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Shadow
+  },
+  moduleItemTitle: {
+    fontFamily: dmSans.style.fontFamily,
+    fontWeight: '400',
+    fontSize: 16,
+    letterSpacing: 0.01,
+    color: '#212121',
+  },
+  moduleItemTime: {
+    ...typography.body2,
+    color: '#8D8D8D',
+  },
+});
+
+export default styles;
