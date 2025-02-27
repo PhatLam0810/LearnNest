@@ -14,11 +14,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  btnContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 16,
+  },
+  subContainer: {
+    paddingTop: 12,
+    paddingBottom: 24,
+  },
   subTitle: {
-    ...typography.body1,
-    textAlign: 'center',
+    ...typography.titleM,
+    color: '#000000',
+  },
+  subDescription: {
+    ...typography.body2,
     color: '#21212199',
-    padding: 32,
   },
   driverContainer: {
     display: 'flex',

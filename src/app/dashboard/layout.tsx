@@ -8,6 +8,7 @@ import {
   LogoutOutlined,
 } from '@ant-design/icons';
 import './styles.css';
+import LogoIcon from '../../assets/svg/LogoICon.svg';
 import Image from 'next/image';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction } from '~mdAuth/redux';
@@ -15,7 +16,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { dashboardQuery } from '~mdDashboard/redux';
 import Icon from '@components/icons';
-import { LessonIcon, LogoIcon } from '@/assets/svg';
+import { LessonIcon } from '@/assets/svg';
 
 const { Sider, Content } = Layout;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
@@ -35,23 +36,45 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (data) {
-      const listLibraryMenu = data.map(item => {
-        const params =
-          item._id !== '0'
-            ? {
-                id: item._id,
-                collection: item?.filter?.collection,
-              }
-            : undefined;
-        return {
-          key: `/dashboard/library/0?${new URLSearchParams(params)}`,
-          label: item.name,
-        };
-      });
+      const listLibraryMenu = data.map(item => ({
+        key: `/dashboard/library/${item._id}`,
+        label: item.name,
+        icon: <Icon name="library" />,
+      }));
 
-      setMenuChildren(listLibraryMenu);
+      setMenuChildren(prev => prev.concat(listLibraryMenu));
     }
   }, [isSuccess]);
+
+  const menuItemFriend = [
+    {
+      key: '/dashboard/id1',
+      style: styles.menuItemFriend,
+      label: (
+        <View style={styles.friendContainer}>
+          <Text style={styles.friendTitle}>Julius Nguyen</Text>
+          <Text style={styles.friendSubTitle}>Lightbridge Teacher</Text>
+        </View>
+      ),
+      icon: <Avatar size={32} />,
+    },
+    {
+      key: '/dashboard/id2',
+      style: styles.menuItemFriend,
+      label: (
+        <View style={styles.friendContainer}>
+          <Text style={styles.friendTitle}>Katie K.</Text>
+          <Text style={styles.friendSubTitle}>Admin</Text>
+        </View>
+      ),
+      icon: (
+        <Avatar
+          size={32}
+          style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }}
+        />
+      ),
+    },
+  ];
 
   const menuItems: MenuItem[] = [
     {
@@ -66,6 +89,11 @@ export default function DashboardLayout({
           label: 'Library',
           icon: <Icon name="library" />,
           children: menuChildren,
+        },
+        {
+          key: '/dashboard/save',
+          label: 'Save',
+          icon: <Icon name="save" />,
         },
       ],
     },
@@ -84,10 +112,17 @@ export default function DashboardLayout({
           children: [
             { key: '/dashboard/admin/userManage', label: 'User Manage' },
             { key: '/dashboard/admin/lessonManage', label: 'Lesson Manage' },
-            { key: '/dashboard/admin/otherManage', label: 'Other Manage' },
           ],
         },
       ],
+    },
+  ];
+  const friendItems: MenuProps['items'] = [
+    {
+      key: 'Friend',
+      label: 'FRIEND',
+      type: 'group',
+      children: [...menuItemFriend],
     },
   ];
 
@@ -111,15 +146,19 @@ export default function DashboardLayout({
       ],
     },
   ];
-
   return (
     <Layout
       hasSider
       style={{ height: '100vh', width: '100vw', backgroundColor: 'white ' }}>
       {/* Sidebar */}
       <Sider theme="light" style={styles.sider} width={240}>
-        <ScrollView style={{ height: '100%', scrollbarWidth: 'none' }}>
-          <LogoIcon style={{ marginBottom: 12 }} />
+        <View style={{ height: '100%' }}>
+          {/* <Image
+            src={LogoIcon}
+            style={{ width: '80%', aspectRatio: 16 / 9, alignSelf: 'center' }}
+            alt=""
+          /> */}
+
           <TouchableOpacity>
             <View
               style={{ alignItems: 'center', marginBottom: 20 }}
@@ -164,6 +203,18 @@ export default function DashboardLayout({
                 }}
               />
             )}
+            <Menu
+              mode="inline"
+              style={{
+                backgroundColor: 'transparent',
+                borderInlineEnd: 0,
+              }}
+              selectedKeys={[pathname]}
+              items={friendItems}
+              onClick={item => {
+                router.replace(item.key);
+              }}
+            />
           </ScrollView>
           <Menu
             mode="inline"
@@ -177,7 +228,7 @@ export default function DashboardLayout({
               router.replace(item.key);
             }}
           />
-        </ScrollView>
+        </View>
       </Sider>
       <Content style={{ backgroundColor: 'white' }}>
         <View style={{ flex: 1, maxHeight: '100vh', height: '100%' }}>

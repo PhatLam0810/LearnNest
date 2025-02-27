@@ -2,8 +2,23 @@ import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: '50%',
+    alignSelf: 'center',
     padding: 20,
+    margin: 'auto',
+  },
+  formContainer: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    height: '100%',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  formItemLayout: {
+    width: '100%',
+    alignItems: 'center',
     gap: 16,
   },
   cameraWrap: {
@@ -17,6 +32,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  avatarContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  inputContainer: {
+    width: '100%',
+  },
+  label: {
+    ...typography.titleS,
+    marginTop: 10,
+    marginBottom: 10,
+    display: 'block',
+  },
+  saveButton: {
+    marginTop: 20,
+    backgroundColor: '#ef405c',
+    width: '100%',
+  },
 });
-
 export default styles;

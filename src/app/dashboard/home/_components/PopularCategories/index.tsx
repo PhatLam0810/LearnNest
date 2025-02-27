@@ -5,23 +5,24 @@ import { PopularCategoryData } from './type';
 import styles from './styles';
 import { Image, Text, View } from 'react-native-web';
 import { Card } from 'antd';
-import { DoubleRightOutlined } from '@ant-design/icons';
 
 type PopularCategoriesProps = {
   data: PopularCategoryData;
+  style?: any;
 };
 
-const PopularCategories: React.FC<PopularCategoriesProps> = ({ data }) => {
+const PopularCategories: React.FC<PopularCategoriesProps> = ({
+  data,
+  style,
+}) => {
   return (
-    <Card>
-      <View style={styles.container}>
-        <Image style={styles.image} />
-        <View style={{ flex: 1, paddingRight: 20 }}>
-          <Text style={styles.chip}>{data.name}</Text>
-          <Text style={styles.desc}>{data.name}</Text>
-        </View>
-
-        <DoubleRightOutlined style={styles.icon} />
+    <Card
+      hoverable
+      styles={{ body: { display: 'flex', height: '100%' } }}
+      style={Object.assign({}, styles.container, style)}>
+      <Image style={styles.image} />
+      <View style={styles.chip}>
+        <Text>{data.name}</Text>
       </View>
     </Card>
   );

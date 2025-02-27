@@ -18,8 +18,12 @@ const styles = StyleSheet.create({
     color: '#212121F0',
   },
   searchInput: {
+    ...typography.titleSM,
     width: '30vw',
     borderRadius: 16,
+    height: 36,
+    paddingBottom: 0,
+    paddingTop: 0,
     backgroundColor: '#F4F7FC',
   },
   icon: {

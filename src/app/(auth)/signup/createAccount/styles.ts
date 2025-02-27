@@ -8,17 +8,17 @@ const styles = StyleSheet.create({
     padding: 20,
     margin: 20,
   },
-  footer: {
-    marginTop: 16,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+  subContainer: {
+    paddingTop: 12,
+    paddingBottom: 36,
   },
   subTitle: {
-    ...typography.body1,
-    textAlign: 'center',
+    ...typography.titleM,
+    color: '#000000',
+  },
+  subDescription: {
+    ...typography.body2,
     color: '#21212199',
-    padding: 32,
   },
   driverContainer: {
     display: 'flex',

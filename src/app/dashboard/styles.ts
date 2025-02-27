@@ -14,6 +14,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 4,
   },
+  menuItemFriend: {
+    marginBottom: 20,
+    marginTop: 20,
+    paddingRight: 0,
+  },
+  friendContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  friendTitle: {
+    ...typography.titleSM,
+  },
+  friendSubTitle: {
+    ...typography.subTitle2,
+    fontWeight: '200',
+    fontSize: 10,
+  },
   role: {
     fontWeight: '300',
     fontSize: 16,

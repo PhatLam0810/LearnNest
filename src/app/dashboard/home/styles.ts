@@ -4,6 +4,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    margin: 20,
   },
 
   content: {
@@ -18,7 +19,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: { ...typography.titleS },
-
   titleWrap: {},
   profileContainer: {
     padding: 8,

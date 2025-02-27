@@ -22,7 +22,7 @@ const Page = () => {
   return (
     <View style={styles.container}>
       <View>
-        <Image src={logo} alt="" width={300} />
+        {/* <Image src={logo} alt="" width={300} /> */}
         <Text style={styles.title}>SUBSCRIPTION PLAN</Text>
       </View>
       <View style={styles.subWrap}>

@@ -64,17 +64,6 @@ const HomeOverview = () => {
 
           <motion.div key={2}>
             <View style={styles.titleContainer}>
-              <Text style={styles.title}>Popular categories</Text>
-            </View>
-            <ScrollView
-              horizontal
-              style={{ scrollbarWidth: 'none' }}
-              contentContainerStyle={styles.scrollView}>
-              {data?.popularCategories?.map((item, index) => (
-                <PopularCategories key={index} data={item} />
-              ))}
-            </ScrollView>
-            <View style={styles.titleContainer}>
               <Text style={styles.title}>Today lesson</Text>
               <Tags title="For you" backgroundColor="#FFA726" />
             </View>
@@ -107,6 +96,14 @@ const HomeOverview = () => {
               </View>
             </ScrollView>
           </motion.div>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Popular categories</Text>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            {data?.popularCategories.map((item, index) => {
+              return <PopularCategories data={item} key={index} />;
+            })}
+          </View>
         </AnimatePresence>
       </ScrollView>
       {!isShowSelfCare && (

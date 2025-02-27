@@ -37,16 +37,16 @@ const LoginPage = () => {
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>
-        <Image
+        {/* <Image
           src={logo}
           style={{ width: '100%', height: 200, objectFit: 'contain' }}
           alt=""
-        />
+        /> */}
 
         <Text style={styles.subTitle}>
           Sign into your account - accessall of your lessons now.
         </Text>
-        <View>
+        <View style={{ overflow: 'hidden' }}>
           <Form<FieldType>
             name="login"
             onFinish={data => {
@@ -56,7 +56,7 @@ const LoginPage = () => {
             layout="vertical"
             requiredMark={false}
             initialValues={{
-              email: 'lamtanphat@gmail.com',
+              email: 'yogapaloozaapp@gmail.com',
               password: '#1Foryogapaloozaapp',
             }}
             form={form}>
@@ -84,6 +84,11 @@ const LoginPage = () => {
                 );
               }}
             </Form.Item>
+            <View style={styles.driverContainer}>
+              <View style={styles.driver}></View>
+              <Text style={styles.driverText}>or</Text>
+              <View style={styles.driver}></View>
+            </View>
             <AppButton onClick={handleLoginOauth}>
               <Icon name="google" />
               Sign in with Google
@@ -92,7 +97,7 @@ const LoginPage = () => {
         </View>
         <View style={styles.footer}>
           <Text>Don’t have an account? </Text>
-          <Link href={`/signup`}>Sign Up?</Link>
+          <Link href={`/signup`}>Sign Up</Link>
         </View>
       </View>
     </Card>

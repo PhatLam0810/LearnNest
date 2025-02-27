@@ -3,28 +3,34 @@
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1); /* Thêm bóng cho sider */
 }
 .ant-menu-item-group .ant-menu-item-group-title {
-  font-size: clamp(8px, 2vw, 16px);
+  font-size: 16px;
   font-weight: 600;
   color: #3f3f3f;
   font-family: 'Inter', sans-serif;
+}
+.ant-menu-item {
+  display: flex !important;
+  align-items: center;
 }
 :where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
   .ant-menu-item-selected {
   background-color: transparent;
   color: #ef405c;
-  font-size: clamp(8px, 2vw, 16px);
+  font-size: 16px;
   font-family: 'Inter', sans-serif;
   font-weight: 400;
 }
 .ant-menu-submenu-title {
-  font-size: clamp(8px, 2vw, 16px);
-  margin-left: lamp(2px, 2vw, 10px);
+  font-size: 16px;
+  margin-left: 10px;
+  align-items: center;
+  display: flex !important;
   font-weight: 400;
   font-family: 'Inter', sans-serif;
 }
 .ant-menu-title-content {
-  margin-left: clamp(2px, 2vw, 10px);
-  font-size: clamp(8px, 2vw, 16px);
+  margin-left: 10px;
+  font-size: 16px;
   font-family: 'Inter', sans-serif;
 }
 :where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
@@ -45,4 +51,8 @@
   svg
   path {
   stroke: #ef405c;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
+  .ant-menu-item-selected {
+  color: #ef405c !important;
 }
