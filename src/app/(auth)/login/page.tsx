@@ -56,7 +56,7 @@ const LoginPage = () => {
             layout="vertical"
             requiredMark={false}
             initialValues={{
-              email: 'yogapaloozaapp@gmail.com',
+              email: 'lamtanphat@gmail.com',
               password: '#1Foryogapaloozaapp',
             }}
             form={form}>
