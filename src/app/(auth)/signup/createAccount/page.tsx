@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { logo } from 'public/images';
 import styles from './styles';
 import { AppButton, AppInput } from '@components';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { authAction } from '~mdAuth/redux';
 
 type FieldType = {
@@ -22,6 +22,7 @@ const CreateAccountPage = () => {
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
+  const router = useRouter();
 
   return (
     <Card style={styles.container}>
@@ -38,9 +39,14 @@ const CreateAccountPage = () => {
           onFinish={data => {
             dispatch(
               authAction.signUp({
-                email: email,
-                password: data.password,
-                fullName: data.username,
+                params: {
+                  email: email,
+                  password: data.password,
+                  fullName: data.username,
+                },
+                callback() {
+                  router.push('/login');
+                },
               }),
             );
           }}

@@ -19,6 +19,12 @@ export type loginApiRes = {
   userProfile: UserProfile;
 };
 
+export type signUpApiRes = {
+  accessToken: string;
+  refreshToken: string;
+  userProfile: UserProfile;
+};
+
 export interface UserProfile {
   _id: string;
   firstName: string;

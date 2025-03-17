@@ -4,6 +4,7 @@ import {
   LoginOauthPayload,
   LoginPayload,
   SignUpPayload,
+  SignUpResponse,
 } from './types';
 import { persistReducer } from 'redux-persist';
 import { storage } from '@redux/storage';
@@ -22,6 +23,9 @@ export const authSlice = createSlice({
     loginOAuth: (_s, a: PayloadAction<LoginOauthPayload>) => {},
     logout: () => initialState,
     signUp: (_s, a: PayloadAction<SignUpPayload>) => {},
+    setSignUpInfo: (s, a: PayloadAction<SignUpResponse>) => {
+      s.signUpInfo = a.payload;
+    },
     updateCurrentInfo: (_s, _a: PayloadAction<UserProfile>) => {},
     setCurrentUserInfo: (s, a: PayloadAction<UserProfile>) => {
       s.tokenInfo.userProfile = a.payload;

@@ -48,7 +48,6 @@ const SignUpPage = () => {
           <Form<FieldType>
             name="signUp"
             onFinish={data => {
-              // dispatch(authAction.register(data));
               router.push(`signup/createAccount?email=${data.email}`);
             }}
             layout="vertical"

@@ -8,7 +8,7 @@ const headers = {
 };
 
 export const BASE_URL_AUTH =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://[::1]:9999';
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:9999';
 const api = axios.create({
   baseURL: BASE_URL_AUTH,
   headers,

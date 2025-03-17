@@ -1,9 +1,14 @@
+import { message } from 'antd';
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { authApi } from '../../services';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { authAction } from '../slice';
 import { AppAxiosRes } from '@/types';
-import { loginApiRes, UserProfile } from '../../services/api/type';
+import {
+  loginApiRes,
+  signUpApiRes,
+  UserProfile,
+} from '../../services/api/type';
 import { LoginOauthPayload, LoginPayload, SignUpPayload } from '../slice/types';
 import { messageApi } from '@hooks';
 
@@ -63,23 +68,29 @@ function* updateCurrentInfoSaga(action: PayloadAction<UserProfile>) {
 
 function* signUpSaga(action: PayloadAction<SignUpPayload>) {
   try {
-    const { status, data }: AppAxiosRes<UserProfile> = yield call(
+    const { params, callback } = action.payload;
+    const { status, data }: AppAxiosRes<signUpApiRes> = yield call(
       authApi.signUpApi,
-      action.payload,
+      params,
     );
     if (status === 200) {
       messageApi?.destroy();
       messageApi.success('SignUp successfully!');
+      yield put(authAction.setSignUpInfo(data.data));
+      callback();
     } else {
       console.log(data.code);
+      messageApi.error(data.code);
     }
   } catch (e: any) {
     console.log('getLessonDetailSaga', e.message);
+    messageApi.error(e.message);
   }
 }
 
 export function* authSaga() {
   yield takeLatest(authAction.login, loginSaga);
+  yield takeLatest(authAction.signUp, signUpSaga);
   yield takeLatest(authAction.loginOAuth, loginOauthSaga);
   yield takeLatest(authAction.updateCurrentInfo, updateCurrentInfoSaga);
 }
