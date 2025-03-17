@@ -9,6 +9,10 @@ import Icon from '@components/icons';
 import { useRouter } from 'next/navigation';
 import { AppButton, AppInput } from '@components';
 import styles from './styles';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '@utils';
+import { useAppDispatch } from '@redux';
+import { authAction } from '~mdAuth/redux';
 
 type FieldType = {
   email: string;
@@ -17,15 +21,23 @@ type FieldType = {
 const SignUpPage = () => {
   const [form] = Form.useForm<FieldType>();
   const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const handleLoginOauth = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const token = await user.getIdToken();
+      dispatch(authAction.loginOAuth({ token }));
+    } catch (error) {
+      console.error('Login Error:', error);
+    }
+  };
 
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>
-        {/* <Image
-          src={logo}
-          style={{ width: '100%', height: 200, objectFit: 'contain' }}
-          alt=""
-        /> */}
         <View style={styles.subContainer}>
           <Text style={styles.subTitle}>Sign Up</Text>
           <Text style={styles.subDescription}>
@@ -37,7 +49,7 @@ const SignUpPage = () => {
             name="signUp"
             onFinish={data => {
               // dispatch(authAction.register(data));
-              router.push('signup/createAccount');
+              router.push(`signup/createAccount?email=${data.email}`);
             }}
             layout="vertical"
             form={form}>
@@ -63,13 +75,9 @@ const SignUpPage = () => {
               <View style={styles.driver}></View>
             </View>
             <View style={styles.btnContainer}>
-              <AppButton>
+              <AppButton onClick={handleLoginOauth}>
                 <Icon name="google" />
                 Sign in with Google
-              </AppButton>
-              <AppButton>
-                <Icon name="apple" />
-                Sign in with Apple
               </AppButton>
             </View>
           </Form>

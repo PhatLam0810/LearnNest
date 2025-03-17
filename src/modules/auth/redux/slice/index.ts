@@ -1,5 +1,10 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { AuthInitialState, LoginOauthPayload, LoginPayload } from './types';
+import {
+  AuthInitialState,
+  LoginOauthPayload,
+  LoginPayload,
+  SignUpPayload,
+} from './types';
 import { persistReducer } from 'redux-persist';
 import { storage } from '@redux/storage';
 import { UserProfile } from '~mdAuth/services/api/type';
@@ -16,6 +21,7 @@ export const authSlice = createSlice({
     },
     loginOAuth: (_s, a: PayloadAction<LoginOauthPayload>) => {},
     logout: () => initialState,
+    signUp: (_s, a: PayloadAction<SignUpPayload>) => {},
     updateCurrentInfo: (_s, _a: PayloadAction<UserProfile>) => {},
     setCurrentUserInfo: (s, a: PayloadAction<UserProfile>) => {
       s.tokenInfo.userProfile = a.payload;

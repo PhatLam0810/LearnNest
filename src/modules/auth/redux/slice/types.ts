@@ -2,6 +2,7 @@ import {
   LoginApiReq,
   loginApiRes,
   LoginOauthApiReq,
+  SignUpApiReq,
 } from '../../services/api/type';
 
 export type AuthInitialState = {
@@ -9,4 +10,5 @@ export type AuthInitialState = {
 };
 
 export type LoginPayload = LoginApiReq;
+export type SignUpPayload = SignUpApiReq;
 export type LoginOauthPayload = LoginOauthApiReq;

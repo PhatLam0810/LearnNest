@@ -3,6 +3,12 @@ export type LoginApiReq = {
   password: string;
 };
 
+export type SignUpApiReq = {
+  email: string;
+  password: string;
+  fullName: string;
+};
+
 export type LoginOauthApiReq = {
   token: string;
 };

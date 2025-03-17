@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { logo } from 'public/images';
 import styles from './styles';
 import { AppButton, AppInput } from '@components';
+import { useSearchParams } from 'next/navigation';
+import { authAction } from '~mdAuth/redux';
 
 type FieldType = {
   username: string;
@@ -18,15 +20,12 @@ type FieldType = {
 const CreateAccountPage = () => {
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
+  const searchParams = useSearchParams();
+  const email = searchParams.get('email');
 
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>
-        {/* <Image
-          src={logo}
-          style={{ width: '100%', height: 200, objectFit: 'contain' }}
-          alt=""
-        /> */}
         <View style={styles.subContainer}>
           <Text style={styles.subTitle}>Create your account</Text>
           <Text style={styles.subDescription}>
@@ -37,7 +36,13 @@ const CreateAccountPage = () => {
         <Form<FieldType>
           name="register"
           onFinish={data => {
-            // dispatch(authAction.register(data));
+            dispatch(
+              authAction.signUp({
+                email: email,
+                password: data.password,
+                fullName: data.username,
+              }),
+            );
           }}
           layout="vertical"
           form={form}>
@@ -76,7 +81,7 @@ const CreateAccountPage = () => {
                   type="primary"
                   disabled={!username || !password || !confirmPassword}
                   htmlType="submit">
-                  Continue
+                  Sign Up
                 </AppButton>
               );
             }}

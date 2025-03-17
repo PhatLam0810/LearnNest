@@ -4,7 +4,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { authAction } from '../slice';
 import { AppAxiosRes } from '@/types';
 import { loginApiRes, UserProfile } from '../../services/api/type';
-import { LoginOauthPayload, LoginPayload } from '../slice/types';
+import { LoginOauthPayload, LoginPayload, SignUpPayload } from '../slice/types';
 import { messageApi } from '@hooks';
 
 function* loginSaga(action: PayloadAction<LoginPayload>) {
@@ -53,6 +53,23 @@ function* updateCurrentInfoSaga(action: PayloadAction<UserProfile>) {
     );
     if (status === 200) {
       yield put(authAction.setCurrentUserInfo(data.data));
+    } else {
+      console.log(data.code);
+    }
+  } catch (e: any) {
+    console.log('getLessonDetailSaga', e.message);
+  }
+}
+
+function* signUpSaga(action: PayloadAction<SignUpPayload>) {
+  try {
+    const { status, data }: AppAxiosRes<UserProfile> = yield call(
+      authApi.signUpApi,
+      action.payload,
+    );
+    if (status === 200) {
+      messageApi?.destroy();
+      messageApi.success('SignUp successfully!');
     } else {
       console.log(data.code);
     }
