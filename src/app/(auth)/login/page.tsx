@@ -4,7 +4,7 @@ import { Card, Form } from 'antd';
 import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@utils';
-import { useAppDispatch } from '@redux';
+import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction } from '~mdAuth/redux';
 import Icon from '@components/icons';
 import logo from '../../../../public/images/logo.png';
@@ -21,7 +21,7 @@ type FieldType = {
 const LoginPage = () => {
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
-
+  const { signUpInfo } = useAppSelector(state => state.authReducer);
   const handleLoginOauth = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -33,7 +33,7 @@ const LoginPage = () => {
       console.error('Login Error:', error);
     }
   };
-
+  console.log(signUpInfo);
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -56,14 +56,14 @@ const LoginPage = () => {
             layout="vertical"
             requiredMark={false}
             initialValues={{
-              email: 'lamtanphat@gmail.com',
+              email: signUpInfo?.userProfile?.email || 'lamtanphat@gmail.com',
               password: '#1Foryogapaloozaapp',
             }}
             form={form}>
             <Form.Item<FieldType>
               name={'email'}
               rules={[{ required: true, message: 'Email required' }]}>
-              <AppInput placeholder="yogapaloozaapp@gmail.com" />
+              <AppInput placeholder="Enter your email" />
             </Form.Item>
             <Form.Item<FieldType>
               name={'password'}

@@ -111,55 +111,12 @@ const LibraryManage = () => {
       key: '1',
       label: <a onClick={() => setIsVisibleModalAdd(true)}>Add Library</a>,
     },
-    {
-      key: '2',
-      label: <a onClick={() => setIsVisibleModalBulk(true)}>Bulk Library</a>,
-    },
-    {
-      key: '3',
-      label: (
-        <a
-          onClick={() => {
-            messageApi.loading('Bulk...', 0);
-            bulkLibraryFromYoutube()
-              .unwrap()
-              .then(res => {
-                messageApi.destroy();
-                messageApi.success('Bulk successfully!');
-                refresh();
-              })
-              .catch(res => {
-                messageApi.destroy();
-                messageApi.error('Bulk error!');
-              });
-          }}>
-          Bulk From Youtube
-        </a>
-      ),
-    },
-    {
-      key: '4',
-      label: (
-        <a
-          onClick={() => {
-            messageApi.loading('Bulk...', 0);
-            bulkLibraryFromGoogleDrive()
-              .unwrap()
-              .then(res => {
-                messageApi.destroy();
-                messageApi.success('Bulk successfully!');
-                refresh();
-              })
-              .catch(res => {
-                messageApi.destroy();
-                messageApi.error('Bulk error!');
-              });
-          }}>
-          Add From Google Drive
-        </a>
-      ),
-    },
   ];
+  const onDone = () => {
+    refresh();
+    setIsVisibleModalAdd(false);
+  };
+
   return (
     <View style={styles.container}>
       <View
@@ -174,13 +131,18 @@ const LibraryManage = () => {
           style={{ width: '50%' }}
           allowClear
         />
-        <View style={{ alignSelf: 'flex-end', flexDirection: 'row', gap: 8 }}>
-          <Dropdown menu={{ items }}>
-            <Button type="default">
-              <PlusOutlined />
-            </Button>
-          </Dropdown>
-        </View>
+        <Button
+          onClick={() => setIsVisibleModalAdd(true)}
+          type="primary"
+          icon={<PlusOutlined />}
+          style={{
+            alignSelf: 'flex-end',
+            alignItems: 'center',
+            flexDirection: 'row',
+            gap: 8,
+          }}>
+          <Text style={{ color: '#FFF' }}>Add Library</Text>
+        </Button>
       </View>
       <View ref={divRef} style={{ flex: 1 }}>
         <Table
@@ -211,7 +173,7 @@ const LibraryManage = () => {
         onClose={onCloseModalAdd}
         footer={null}
         title="Add Library">
-        <AddLibraryContent initialValues={selectedItem} />
+        <AddLibraryContent initialValues={selectedItem} onDone={onDone} />
       </Modal>
 
       <Modal
@@ -229,12 +191,7 @@ const LibraryManage = () => {
         }}>
         <Text>{`Delete Library: ${selectedItem?.title}`}</Text>
       </Modal>
-      <ModalBulkData
-        title="Bulk Library"
-        isVisible={isVisibleModalBulk}
-        setIsVisible={setIsVisibleModalBulk}
-        onOk={data => {}}
-      />
+
       <Modal
         width={'80%'}
         closeIcon={null}

@@ -53,8 +53,11 @@ const SignUpPage = () => {
             layout="vertical"
             form={form}>
             <Form.Item<FieldType>
-              name={'email'}
-              rules={[{ required: true, message: 'Email required' }]}>
+              name="email"
+              rules={[
+                { required: true, message: 'Email required' },
+                { type: 'email', message: 'Invalid email format' },
+              ]}>
               <AppInput placeholder="Enter Email" />
             </Form.Item>
 

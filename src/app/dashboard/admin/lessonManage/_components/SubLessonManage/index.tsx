@@ -91,6 +91,12 @@ const SubLessonManage = () => {
   }, []);
 
   const { Search } = Input;
+
+  const onDone = () => {
+    refresh();
+    setIsVisibleModalAdd(false);
+  };
+
   return (
     <View style={styles.container}>
       <View
@@ -110,12 +116,6 @@ const SubLessonManage = () => {
             icon={<PlusOutlined />}
             onClick={() => setIsVisibleModalAdd(true)}>
             Add SubLesson
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsVisibleModalBulk(true)}>
-            Bulk SubLesson
           </Button>
         </View>
       </View>
@@ -148,7 +148,7 @@ const SubLessonManage = () => {
         onClose={onCloseModalAdd}
         footer={null}
         title="Add SubLesson">
-        <AddSubLessonContent initialValues={selectedItem} />
+        <AddSubLessonContent initialValues={selectedItem} onDone={onDone} />
       </Modal>
 
       <Modal
@@ -166,29 +166,7 @@ const SubLessonManage = () => {
         }}>
         <Text>{`Delete SubLesson: ${selectedItem?.title}`}</Text>
       </Modal>
-      <ModalBulkData
-        title="Bulk SubLesson"
-        isVisible={isVisibleModalBulk}
-        setIsVisible={setIsVisibleModalBulk}
-        onOk={async data => {
-          messageApi.loading('Bulk...', 0);
-          const apiResponse = await api.post(
-            'lesson/BulkSubLessonWithName',
-            data,
-            {
-              headers: { 'Content-Type': 'multipart/form-data' },
-            },
-          );
-          messageApi.destroy();
-          if (apiResponse.status === 201) {
-            messageApi.success('Bulk Successfully!');
-            refresh();
-            setIsVisibleModalBulk(false);
-            return;
-          }
-          messageApi.error('Bulk Failed!');
-        }}
-      />
+
       <Modal
         open={!!data}
         onCancel={() => {

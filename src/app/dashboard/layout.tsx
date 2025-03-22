@@ -90,11 +90,6 @@ export default function DashboardLayout({
           icon: <Icon name="library" />,
           children: menuChildren,
         },
-        {
-          key: '/dashboard/save',
-          label: 'Save',
-          icon: <Icon name="save" />,
-        },
       ],
     },
   ];
@@ -115,14 +110,6 @@ export default function DashboardLayout({
           ],
         },
       ],
-    },
-  ];
-  const friendItems: MenuProps['items'] = [
-    {
-      key: 'Friend',
-      label: 'FRIEND',
-      type: 'group',
-      children: [...menuItemFriend],
     },
   ];
 
@@ -203,18 +190,6 @@ export default function DashboardLayout({
                 }}
               />
             )}
-            <Menu
-              mode="inline"
-              style={{
-                backgroundColor: 'transparent',
-                borderInlineEnd: 0,
-              }}
-              selectedKeys={[pathname]}
-              items={friendItems}
-              onClick={item => {
-                router.replace(item.key);
-              }}
-            />
           </ScrollView>
           <Menu
             mode="inline"

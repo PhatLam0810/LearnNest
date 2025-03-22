@@ -82,20 +82,24 @@ const AddSubLessonContent: React.FC<AddSubLessonContentProps> = ({
             <PlusOutlined />
           </Button>
           <DraggableList
-            data={selectedLibraries}
+            data={selectedLibraries || []}
             keyExtractor={item => item?._id}
             handleUpdatedList={setSelectedLibraries}
-            renderItem={({ item }) => (
-              <DragLibraryItem
-                data={item}
-                onDelete={() => {
-                  const newList = [...selectedLibraries].filter(
-                    sItem => sItem._id !== item._id,
-                  );
-                  setSelectedLibraries(newList);
-                }}
-              />
-            )}
+            renderItem={({ item }) => {
+              if (item) {
+                return (
+                  <DragLibraryItem
+                    data={item}
+                    onDelete={() => {
+                      const newList = [...selectedLibraries].filter(
+                        sItem => sItem._id !== item._id,
+                      );
+                      setSelectedLibraries(newList);
+                    }}
+                  />
+                );
+              }
+            }}
           />
         </View>
       </ScrollView>

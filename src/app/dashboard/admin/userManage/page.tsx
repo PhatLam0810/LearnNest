@@ -34,20 +34,6 @@ const UserManage = () => {
       key: 'role',
       render: (value: UserItem['role']) => <Text>{value?.name}</Text>,
     },
-    {
-      title: 'Action',
-      key: 'action',
-      render: (_, record) => (
-        <Space size="middle">
-          <a>Delete</a>
-          <a>Update</a>
-        </Space>
-      ),
-    },
-    {
-      key: 'more',
-      render: (_, record) => <MoreDropdown data={record} />,
-    },
   ];
   return (
     <View style={styles.container}>

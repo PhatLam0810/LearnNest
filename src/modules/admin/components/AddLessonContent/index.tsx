@@ -17,10 +17,12 @@ import { getYouTubeThumbnail } from '@utils/youtube';
 type CreateLessonFormProps = {
   initialValues?: Lesson;
   onFormFinish?: (data: any) => void;
+  onDone?: (data: Lesson) => void;
 };
 const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   initialValues,
   onFormFinish,
+  onDone,
 }) => {
   const [form] = Form.useForm();
   const { data: CategoriesAllData } = adminQuery.useGetCategoriesAllQuery();
@@ -46,6 +48,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           .then(res => {
             messageApi.success('Add new lesson successfully!');
             form.resetFields();
+            onDone && onDone(res);
             setListSelected([]);
           })
           .catch(() => {
@@ -169,19 +172,6 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                       form.setFieldsValue({ thumbnail: res.data.data });
                     }}
                   />
-                </Form.Item>
-
-                <Form.Item
-                  style={styles.formItemTitle}
-                  label="Categories"
-                  name="categories">
-                  <Select mode="tags" placeholder="Select categories">
-                    {CategoriesAllData?.map((category: any, index) => (
-                      <Option key={category._id} value={category._id}>
-                        {category.name}
-                      </Option>
-                    ))}
-                  </Select>
                 </Form.Item>
               </View>
             </View>

@@ -16,10 +16,10 @@ const DragSublessonItem: React.FC<DragSublessonItemProps> = ({
   return (
     <TouchableOpacity style={styles.container}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{data.title}</Text>
-        <Text style={styles.subTitle}>{data.durations}</Text>
+        <Text style={styles.title}>{data?.title}</Text>
+        <Text style={styles.subTitle}>{data?.durations}</Text>
         <Text style={styles.subTitle}>
-          Total library {data.libraries.length}
+          Total library {data?.libraries.length}
         </Text>
       </View>
       <Button

@@ -83,7 +83,10 @@ const LessonManage = () => {
   const onCloseDelete = () => {
     setOpenDelete(false);
   };
-
+  const onDone = () => {
+    refresh();
+    setIsVisibleModalAdd(false);
+  };
   const { Search } = Input;
   return (
     <View style={styles.container}>
@@ -104,18 +107,6 @@ const LessonManage = () => {
             icon={<PlusOutlined />}
             onClick={() => setIsVisibleModalAdd(true)}>
             Add Lesson
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsVisibleModalBulk(true)}>
-            Bulk Lesson
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsVisibleModalBulkGGS(true)}>
-            Bulk Lesson GoogleSheet Json
           </Button>
         </View>
       </View>
@@ -153,7 +144,7 @@ const LessonManage = () => {
         title={selectedItem ? selectedItem.title : 'Add Lesson'}>
         <ScrollView
           style={{ height: (width * 0.8 * 9) / 16, scrollbarWidth: 'none' }}>
-          <AddLessonContent initialValues={selectedItem} />
+          <AddLessonContent initialValues={selectedItem} onDone={onDone} />
         </ScrollView>
       </Modal>
 
@@ -172,53 +163,7 @@ const LessonManage = () => {
         }}>
         <Text>{`Delete Lesson: ${selectedItem?.title}`}</Text>
       </Modal>
-      <ModalBulkData
-        title="Bulk Lesson"
-        isVisible={isVisibleModalBulk}
-        setIsVisible={setIsVisibleModalBulk}
-        onOk={async data => {
-          messageApi.loading('Bulk...', 0);
-          const apiResponse = await api.post(
-            'lesson/BulkLessonWithName',
-            data,
-            {
-              headers: { 'Content-Type': 'multipart/form-data' },
-            },
-          );
-          messageApi.destroy();
-          if (apiResponse.status === 201) {
-            messageApi.success('Bulk Successfully!');
-            refresh();
-            setIsVisibleModalBulk(false);
-            setIsVisibleModalBulkGGS(false);
-            return;
-          }
-          messageApi.error('Bulk Failed!');
-        }}
-      />
-      <ModalBulkData
-        title="Bulk Lesson"
-        isVisible={isVisibleModalBulkGGS}
-        setIsVisible={setIsVisibleModalBulkGGS}
-        onOk={async data => {
-          messageApi.loading('Bulk...', 0);
-          const apiResponse = await api.post(
-            'lesson/BulkLessonWithNameByGoogleSheetJson',
-            data,
-            {
-              headers: { 'Content-Type': 'multipart/form-data' },
-            },
-          );
-          messageApi.destroy();
-          if (apiResponse.status === 201) {
-            messageApi.success('Bulk Successfully!');
-            refresh();
-            setIsVisibleModalBulk(false);
-            return;
-          }
-          messageApi.error('Bulk Failed!');
-        }}
-      />
+
       <ModalLessonOverview
         data={data}
         isVisible={isVisibleModalOverview}

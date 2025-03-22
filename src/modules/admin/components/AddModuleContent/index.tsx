@@ -33,12 +33,11 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
   const [selectedLibraries, setSelectedLibraries] = useState<any[]>([]);
   const [isVisibleModalLibrarySelect, setIsVisibleModalLibrarySelect] =
     useState(false);
-
   useEffect(() => {
     form.setFieldsValue(initialValues);
-    setHasSubLesson(initialValues.hasSubLesson);
-    setSelectedLibraries(initialValues.libraries);
-    setListSelected(initialValues.subLessons);
+    setHasSubLesson(true);
+    setSelectedLibraries(initialValues?.libraries);
+    setListSelected(initialValues?.subLessons);
   }, [initialValues]);
 
   return (
@@ -85,15 +84,6 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
           ]}>
           <Input placeholder="Enter Module title" />
         </Form.Item>
-        <Form.Item name="hasSubLesson">
-          <Checkbox
-            onChange={e => {
-              form.setFieldValue('hasSubLesson', e.target.checked);
-              setHasSubLesson(e.target.checked);
-            }}>
-            Has SubLesson
-          </Checkbox>
-        </Form.Item>
         <Typography.Title level={5}>Manage</Typography.Title>
         <View>
           <Button
@@ -108,31 +98,22 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
             <PlusOutlined />
           </Button>
           <DraggableList
-            data={hasSubLesson ? listSelected : selectedLibraries}
+            data={listSelected || []}
             keyExtractor={item => item?._id}
             handleUpdatedList={setListSelected}
             renderItem={({ item, index }) => {
-              if (hasSubLesson) {
+              console.log(item);
+              if (item) {
                 return (
                   <DragSublessonItem
+                    key={index}
                     data={item}
                     onDelete={() => {
                       const newList = [...listSelected].filter(
-                        sItem => sItem._id !== item._id,
+                        sItem => sItem?._id !== item._id,
                       );
                       setSelectedLibraries(newList);
-                    }}
-                  />
-                );
-              } else {
-                return (
-                  <DragLibraryItem
-                    data={item}
-                    onDelete={() => {
-                      const newList = [...selectedLibraries].filter(
-                        sItem => sItem._id !== item._id,
-                      );
-                      setSelectedLibraries(newList);
+                      setListSelected(newList);
                     }}
                   />
                 );

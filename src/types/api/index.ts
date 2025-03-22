@@ -1,8 +1,10 @@
+import { message } from 'antd';
 import { AxiosResponse } from 'axios';
 
 export type AppRes<T> = {
   data: T;
   code: string;
+  message: string;
 };
 
 export type PayLoadCallBack<T> = {

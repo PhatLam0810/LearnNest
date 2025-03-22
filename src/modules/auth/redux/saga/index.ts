@@ -73,18 +73,18 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
       authApi.signUpApi,
       params,
     );
-    if (status === 200) {
+    if (status === 201) {
       messageApi?.destroy();
       messageApi.success('SignUp successfully!');
       yield put(authAction.setSignUpInfo(data.data));
       callback();
     } else {
       console.log(data.code);
-      messageApi.error(data.code);
+      messageApi.error(data.message);
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
-    messageApi.error(e.message);
+    console.log('getLessonDetailSaga', e.message, e);
+    messageApi.error(e.response.data.message);
   }
 }
 

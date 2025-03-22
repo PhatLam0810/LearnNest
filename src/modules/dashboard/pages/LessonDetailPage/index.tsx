@@ -23,14 +23,17 @@ import {
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
 import { AppHeader } from '@components';
+import { message } from 'antd';
 
 const LessonDetailPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const [messageApi, contextHolder] = message.useMessage();
   const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
 
   return (
     <View style={styles.container}>
+      {contextHolder}
       <AppHeader title="Lesson" />
       <ScrollView style={{ scrollbarWidth: 'none' }}>
         <View style={{ marginTop: 12, gap: 12 }}>
@@ -76,12 +79,21 @@ const LessonDetailPage = () => {
             onClick={() => {
               const modules = lessonDetail.modules;
               if (modules && modules?.length > 0) {
+                console.log('object');
                 dispatch(dashboardAction.setSelectedModule(modules[0]));
                 if (modules[0]?.hasSubLesson) {
+                  console.log('2');
                   router.push('/dashboard/home/lesson/subLesson');
                 } else {
+                  console.log('44');
                   router.push('/dashboard/home/lesson/moduleDetail');
                 }
+              } else {
+                messageApi.open({
+                  type: 'warning',
+                  content: 'Chưa có nội dung bài học vui lòng quay lại sau',
+                  duration: 5,
+                });
               }
             }}>
             <Icon name="liveTV" className="button-icon" />

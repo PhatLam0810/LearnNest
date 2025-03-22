@@ -20,17 +20,19 @@ export const useAppPagination = <T>(props: {
     useState<AppAxiosListRes<T>['data']['data']>();
   const [isLoading, setIsLoading] = useState(false);
   const pageNum = useRef(props.params?.pageNum || 1);
+  const isFetching = useRef(false);
   const currentParams = useRef<PaginationParams | undefined>(props.params);
   const totalPages = useRef(100);
   const fetchData = async (p?: any) => {
+    if (isFetching.current) return;
+    isFetching.current = true; // ✅ Đánh dấu đang fetch
+
     pageNum.current = p?.pageNum ? p?.pageNum : pageNum.current;
     if (pageNum.current > totalPages.current) {
+      isFetching.current = false;
       return;
     }
-    if (isLoading) {
-      return;
-    }
-    setIsLoading(true);
+
     try {
       const { status, data }: AppAxiosListRes<T> = await api.post(
         props.apiUrl,
@@ -43,11 +45,12 @@ export const useAppPagination = <T>(props: {
         setListItem(prev => [...prev, ...data.data?.items]);
         pageNum.current++;
         totalPages.current = data.data.totalPages;
-        setIsLoading(false);
         setCurrentData(data.data);
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      isFetching.current = false; // ✅ Giải phóng lock sau khi fetch xong
     }
   };
   const reset = () => {

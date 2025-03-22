@@ -12,9 +12,7 @@ import {
 } from './_components';
 import './styles.css';
 
-const onChange = (key: string) => {
-  console.log(key);
-};
+const onChange = (key: string) => {};
 
 const items: TabsProps['items'] = [
   {

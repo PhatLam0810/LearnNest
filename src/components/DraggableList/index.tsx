@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DndContext } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -15,12 +15,21 @@ type ScrollableDragListProps = {
   style?: any;
 };
 const ScrollableDragList: React.FC<ScrollableDragListProps> = ({
-  data,
+  data = [],
   renderItem,
   keyExtractor,
   handleUpdatedList,
   style,
 }) => {
+  const [listItem, setListItem] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (data) {
+      setListItem(data);
+    } else {
+      setListItem([]);
+    }
+  }, [data]);
   const handleDragEnd = (event: any) => {
     const { active, over } = event;
 
@@ -38,7 +47,7 @@ const ScrollableDragList: React.FC<ScrollableDragListProps> = ({
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <SortableContext
-        items={data.map(keyExtractor)}
+        items={listItem.map(keyExtractor)}
         strategy={verticalListSortingStrategy}>
         <div
           style={Object.assign(
@@ -49,7 +58,7 @@ const ScrollableDragList: React.FC<ScrollableDragListProps> = ({
             },
             style,
           )}>
-          {data.map((item, index) => (
+          {listItem.map((item, index) => (
             <SortableItem key={keyExtractor(item)} id={keyExtractor(item)}>
               {renderItem({ item, index })}
             </SortableItem>

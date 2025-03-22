@@ -83,6 +83,11 @@ const ModuleManage = () => {
     setOpenDelete(false);
   };
 
+  const onDone = () => {
+    refresh();
+    setIsVisibleModalAdd(false);
+  };
+
   const { Search } = Input;
   return (
     <View style={styles.container}>
@@ -103,12 +108,6 @@ const ModuleManage = () => {
             icon={<PlusOutlined />}
             onClick={() => setIsVisibleModalAdd(true)}>
             Add Module
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsVisibleModalBulk(true)}>
-            Bulk Module
           </Button>
         </View>
       </View>
@@ -145,7 +144,7 @@ const ModuleManage = () => {
         centered
         title={selectedItem ? selectedItem.title : 'Add Module'}>
         <ScrollView style={{ height: (width * 0.8 * 9) / 16 }}>
-          <AddModuleContent initialValues={selectedItem} />
+          <AddModuleContent initialValues={selectedItem} onDone={onDone} />
         </ScrollView>
       </Modal>
 

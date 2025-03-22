@@ -62,6 +62,25 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
           </>
         );
       }
+      case 'youtube': {
+        return (
+          <Form.Item
+            name="url"
+            label="File / Link"
+            rules={[
+              {
+                required: true,
+                message: 'Please upload a file or enter a link',
+              },
+            ]}>
+            <Input
+              placeholder="Or enter a link"
+              onChange={e => form.setFieldsValue({ url: e.target.value })}
+              style={{ marginBottom: 32 }}
+            />
+          </Form.Item>
+        );
+      }
       default: {
         return (
           <Form.Item
@@ -88,11 +107,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 }}>
                 <Button type="text">Upload</Button>
               </Upload>
-              <Input
-                placeholder="Or enter a link"
-                onChange={e => form.setFieldsValue({ url: e.target.value })}
-                style={{ marginTop: 8 }}
-              />
             </>
           </Form.Item>
         );
@@ -190,12 +204,9 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             onChange={value => setLibraryType(value)} // Cập nhật trạng thái khi chọn
             getPopupContainer={triggerNode => triggerNode.parentNode}>
             <Select.Option value="Image">Image</Select.Option>
-            <Select.Option value="Video">Video</Select.Option>
-            <Select.Option value="Youtube">YouTube</Select.Option>
+            <Select.Option value="Youtube">Link YouTube</Select.Option>
             <Select.Option value="PDF">PDF</Select.Option>
             <Select.Option value="Text">Text</Select.Option>
-            <Select.Option value="Short">Short</Select.Option>
-            <Select.Option value="Self-Care">Self-Care</Select.Option>
           </Select>
         </Form.Item>
         {renderInputContent()}

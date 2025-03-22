@@ -15,7 +15,7 @@ const DragLibraryItem: React.FC<DragLibraryItemProps> = ({
 }) => {
   return (
     <View style={styles.container} onClick={e => e.stopPropagation()}>
-      <Text style={styles.title}>{data.title}</Text>
+      <Text style={styles.title}>{data?.title}</Text>
       <Button
         color="danger"
         variant="solid"
