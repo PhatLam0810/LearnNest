@@ -10,6 +10,7 @@ import { AddLessonContent, ModalBulkData } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import api from '@services/api';
 import { ModalLessonOverview } from './_components';
+import { UpdateLessonForm } from '@/app/dashboard/lesson/_components';
 
 const LessonManage = () => {
   const divRef = useRef(null);
@@ -20,6 +21,9 @@ const LessonManage = () => {
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
   const [isVisibleModalBulk, setIsVisibleModalBulk] = useState(false);
   const [isVisibleModalBulkGGS, setIsVisibleModalBulkGGS] = useState(false);
+  const [dataEdit, setDataEdit] = useState<any>();
+  const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
+
   const [isVisibleModalOverview, setIsVisibleModalModalOverview] =
     useState(false);
   const [data, setData] = useState<Lesson>();
@@ -57,7 +61,8 @@ const LessonManage = () => {
           <a
             onClick={e => {
               setSelectedItem(record);
-              setIsVisibleModalAdd(true);
+              setDataEdit(record);
+              setIsVisibleModalUpdate(true);
             }}>
             Update
           </a>
@@ -168,6 +173,14 @@ const LessonManage = () => {
         data={data}
         isVisible={isVisibleModalOverview}
         setIsVisible={setIsVisibleModalModalOverview}
+      />
+      <UpdateLessonForm
+        data={dataEdit}
+        isVisible={isVisibleModalUpdate}
+        setIsVisible={setIsVisibleModalUpdate}
+        refresh={refresh}
+        setSelectedItem={onCloseModalAdd}
+        setIsVisibleModalAdd={onCloseModalAdd}
       />
     </View>
   );

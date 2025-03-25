@@ -19,6 +19,7 @@ import { AddLibraryContent, ModalBulkData } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import { Library } from '~mdDashboard/types';
 import LibraryDetailItem from '~mdDashboard/pages/SubLessonDetailPage/_components/LibraryDetailItem';
+import { UpdateLibraryForm } from '@/app/dashboard/library/_components';
 
 const LibraryManage = () => {
   const divRef = useRef(null);
@@ -28,6 +29,8 @@ const LibraryManage = () => {
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
   const [isVisibleModalBulk, setIsVisibleModalBulk] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
+  const [dataEdit, setDataEdit] = useState<any>();
+  const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
 
   const [data, setData] = useState<Library>(null);
 
@@ -77,7 +80,8 @@ const LibraryManage = () => {
           <a
             onClick={() => {
               setSelectedItem(record);
-              setIsVisibleModalAdd(true);
+              setDataEdit(record);
+              setIsVisibleModalUpdate(true);
             }}>
             Update
           </a>
@@ -205,6 +209,14 @@ const LibraryManage = () => {
         onCancel={() => setData(null)}>
         <LibraryDetailItem data={data} />
       </Modal>
+      <UpdateLibraryForm
+        data={dataEdit}
+        isVisible={isVisibleModalUpdate}
+        setIsVisible={setIsVisibleModalUpdate}
+        refresh={refresh}
+        setSelectedItem={onCloseModalAdd}
+        setIsVisibleModalAdd={onCloseModalAdd}
+      />
     </View>
   );
 };

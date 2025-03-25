@@ -10,6 +10,7 @@ import { AddSubLessonContent, ModalBulkData } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import api from '@services/api';
 import LibraryDetailItem from '~mdDashboard/pages/SubLessonDetailPage/_components/LibraryDetailItem';
+import UpdateSubLessonForm from '@/app/dashboard/subLesson/_components/UpdateSubLessonForm';
 
 const SubLessonManage = () => {
   const divRef = useRef(null);
@@ -17,6 +18,8 @@ const SubLessonManage = () => {
   const [height, setHeight] = useState(0);
   const [selectedItem, setSelectedItem] = useState<Sublesson>(null);
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
+  const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
+  const [dataEdit, setDataEdit] = useState<any>();
   const [isVisibleModalBulk, setIsVisibleModalBulk] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [data, setData] = useState<Sublesson>(null);
@@ -49,7 +52,8 @@ const SubLessonManage = () => {
           <a
             onClick={() => {
               setSelectedItem(record);
-              setIsVisibleModalAdd(true);
+              setDataEdit(record);
+              setIsVisibleModalUpdate(true);
             }}>
             Update
           </a>
@@ -187,6 +191,14 @@ const SubLessonManage = () => {
           />
         </View>
       </Modal>
+      <UpdateSubLessonForm
+        data={dataEdit}
+        isVisible={isVisibleModalUpdate}
+        setIsVisible={setIsVisibleModalUpdate}
+        refresh={refresh}
+        setSelectedItem={onCloseModalAdd}
+        setIsVisibleModalAdd={onCloseModalAdd}
+      />
     </View>
   );
 };

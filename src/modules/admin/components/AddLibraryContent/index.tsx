@@ -125,7 +125,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
       form={form}
       onFinish={values => {
         onFinish
-          ? onFinish
+          ? onFinish(values)
           : addLibrary(values)
               .then(res => {
                 setSelectedItems([...selectedItems, res.data]);

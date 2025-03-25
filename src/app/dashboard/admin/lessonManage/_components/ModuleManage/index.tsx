@@ -10,6 +10,7 @@ import { AddModuleContent, ModalBulkData } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import api from '@services/api';
 import { ModalModuleOverview } from './_components';
+import { UpdateModuleForm } from '@/app/dashboard/module/_components';
 
 const ModuleManage = () => {
   const divRef = useRef(null);
@@ -20,6 +21,8 @@ const ModuleManage = () => {
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
   const [isVisibleModalBulk, setIsVisibleModalBulk] = useState(false);
   const [isVisibleModalOverview, setIsVisibleModalOverview] = useState(false);
+  const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
+  const [dataEdit, setDataEdit] = useState<any>();
   const [openDelete, setOpenDelete] = useState(false);
   const [data, setData] = useState<Module>(null);
   const { listItem, currentData, fetchData, refresh, search } =
@@ -56,7 +59,8 @@ const ModuleManage = () => {
           <a
             onClick={() => {
               setSelectedItem(record);
-              setIsVisibleModalAdd(true);
+              setDataEdit(record);
+              setIsVisibleModalUpdate(true);
             }}>
             Update
           </a>
@@ -190,6 +194,14 @@ const ModuleManage = () => {
         data={data}
         isVisible={isVisibleModalOverview}
         setIsVisible={setIsVisibleModalOverview}
+      />
+      <UpdateModuleForm
+        data={dataEdit}
+        isVisible={isVisibleModalUpdate}
+        setIsVisible={setIsVisibleModalUpdate}
+        refresh={refresh}
+        setSelectedItem={onCloseModalAdd}
+        setIsVisibleModalAdd={onCloseModalAdd}
       />
     </View>
   );
