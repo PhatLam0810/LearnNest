@@ -12,7 +12,7 @@ export type AuthInitialState = {
   tokenInfo?: loginApiRes;
   signUpInfo?: signUpApiRes;
   sendOtpInfo?: { email: string };
-  isLoading?: boolean;
+  isLoading: boolean;
 };
 
 export type LoginPayload = LoginApiReq;

@@ -41,6 +41,7 @@ export const authSlice = createSlice({
   },
 });
 
+export const { setIsShowLoading } = authSlice.actions;
 export const authAction = authSlice.actions;
 
 const persistConfig = {

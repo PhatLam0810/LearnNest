@@ -7,8 +7,6 @@ import { auth } from '@utils';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction } from '~mdAuth/redux';
 import Icon from '@components/icons';
-import logo from '../../../../public/images/logo.png';
-import Image from 'next/image';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
 import { AppButton, AppInput } from '@components';

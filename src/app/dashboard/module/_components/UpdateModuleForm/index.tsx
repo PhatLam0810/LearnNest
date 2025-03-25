@@ -17,9 +17,9 @@ import { Module } from '~mdDashboard/redux/saga/type';
 type UpdateModuleFormProps = {
   data: Module;
   isVisible: boolean;
-  setIsVisible: (isVisible: boolean) => void;
-  setSelectedItem: (data: any) => void;
-  setIsVisibleModalAdd: (isVisible: boolean) => void;
+  setIsVisible?: (isVisible: boolean) => void;
+  setSelectedItem?: (data: any) => void;
+  setIsVisibleModalAdd?: (isVisible: boolean) => void;
   refresh: () => void;
 };
 

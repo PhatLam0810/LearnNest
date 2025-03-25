@@ -12,9 +12,9 @@ type UpdateLessonFormProps = {
   data: Lesson;
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
-  setSelectedItem: (data: any) => void;
-  setIsVisibleModalAdd: (isVisible: boolean) => void;
-  refresh: () => void;
+  setSelectedItem?: (data: any) => void;
+  setIsVisibleModalAdd?: (isVisible: boolean) => void;
+  refresh?: () => void;
 };
 
 const UpdateLessonForm: React.FC<UpdateLessonFormProps> = ({

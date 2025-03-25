@@ -25,9 +25,9 @@ type UpdateLibraryFormProps = {
   data: Library;
   isVisible: boolean;
   setIsVisible: (isVisible: boolean) => void;
-  setSelectedItem: (data: any) => void;
-  setIsVisibleModalAdd: (isVisible: boolean) => void;
-  refresh: () => void;
+  setSelectedItem?: (data: any) => void;
+  setIsVisibleModalAdd?: (isVisible: boolean) => void;
+  refresh?: () => void;
 };
 
 const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({

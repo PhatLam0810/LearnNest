@@ -41,5 +41,3 @@ export interface UserProfile {
     name: string;
   };
 }
-
-E;

@@ -26,14 +26,7 @@ const Page = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [dataEdit, setDataEdit] = useState<any>();
 
-  const handleEdit = (value: any) => {
-    setDataEdit(value);
-    setIsVisible(true);
-  };
-
   const { data } = dashboardQuery.useGetAllCategoryQuery();
-
-  const [updateLesson] = adminQuery.useUpdateLessonMutation();
 
   return (
     <View style={styles.container}>
@@ -108,15 +101,6 @@ const Page = () => {
         data={dataEdit}
         isVisible={isVisible}
         setIsVisible={setIsVisible}
-        onUpdateFinish={res => {
-          updateLesson({ _id: dataEdit._id, ...res })
-            .unwrap()
-            .then(res => {
-              setIsVisible(false);
-              messageApi.success('Update Successfully');
-              refresh();
-            });
-        }}
       />
     </View>
   );
