@@ -37,6 +37,7 @@ const SignUpPage = () => {
 
   const handleSendOtp = async (email: string) => {
     try {
+      dispatch(authAction.setIsShowLoading(true));
       const response = await sendOtp({ email: email });
 
       if (response.data) {
@@ -46,6 +47,8 @@ const SignUpPage = () => {
     } catch (error) {
       console.error('Lỗi gửi OTP:', error); // In ra lỗi
       messageApi.error(error.message || 'Failed to send OTP.');
+    } finally {
+      dispatch(authAction.setIsShowLoading(false));
     }
   };
 

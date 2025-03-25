@@ -12,6 +12,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import { Document, Page, pdfjs } from 'react-pdf';
 import ReactPlayer from 'react-player';
 import Image from 'next/image';
+import LoadingScreen from '~mdAuth/components/Loading';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -76,6 +77,7 @@ export default function RootLayout({
                 {context}
                 {children}
               </View>
+              <LoadingScreen />
             </PersistGate>
 
             <Authentication />
