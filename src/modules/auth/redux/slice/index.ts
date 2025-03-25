@@ -30,6 +30,9 @@ export const authSlice = createSlice({
     setCurrentUserInfo: (s, a: PayloadAction<UserProfile>) => {
       s.tokenInfo.userProfile = a.payload;
     },
+    sendOtpInfo: (s, a: PayloadAction<{ email: string }>) => {
+      s.sendOtpInfo = a.payload;
+    },
   },
 });
 

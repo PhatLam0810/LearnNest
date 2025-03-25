@@ -2,6 +2,7 @@ import api from '@services/api';
 import {
   LoginApiReq,
   LoginOauthApiReq,
+  OtpApiReq,
   SignUpApiReq,
   UserProfile,
 } from './type';
@@ -11,6 +12,11 @@ export const loginApi = (params: LoginApiReq) =>
 
 export const signUpApi = (params: SignUpApiReq) =>
   api.post(`/auth/signUp`, params);
+
+export const sendOtpApi = (params: OtpApiReq) => api.post(`/otp/send`, params);
+
+export const verifyOtpApi = (params: { otp: number; email: string }) =>
+  api.post(`/otp/verify`, params);
 
 export const loginOauth = (params: LoginOauthApiReq) =>
   api.post(`/auth/loginOauth`, params);

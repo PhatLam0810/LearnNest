@@ -33,7 +33,6 @@ const LoginPage = () => {
       console.error('Login Error:', error);
     }
   };
-  console.log(signUpInfo);
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>

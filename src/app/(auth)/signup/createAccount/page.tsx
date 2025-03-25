@@ -1,7 +1,7 @@
 'use client';
-import React from 'react';
-import { Button, Card, Form } from 'antd';
-import { useAppDispatch } from '@redux';
+import React, { useEffect } from 'react';
+import { Button, Card, Form, message } from 'antd';
+import { useAppDispatch, useAppSelector } from '@redux';
 import Image from 'next/image';
 import { Text, View } from 'react-native-web';
 import Link from 'next/link';
@@ -12,7 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { authAction } from '~mdAuth/redux';
 
 type FieldType = {
-  username: string;
+  otp: number;
   password: string;
   confirmPassword: string;
 };
@@ -21,11 +21,23 @@ const CreateAccountPage = () => {
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
-  const email = searchParams.get('email');
+  const { sendOtpInfo } = useAppSelector(state => state.authReducer);
+  const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
+
+  useEffect(() => {
+    if (sendOtpInfo) {
+      messageApi.open({
+        type: 'success',
+        content: `Otp code has been send to your ${sendOtpInfo.email}`,
+        duration: 5,
+      });
+    }
+  }, [sendOtpInfo]);
 
   return (
     <Card style={styles.container}>
+      {contextHolder}
       <View style={{ flex: 1 }}>
         <View style={styles.subContainer}>
           <Text style={styles.subTitle}>Create your account</Text>
@@ -40,9 +52,9 @@ const CreateAccountPage = () => {
             dispatch(
               authAction.signUp({
                 params: {
-                  email: email,
+                  email: sendOtpInfo.email,
                   password: data.password,
-                  fullName: data.username,
+                  otp: data.otp,
                 },
                 callback() {
                   router.push('/login');
@@ -53,9 +65,9 @@ const CreateAccountPage = () => {
           layout="vertical"
           form={form}>
           <Form.Item<FieldType>
-            name={'username'}
-            rules={[{ required: true, message: 'Name required' }]}>
-            <AppInput placeholder="What's your name?" />
+            name={'otp'}
+            rules={[{ required: true, message: 'Otp required' }]}>
+            <AppInput placeholder="Enter Otp code" />
           </Form.Item>
           <Form.Item<FieldType>
             name={'password'}
@@ -81,11 +93,11 @@ const CreateAccountPage = () => {
 
           <Form.Item shouldUpdate>
             {({ getFieldsValue }) => {
-              const { username, password, confirmPassword } = getFieldsValue();
+              const { otp, password, confirmPassword } = getFieldsValue();
               return (
                 <AppButton
                   type="primary"
-                  disabled={!username || !password || !confirmPassword}
+                  disabled={!otp || !password || !confirmPassword}
                   htmlType="submit">
                   Sign Up
                 </AppButton>

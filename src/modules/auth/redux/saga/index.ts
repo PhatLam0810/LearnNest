@@ -9,7 +9,12 @@ import {
   signUpApiRes,
   UserProfile,
 } from '../../services/api/type';
-import { LoginOauthPayload, LoginPayload, SignUpPayload } from '../slice/types';
+import {
+  LoginOauthPayload,
+  LoginPayload,
+  OtpPayLoad,
+  SignUpPayload,
+} from '../slice/types';
 import { messageApi } from '@hooks';
 
 function* loginSaga(action: PayloadAction<LoginPayload>) {
@@ -69,22 +74,53 @@ function* updateCurrentInfoSaga(action: PayloadAction<UserProfile>) {
 function* signUpSaga(action: PayloadAction<SignUpPayload>) {
   try {
     const { params, callback } = action.payload;
-    const { status, data }: AppAxiosRes<signUpApiRes> = yield call(
-      authApi.signUpApi,
-      params,
-    );
-    if (status === 201) {
-      messageApi?.destroy();
-      messageApi.success('SignUp successfully!');
-      yield put(authAction.setSignUpInfo(data.data));
-      callback();
-    } else {
-      console.log(data.code);
-      messageApi.error(data.message);
+
+    // Gọi API xác thực OTP
+    let otpResponse: AppAxiosRes<any> | null = null;
+    try {
+      otpResponse = yield call(authApi.verifyOtpApi, {
+        email: params.email,
+        otp: params.otp,
+      });
+    } catch (e: any) {
+      console.error('OTP Verification Error:', e);
+      messageApi.error(e.response.data.message);
+      return; // Dừng saga nếu OTP verification thất bại
     }
+
+    if (!otpResponse || otpResponse.status !== 201) {
+      messageApi.error(otpResponse.data.message);
+      return;
+    }
+
+    // Gọi API đăng ký
+    let signUpResponse: AppAxiosRes<signUpApiRes> | null = null;
+    try {
+      signUpResponse = yield call(authApi.signUpApi, {
+        email: params.email,
+        password: params.password,
+      });
+    } catch (e: any) {
+      console.error('SignUp Error:', e);
+      messageApi.error(e?.response?.data?.message);
+      return; // Dừng saga nếu đăng ký thất bại
+    }
+
+    if (!signUpResponse || signUpResponse.status !== 201) {
+      messageApi.error(signUpResponse?.data?.message);
+      return;
+    }
+
+    // Nếu cả hai API thành công, tiếp tục đăng nhập
+    messageApi?.destroy();
+    messageApi.success('SignUp successfully!');
+    yield put(authAction.setSignUpInfo(signUpResponse.data.data));
+    callback();
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message, e);
-    messageApi.error(e.response.data.message);
+    console.error('signUpSaga error:', e);
+    messageApi.error(
+      e?.response?.data?.message || 'An unexpected error occurred',
+    );
   }
 }
 

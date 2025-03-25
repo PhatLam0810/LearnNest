@@ -8,6 +8,14 @@ export const authQuery = baseQuery.injectEndpoints({
       query: () => '/lesson/recommend',
       transformResponse: (res: AxiosResponse<LessonRecommendRes>) => res.data,
     }),
+    sendOtp: builder.mutation({
+      query: (params: { email: string }) => ({
+        url: '/otp/send',
+        method: 'POST',
+        body: params,
+      }),
+      transformResponse: (response: any) => response,
+    }),
   }),
   overrideExisting: true,
 });

@@ -3,10 +3,13 @@ export type LoginApiReq = {
   password: string;
 };
 
+export type OtpApiReq = {
+  email: string;
+};
+
 export type SignUpApiReq = {
   email: string;
   password: string;
-  fullName: string;
 };
 
 export type LoginOauthApiReq = {
@@ -38,3 +41,5 @@ export interface UserProfile {
     name: string;
   };
 }
+
+E;

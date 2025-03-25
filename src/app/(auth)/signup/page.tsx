@@ -1,8 +1,6 @@
 'use client';
 import React from 'react';
-import { Button, Card, Form, Input } from 'antd';
-import Image from 'next/image';
-import logo from '../../../../public/images/logo.png';
+import { Button, Card, Form, Input, message } from 'antd';
 import { Text, View } from 'react-native-web';
 import Link from 'next/link';
 import Icon from '@components/icons';
@@ -12,7 +10,8 @@ import styles from './styles';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@utils';
 import { useAppDispatch } from '@redux';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
+import { messageApi } from '@hooks';
 
 type FieldType = {
   email: string;
@@ -22,7 +21,8 @@ const SignUpPage = () => {
   const [form] = Form.useForm<FieldType>();
   const router = useRouter();
   const dispatch = useAppDispatch();
-
+  const [sendOtp, { error, isSuccess }] = authQuery.useSendOtpMutation();
+  const [messageApi, contextHolder] = message.useMessage();
   const handleLoginOauth = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -35,8 +35,23 @@ const SignUpPage = () => {
     }
   };
 
+  const handleSendOtp = async (email: string) => {
+    try {
+      const response = await sendOtp({ email: email });
+
+      if (response.data) {
+        dispatch(authAction.sendOtpInfo({ email: email }));
+        router.push('signup/createAccount');
+      }
+    } catch (error) {
+      console.error('Lỗi gửi OTP:', error); // In ra lỗi
+      messageApi.error(error.message || 'Failed to send OTP.');
+    }
+  };
+
   return (
     <Card style={styles.container}>
+      {contextHolder}
       <View style={{ flex: 1 }}>
         <View style={styles.subContainer}>
           <Text style={styles.subTitle}>Sign Up</Text>
@@ -48,7 +63,7 @@ const SignUpPage = () => {
           <Form<FieldType>
             name="signUp"
             onFinish={data => {
-              router.push(`signup/createAccount?email=${data.email}`);
+              handleSendOtp(data.email);
             }}
             layout="vertical"
             form={form}>
