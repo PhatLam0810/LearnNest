@@ -110,7 +110,7 @@ const SubLessonManage = () => {
           justifyContent: 'space-between',
         }}>
         <Search
-          placeholder="input search text"
+          placeholder="Input search text"
           onSearch={search}
           style={{ width: '50%' }}
         />

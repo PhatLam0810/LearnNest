@@ -26,11 +26,6 @@ const items: TabsProps['items'] = [
     children: <ModuleManage />,
   },
   {
-    key: '3',
-    label: 'SubLesson',
-    children: <SubLessonManage />,
-  },
-  {
     key: '4',
     label: 'Library',
     children: <LibraryManage />,

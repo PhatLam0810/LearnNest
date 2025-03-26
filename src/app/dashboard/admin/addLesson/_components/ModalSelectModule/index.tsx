@@ -74,6 +74,7 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
             renderItem={({ item, index }) => {
               return (
                 <ModuleItem
+                  data={item}
                   key={item._id + index}
                   title={item.title}
                   description={item.description}

@@ -3,13 +3,13 @@ import { StyleSheet, typography } from '@styles';
 const styles = StyleSheet.create({
   container: {
     padding: 8,
-    minWidth: '19.6%',
+    width: '19.6%',
+    minHeight: 200,
     marginBottom: 6,
   },
   image: {
     width: '100%',
     height: 170,
-
     objectFit: 'contain',
     aspectRatio: 16 / 9,
     // backgroundColor: 'gray',
@@ -17,6 +17,9 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.subTitle1,
+    height: 50,
+    alignContent: 'center',
+    textAlign: 'center',
     fontWeight: '500',
     marginTop: 4,
     marginBottom: 4,

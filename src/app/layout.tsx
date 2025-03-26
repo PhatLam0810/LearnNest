@@ -13,6 +13,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import ReactPlayer from 'react-player';
 import Image from 'next/image';
 import LoadingScreen from '~mdAuth/components/Loading';
+import './styles.css';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',

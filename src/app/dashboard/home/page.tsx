@@ -96,34 +96,8 @@ const HomeOverview = () => {
               </View>
             </ScrollView>
           </motion.div>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Popular categories</Text>
-          </View>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            {data?.popularCategories.map((item, index) => {
-              return <PopularCategories data={item} key={index} />;
-            })}
-          </View>
         </AnimatePresence>
       </ScrollView>
-      {!isShowSelfCare && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: 'spring' }}
-          whileHover={{ opacity: 1, y: 0 }}
-          onClick={() => router.push('/dashboard/home/selfCareHistory')}
-          style={{
-            position: 'absolute',
-            padding: 15,
-            borderRadius: 100,
-            bottom: 30,
-            right: 30,
-            backgroundColor: '#FD2159',
-          }}>
-          <HeartIcon />
-        </motion.div>
-      )}
     </View>
   );
 };

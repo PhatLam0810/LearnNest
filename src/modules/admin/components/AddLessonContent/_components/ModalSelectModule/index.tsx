@@ -74,6 +74,7 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
             renderItem={({ item, index }) => {
               return (
                 <ModuleItem
+                  data={item}
                   key={item._id + index}
                   title={item.title}
                   description={item.description}
@@ -95,7 +96,7 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
             <Button
               style={styles.buttonAddNew}
               onClick={() => setIsVisibleModalAddNew(true)}>
-              <Text>Add new module</Text>
+              <Text style={styles.buttonText}>Add new module</Text>
             </Button>
           </View>
         </View>

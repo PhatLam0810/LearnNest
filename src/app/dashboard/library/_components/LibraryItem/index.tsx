@@ -50,9 +50,12 @@ const LibraryItem: React.FC<LibraryItemProps> = ({ data, onClick, style }) => {
             <Thumbnail data={data} />
           </View>
           <View>
-            <Text style={styles.title}>{data?.title}</Text>
-            <Text style={styles.desc}>{data?.description}</Text>
-            <Text style={styles.tags}>{`Tags: ${data?.tags?.join(', ')}`}</Text>
+            <Text numberOfLines={2} style={styles.title}>
+              {data?.title}
+            </Text>
+            <Text numberOfLines={2} style={styles.desc}>
+              {data?.description}
+            </Text>
           </View>
         </View>
       </View>

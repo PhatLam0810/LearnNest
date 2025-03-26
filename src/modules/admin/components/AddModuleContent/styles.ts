@@ -13,6 +13,19 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#FD2159',
   },
+  button: {
+    backgroundColor: '#FD2159',
+    alignSelf: 'flex-start',
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: 12,
+    paddingRight: 12,
+    borderRadius: 8,
+    marginTop: 20,
+  },
+  buttonText: {
+    color: 'white',
+  },
   libraryItem: {
     padding: 12,
     width: '20%',

@@ -1,3 +1,4 @@
+import { Library } from '~mdDashboard/types';
 import {
   LessonDetailDataResponse,
   Module,
@@ -9,6 +10,7 @@ export type HomeInitialState = {
   subLessonDetail: SubLessonDetailData;
   selectedSubLessonStart?: SelectedSubLessonPayload;
   selectedModule?: Module;
+  selectedLibrary?: Library;
 };
 
 export type SelectedSubLessonPayload = {

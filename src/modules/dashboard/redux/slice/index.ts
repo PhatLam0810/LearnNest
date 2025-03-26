@@ -6,6 +6,7 @@ import {
   SubLessonDetailResponse,
 } from '../saga/type';
 import { UserProfile } from '~mdAuth/services/api/type';
+import { Library } from '~mdDashboard/types';
 
 const initialState: HomeInitialState = {
   lessonDetail: {},
@@ -39,6 +40,9 @@ export const dashboardSlice = createSlice({
     },
     setSelectedModule: (s, a: PayloadAction<Module>) => {
       s.selectedModule = a.payload;
+    },
+    setSelectedLibrary: (s, a: PayloadAction<Library>) => {
+      s.selectedLibrary = a.payload;
     },
   },
 });

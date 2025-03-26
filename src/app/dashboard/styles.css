@@ -15,7 +15,7 @@
 :where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
   .ant-menu-item-selected {
   background-color: transparent;
-  color: #ef405c;
+  /* color: #ef405c; */
   font-size: 16px;
   font-family: 'Inter', sans-serif;
   font-weight: 400;
@@ -36,7 +36,7 @@
 :where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
   .ant-menu-submenu-selected
   > .ant-menu-submenu-title {
-  color: #ef405c;
+  /* color: #ef405c; */
   font-family: 'Inter', sans-serif;
 }
 :where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
@@ -44,15 +44,32 @@
   > .ant-menu-submenu-title
   svg
   path {
-  stroke: #ef405c;
+  stroke: #fff;
 }
 :where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
   .ant-menu-item-selected
   svg
   path {
-  stroke: #ef405c;
+  stroke: #fff;
 }
 :where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
   .ant-menu-item-selected {
-  color: #ef405c !important;
+  /* color: #ef405c !important; */
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-menu
+  .ant-menu-submenu-title
+  .ant-menu-item-icon
+  svg
+  path {
+  stroke: #fff;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
+  .ant-menu-submenu-selected
+  > .ant-menu-submenu-title,
+:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
+  > .ant-menu
+  .ant-menu-submenu-selected
+  > .ant-menu-submenu-title {
+  color: #fff;
+  background-color: #ef405c;
 }

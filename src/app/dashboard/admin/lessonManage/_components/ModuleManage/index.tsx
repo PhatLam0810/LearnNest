@@ -31,7 +31,6 @@ const ModuleManage = () => {
     });
 
   const [deleteItem] = adminQuery.useDeleteModuleMutation();
-
   const columns: TableProps<Module>['columns'] = [
     {
       title: 'Title',
@@ -39,36 +38,37 @@ const ModuleManage = () => {
       key: 'title',
     },
     {
-      title: 'Has SubLesson',
-      dataIndex: 'hasSubLesson',
-      key: 'hasSubLesson',
-      render: data => <p>{data?.toString()}</p>,
+      title: 'Total Library',
+      dataIndex: 'Library',
+      key: 'Library',
+      render: (_, record) => (
+        <p style={{ margin: 0 }}>Library: {record.libraries.length} </p>
+      ),
     },
     {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
         <Space size="middle" onClick={e => e.stopPropagation()}>
-          <a
+          <button
+            style={styles.button}
             onClick={() => {
               setSelectedItem(record);
               setOpenDelete(true);
             }}>
-            Delete
-          </a>
-          <a
+            <a style={styles.buttonText}> Delete</a>
+          </button>
+          <button
+            style={styles.button}
             onClick={() => {
               setSelectedItem(record);
               setDataEdit(record);
               setIsVisibleModalUpdate(true);
             }}>
-            Update
-          </a>
+            <a style={styles.buttonText}> Update</a>
+          </button>
         </Space>
       ),
-    },
-    {
-      key: 'more',
     },
   ];
 
@@ -81,6 +81,7 @@ const ModuleManage = () => {
   const onCloseModalAdd = () => {
     setSelectedItem(null);
     setIsVisibleModalAdd(false);
+    setIsVisibleModalUpdate(false);
   };
 
   const onCloseDelete = () => {
@@ -89,6 +90,7 @@ const ModuleManage = () => {
 
   const onDone = () => {
     refresh();
+    setSelectedItem(null);
     setIsVisibleModalAdd(false);
   };
 
@@ -102,7 +104,7 @@ const ModuleManage = () => {
           justifyContent: 'space-between',
         }}>
         <Search
-          placeholder="input search text"
+          placeholder="Input search text"
           onSearch={search}
           style={{ width: '50%' }}
         />
@@ -162,6 +164,7 @@ const ModuleManage = () => {
             .unwrap()
             .then(res => {
               refresh();
+              setSelectedItem(null);
               onCloseDelete();
             });
         }}>

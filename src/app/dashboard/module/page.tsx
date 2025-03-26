@@ -62,6 +62,7 @@ const ModuleList = () => {
         onEndReached={fetchData}
         renderItem={({ item, index }) => (
           <ModuleItem
+            data={item}
             key={item._id + index}
             title={item.title}
             id={item._id}

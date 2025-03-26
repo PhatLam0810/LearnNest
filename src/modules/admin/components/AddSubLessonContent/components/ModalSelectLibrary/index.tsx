@@ -7,6 +7,7 @@ import Search from 'antd/es/input/Search';
 import { Button, Modal as AntdModal } from 'antd';
 import { Library } from '~mdDashboard/types';
 import { AddLibraryContent } from '~mdAdmin/components';
+import './styles.css';
 
 type ModalSelectLibraryProps = {
   isVisible: boolean;
@@ -93,7 +94,7 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
             <Button
               style={styles.buttonAddNew}
               onClick={() => setIsVisibleModalAddNew(true)}>
-              <Text>Add new library </Text>
+              <Text style={styles.buttonText}>Add new library </Text>
             </Button>
           </View>
         </View>

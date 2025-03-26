@@ -3,12 +3,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native-web';
 import styles from './styles';
 import { Button, Input, Modal, Space, Table, TableProps, Tag } from 'antd';
-import { messageApi, useAppPagination, useWindowSize } from '@hooks';
+import { useAppPagination, useWindowSize } from '@hooks';
 import { Lesson } from '~mdDashboard/redux/saga/type';
 import { PlusOutlined } from '@ant-design/icons';
-import { AddLessonContent, ModalBulkData } from '~mdAdmin/components';
+import { AddLessonContent } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
-import api from '@services/api';
 import { ModalLessonOverview } from './_components';
 import { UpdateLessonForm } from '@/app/dashboard/lesson/_components';
 
@@ -19,11 +18,8 @@ const LessonManage = () => {
   const [height, setHeight] = useState(0);
   const [selectedItem, setSelectedItem] = useState<Lesson>(null);
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
-  const [isVisibleModalBulk, setIsVisibleModalBulk] = useState(false);
-  const [isVisibleModalBulkGGS, setIsVisibleModalBulkGGS] = useState(false);
   const [dataEdit, setDataEdit] = useState<any>();
   const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
-
   const [isVisibleModalOverview, setIsVisibleModalModalOverview] =
     useState(false);
   const [data, setData] = useState<Lesson>();
@@ -37,40 +33,42 @@ const LessonManage = () => {
 
   const columns: TableProps<Lesson>['columns'] = [
     {
-      title: 'Id',
-      dataIndex: '_id',
-      key: '_id',
-    },
-    {
       title: 'Title',
       dataIndex: 'title',
       key: 'title',
+    },
+    {
+      title: 'Total Module',
+      dataIndex: 'Module',
+      key: 'Module',
+      render: (_, record) => (
+        <p style={{ margin: 0 }}>Module: {record.modules.length} </p>
+      ),
     },
     {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
         <Space size="middle" onClick={e => e.stopPropagation()}>
-          <a
-            onClick={e => {
+          <button
+            style={styles.button}
+            onClick={() => {
               setSelectedItem(record);
               setOpenDelete(true);
             }}>
-            Delete
-          </a>
-          <a
-            onClick={e => {
+            <a style={styles.buttonText}> Delete</a>
+          </button>
+          <button
+            style={styles.button}
+            onClick={() => {
               setSelectedItem(record);
               setDataEdit(record);
               setIsVisibleModalUpdate(true);
             }}>
-            Update
-          </a>
+            <a style={styles.buttonText}> Update</a>
+          </button>
         </Space>
       ),
-    },
-    {
-      key: 'more',
     },
   ];
 
@@ -83,6 +81,7 @@ const LessonManage = () => {
   const onCloseModalAdd = () => {
     setSelectedItem(null);
     setIsVisibleModalAdd(false);
+    setIsVisibleModalUpdate(false);
   };
 
   const onCloseDelete = () => {
@@ -102,7 +101,7 @@ const LessonManage = () => {
           justifyContent: 'space-between',
         }}>
         <Search
-          placeholder="input search text"
+          placeholder="Input search text"
           onSearch={search}
           style={{ width: '50%' }}
         />

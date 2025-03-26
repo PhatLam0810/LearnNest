@@ -58,38 +58,29 @@ const LibraryManage = () => {
       key: 'type',
     },
     {
-      title: 'Category',
-      dataIndex: 'libraryType',
-      key: 'libraryType',
-      render: value => {
-        return <p>{value?.name}</p>;
-      },
-    },
-    {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
         <Space size="middle" onClick={e => e.stopPropagation()}>
-          <a
+          <button
+            style={styles.button}
             onClick={() => {
               setSelectedItem(record);
               setOpenDelete(true);
             }}>
-            Delete
-          </a>
-          <a
+            <a style={styles.buttonText}> Delete</a>
+          </button>
+          <button
+            style={styles.button}
             onClick={() => {
               setSelectedItem(record);
               setDataEdit(record);
               setIsVisibleModalUpdate(true);
             }}>
-            Update
-          </a>
+            <a style={styles.buttonText}> Update</a>
+          </button>
         </Space>
       ),
-    },
-    {
-      key: 'more',
     },
   ];
 
@@ -102,6 +93,7 @@ const LibraryManage = () => {
   const onCloseModalAdd = () => {
     setSelectedItem(null);
     setIsVisibleModalAdd(false);
+    setIsVisibleModalUpdate(false);
   };
 
   const onCloseDelete = () => {
@@ -130,7 +122,7 @@ const LibraryManage = () => {
           justifyContent: 'space-between',
         }}>
         <Search
-          placeholder="input search text"
+          placeholder="Input search text"
           onSearch={search}
           style={{ width: '50%' }}
           allowClear

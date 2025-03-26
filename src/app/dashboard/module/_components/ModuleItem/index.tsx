@@ -11,9 +11,11 @@ import {
 } from '@ant-design/icons';
 import { adminQuery } from '@/modules/admin/redux';
 import UpdateModuleForm from '../UpdateModuleForm';
+import { Module } from '~mdDashboard/redux/saga/type';
 
 type ModuleItemProps = {
   title: string;
+  data: Module;
   description?: string;
   durations?: number;
   subLessons?: number;
@@ -27,6 +29,7 @@ type ModuleItemProps = {
 };
 const ModuleItem: React.FC<ModuleItemProps> = ({
   subLessons,
+  data,
   title,
   durations,
   description,
@@ -38,10 +41,6 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
   onEditClick,
   style,
 }) => {
-  const [isVisibleDeleteModal, setIsVisibleDeleteModal] = useState(false);
-  const [isVisibleEditModal, setIsVisibleEditModal] = useState(false);
-  const data = { title, description, id, subLessonsData };
-
   const [deleteModule, { isSuccess: isSuccessDelete }] =
     adminQuery.useDeleteModuleMutation();
 
@@ -65,54 +64,21 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
     },
   ];
 
-  const handleMenuClick: MenuProps['onClick'] = e => {
-    if (e.key === 'Delete') {
-      setIsVisibleDeleteModal(true);
-    } else {
-      onEditClick(data);
-    }
-  };
-
-  const handleDelete = () => {
-    deleteModule({ _id: id });
-    setIsVisibleDeleteModal(false);
-  };
-
-  const handleCancelDelete = () => {
-    setIsVisibleDeleteModal(false);
-  };
-  const menuProps = {
-    items,
-    onClick: handleMenuClick,
-  };
-
   return (
     <>
       <Card
         style={{ ...styles.container, ...style }}
         hoverable
         onClick={onClick}
-        actions={[<Text key="Library">Total SubLesson: {subLessons}</Text>]}>
-        {haveMenu && (
-          <Dropdown menu={menuProps} trigger={['click']}>
-            <Button style={styles.btn}>
-              <EllipsisOutlined />
-            </Button>
-          </Dropdown>
-        )}
+        actions={[
+          <Text key="Library">Total Libraries: {data.libraries.length}</Text>,
+        ]}>
         <View>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.desc}>{description}</Text>
-          <Text style={styles.desc}>{durations}</Text>
+          <Text numberOfLines={2} style={styles.title}>
+            {title}
+          </Text>
         </View>
       </Card>
-      <Modal
-        title="Delete Module"
-        open={isVisibleDeleteModal}
-        onOk={handleDelete}
-        onCancel={handleCancelDelete}>
-        <Text>Do you want delete this module</Text>
-      </Modal>
     </>
   );
 };

@@ -11,6 +11,7 @@ import { Library } from '~mdDashboard/types';
 import styles from './styles';
 import { useSearchParams } from 'next/navigation';
 import { LessonItem } from '~mdDashboard/components';
+import './styles.css';
 
 const LibraryList = ({ params }) => {
   const searchParams = useSearchParams();

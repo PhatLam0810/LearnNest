@@ -33,9 +33,11 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   const [libraryType, setLibraryType] = useState('');
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [newTag, setNewTag] = useState('');
-
   useEffect(() => {
-    form.setFieldsValue(initialValues);
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+      setLibraryType(initialValues.type);
+    }
   }, [initialValues]);
 
   const renderInputContent = () => {

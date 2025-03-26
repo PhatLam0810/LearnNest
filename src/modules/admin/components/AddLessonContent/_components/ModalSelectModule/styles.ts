@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
   },
   buttonAddNew: {
     alignSelf: 'flex-start',
+    backgroundColor: '#FD2159',
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 12,

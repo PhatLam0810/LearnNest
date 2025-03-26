@@ -31,51 +31,6 @@ export default function DashboardLayout({
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
 
-  const { data, isSuccess } = dashboardQuery.useGetListLibraryTypeQuery();
-  const [menuChildren, setMenuChildren] = useState([]);
-
-  useEffect(() => {
-    if (data) {
-      const listLibraryMenu = data.map(item => ({
-        key: `/dashboard/library/${item._id}`,
-        label: item.name,
-        icon: <Icon name="library" />,
-      }));
-
-      setMenuChildren(prev => prev.concat(listLibraryMenu));
-    }
-  }, [isSuccess]);
-
-  const menuItemFriend = [
-    {
-      key: '/dashboard/id1',
-      style: styles.menuItemFriend,
-      label: (
-        <View style={styles.friendContainer}>
-          <Text style={styles.friendTitle}>Julius Nguyen</Text>
-          <Text style={styles.friendSubTitle}>Lightbridge Teacher</Text>
-        </View>
-      ),
-      icon: <Avatar size={32} />,
-    },
-    {
-      key: '/dashboard/id2',
-      style: styles.menuItemFriend,
-      label: (
-        <View style={styles.friendContainer}>
-          <Text style={styles.friendTitle}>Katie K.</Text>
-          <Text style={styles.friendSubTitle}>Admin</Text>
-        </View>
-      ),
-      icon: (
-        <Avatar
-          size={32}
-          style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }}
-        />
-      ),
-    },
-  ];
-
   const menuItems: MenuItem[] = [
     {
       key: 'Overview',
@@ -85,10 +40,9 @@ export default function DashboardLayout({
         { key: '/dashboard/home', label: 'Home', icon: <Icon name="home" /> },
         { key: '/dashboard/lesson', label: 'Lesson', icon: <LessonIcon /> },
         {
-          key: '/dashboard',
+          key: '/dashboard/library/0',
           label: 'Library',
           icon: <Icon name="library" />,
-          children: menuChildren,
         },
       ],
     },
@@ -120,11 +74,6 @@ export default function DashboardLayout({
       type: 'group',
       children: [
         {
-          key: 'sett/dashboard/setting',
-          icon: <SettingOutlined />,
-          label: 'Setting',
-        },
-        {
           key: 'logout',
           icon: <LogoutOutlined />,
           label: 'Logout',
@@ -140,12 +89,6 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <Sider theme="light" style={styles.sider} width={240}>
         <View style={{ height: '100%' }}>
-          {/* <Image
-            src={LogoIcon}
-            style={{ width: '80%', aspectRatio: 16 / 9, alignSelf: 'center' }}
-            alt=""
-          /> */}
-
           <TouchableOpacity>
             <View
               style={{ alignItems: 'center', marginBottom: 20 }}

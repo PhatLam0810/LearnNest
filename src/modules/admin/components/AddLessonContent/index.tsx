@@ -186,7 +186,17 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               keyExtractor={item => item?._id}
               handleUpdatedList={setListSelected}
               style={styles.draggableList}
-              renderItem={({ item }) => <DragModuleItem data={item} />}
+              renderItem={({ item }) => (
+                <DragModuleItem
+                  data={item}
+                  onDelete={() => {
+                    const newList = [...listSelected].filter(
+                      sItem => sItem._id !== item._id,
+                    );
+                    setListSelected(newList);
+                  }}
+                />
+              )}
             />
           </ScrollView>
           <Button style={styles.btn} type="primary" htmlType="submit">

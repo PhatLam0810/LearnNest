@@ -2,8 +2,7 @@ import { dmSans, StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
-    width: 250,
-    aspectRatio: 256 / 266,
+    width: 325,
     padding: 12,
     backgroundColor: '#F9F9F9',
   },

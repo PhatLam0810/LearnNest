@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     fontSize: 22.78,
   },
   chip: {
-    ...typography.subTitle1,
+    ...typography.titleS,
   },
   categoryItem: {
     paddingTop: 7,
@@ -46,9 +46,23 @@ const styles = StyleSheet.create({
     ...typography.subTitle1,
     color: '#FFA726',
   },
+  learnedSkillText: {
+    ...typography.subTitle2,
+    margin: 0,
+  },
+  moduleContentHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   skillLearnedItem: {
     ...typography.body2,
     color: '#21212199',
+  },
+  totalLibrary: {
+    ...typography.titleSM,
+    textAlign: 'center',
   },
   lessonContent: {
     marginTop: 30,

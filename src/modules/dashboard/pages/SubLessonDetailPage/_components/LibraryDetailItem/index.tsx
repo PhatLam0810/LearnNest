@@ -16,7 +16,6 @@ type LibraryDetailItemProps = {
 const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({ data }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
-
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
   };
@@ -52,7 +51,13 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({ data }) => {
                 allowFullScreen
               />
             ) : (
-              <ReactPlayer width="100%" height="100%" controls url={data.url} />
+              <ReactPlayer
+                width="100%"
+                height="100%"
+                controls
+                key={data.url}
+                url={data.url}
+              />
             )}
           </View>
         );

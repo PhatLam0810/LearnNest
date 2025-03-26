@@ -28,7 +28,6 @@ function* getSubLessonDetailSaga(action: PayloadAction<{ id: string }>) {
       action.payload,
     );
     if (status === 200) {
-      console.log(data);
       yield put(dashboardAction.setSubLessonDetail({ ...data }));
     } else {
       console.log(data.code);

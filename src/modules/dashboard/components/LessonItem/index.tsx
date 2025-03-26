@@ -50,7 +50,13 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
           </Text>
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 4,
+            marginTop: 8,
+            alignItems: 'center',
+          }}>
           <ClockCircleOutlined style={styles.time} />
           <Text style={styles.time}>
             {dayjs(createdAt).format('MM/DD/YYYY HH:mm')}

@@ -42,6 +42,7 @@ const UpdateModuleForm: React.FC<UpdateModuleFormProps> = ({
         },
         callback() {
           refresh();
+          setSelectedItem(null);
           setIsVisible(false);
         },
       }),

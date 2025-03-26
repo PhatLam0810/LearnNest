@@ -40,33 +40,15 @@ const Page = () => {
         />
         <View style={{ flexDirection: 'row', gap: 8 }}>
           <View style={{ gap: 2 }}>
-            <Text style={styles.title}>Category</Text>
-            <Select
-              style={{ width: 120 }}
-              allowClear
-              options={data?.map(item => ({
-                label: item.name,
-                value: item._id,
-              }))}
-              placeholder="Category"
-              onSelect={data => {
-                filter({
-                  categories: data.value,
-                });
-              }}
-            />
-          </View>
-
-          <View style={{ gap: 2 }}>
             <Text style={styles.title}>Sort By</Text>
             <Select
               style={{ width: 120 }}
               defaultValue={{ label: 'desc', value: 'desc' }}
               options={[
-                { label: 'desc', value: 'desc' },
-                { label: 'asc', value: 'asc' },
+                { label: 'Desc', value: 'desc' },
+                { label: 'Asc', value: 'asc' },
               ]}
-              placeholder="Category"
+              placeholder="Sort"
               onSelect={data => {
                 changeParams({ sortBy: data });
               }}
