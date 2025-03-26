@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, Modal, View } from 'react-native-web';
 import { Document, Page } from 'react-pdf';
 import { FullscreenOutlined } from '@ant-design/icons';
@@ -19,6 +19,30 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({ data }) => {
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
   };
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [watchedPercent, setWatchedPercent] = useState(0);
+  const [canSwitch, setCanSwitch] = useState(false);
+  const [lastPlayed, setLastPlayed] = useState(0);
+  const playerRef = React.useRef(null);
+
+  useEffect(() => {
+    // Kiểm tra xem video này đã được xem chưa
+    const watchedVideos =
+      JSON.parse(localStorage.getItem('watchedVideos')) || {};
+  }, []);
+
+  const handleProgress = ({ playedSeconds }) => {
+    setLastPlayed(playedSeconds);
+    setWatchedPercent((playedSeconds / playerRef.current.getDuration()) * 100);
+  };
+
+  const handleSeek = seconds => {
+    console.log(seconds);
+    console.log(Math.abs(seconds - lastPlayed) > 60);
+    if (Math.abs(seconds - lastPlayed) > 60) {
+      playerRef.current.seekTo(lastPlayed, 'seconds'); // Quay về vị trí trước đó
+    }
+  };
 
   const renderMedia = () => {
     switch (data.type) {
@@ -35,7 +59,15 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({ data }) => {
                 allowFullScreen
               />
             ) : (
-              <ReactPlayer width="100%" height="100%" controls url={data.url} />
+              <ReactPlayer
+                ref={playerRef}
+                width="100%"
+                height="100%"
+                controls
+                url={data.url}
+                onProgress={handleProgress}
+                onSeek={handleSeek}
+              />
             )}
           </View>
         );

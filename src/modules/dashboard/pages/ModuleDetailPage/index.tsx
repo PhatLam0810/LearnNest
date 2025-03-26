@@ -100,7 +100,6 @@ const ModuleDetailPage = () => {
                 );
 
                 const nextLibrary = libraries[currentIndex + 1] || libraries[0];
-                console.log(nextLibrary);
                 dispatch(dashboardAction.setSelectedLibrary(nextLibrary));
               }}>
               <Text style={styles.buttonText}> Next Libraries</Text>
