@@ -76,6 +76,9 @@ const styles = StyleSheet.create({
     paddingRight: 12,
     borderRadius: 8,
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
   buttonText: {
     color: 'white',
   },

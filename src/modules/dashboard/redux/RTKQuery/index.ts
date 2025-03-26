@@ -46,6 +46,14 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    setLibraryCanPlay: builder.mutation({
+      query: params => ({
+        url: '/library/setLibraryCanPlay',
+        method: 'PUT',
+        body: params,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });

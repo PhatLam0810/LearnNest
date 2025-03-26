@@ -77,6 +77,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.01,
     color: '#000',
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
   buttonModule: {
     flexDirection: 'row',
     paddingLeft: 16,

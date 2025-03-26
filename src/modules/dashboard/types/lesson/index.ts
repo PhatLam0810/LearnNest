@@ -17,4 +17,5 @@ export interface Library {
     __v: 0;
   };
   __v: number;
+  isCanPlayed: boolean;
 }

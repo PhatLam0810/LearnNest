@@ -1,6 +1,6 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Image, Modal, View } from 'react-native-web';
+import React, { useEffect, useRef, useState } from 'react';
+import { View } from 'react-native-web';
 import { Document, Page } from 'react-pdf';
 import { FullscreenOutlined } from '@ant-design/icons';
 import ReactPlayer from 'react-player';
@@ -8,40 +8,64 @@ import { Library } from '~mdDashboard/types';
 import styles from './styles';
 import { handleConvert } from './functions';
 import NextImage from 'next/image';
+import YouTube from 'react-youtube';
+import { Modal } from 'antd';
 
 type LibraryDetailItemProps = {
   data: Library;
+  onWatchFinish?: () => void;
 };
 
-const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({ data }) => {
+const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
+  data,
+  onWatchFinish,
+}) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
   };
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [watchedPercent, setWatchedPercent] = useState(0);
-  const [canSwitch, setCanSwitch] = useState(false);
+  const playerRef = useRef(null);
   const [lastPlayed, setLastPlayed] = useState(0);
-  const playerRef = React.useRef(null);
+  const [maxWatched, setMaxWatched] = useState(0);
+  const [apiCalled, setApiCalled] = useState(false);
+  const [modal, contextHolder] = Modal.useModal();
 
-  useEffect(() => {
-    // Kiểm tra xem video này đã được xem chưa
-    const watchedVideos =
-      JSON.parse(localStorage.getItem('watchedVideos')) || {};
-  }, []);
-
-  const handleProgress = ({ playedSeconds }) => {
-    setLastPlayed(playedSeconds);
-    setWatchedPercent((playedSeconds / playerRef.current.getDuration()) * 100);
+  const getYoutubeId = url => {
+    const match = url.match(/(?:[?&]v=|youtu\.be\/|embed\/)([^&]+)/);
+    return match ? match[1] : null;
   };
 
-  const handleSeek = seconds => {
-    console.log(seconds);
-    console.log(Math.abs(seconds - lastPlayed) > 60);
-    if (Math.abs(seconds - lastPlayed) > 60) {
-      playerRef.current.seekTo(lastPlayed, 'seconds'); // Quay về vị trí trước đó
-    }
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playerRef.current) {
+        const currentTime = playerRef.current.getCurrentTime();
+        const duration = playerRef.current.getDuration();
+        const percentWatched = (maxWatched / duration) * 100;
+        if (currentTime > maxWatched + 5) {
+          warning();
+          playerRef.current.pauseVideo();
+          playerRef.current.seekTo(lastPlayed);
+        } else {
+          setLastPlayed(currentTime);
+          setMaxWatched(prevMax => Math.max(prevMax, currentTime));
+        }
+        if (percentWatched >= 99) {
+          onWatchFinish();
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastPlayed, data]);
+
+  const warning = () => {
+    modal.warning({
+      title: 'Warning',
+      content:
+        'You are learning faster than usual, please avoid skipping too much while studying!',
+      centered: true,
+    });
   };
 
   const renderMedia = () => {
@@ -59,15 +83,29 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({ data }) => {
                 allowFullScreen
               />
             ) : (
-              <ReactPlayer
-                ref={playerRef}
-                width="100%"
-                height="100%"
-                controls
-                url={data.url}
-                onProgress={handleProgress}
-                onSeek={handleSeek}
-              />
+              <View
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  paddingTop: '56.25%',
+                }}>
+                <YouTube
+                  videoId={getYoutubeId(data.url)}
+                  opts={{
+                    width: '100%',
+                    height: '100%',
+                    playerVars: { controls: 1, autoplay: 1 },
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                  }}
+                  onReady={event => (playerRef.current = event.target)}
+                />
+              </View>
             )}
           </View>
         );
@@ -132,16 +170,7 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({ data }) => {
   return (
     <View>
       {renderMedia()}
-      <Modal
-        visible={isModalVisible}
-        transparent
-        onClick={() => setModalVisible(false)}>
-        <View style={styles.modalBackground} onClick={e => e.stopPropagation()}>
-          <Document file={data.url}>
-            <Page pageNumber={1} scale={0.99} />
-          </Document>
-        </View>
-      </Modal>
+      {contextHolder}
     </View>
   );
 };

@@ -46,13 +46,18 @@ const LessonDetailPage = () => {
       children: (
         <View style={{ gap: 8, marginTop: 8 }}>
           {item.libraries.map((subItem, subIndex) => (
-            <TouchableOpacity key={subIndex}>
+            <TouchableOpacity
+              key={subIndex}
+              style={[!subItem?.isCanPlayed && styles.disabledButton]}
+              pointerEvents={subItem?.isCanPlayed ? 'auto' : 'none'}>
               <View
                 style={styles.buttonModule}
                 onClick={() => {
-                  dispatch(dashboardAction.setSelectedModule(item));
-                  dispatch(dashboardAction.setSelectedLibrary(subItem));
-                  router.push('/dashboard/home/lesson/moduleDetail');
+                  if (subItem?.isCanPlayed) {
+                    dispatch(dashboardAction.setSelectedModule(item));
+                    dispatch(dashboardAction.setSelectedLibrary(subItem));
+                    router.push('/dashboard/home/lesson/moduleDetail');
+                  }
                 }}>
                 <PlayCircleOutlined />
                 <View style={{ paddingTop: 7, paddingBottom: 7 }}>

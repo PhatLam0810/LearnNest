@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
@@ -7,14 +7,16 @@ import LibraryDetailItem from '../SubLessonDetailPage/_components/LibraryDetailI
 import { AppHeader } from '@components';
 import { Button, Collapse, CollapseProps } from 'antd';
 import { convertDurationToTime } from '@utils';
-import { dashboardAction } from '~mdDashboard/redux';
+import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 
 const ModuleDetailPage = () => {
   const { selectedModule, lessonDetail, selectedLibrary } = useAppSelector(
     state => state.dashboardReducer,
   );
   const dispatch = useAppDispatch();
-  console.log(selectedLibrary);
+  const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
+  const [nextLibrary, setNextLibrary] = useState<any>(null);
+
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index,
@@ -29,10 +31,15 @@ const ModuleDetailPage = () => {
       children: (
         <View style={{ gap: 8, marginTop: 8 }}>
           {item.libraries.map((subItem, subIndex) => (
-            <TouchableOpacity key={subIndex}>
+            <TouchableOpacity
+              key={subIndex}
+              style={[!subItem?.isCanPlayed && styles.disabledButton]}
+              pointerEvents={subItem?.isCanPlayed ? 'auto' : 'none'}>
               <View
                 onClick={() => {
-                  dispatch(dashboardAction.setSelectedLibrary(subItem));
+                  if (subItem?.isCanPlayed) {
+                    dispatch(dashboardAction.setSelectedLibrary(subItem));
+                  }
                 }}
                 style={[
                   styles.buttonModule,
@@ -73,13 +80,38 @@ const ModuleDetailPage = () => {
     borderRadius: '#f5f5f5',
     border: 'none',
   };
+
+  const onWatchFinish = async () => {
+    if (!selectedLibrary || !lessonDetail?.modules) return;
+
+    const libraries = lessonDetail?.modules?.flatMap(
+      module => module.libraries,
+    );
+
+    const currentIndex = libraries.findIndex(
+      lib => lib._id === selectedLibrary?._id,
+    );
+
+    const nextLibrary = libraries[currentIndex + 1] || null;
+
+    console.log(nextLibrary);
+    console.log('set Video tiep theo coi dc ne');
+    await setLibraryCanPlay({ _id: nextLibrary?._id });
+    dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+    dispatch(dashboardAction.setSelectedLibrary(nextLibrary));
+  };
   return (
     <View style={styles.container}>
       <AppHeader title={selectedModule?.title} subTitle={lessonDetail?.title} />
 
       <View style={styles.layout}>
         <View style={{ width: '70%' }}>
-          {selectedLibrary && <LibraryDetailItem data={selectedLibrary} />}
+          {selectedLibrary && (
+            <LibraryDetailItem
+              data={selectedLibrary}
+              onWatchFinish={onWatchFinish}
+            />
+          )}
           <View style={styles.layoutTitleContainer}>
             <View style={{ width: '100%', flex: 1 }}>
               <Text style={styles.layoutTitle}>{selectedLibrary?.title}</Text>
@@ -89,6 +121,7 @@ const ModuleDetailPage = () => {
             </View>
             <Button
               style={styles.button}
+              disabled={!nextLibrary?.isCanPlayed}
               onClick={() => {
                 if (!selectedLibrary || !lessonDetail?.modules) return;
                 const libraries = lessonDetail.modules.flatMap(
@@ -100,6 +133,7 @@ const ModuleDetailPage = () => {
                 );
 
                 const nextLibrary = libraries[currentIndex + 1] || libraries[0];
+                setNextLibrary(nextLibrary);
                 dispatch(dashboardAction.setSelectedLibrary(nextLibrary));
               }}>
               <Text style={styles.buttonText}> Next Libraries</Text>
