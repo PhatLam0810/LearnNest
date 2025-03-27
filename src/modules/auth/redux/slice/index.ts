@@ -35,6 +35,7 @@ export const authSlice = createSlice({
     sendOtpInfo: (s, a: PayloadAction<{ email: string }>) => {
       s.sendOtpInfo = a.payload;
     },
+
     setIsShowLoading: (s, a: PayloadAction<boolean>) => {
       s.isLoading = a.payload;
     },

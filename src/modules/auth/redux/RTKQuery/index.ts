@@ -1,5 +1,5 @@
 import { baseQuery } from '@redux/RTKQuery';
-import { LessonRecommendRes } from './types';
+import { LessonRecommendRes, SubscriptionsRes } from './types';
 import { AxiosResponse } from 'axios';
 
 export const authQuery = baseQuery.injectEndpoints({
@@ -15,6 +15,29 @@ export const authQuery = baseQuery.injectEndpoints({
         body: params,
       }),
       transformResponse: (response: any) => response,
+    }),
+    sendTransactionOtp: builder.mutation({
+      query: (params: { email: string }) => ({
+        url: '/otp/sendTransaction',
+        method: 'POST',
+        body: params,
+      }),
+      transformResponse: (response: any) => response,
+    }),
+    verifyTransactionOtp: builder.mutation({
+      query: (params: { email: string; otp: number }) => ({
+        url: '/otp/verify',
+        method: 'POST',
+        body: params,
+      }),
+      transformResponse: (response: any) => response.data,
+    }),
+    getSubscriptions: builder.query({
+      query: () => ({
+        url: '/subscriptions',
+        method: 'GET',
+      }),
+      transformResponse: (res: SubscriptionsRes[]) => res,
     }),
   }),
   overrideExisting: true,

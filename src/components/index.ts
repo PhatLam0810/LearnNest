@@ -5,3 +5,4 @@ export { default as DraggableList } from './DraggableList';
 export * from './(Form)';
 export { default as AppButton } from './AppButton';
 export { default as AppUploadToServer } from './AppUploadToServer';
+export { default as AppModalPayPal } from './AppModalPayPal';

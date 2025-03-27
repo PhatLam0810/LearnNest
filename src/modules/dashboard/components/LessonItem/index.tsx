@@ -1,12 +1,13 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from 'antd';
-import { ClockCircleOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, DollarOutlined } from '@ant-design/icons';
 import './styles.css';
 import dayjs from 'dayjs';
 import styles from './styles';
 import { Text, View } from 'react-native-web';
 import LessonThumbnail from '../LessonThumbnail';
+import { authQuery } from '~mdAuth/redux';
 type LessonItemProps = {
   data: {
     thumbnail: string;
@@ -14,6 +15,8 @@ type LessonItemProps = {
     title: string;
     description: string;
     _id: string;
+    isPremium: boolean;
+    price: number;
   };
   onClick: () => void;
   onEditClick?: (data: any) => void;
@@ -23,7 +26,20 @@ type LessonItemProps = {
 };
 
 const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
-  const { thumbnail, createdAt, title, description } = data || {};
+  const { thumbnail, createdAt, title, description, isPremium, price, _id } =
+    data || {};
+  const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
+  const [accessLesson, setAccessLesson] = useState(false);
+
+  useEffect(() => {
+    if (isPremium) {
+      setAccessLesson(false);
+    }
+
+    if (dataSub?.length > 0 && dataSub.some(sub => sub.lessonId === _id)) {
+      setAccessLesson(true);
+    }
+  }, [dataSub, isPremium]);
 
   return (
     <Card
@@ -31,6 +47,12 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
       hoverable
       style={Object.assign({}, styles.container, style)}>
       <View style={{ flex: 1 }} onClick={onClick}>
+        {!accessLesson && (
+          <View style={styles.premium}>
+            <DollarOutlined style={{ color: '#FFF', fontSize: 24 }} />
+          </View>
+        )}
+
         <View
           style={{
             width: '100%',
@@ -48,6 +70,11 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
           <Text style={styles.desc} numberOfLines={2}>
             {description}
           </Text>
+          {!accessLesson && (
+            <Text style={styles.price} numberOfLines={2}>
+              Price: {price}$
+            </Text>
+          )}
         </View>
 
         <View

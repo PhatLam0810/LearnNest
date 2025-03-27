@@ -3,7 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import styles from './styles';
 import { ScrollView, Text, View } from 'react-native-web';
-import { Form, Input, Select, Button } from 'antd';
+import {
+  Form,
+  Input,
+  Select,
+  Button,
+  Switch,
+  Space,
+  InputNumber,
+  Row,
+  Col,
+} from 'antd';
 import api from '@services/api';
 import { adminQuery } from '@/modules/admin/redux';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -25,9 +35,8 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   onDone,
 }) => {
   const [form] = Form.useForm();
-  const { data: CategoriesAllData } = adminQuery.useGetCategoriesAllQuery();
   const [addLesson] = adminQuery.useAddLessonMutation();
-  const { Option } = Select;
+  const [isPremium, setIsPremium] = useState(initialValues.isPremium);
 
   const [listSelected, setListSelected] = useState<any[]>([]);
   const [isVisibleModalSelect, setIsVisibleModalSelect] = useState(false);
@@ -67,6 +76,11 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
       setListSelected(initialValues.modules);
     }
   }, [initialValues]);
+
+  const onChange = (checked: boolean) => {
+    setIsPremium(checked);
+  };
+
   return (
     <View style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -107,6 +121,47 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                     placeholder="Enter lesson description"
                   />
                 </Form.Item>
+
+                <Row align="middle" gutter={16}>
+                  {/* Switch */}
+                  <Col>
+                    <Form.Item label="Premium Lesson" name="isPremium">
+                      <Switch onChange={setIsPremium} />
+                    </Form.Item>
+                  </Col>
+
+                  {/* Input price chỉ hiển thị khi bật switch */}
+                  {isPremium && (
+                    <Col>
+                      <Form.Item
+                        name="price"
+                        label="Price Lesson"
+                        validateTrigger="onBlur"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'Price is required!',
+                          },
+                          {
+                            validator: (_, value) =>
+                              value && value > 500
+                                ? Promise.reject(
+                                    new Error('Maximum price is $500!'),
+                                  )
+                                : Promise.resolve(),
+                          },
+                        ]}>
+                        <InputNumber
+                          addonAfter="$"
+                          min={1}
+                          value={initialValues.price}
+                          placeholder="Enter price"
+                          style={{ width: '100%' }}
+                        />
+                      </Form.Item>
+                    </Col>
+                  )}
+                </Row>
 
                 <Form.Item
                   style={styles.formItemTitle}

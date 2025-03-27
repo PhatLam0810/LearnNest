@@ -12,6 +12,8 @@ export interface Lesson {
   __v: number;
   modules: Module[];
   relatedLessons: RelatedLesson[];
+  isPremium: boolean;
+  price: number;
 }
 export interface LessonDetailDataResponse {
   _id: string;
@@ -25,6 +27,8 @@ export interface LessonDetailDataResponse {
   __v: number;
   modules: Module[];
   relatedLessons: RelatedLesson[];
+  isPremium: boolean;
+  price: number;
 }
 
 export interface Category {
@@ -70,6 +74,8 @@ export interface RelatedLesson {
   createdAt: string;
   updatedAt: string;
   __v: number;
+  isPremium: boolean;
+  price: number;
 }
 
 export interface Category {

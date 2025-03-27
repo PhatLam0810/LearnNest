@@ -3,6 +3,18 @@ export interface LessonRecommendRes {
   recommend: Recommend[];
   popularCategories: PopularCategory[];
 }
+export interface SubscriptionsRes {
+  status?: string;
+  _id?: string;
+  userId?: string;
+  lessonId: string;
+  planName?: string;
+  startDate?: string;
+  paymentId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
+}
 
 export interface Today {
   _id: string;

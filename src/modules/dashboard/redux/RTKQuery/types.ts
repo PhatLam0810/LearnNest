@@ -13,6 +13,8 @@ export interface Today {
   categories: string[];
   createdAt: string;
   updatedAt: string;
+  isPremium: boolean;
+  price: number;
   __v: number;
 }
 
@@ -25,6 +27,8 @@ export interface Recommend {
   categories: string[];
   createdAt: string;
   updatedAt: string;
+  isPremium: boolean;
+  price: number;
   __v: number;
 }
 

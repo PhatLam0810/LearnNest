@@ -4,8 +4,10 @@ import {
   CheckOutlined,
   PlayCircleOutlined,
   CaretRightOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
 import './styles.css';
+
 import { useRouter } from 'next/navigation';
 import Icon from '@components/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
@@ -20,21 +22,41 @@ import {
 } from 'react-native-web';
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
-import { AppHeader } from '@components';
-import { Collapse, CollapseProps, message } from 'antd';
+import { AppHeader, AppModalPayPal } from '@components';
+import { Collapse, CollapseProps, message, Modal } from 'antd';
+import { PayPalButtons } from '@paypal/react-paypal-js';
+import { authQuery } from '~mdAuth/redux';
 
 const LessonDetailPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [messageApi, contextHolder] = message.useMessage();
   const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
-  const numColumns = lessonDetail?.learnedSkills?.length >= 5 ? 2 : 1;
+  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [isVisibleModalBuy, setIsVisibleModalBuy] = useState(false);
+  const [itemBuy, setItemBuy] = useState(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
+  const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
+  const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
   const totalLibraries = lessonDetail?.modules?.reduce((total, item) => {
     return total + (item.libraries?.length || 0);
   }, 0);
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
-  const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
+  const numColumns = lessonDetail?.learnedSkills?.length >= 5 ? 2 : 1;
+
+  const [accessLesson, setAccessLesson] = useState(false);
+
+  useEffect(() => {
+    if (lessonDetail.isPremium) {
+      setAccessLesson(false);
+    }
+
+    if (
+      dataSub?.length > 0 &&
+      dataSub.some(sub => sub.lessonId === lessonDetail._id)
+    ) {
+      setAccessLesson(true);
+    }
+  }, [dataSub, lessonDetail.isPremium]);
 
   useEffect(() => {
     setLibraryCanPlay({
@@ -44,6 +66,9 @@ const LessonDetailPage = () => {
     dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
   }, []);
 
+  const onCloseModalAdd = () => {
+    setIsVisibleModalBuy(false);
+  };
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index.toString(),
@@ -64,10 +89,14 @@ const LessonDetailPage = () => {
                 !subItem?.usersCanPlay?.some(
                   id => id._id === userProfile?._id,
                 ) && styles.disabledButton,
+                !accessLesson && styles.disabledButton,
               ]}>
               <View
                 style={styles.buttonModule}
                 onClick={() => {
+                  if (!accessLesson) {
+                    return;
+                  }
                   if (
                     subItem?.usersCanPlay?.some(
                       id => id._id === userProfile?._id,
@@ -116,8 +145,8 @@ const LessonDetailPage = () => {
             ))}
           </View>
           <Text style={styles.title}>{lessonDetail?.title}</Text>
-          <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 3 }}>
+          <View style={{ flexDirection: 'row', height: '100%' }}>
+            <View style={{ flex: 2.4 }}>
               <Text style={styles.description}>
                 {lessonDetail?.description}
               </Text>
@@ -155,32 +184,51 @@ const LessonDetailPage = () => {
                   overflow: 'hidden',
                   backgroundColor: 'gray',
                 }}>
+                {!accessLesson && (
+                  <View style={styles.premium}>
+                    <DollarOutlined style={{ color: '#FFF', fontSize: 24 }} />
+                  </View>
+                )}
                 <LessonThumbnail thumbnail={lessonDetail.thumbnail} />
               </View>
-
-              <button
-                className="button"
-                onClick={() => {
-                  const modules = lessonDetail.modules;
-                  const libraries = modules[0].libraries[0];
-                  if (modules && modules?.length > 0) {
-                    dispatch(dashboardAction.setSelectedModule(modules[0]));
-                    dispatch(dashboardAction.setSelectedLibrary(libraries));
-                    router.push('/dashboard/home/lesson/moduleDetail');
-                  } else {
-                    messageApi.open({
-                      type: 'warning',
-                      content: 'Chưa có nội dung bài học vui lòng quay lại sau',
-                      duration: 5,
-                    });
-                  }
-                }}>
-                <Icon name="liveTV" className="button-icon" />
-                <span className="label">Start lesson</span>
-              </button>
-              <Text style={styles.totalLibrary}>
-                Total Libraries: {totalLibraries}
-              </Text>
+              {!accessLesson ? (
+                <button
+                  className="button"
+                  onClick={() => {
+                    setItemBuy(lessonDetail);
+                    setIsVisibleModalBuy(true);
+                  }}>
+                  <Icon name="liveTV" className="button-icon" />
+                  <span className="label">Buy Now</span>
+                </button>
+              ) : (
+                <View>
+                  <button
+                    className="button"
+                    onClick={() => {
+                      const modules = lessonDetail.modules;
+                      const libraries = modules[0].libraries[0];
+                      if (modules && modules?.length > 0) {
+                        dispatch(dashboardAction.setSelectedModule(modules[0]));
+                        dispatch(dashboardAction.setSelectedLibrary(libraries));
+                        router.push('/dashboard/home/lesson/moduleDetail');
+                      } else {
+                        messageApi.open({
+                          type: 'warning',
+                          content:
+                            'Chưa có nội dung bài học vui lòng quay lại sau',
+                          duration: 5,
+                        });
+                      }
+                    }}>
+                    <Icon name="liveTV" className="button-icon" />
+                    <span className="label">Start lesson</span>
+                  </button>
+                  <Text style={styles.totalLibrary}>
+                    Total Libraries: {totalLibraries}
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         </View>
@@ -220,6 +268,12 @@ const LessonDetailPage = () => {
           </View>
         )}
       </ScrollView>
+      <AppModalPayPal
+        isVisibleModalBuy={isVisibleModalBuy}
+        setIsVisibleModalBuy={setIsVisibleModalBuy}
+        data={lessonDetail}
+        accessLesson={accessLesson}
+      />
     </View>
   );
 };
