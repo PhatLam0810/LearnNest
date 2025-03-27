@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState } from 'react';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
@@ -15,7 +15,7 @@ const ModuleDetailPage = () => {
   );
   const dispatch = useAppDispatch();
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
-  const [nextLibrary, setNextLibrary] = useState<any>(null);
+  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
@@ -30,45 +30,58 @@ const ModuleDetailPage = () => {
       ),
       children: (
         <View style={{ gap: 8, marginTop: 8 }}>
-          {item.libraries.map((subItem, subIndex) => (
-            <TouchableOpacity
-              key={subIndex}
-              style={[!subItem?.isCanPlayed && styles.disabledButton]}
-              pointerEvents={subItem?.isCanPlayed ? 'auto' : 'none'}>
-              <View
-                onClick={() => {
-                  if (subItem?.isCanPlayed) {
-                    dispatch(dashboardAction.setSelectedLibrary(subItem));
-                  }
-                }}
+          {item.libraries.map((subItem, subIndex) => {
+            return (
+              <TouchableOpacity
+                key={subIndex}
                 style={[
-                  styles.buttonModule,
-                  selectedLibrary?._id === subItem._id && {
-                    backgroundColor: '#ef405c',
-                    color: '#FFF',
-                  },
+                  !subItem?.usersCanPlay?.some(
+                    id => id._id === userProfile?._id,
+                  ) && styles.disabledButton,
                 ]}>
-                <PlayCircleOutlined />
-                <View style={{ paddingVertical: 7, flex: 1 }}>
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      styles.moduleItemTitle,
-                      selectedLibrary?._id === subItem._id && { color: '#FFF' },
-                    ]}>
-                    {subItem.title}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.moduleItemTime,
-                      selectedLibrary?._id === subItem._id && { color: '#FFF' },
-                    ]}>
-                    {convertDurationToTime(subItem.duration)}
-                  </Text>
+                <View
+                  onClick={() => {
+                    if (
+                      subItem?.usersCanPlay?.some(
+                        id => id._id === userProfile?._id,
+                      )
+                    ) {
+                      dispatch(dashboardAction.setSelectedLibrary(subItem));
+                    }
+                  }}
+                  style={[
+                    styles.buttonModule,
+                    selectedLibrary?._id === subItem._id && {
+                      backgroundColor: '#ef405c',
+                      color: '#FFF',
+                    },
+                  ]}>
+                  <PlayCircleOutlined />
+                  <View style={{ paddingVertical: 7, flex: 1 }}>
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.moduleItemTitle,
+                        selectedLibrary?._id === subItem._id && {
+                          color: '#FFF',
+                        },
+                      ]}>
+                      {subItem.title}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.moduleItemTime,
+                        selectedLibrary?._id === subItem._id && {
+                          color: '#FFF',
+                        },
+                      ]}>
+                      {convertDurationToTime(subItem.duration)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       ),
       style: panelStyle,
@@ -94,9 +107,10 @@ const ModuleDetailPage = () => {
 
     const nextLibrary = libraries[currentIndex + 1] || null;
 
-    console.log(nextLibrary);
-    console.log('set Video tiep theo coi dc ne');
-    await setLibraryCanPlay({ _id: nextLibrary?._id });
+    await setLibraryCanPlay({
+      libraryId: nextLibrary?._id,
+      userId: userProfile?._id,
+    });
     dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
     dispatch(dashboardAction.setSelectedLibrary(nextLibrary));
   };
@@ -119,26 +133,6 @@ const ModuleDetailPage = () => {
                 {selectedLibrary?.description}
               </Text>
             </View>
-            <Button
-              style={styles.button}
-              disabled={!nextLibrary?.isCanPlayed}
-              onClick={() => {
-                if (!selectedLibrary || !lessonDetail?.modules) return;
-                const libraries = lessonDetail.modules.flatMap(
-                  module => module.libraries,
-                );
-
-                const currentIndex = libraries.findIndex(
-                  lib => lib._id === selectedLibrary._id,
-                );
-
-                const nextLibrary = libraries[currentIndex + 1] || libraries[0];
-                setNextLibrary(nextLibrary);
-                dispatch(dashboardAction.setSelectedLibrary(nextLibrary));
-              }}>
-              <Text style={styles.buttonText}> Next Libraries</Text>
-              <CaretRightOutlined style={{ color: '#FFF' }} />
-            </Button>
           </View>
         </View>
         <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>

@@ -17,5 +17,9 @@ export interface Library {
     __v: 0;
   };
   __v: number;
-  isCanPlayed: boolean;
+  usersCanPlay: UserId[];
+}
+
+interface UserId {
+  _id: string;
 }

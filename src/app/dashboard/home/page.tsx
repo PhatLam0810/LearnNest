@@ -16,6 +16,8 @@ import { splitData } from './functions';
 import 'antd/dist/reset.css';
 import { AnimatePresence, motion } from 'framer-motion';
 import { HeartIcon } from '@/assets/svg';
+import { PayPalButtons } from '@paypal/react-paypal-js';
+import { Modal } from 'antd';
 
 const HomeOverview = () => {
   const router = useRouter();
@@ -27,6 +29,7 @@ const HomeOverview = () => {
   const [markAtRead] = dashboardQuery.useMarkSelfCareAsReadMutation();
 
   const [isShowSelfCare, setIsShowSelfCare] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const onClickLesson = (id: string) => {
     dispatch(dashboardAction.getLessonDetail({ id }));
@@ -88,7 +91,7 @@ const HomeOverview = () => {
                       <LessonItem
                         key={index}
                         data={item}
-                        onClick={() => onClickLesson(item._id)}
+                        onClick={() => setIsVisible(true)}
                       />
                     ))}
                   </View>
@@ -98,6 +101,41 @@ const HomeOverview = () => {
           </motion.div>
         </AnimatePresence>
       </ScrollView>
+      <Modal open={isVisible}>
+        <View
+          onClick={() => {
+            setIsVisible(false);
+          }}>
+          <View
+            onClick={e => {
+              e.stopPropagation();
+            }}>
+            <PayPalButtons
+              createOrder={(data, actions) => {
+                return actions.order.create({
+                  intent: 'CAPTURE',
+                  purchase_units: [
+                    {
+                      amount: {
+                        value: (50 || 0).toString(),
+                        currency_code: 'USD',
+                      },
+                    },
+                  ],
+                });
+              }}
+              onApprove={async (data, actions) => {
+                const detail = await actions?.order?.capture();
+                // router.back();
+                console.log(detail);
+              }}
+              onError={err => {
+                setIsVisible(false);
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

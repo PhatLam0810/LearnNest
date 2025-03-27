@@ -14,7 +14,6 @@ import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction } from '~mdAuth/redux';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
-import { dashboardQuery } from '~mdDashboard/redux';
 import Icon from '@components/icons';
 import { LessonIcon } from '@/assets/svg';
 
@@ -77,7 +76,9 @@ export default function DashboardLayout({
           key: 'logout',
           icon: <LogoutOutlined />,
           label: 'Logout',
-          onClick: () => dispatch(authAction.logout()),
+          onClick: () => {
+            dispatch(authAction.logout());
+          },
         },
       ],
     },

@@ -1,5 +1,5 @@
 'use client';
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import {
   CheckOutlined,
   PlayCircleOutlined,
@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import Icon from '@components/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { LessonItem, LessonThumbnail } from '~mdDashboard/components';
-import { dashboardAction } from '~mdDashboard/redux';
+import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import {
   FlatList,
   ScrollView,
@@ -29,9 +29,21 @@ const LessonDetailPage = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
   const numColumns = lessonDetail?.learnedSkills?.length >= 5 ? 2 : 1;
+  const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const totalLibraries = lessonDetail?.modules?.reduce((total, item) => {
     return total + (item.libraries?.length || 0);
   }, 0);
+  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
+
+  useEffect(() => {
+    setLibraryCanPlay({
+      libraryId: libraries[0]?._id,
+      userId: userProfile?._id,
+    });
+    dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+  }, []);
+
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index.toString(),
@@ -48,12 +60,19 @@ const LessonDetailPage = () => {
           {item.libraries.map((subItem, subIndex) => (
             <TouchableOpacity
               key={subIndex}
-              style={[!subItem?.isCanPlayed && styles.disabledButton]}
-              pointerEvents={subItem?.isCanPlayed ? 'auto' : 'none'}>
+              style={[
+                !subItem?.usersCanPlay?.some(
+                  id => id._id === userProfile?._id,
+                ) && styles.disabledButton,
+              ]}>
               <View
                 style={styles.buttonModule}
                 onClick={() => {
-                  if (subItem?.isCanPlayed) {
+                  if (
+                    subItem?.usersCanPlay?.some(
+                      id => id._id === userProfile?._id,
+                    )
+                  ) {
                     dispatch(dashboardAction.setSelectedModule(item));
                     dispatch(dashboardAction.setSelectedLibrary(subItem));
                     router.push('/dashboard/home/lesson/moduleDetail');

@@ -22,7 +22,6 @@ const Page = () => {
   return (
     <View style={styles.container}>
       <View>
-        {/* <Image src={logo} alt="" width={300} /> */}
         <Text style={styles.title}>SUBSCRIPTION PLAN</Text>
       </View>
       <View style={styles.subWrap}>
@@ -80,7 +79,8 @@ const Page = () => {
               }}
               onApprove={async (data, actions) => {
                 const detail = await actions?.order?.capture();
-                router.back();
+                // router.back();
+                console.log(detail);
                 messageApi?.success({ content: 'Buy success' });
               }}
               onError={err => {
