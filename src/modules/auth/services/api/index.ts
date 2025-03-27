@@ -1,5 +1,6 @@
 import api from '@services/api';
 import {
+  LessonPurchase,
   LoginApiReq,
   LoginOauthApiReq,
   OtpApiReq,
@@ -17,6 +18,9 @@ export const sendOtpApi = (params: OtpApiReq) => api.post(`/otp/send`, params);
 
 export const verifyOtpApi = (params: { otp: number; email: string }) =>
   api.post(`/otp/verify`, params);
+
+export const lessonPurchaseApi = (params: LessonPurchase) =>
+  api.post(`/lesson/purchase/${params._id}`, params);
 
 export const loginOauth = (params: LoginOauthApiReq) =>
   api.post(`/auth/loginOauth`, params);

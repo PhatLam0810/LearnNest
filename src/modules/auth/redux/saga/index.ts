@@ -5,6 +5,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { authAction } from '../slice';
 import { AppAxiosRes } from '@/types';
 import {
+  LessonPurchase,
   loginApiRes,
   signUpApiRes,
   UserProfile,
@@ -71,6 +72,41 @@ function* updateCurrentInfoSaga(action: PayloadAction<UserProfile>) {
   }
 }
 
+function* verifyOtpSaga(action: PayloadAction<{ email: string; otp: number }>) {
+  try {
+    const { status, data }: AppAxiosRes<UserProfile> = yield call(
+      authApi.verifyOtpApi,
+      action.payload,
+    );
+    if (status === 201) {
+      yield put(authAction.setVerifyInfo(true));
+    } else {
+      console.log(data.code);
+    }
+  } catch (e: any) {
+    messageApi.error('Otp is not correct');
+    console.log('getLessonDetailSaga', e.message);
+  }
+}
+
+function* lessonPurchaseSaga(action: PayloadAction<LessonPurchase>) {
+  try {
+    const { status, data }: AppAxiosRes<any> = yield call(
+      authApi.lessonPurchaseApi,
+      action.payload,
+    );
+
+    if (status === 201) {
+      yield put(authAction.lessonPurchaseData(data));
+    } else {
+      console.log(data.code);
+    }
+  } catch (e: any) {
+    messageApi.error('Otp is not correct');
+    console.log('getLessonDetailSaga', e.message);
+  }
+}
+
 function* signUpSaga(action: PayloadAction<SignUpPayload>) {
   try {
     const { params, callback } = action.payload;
@@ -128,5 +164,7 @@ export function* authSaga() {
   yield takeLatest(authAction.login, loginSaga);
   yield takeLatest(authAction.signUp, signUpSaga);
   yield takeLatest(authAction.loginOAuth, loginOauthSaga);
+  yield takeLatest(authAction.verifyOtp, verifyOtpSaga);
   yield takeLatest(authAction.updateCurrentInfo, updateCurrentInfoSaga);
+  yield takeLatest(authAction.lessonPurchase, lessonPurchaseSaga);
 }

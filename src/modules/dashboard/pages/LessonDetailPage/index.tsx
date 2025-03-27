@@ -25,18 +25,19 @@ import { convertDurationToTime } from '@utils';
 import { AppHeader, AppModalPayPal } from '@components';
 import { Collapse, CollapseProps, message, Modal } from 'antd';
 import { PayPalButtons } from '@paypal/react-paypal-js';
-import { authQuery } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 
 const LessonDetailPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
   const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
   const [messageApi, contextHolder] = message.useMessage();
   const [isVisibleModalBuy, setIsVisibleModalBuy] = useState(false);
   const [itemBuy, setItemBuy] = useState(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
-  const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
+  const { data: dataSub, refetch } = authQuery.useGetSubscriptionsQuery({});
   const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
   const totalLibraries = lessonDetail?.modules?.reduce((total, item) => {
     return total + (item.libraries?.length || 0);
@@ -65,10 +66,15 @@ const LessonDetailPage = () => {
     });
     dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
   }, []);
+  useEffect(() => {
+    if (lessonPurchaseData) {
+      console.log('goi lai lesson');
+      refetch();
+      setIsVisibleModalBuy(false);
+      dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+    }
+  }, [lessonPurchaseData]);
 
-  const onCloseModalAdd = () => {
-    setIsVisibleModalBuy(false);
-  };
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index.toString(),
@@ -197,6 +203,7 @@ const LessonDetailPage = () => {
                   onClick={() => {
                     setItemBuy(lessonDetail);
                     setIsVisibleModalBuy(true);
+                    dispatch(authAction.setVerifyInfo(false));
                   }}>
                   <Icon name="liveTV" className="button-icon" />
                   <span className="label">Buy Now</span>

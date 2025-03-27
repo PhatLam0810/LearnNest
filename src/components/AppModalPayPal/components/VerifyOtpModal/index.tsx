@@ -2,13 +2,12 @@ import React, { useEffect } from 'react';
 import { Modal, Input, Button, Form } from 'antd';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
-import { authQuery } from '~mdAuth/redux';
-import { messageApi } from '@hooks';
-import { error } from 'console';
+import { authAction } from '~mdAuth/redux';
+import { useAppDispatch } from '@redux';
 
 type VerifyOtpModalProps = {
   isVisible: boolean;
-  setIsVisible: (value: boolean) => void;
+  setIsVisible: (isVisible: boolean) => void;
   email: string;
 };
 
@@ -18,26 +17,27 @@ const VerifyOtpModal: React.FC<VerifyOtpModalProps> = ({
   setIsVisible,
 }) => {
   const [form] = Form.useForm();
-  const [verifyOtp, { isError, isSuccess, data }] =
-    authQuery.useVerifyTransactionOtpMutation();
+  const dispatch = useAppDispatch();
 
   const onClose = () => {
     setIsVisible(false);
     form.resetFields(); // Reset form khi đóng modal
   };
-
   const onFinish = (values: { otp: number }) => {
-    console.log({ email, otp: values.otp });
-    verifyOtp({ email: email, otp: values.otp });
-
-    console.log(isError);
-    console.log(data);
+    dispatch(authAction.verifyOtp({ email: email, otp: values.otp }));
   };
+
+  useEffect(() => {
+    if (isVisible) {
+      form.resetFields();
+    }
+  }, [isVisible]);
 
   return (
     <Modal
       open={isVisible}
       onCancel={onClose}
+      onClose={onClose}
       footer={null}
       centered
       closable={false}>
@@ -73,10 +73,7 @@ const VerifyOtpModal: React.FC<VerifyOtpModalProps> = ({
             <Button
               type="primary"
               htmlType="submit"
-              style={styles.verifyButton}
-              // icon={<PlusOutlined />}
-              // onClick={() => setIsVisibleModalAdd(true)}
-            >
+              style={styles.verifyButton}>
               Verify
             </Button>
           </View>

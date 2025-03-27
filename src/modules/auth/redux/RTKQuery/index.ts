@@ -30,7 +30,7 @@ export const authQuery = baseQuery.injectEndpoints({
         method: 'POST',
         body: params,
       }),
-      transformResponse: (response: any) => response.data,
+      transformResponse: (response: any) => response,
     }),
     getSubscriptions: builder.query({
       query: () => ({

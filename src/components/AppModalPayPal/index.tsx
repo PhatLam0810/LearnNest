@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FlatList, Text, View } from 'react-native-web';
+import { View } from 'react-native-web';
 import styles from './styles';
 import { Button, message, Modal } from 'antd';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { LessonDetailDataResponse } from '~mdDashboard/redux/saga/type';
-import { LessonThumbnail } from '~mdDashboard/components';
-import { DollarOutlined, CheckOutlined } from '@ant-design/icons';
 import { LessonContent, VerifyOtpModal } from './components';
-import Icon from '@components/icons';
 import { authAction, authQuery } from '~mdAuth/redux';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { messageApi } from '@hooks';
 import './styles.css';
 type AppModalPayPalProps = {
   isVisibleModalBuy: boolean;
@@ -30,9 +26,8 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
   const [messageApi, contextHolder] = message.useMessage();
   const [sendOtp] = authQuery.useSendTransactionOtpMutation();
   const [isLoading, setIsLoading] = useState(false);
-
+  const { verifyInfo } = useAppSelector(state => state.authReducer);
   const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
-  const router = useRouter();
 
   const [isVisibleVerify, setIsVisibleVerify] = useState(false);
   const handleSendOtp = async (email: string) => {
@@ -58,6 +53,15 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
   const onCloseModalAdd = () => {
     setIsVisibleModalBuy(false);
   };
+  const onCloseModalVerify = () => {
+    setIsVisibleVerify(false);
+  };
+
+  useEffect(() => {
+    if (verifyInfo) {
+      onCloseModalVerify();
+    }
+  }, [verifyInfo]);
   return (
     <Modal
       open={isVisibleModalBuy}
@@ -68,41 +72,55 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
       <View style={{ flex: 1 }}>
         {contextHolder}
         <LessonContent data={data} accessLesson={accessLesson} />
-        {/* <PayPalButtons
-          fundingSource="paypal"
-          createOrder={(paypalData, actions) => {
-            return actions.order.create({
-              intent: 'CAPTURE',
-              purchase_units: [
-                {
-                  amount: {
-                    value: (data.price || 0).toString(),
-                    currency_code: 'USD',
+        {!verifyInfo ? (
+          <PayPalButtons
+            fundingSource="paypal"
+            createOrder={(paypalData, actions) => {
+              return actions.order.create({
+                intent: 'CAPTURE',
+                purchase_units: [
+                  {
+                    amount: {
+                      value: (data.price || 0).toString(),
+                      currency_code: 'USD',
+                    },
                   },
-                },
-              ],
-            });
-          }}
-          onApprove={async (data, actions) => {
-            const detail = await actions?.order?.capture();
-            // router.back();
-            console.log(detail);
-          }}
-          onError={err => {
-            setIsVisibleModalBuy(false);
-          }}
-        /> */}
-        <Button
-          type="primary"
-          style={styles.button}
-          onClick={() => handleSendOtp(userProfile.email)}
-          loading={isLoading}>
-          Continue with PayPal
-        </Button>
+                ],
+              });
+            }}
+            onApprove={async (detailData, actions) => {
+              const detail = await actions?.order?.capture();
+              if (detail) {
+                dispatch(
+                  authAction.lessonPurchase({
+                    _id: data._id,
+                    email: userProfile.email,
+                    userId: userProfile._id,
+                    paymentId: detail.id,
+                    planName: data.title,
+                    amount: data.price,
+                    currency: 'USD',
+                  }),
+                );
+              }
+            }}
+            onError={err => {
+              setIsVisibleModalBuy(false);
+            }}
+          />
+        ) : (
+          <Button
+            type="primary"
+            style={styles.button}
+            onClick={() => handleSendOtp(userProfile.email)}
+            loading={isLoading}>
+            Continue with PayPal
+          </Button>
+        )}
       </View>
       <VerifyOtpModal
         isVisible={isVisibleVerify}
-        setIsVisible={setIsVisibleVerify}
+        setIsVisible={onCloseModalVerify}
         email={userProfile.email}
       />
     </Modal>

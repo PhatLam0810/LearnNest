@@ -14,8 +14,6 @@ const LessonContent: React.FC<LessonContentProps> = ({
   data,
   accessLesson,
 }) => {
-  const router = useRouter();
-  console.log(data);
   return (
     <View>
       <View
@@ -33,9 +31,9 @@ const LessonContent: React.FC<LessonContentProps> = ({
         )}
         <LessonThumbnail thumbnail={data.thumbnail} />
       </View>
-      <View style={styles.priceTitle}>Cost price: {data.price}$</View>
-      <View style={styles.title}>{data.title}</View>
-      <View style={styles.description}>{data.description}</View>
+      <Text style={styles.priceTitle}>Cost price: {data.price}$</Text>
+      <Text style={styles.title}>{data.title}</Text>
+      <Text style={styles.description}>{data.description}</Text>
       <View style={{ paddingTop: 10, paddingBottom: 10, gap: 10 }}>
         <Text style={styles.whatLearnTitle}>What you’ll learn:</Text>
         <FlatList

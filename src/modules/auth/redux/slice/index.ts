@@ -8,10 +8,11 @@ import {
 } from './types';
 import { persistReducer } from 'redux-persist';
 import { storage } from '@redux/storage';
-import { UserProfile } from '~mdAuth/services/api/type';
+import { LessonPurchase, UserProfile } from '~mdAuth/services/api/type';
 
 const initialState: AuthInitialState = {
   isLoading: false,
+  verifyInfo: false,
 };
 
 export const authSlice = createSlice({
@@ -36,6 +37,17 @@ export const authSlice = createSlice({
       s.sendOtpInfo = a.payload;
     },
 
+    verifyOtp: (s, a: PayloadAction<{ email: string; otp: number }>) => {},
+    setVerifyInfo: (s, a: PayloadAction<boolean>) => {
+      s.verifyInfo = a.payload;
+    },
+
+    lessonPurchase: (s, a: PayloadAction<LessonPurchase>) => {
+      s.lessonPurchase = a.payload;
+    },
+    lessonPurchaseData: (s, a: PayloadAction<any>) => {
+      s.lessonPurchaseData = a.payload;
+    },
     setIsShowLoading: (s, a: PayloadAction<boolean>) => {
       s.isLoading = a.payload;
     },
