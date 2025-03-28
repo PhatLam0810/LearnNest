@@ -9,7 +9,6 @@ type DragModuleItemProps = {
   onDelete?: () => void;
 };
 const DragModuleItem: React.FC<DragModuleItemProps> = ({ data, onDelete }) => {
-  console.log(data);
   return (
     <TouchableOpacity style={styles.container}>
       <View>

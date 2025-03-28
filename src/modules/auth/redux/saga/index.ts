@@ -95,7 +95,6 @@ function* lessonPurchaseSaga(action: PayloadAction<LessonPurchase>) {
       authApi.lessonPurchaseApi,
       action.payload,
     );
-
     if (status === 201) {
       yield put(authAction.lessonPurchaseData(data));
     } else {
@@ -103,6 +102,22 @@ function* lessonPurchaseSaga(action: PayloadAction<LessonPurchase>) {
     }
   } catch (e: any) {
     messageApi.error('Otp is not correct');
+    console.log('getLessonDetailSaga', e.message);
+  }
+}
+
+function* viewDetailTransactionSaga(action: PayloadAction<{ id: string }>) {
+  try {
+    const { status, data }: AppAxiosRes<any> = yield call(
+      authApi.viewTransactionDetail,
+      action.payload,
+    );
+    if (status === 201) {
+      yield put(authAction.lessonPurchaseData(data.data));
+    } else {
+      console.log(data.code);
+    }
+  } catch (e: any) {
     console.log('getLessonDetailSaga', e.message);
   }
 }
@@ -167,4 +182,5 @@ export function* authSaga() {
   yield takeLatest(authAction.verifyOtp, verifyOtpSaga);
   yield takeLatest(authAction.updateCurrentInfo, updateCurrentInfoSaga);
   yield takeLatest(authAction.lessonPurchase, lessonPurchaseSaga);
+  yield takeLatest(authAction.viewDetailTransaction, viewDetailTransactionSaga);
 }

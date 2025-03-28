@@ -22,6 +22,12 @@ export const verifyOtpApi = (params: { otp: number; email: string }) =>
 export const lessonPurchaseApi = (params: LessonPurchase) =>
   api.post(`/lesson/purchase/${params._id}`, params);
 
+export const viewTransactionDetail = (params: { id: string }) =>
+  api.get(`/transaction/${params.id}`);
+
+export const gelAllTransaction = (params: { userId: string }) =>
+  api.get(`/transaction/user/${params.userId}`);
+
 export const loginOauth = (params: LoginOauthApiReq) =>
   api.post(`/auth/loginOauth`, params);
 

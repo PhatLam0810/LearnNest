@@ -50,10 +50,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   cancelButton: {
+    ...typography.button,
     backgroundColor: 'transparent',
     width: '48%',
   },
   verifyButton: {
+    ...typography.button,
     width: '48%',
     backgroundColor: '#ef405c',
     color: '#FFF',

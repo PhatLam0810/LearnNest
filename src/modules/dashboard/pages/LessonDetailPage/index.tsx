@@ -26,6 +26,7 @@ import { AppHeader, AppModalPayPal } from '@components';
 import { Collapse, CollapseProps, message, Modal } from 'antd';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { authAction, authQuery } from '~mdAuth/redux';
+import AppModalSuccess from '@components/AppModalSuccess';
 
 const LessonDetailPage = () => {
   const router = useRouter();
@@ -35,6 +36,7 @@ const LessonDetailPage = () => {
   const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
   const [messageApi, contextHolder] = message.useMessage();
   const [isVisibleModalBuy, setIsVisibleModalBuy] = useState(false);
+  const [isVisibleModalSuccess, setIsVisibleModalSuccess] = useState(false);
   const [itemBuy, setItemBuy] = useState(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const { data: dataSub, refetch } = authQuery.useGetSubscriptionsQuery({});
@@ -68,9 +70,9 @@ const LessonDetailPage = () => {
   }, []);
   useEffect(() => {
     if (lessonPurchaseData) {
-      console.log('goi lai lesson');
       refetch();
       setIsVisibleModalBuy(false);
+      setIsVisibleModalSuccess(true);
       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
     }
   }, [lessonPurchaseData]);
@@ -280,6 +282,10 @@ const LessonDetailPage = () => {
         setIsVisibleModalBuy={setIsVisibleModalBuy}
         data={lessonDetail}
         accessLesson={accessLesson}
+      />
+      <AppModalSuccess
+        isVisibleModalSuccess={isVisibleModalSuccess}
+        setIsVisibleModalSuccess={setIsVisibleModalSuccess}
       />
     </View>
   );

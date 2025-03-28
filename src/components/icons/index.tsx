@@ -11,6 +11,8 @@ import SaveIcon from './SaveIcon';
 import NotificationIcon from './NotificationIcon';
 import SettingSuggestIcon from './SettingSuggestIcon';
 import AppleIcon from './AppleIcon';
+import SuccessIcon from './SuccessIcon';
+import ErrorIcon from './ErrorIcon';
 
 const icons = {
   awesome: AwesomeIcon,
@@ -24,6 +26,8 @@ const icons = {
   save: SaveIcon,
   notification: NotificationIcon,
   settingSuggest: SettingSuggestIcon,
+  success: SuccessIcon,
+  error: ErrorIcon,
 };
 
 interface Props {

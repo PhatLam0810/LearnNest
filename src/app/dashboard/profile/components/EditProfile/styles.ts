@@ -2,10 +2,11 @@ import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
-    width: '50%',
-    alignSelf: 'center',
+    flex: 1,
     padding: 20,
-    margin: 'auto',
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 8,
   },
   formContainer: {
     flex: 1,
@@ -47,9 +48,14 @@ const styles = StyleSheet.create({
     display: 'block',
   },
   saveButton: {
-    marginTop: 20,
-    backgroundColor: '#ef405c',
     width: '100%',
+    height: 48,
+    ...typography.button,
+    backgroundColor: '#ef405c',
+    color: '#FFF',
+  },
+  labelText: {
+    ...typography.button,
   },
 });
 export default styles;

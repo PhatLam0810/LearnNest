@@ -8,7 +8,8 @@ export interface PaginationParams {
   search?: string;
   sortBy?: 'desc' | 'asc';
   filter?: Record<string, any>;
-  other: any;
+  other?: any;
+  userId?: string;
 }
 export const useAppPagination = <T>(props: {
   apiUrl: string;
@@ -39,6 +40,7 @@ export const useAppPagination = <T>(props: {
         {
           ...currentParams.current,
           pageNum: pageNum.current,
+          pageSize: 10,
         },
       );
       if (status === 201) {

@@ -104,3 +104,17 @@ export interface LibraryType {
     query: any;
   };
 }
+export interface TransactionItem {
+  _id: string;
+  lessonId: string;
+  userId: string;
+  paymentId: string;
+  title: string;
+  amount: number;
+  currency: string;
+  startDate: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}

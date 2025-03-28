@@ -37,3 +37,37 @@
   margin-top: 16px;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3); /* Thêm bóng cho sider */
 }
+:where(.css-dev-only-do-not-override-1htoz2s).ant-table-wrapper
+  .ant-table-thead
+  > tr
+  > th,
+:where(.css-dev-only-do-not-override-1htoz2s).ant-table-wrapper
+  .ant-table-thead
+  > tr
+  > th,
+:where(.css-dev-only-do-not-override-1htoz2s).ant-table-wrapper
+  .ant-table-thead
+  > tr
+  > td {
+  background-color: #ef405c;
+  color: #fff;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-pagination
+  .ant-pagination-item-active {
+  border-color: #ef405c;
+  background-color: #ef405c;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-pagination
+  .ant-pagination-item-active
+  a {
+  color: #fff;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-pagination
+  .ant-pagination-item-active:hover {
+  border-color: #ef405c;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-pagination
+  .ant-pagination-item-active:hover
+  a {
+  color: #fff;
+}

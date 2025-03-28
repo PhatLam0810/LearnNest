@@ -94,7 +94,7 @@ export default function DashboardLayout({
             <View
               style={{ alignItems: 'center', marginBottom: 20 }}
               onClick={() => {
-                router.push('/dashboard/profile/editProfile');
+                router.push('/dashboard/profile');
               }}>
               <Avatar
                 src={userProfile?.avatar}

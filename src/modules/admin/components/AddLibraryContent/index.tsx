@@ -208,6 +208,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             <Select.Option value="Image">Image</Select.Option>
             <Select.Option value="Youtube">Link YouTube</Select.Option>
             <Select.Option value="PDF">PDF</Select.Option>
+            <Select.Option value="Video">Video</Select.Option>
             <Select.Option value="Text">Text</Select.Option>
           </Select>
         </Form.Item>

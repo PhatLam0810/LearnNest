@@ -62,6 +62,7 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
       onCloseModalVerify();
     }
   }, [verifyInfo]);
+
   return (
     <Modal
       open={isVisibleModalBuy}
@@ -72,7 +73,7 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
       <View style={{ flex: 1 }}>
         {contextHolder}
         <LessonContent data={data} accessLesson={accessLesson} />
-        {!verifyInfo ? (
+        {verifyInfo ? (
           <PayPalButtons
             fundingSource="paypal"
             createOrder={(paypalData, actions) => {
@@ -97,9 +98,27 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
                     email: userProfile.email,
                     userId: userProfile._id,
                     paymentId: detail.id,
-                    planName: data.title,
+                    title: data.title,
                     amount: data.price,
                     currency: 'USD',
+                    status: 'success',
+                  }),
+                );
+              }
+            }}
+            onCancel={(cancelData, actions) => {
+              setIsVisibleModalBuy(false);
+              if (cancelData.orderID) {
+                dispatch(
+                  authAction.lessonPurchase({
+                    _id: data._id,
+                    email: userProfile.email,
+                    userId: userProfile._id,
+                    paymentId: String(cancelData?.orderID),
+                    title: data.title,
+                    amount: data.price,
+                    currency: 'USD',
+                    status: 'failed',
                   }),
                 );
               }

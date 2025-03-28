@@ -47,16 +47,17 @@ export interface LessonPurchase {
   email: string;
   userId: string;
   paymentId: string;
-  planName: string;
+  title: string;
   amount: number;
   currency: string;
+  status: string;
 }
 
 export interface LessonPurchaseResponse {
   lessonId: string;
   userId: string;
   paymentId: string;
-  planName: string;
+  title: string;
   amount: number;
   currency: string;
   startDate: string;

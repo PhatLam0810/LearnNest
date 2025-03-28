@@ -51,6 +51,8 @@ export const authSlice = createSlice({
     setIsShowLoading: (s, a: PayloadAction<boolean>) => {
       s.isLoading = a.payload;
     },
+
+    viewDetailTransaction: (s, a: PayloadAction<{ id: string }>) => {},
   },
 });
 

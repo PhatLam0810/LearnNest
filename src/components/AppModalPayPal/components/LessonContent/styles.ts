@@ -9,6 +9,7 @@ const styles = StyleSheet.create({
   },
   priceTitle: {
     marginTop: 8,
+    marginBottom: 8,
     fontFamily: inter.style.fontFamily,
     fontWeight: '600',
     fontSize: 24,
