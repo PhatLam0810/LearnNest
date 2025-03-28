@@ -1,6 +1,4 @@
 'use client';
-import Image from 'next/image';
-import { logo } from 'public/images';
 import React, { useState } from 'react';
 import { Modal, Text, View } from 'react-native-web';
 import styles from './styles';

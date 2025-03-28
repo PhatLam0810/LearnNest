@@ -81,7 +81,10 @@ const HomeOverview = () => {
               <Text style={styles.title}>Just added</Text>
               <Tags title="New" backgroundColor="#0059C7" />
             </View>
-            <ScrollView horizontal style={{ scrollbarWidth: 'none' }}>
+            <ScrollView
+              horizontal
+              contentContainerStyle={{ width: '100%' }}
+              style={{ scrollbarWidth: 'none' }}>
               <View style={{ gap: 12 }}>
                 {splitData(data?.recommend || []).map((arr, arrIndex) => (
                   <View

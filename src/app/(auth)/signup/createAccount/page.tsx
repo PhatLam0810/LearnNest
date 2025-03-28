@@ -1,11 +1,8 @@
 'use client';
 import React, { useEffect } from 'react';
-import { Button, Card, Form, message } from 'antd';
+import { Card, Form, message } from 'antd';
 import { useAppDispatch, useAppSelector } from '@redux';
-import Image from 'next/image';
 import { Text, View } from 'react-native-web';
-import Link from 'next/link';
-import { logo } from 'public/images';
 import styles from './styles';
 import { AppButton, AppInput } from '@components';
 import { useRouter, useSearchParams } from 'next/navigation';

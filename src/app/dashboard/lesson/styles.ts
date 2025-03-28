@@ -10,7 +10,6 @@ const styles = StyleSheet.create({
   lessonItem: {
     width: '100%',
     maxWidth: '19.6%',
-    aspectRatio: 1,
   },
   title: {
     ...typography.body2,

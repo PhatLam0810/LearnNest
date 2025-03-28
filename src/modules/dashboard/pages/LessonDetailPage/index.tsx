@@ -53,7 +53,7 @@ const LessonDetailPage = () => {
       ) || 0)
     );
   }, 0);
-  const numColumns = lessonDetail?.learnedSkills?.length >= 5 ? 2 : 1;
+  const numColumns = lessonDetail?.learnedSkills?.length >= 10 ? 2 : 1;
 
   const [accessLesson, setAccessLesson] = useState(true);
 
@@ -61,7 +61,9 @@ const LessonDetailPage = () => {
     if (lessonDetail.isPremium) {
       setAccessLesson(false);
     }
-
+    if (userProfile?.role?.level <= 2) {
+      setAccessLesson(true);
+    }
     if (
       dataSub?.length > 0 &&
       dataSub.some(sub => sub.lessonId === lessonDetail._id)
@@ -151,7 +153,7 @@ const LessonDetailPage = () => {
       {contextHolder}
       <AppHeader title="Lesson" />
       <ScrollView style={{ scrollbarWidth: 'none' }}>
-        <View style={{ marginTop: 12, gap: 12 }}>
+        <View style={{ marginTop: 12, gap: 16 }}>
           <View style={{ flexDirection: 'row', gap: 12 }}>
             {lessonDetail?.categories?.map((item, index) => (
               <View style={styles.container} key={index}>
@@ -162,7 +164,7 @@ const LessonDetailPage = () => {
             ))}
           </View>
           <Text style={styles.title}>{lessonDetail?.title}</Text>
-          <View style={{ flexDirection: 'row', height: '100%' }}>
+          <View style={{ flexDirection: 'row', height: '100%', gap: 12 }}>
             <View style={{ flex: 2.4 }}>
               <Text style={styles.description}>
                 {lessonDetail?.description}
@@ -185,18 +187,21 @@ const LessonDetailPage = () => {
                       <CheckOutlined
                         style={{ color: '#ef405c', marginRight: 12 }}
                       />
-                      <Text style={styles.learnedSkillText}>{item}</Text>
+                      <Text style={styles.learnedSkillText}>
+                        {item.replace(/\n+/g, '\n')}
+                      </Text>
                     </View>
                   )}
                 />
               </View>
             </View>
-            <View style={{ flex: 1, gap: 16, display: 'flex', maxWidth: 400 }}>
+            <View style={{ flex: 1, gap: 16, display: 'flex' }}>
               <View
                 style={{
                   flex: 1,
                   width: '100%',
-                  maxHeight: 200,
+                  height: '100%',
+                  minHeight: 200,
                   borderRadius: 12,
                   overflow: 'hidden',
                   backgroundColor: 'gray',

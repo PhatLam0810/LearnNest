@@ -68,7 +68,6 @@ const Page = () => {
         renderItem={({ item }) => {
           return (
             <LessonItem
-              style={styles.lessonItem}
               key={item._id}
               data={item}
               onClick={() => {
