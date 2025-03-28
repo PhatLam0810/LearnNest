@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   totalLibrary: {
-    ...typography.titleSM,
+    ...typography.subTitle2,
     marginTop: 16,
     textAlign: 'center',
   },

@@ -36,7 +36,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [addLesson] = adminQuery.useAddLessonMutation();
-  const [isPremium, setIsPremium] = useState(initialValues.isPremium);
+  const [isPremium, setIsPremium] = useState(initialValues?.isPremium);
 
   const [listSelected, setListSelected] = useState<any[]>([]);
   const [isVisibleModalSelect, setIsVisibleModalSelect] = useState(false);
@@ -126,7 +126,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                   {/* Switch */}
                   <Col>
                     <Form.Item label="Premium Lesson" name="isPremium">
-                      <Switch onChange={setIsPremium} />
+                      <Switch onChange={onChange} />
                     </Form.Item>
                   </Col>
 
@@ -154,7 +154,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                         <InputNumber
                           addonAfter="$"
                           min={1}
-                          value={initialValues.price}
+                          value={initialValues?.price || 0}
                           placeholder="Enter price"
                           style={{ width: '100%' }}
                         />

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { Button, Divider, Form, Input, Select, Space, Upload } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { adminQuery } from '../../redux';
 import { messageApi, useAppPagination } from '@hooks';
 import api from '@services/api';
@@ -8,6 +8,8 @@ import { Library } from '~mdDashboard/types';
 import { ScrollView, View } from 'react-native-web';
 import { AppRichTextInput } from '@components';
 import { PlusOutlined } from '@ant-design/icons';
+import { getVideoDuration, getYouTubeVideoDuration } from './functions';
+import { debounce } from 'lodash';
 
 type AddLibraryContentProps = {
   onFinish?: (values: any) => void;
@@ -38,7 +40,18 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
       form.setFieldsValue(initialValues);
       setLibraryType(initialValues.type);
     }
-  }, [initialValues]);
+  }, []);
+
+  const debouncedOnChange = useCallback(
+    debounce((value: string) => {
+      getYouTubeVideoDuration(value).then(res => {
+        form.setFieldsValue({ duration: res });
+      });
+
+      form.setFieldsValue({ url: value });
+    }, 500),
+    [],
+  );
 
   const renderInputContent = () => {
     switch (libraryType.toLocaleLowerCase()) {
@@ -77,7 +90,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             ]}>
             <Input
               placeholder="Or enter a link"
-              onChange={e => form.setFieldsValue({ url: e.target.value })}
+              onChange={e => debouncedOnChange(e.target.value)}
               style={{ marginBottom: 32 }}
             />
           </Form.Item>
@@ -105,6 +118,11 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                     if (responseUrl) {
                       form.setFieldsValue({ url: responseUrl });
                     }
+                    getVideoDuration(responseUrl)
+                      .then(duration =>
+                        form.setFieldsValue({ duration: duration }),
+                      )
+                      .catch(error => console.error(error));
                   }
                 }}>
                 <Button type="text">Upload</Button>
@@ -152,7 +170,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
         <Form.Item label="Library Description" name="description">
           <Input.TextArea placeholder="Enter library description" />
         </Form.Item>
-
+        <Form.Item name="duration" noStyle></Form.Item>
         <Form.Item label="tags" name="tags">
           <Select
             placeholder="Select tags"

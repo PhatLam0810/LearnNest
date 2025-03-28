@@ -181,7 +181,11 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
             <h4>Select module</h4>
 
-            <Button onClick={() => setIsVisibleModalSelect(true)}>
+            <Button
+              onClick={() => {
+                setIsVisibleModalSelect(true);
+                setListSelected(null);
+              }}>
               <Text>Add Module</Text>
             </Button>
             <DraggableList

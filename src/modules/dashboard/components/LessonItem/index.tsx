@@ -29,8 +29,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
   const { thumbnail, createdAt, title, description, isPremium, price, _id } =
     data || {};
   const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
-  const [accessLesson, setAccessLesson] = useState(false);
-
+  const [accessLesson, setAccessLesson] = useState(true);
   useEffect(() => {
     if (isPremium) {
       setAccessLesson(false);
@@ -72,7 +71,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
           </Text>
           {!accessLesson && (
             <Text style={styles.price} numberOfLines={2}>
-              Price: {price}$
+              Cost price: {price}$
             </Text>
           )}
         </View>

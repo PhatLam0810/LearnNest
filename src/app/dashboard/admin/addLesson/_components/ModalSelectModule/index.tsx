@@ -31,6 +31,7 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
   const handleDone = () => {
     onFinish(selectedItems);
     closeModal();
+    setSelectedItems([]);
   };
 
   const handleSelectModuleLesson = (data: any) => {

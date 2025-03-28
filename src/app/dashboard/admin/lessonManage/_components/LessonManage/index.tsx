@@ -18,7 +18,7 @@ const LessonManage = () => {
   const [height, setHeight] = useState(0);
   const [selectedItem, setSelectedItem] = useState<Lesson>(null);
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
-  const [dataEdit, setDataEdit] = useState<any>();
+  const [dataEdit, setDataEdit] = useState<any>(null);
   const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
   const [isVisibleModalOverview, setIsVisibleModalModalOverview] =
     useState(false);
@@ -109,7 +109,10 @@ const LessonManage = () => {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => setIsVisibleModalAdd(true)}>
+            onClick={() => {
+              setIsVisibleModalAdd(true);
+              setSelectedItem(null);
+            }}>
             Add Lesson
           </Button>
         </View>

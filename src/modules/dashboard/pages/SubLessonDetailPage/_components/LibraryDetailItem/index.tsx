@@ -21,14 +21,14 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   onWatchFinish,
 }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [isModalVisible, setModalVisible] = useState(false);
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
   };
   const playerRef = useRef(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const [lastPlayed, setLastPlayed] = useState(0);
   const [maxWatched, setMaxWatched] = useState(0);
-  const [apiCalled, setApiCalled] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
 
   const getYoutubeId = url => {
@@ -52,6 +52,36 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
         }
         if (percentWatched >= 99) {
           onWatchFinish();
+          setMaxWatched(0);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastPlayed, data]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (videoRef.current) {
+        const currentTime = videoRef.current.currentTime;
+        const duration = videoRef.current.duration;
+        const percentWatched = (maxWatched / duration) * 100;
+
+        // Chặn tua quá 5 giây so với maxWatched
+        if (currentTime > maxWatched + 5) {
+          warning();
+          videoRef.current.pause();
+          videoRef.current.currentTime = lastPlayed;
+        } else {
+          setLastPlayed(currentTime);
+          setMaxWatched(prevMax => Math.max(prevMax, currentTime));
+        }
+
+        // Nếu đã xem trên 99% thì gọi onWatchFinish
+        if (percentWatched >= 99) {
+          onWatchFinish();
+          setMaxWatched(0);
+          clearInterval(interval);
         }
       }
     }, 1000);
@@ -67,20 +97,21 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
       centered: true,
     });
   };
-
+  console.log(data.url);
   const renderMedia = () => {
     switch (data.type) {
       case 'Video':
       case 'Youtube':
         return (
           <View style={styles.mediaContainer}>
-            {data.url.includes('https://drive.google.com') ? (
-              <iframe
-                src={handleConvert(data.url)}
+            {data.url.includes('https://storage.googleapis.com') ? (
+              <video
+                ref={videoRef}
+                src={data.url}
                 width="100%"
                 height="100%"
-                allow="autoplay"
-                allowFullScreen
+                controls
+                controlsList="nodownload noseek"
               />
             ) : (
               <View
@@ -148,9 +179,7 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
                 <Page key={index} pageNumber={index + 1} />
               ))}
             </Document>
-            <View
-              onClick={() => setModalVisible(true)}
-              style={styles.fullscreenButton}>
+            <View style={styles.fullscreenButton}>
               <FullscreenOutlined />
             </View>
           </View>

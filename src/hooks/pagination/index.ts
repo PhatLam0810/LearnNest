@@ -40,7 +40,6 @@ export const useAppPagination = <T>(props: {
         {
           ...currentParams.current,
           pageNum: pageNum.current,
-          pageSize: 10,
         },
       );
       if (status === 201) {

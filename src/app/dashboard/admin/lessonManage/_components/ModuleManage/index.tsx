@@ -150,7 +150,7 @@ const ModuleManage = () => {
         centered
         title={selectedItem ? selectedItem.title : 'Add Module'}>
         <ScrollView style={{ height: (width * 0.8 * 9) / 16 }}>
-          <AddModuleContent initialValues={selectedItem} onDone={onDone} />
+          <AddModuleContent onDone={onDone} />
         </ScrollView>
       </Modal>
 

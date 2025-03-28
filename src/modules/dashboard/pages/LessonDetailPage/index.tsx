@@ -44,9 +44,18 @@ const LessonDetailPage = () => {
   const totalLibraries = lessonDetail?.modules?.reduce((total, item) => {
     return total + (item.libraries?.length || 0);
   }, 0);
+  const totalDuration = lessonDetail?.modules?.reduce((total, module) => {
+    return (
+      total +
+      (module.libraries?.reduce(
+        (libTotal, library) => libTotal + (library.duration || 0),
+        0,
+      ) || 0)
+    );
+  }, 0);
   const numColumns = lessonDetail?.learnedSkills?.length >= 5 ? 2 : 1;
 
-  const [accessLesson, setAccessLesson] = useState(false);
+  const [accessLesson, setAccessLesson] = useState(true);
 
   useEffect(() => {
     if (lessonDetail.isPremium) {
@@ -182,12 +191,12 @@ const LessonDetailPage = () => {
                 />
               </View>
             </View>
-            <View style={{ flex: 1, gap: 16, display: 'flex' }}>
+            <View style={{ flex: 1, gap: 16, display: 'flex', maxWidth: 400 }}>
               <View
                 style={{
                   flex: 1,
                   width: '100%',
-                  height: 200,
+                  maxHeight: 200,
                   borderRadius: 12,
                   overflow: 'hidden',
                   backgroundColor: 'gray',
@@ -200,16 +209,24 @@ const LessonDetailPage = () => {
                 <LessonThumbnail thumbnail={lessonDetail.thumbnail} />
               </View>
               {!accessLesson ? (
-                <button
-                  className="button"
-                  onClick={() => {
-                    setItemBuy(lessonDetail);
-                    setIsVisibleModalBuy(true);
-                    dispatch(authAction.setVerifyInfo(false));
-                  }}>
-                  <Icon name="liveTV" className="button-icon" />
-                  <span className="label">Buy Now</span>
-                </button>
+                <View>
+                  <button
+                    className="button"
+                    onClick={() => {
+                      setItemBuy(lessonDetail);
+                      setIsVisibleModalBuy(true);
+                      dispatch(authAction.setVerifyInfo(false));
+                    }}>
+                    <Icon name="liveTV" className="button-icon" />
+                    <span className="label">Buy Now</span>
+                  </button>
+                  <Text style={styles.totalLibrary}>
+                    Total Duration: {convertDurationToTime(totalDuration)}
+                  </Text>
+                  <Text style={styles.totalLibrary}>
+                    Total Libraries: {totalLibraries}
+                  </Text>
+                </View>
               ) : (
                 <View>
                   <button
@@ -233,6 +250,9 @@ const LessonDetailPage = () => {
                     <Icon name="liveTV" className="button-icon" />
                     <span className="label">Start lesson</span>
                   </button>
+                  <Text style={styles.totalLibrary}>
+                    Total Duration: {convertDurationToTime(totalDuration)}
+                  </Text>
                   <Text style={styles.totalLibrary}>
                     Total Libraries: {totalLibraries}
                   </Text>

@@ -28,9 +28,11 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
     useState(false);
 
   useEffect(() => {
-    form.setFieldsValue(initialValues);
-    setSelectedLibraries(initialValues?.libraries);
-  }, [initialValues]);
+    if (initialValues) {
+      form.setFieldsValue(initialValues);
+      setSelectedLibraries(initialValues?.libraries);
+    }
+  }, []);
 
   return (
     <Form

@@ -24,7 +24,6 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
   const { listItem, fetchData, search, refresh } = useAppPagination<Library>({
     apiUrl: 'library/getAllLibrary',
   });
-
   const [selectedItems, setSelectedItems] = useState<Library[]>([]);
   const [isVisibleModalAddNew, setIsVisibleModalAddNew] = useState(false);
 
@@ -34,13 +33,14 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
   const handleDone = () => {
     onFinish(selectedItems);
     closeModal();
+    setSelectedItems([]);
   };
 
   useEffect(() => {
     if (initialValues) {
       setSelectedItems(initialValues);
     }
-  }, [initialValues]);
+  }, []);
 
   const handleSelectLibrary = (data: any) => {
     if (selectedItems.some(item => item._id === data._id)) {

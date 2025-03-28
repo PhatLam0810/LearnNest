@@ -111,6 +111,8 @@ const LibraryManage = () => {
   const onDone = () => {
     refresh();
     setIsVisibleModalAdd(false);
+    setDataEdit(null);
+    setSelectedItem(null);
   };
 
   return (
@@ -128,7 +130,10 @@ const LibraryManage = () => {
           allowClear
         />
         <Button
-          onClick={() => setIsVisibleModalAdd(true)}
+          onClick={() => {
+            setIsVisibleModalAdd(true);
+            setSelectedItem(null);
+          }}
           type="primary"
           icon={<PlusOutlined />}
           style={{
@@ -205,7 +210,7 @@ const LibraryManage = () => {
         data={dataEdit}
         isVisible={isVisibleModalUpdate}
         setIsVisible={setIsVisibleModalUpdate}
-        refresh={refresh}
+        refresh={onDone}
         setSelectedItem={onCloseModalAdd}
         setIsVisibleModalAdd={onCloseModalAdd}
       />
