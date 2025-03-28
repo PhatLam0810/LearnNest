@@ -169,9 +169,7 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
     callback();
   } catch (e: any) {
     console.error('signUpSaga error:', e);
-    messageApi.error(
-      e?.response?.data?.message || 'An unexpected error occurred',
-    );
+    messageApi.error('Email already exists');
   }
 }
 

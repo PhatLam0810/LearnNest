@@ -60,7 +60,7 @@ const Page = () => {
         data={listItem}
         stickyHeaderHiddenOnScroll={true}
         keyExtractor={(item, index) => item._id + index}
-        numColumns={4}
+        numColumns={5}
         contentContainerStyle={{ gap: 6 }}
         columnWrapperStyle={{ gap: '0.5%' }}
         showsVerticalScrollIndicator={false}

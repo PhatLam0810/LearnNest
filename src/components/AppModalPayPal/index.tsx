@@ -37,7 +37,7 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
       if (response.data) {
         messageApi.open({
           type: 'success',
-          content: `Otp code has been send to your ${userProfile.email}`,
+          content: `Otp code has been send to your ${userProfile?.email}`,
           duration: 10,
         });
         setIsVisibleVerify(true);
@@ -95,8 +95,8 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
                 dispatch(
                   authAction.lessonPurchase({
                     _id: data._id,
-                    email: userProfile.email,
-                    userId: userProfile._id,
+                    email: userProfile?.email,
+                    userId: userProfile?._id,
                     paymentId: detail.id,
                     title: data.title,
                     amount: data.price,
@@ -112,8 +112,8 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
                 dispatch(
                   authAction.lessonPurchase({
                     _id: data._id,
-                    email: userProfile.email,
-                    userId: userProfile._id,
+                    email: userProfile?.email,
+                    userId: userProfile?._id,
                     paymentId: String(cancelData?.orderID),
                     title: data.title,
                     amount: data.price,
@@ -131,7 +131,7 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
           <Button
             type="primary"
             style={styles.button}
-            onClick={() => handleSendOtp(userProfile.email)}
+            onClick={() => handleSendOtp(userProfile?.email)}
             loading={isLoading}>
             Continue with PayPal
           </Button>
@@ -140,7 +140,7 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
       <VerifyOtpModal
         isVisible={isVisibleVerify}
         setIsVisible={onCloseModalVerify}
-        email={userProfile.email}
+        email={userProfile?.email}
       />
     </Modal>
   );

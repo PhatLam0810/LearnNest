@@ -20,6 +20,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   subContainer: {
+    alignItems: 'center',
     paddingTop: 12,
     paddingBottom: 24,
   },

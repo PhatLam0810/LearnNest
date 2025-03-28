@@ -21,7 +21,7 @@ const TransactionHistory = () => {
     useAppPagination<TransactionItem>({
       apiUrl: '/transaction/getAllTransaction',
       params: {
-        userId: userProfile._id,
+        userId: userProfile?._id,
       },
     });
   console.log(listItem);

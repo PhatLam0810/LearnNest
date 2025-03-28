@@ -89,7 +89,7 @@ const HomeOverview = () => {
                 {splitData(data?.recommend || []).map((arr, arrIndex) => (
                   <View
                     key={arrIndex}
-                    style={{ flexDirection: 'row', gap: 12 }}>
+                    style={{ flexDirection: 'row', gap: '0.5%' }}>
                     {arr.map((item, index) => (
                       <LessonItem
                         key={index}

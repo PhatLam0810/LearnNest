@@ -41,6 +41,10 @@ const CreateAccountPage = () => {
           <Text style={styles.subDescription}>
             In the next step, we’ll learn about your interests and skills.
           </Text>
+          <Text style={styles.description}>
+            Enter the OTP code we just sent to your email{' '}
+            <Text style={styles.email}>{sendOtpInfo.email}</Text> to verify.
+          </Text>
         </View>
 
         <Form<FieldType>
