@@ -24,7 +24,6 @@ const TransactionHistory = () => {
         userId: userProfile?._id,
       },
     });
-  console.log(listItem);
   const columns: TableProps<TransactionItem>['columns'] = [
     {
       title: 'Transaction ID',

@@ -112,7 +112,7 @@ function* viewDetailTransactionSaga(action: PayloadAction<{ id: string }>) {
       authApi.viewTransactionDetail,
       action.payload,
     );
-    if (status === 201) {
+    if (status === 200) {
       yield put(authAction.lessonPurchaseData(data.data));
     } else {
       console.log(data.code);
