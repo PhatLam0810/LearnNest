@@ -9,7 +9,7 @@ import { ScrollView, View } from 'react-native-web';
 import { AppRichTextInput } from '@components';
 import { PlusOutlined } from '@ant-design/icons';
 import { getVideoDuration, getYouTubeVideoDuration } from './functions';
-import { debounce } from 'lodash';
+import debounce from 'lodash-es/debounce';
 
 type AddLibraryContentProps = {
   onFinish?: (values: any) => void;
