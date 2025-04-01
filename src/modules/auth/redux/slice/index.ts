@@ -30,6 +30,7 @@ export const authSlice = createSlice({
       s.signUpInfo = a.payload;
     },
     updateCurrentInfo: (_s, _a: PayloadAction<UserProfile>) => {},
+    changePassword: (_s, _a: PayloadAction<any>) => {},
     setCurrentUserInfo: (s, a: PayloadAction<UserProfile>) => {
       s.tokenInfo.userProfile = a.payload;
     },

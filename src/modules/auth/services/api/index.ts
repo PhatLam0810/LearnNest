@@ -33,3 +33,6 @@ export const loginOauth = (params: LoginOauthApiReq) =>
 
 export const updateCurrentInfoApi = (params: UserProfile) =>
   api.put(`/user/updateCurrentInfo`, params);
+
+export const changePasswordApi = (params: any) =>
+  api.put(`/user/changePassword`, params);

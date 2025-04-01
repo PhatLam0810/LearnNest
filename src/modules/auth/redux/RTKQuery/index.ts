@@ -39,6 +39,13 @@ export const authQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: SubscriptionsRes[]) => res,
     }),
+    deleteAccount: builder.mutation({
+      query: (params: { Userid: string }) => ({
+        url: `/user/${params.Userid}`,
+        method: 'DELETE',
+      }),
+      transformResponse: (res: any) => res,
+    }),
   }),
   overrideExisting: true,
 });

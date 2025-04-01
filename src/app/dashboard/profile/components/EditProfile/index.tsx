@@ -1,19 +1,26 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Avatar, Button, Card, Form, Upload } from 'antd';
+import { Avatar, Button, Card, Form, Modal, Upload } from 'antd';
 import { CameraOutlined, UserOutlined } from '@ant-design/icons';
 import styles from './styles';
 import { AppButton, AppInput, AppUploadToServer } from '@components';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 import './styles.css';
+import { useRouter } from 'next/navigation';
 
 const EditProfile = () => {
   const dispatch = useAppDispatch();
   const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
-
+  const [deleteAccount] = authQuery.useDeleteAccountMutation();
   const [avatar, setAvatar] = useState(userProfile?.avatar);
+  const router = useRouter();
+  const [modelDelete, setModalDelete] = useState(false);
+
+  const onCloseDelete = () => {
+    setModalDelete(false);
+  };
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -70,6 +77,15 @@ const EditProfile = () => {
                 placeholder="Enter a bio (max 250 chars.)"
               />
             </Form.Item>
+            <View style={styles.buttonDeleteContainer}>
+              <Button
+                onClick={() => {
+                  setModalDelete(true);
+                }}
+                style={styles.buttonDelete}>
+                Delete Account
+              </Button>
+            </View>
           </View>
           {/* Nút lưu */}
           <Button type="primary" htmlType="submit" style={styles.saveButton}>
@@ -77,6 +93,20 @@ const EditProfile = () => {
           </Button>
         </Form>
       </View>
+      <Modal
+        title="Delete Lesson"
+        open={modelDelete}
+        onCancel={onCloseDelete}
+        onClose={onCloseDelete}
+        onOk={() => {
+          deleteAccount({ Userid: userProfile._id })
+            .unwrap()
+            .then(res => {
+              router.replace('/login');
+            });
+        }}>
+        <Text>Do you want delete this account ?</Text>
+      </Modal>
     </Card>
   );
 };

@@ -73,17 +73,19 @@ const LessonDetailPage = () => {
   }, [dataSub, lessonDetail.isPremium]);
 
   useEffect(() => {
-    setLibraryCanPlay({
-      libraryId: libraries[0]?._id,
-      userId: userProfile?._id,
-    });
-    dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+    if (libraries) {
+      setLibraryCanPlay({
+        libraryId: libraries[0]?._id,
+        userId: userProfile?._id,
+      });
+      dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+    }
   }, []);
   useEffect(() => {
     if (lessonPurchaseData) {
       refetch();
       setIsVisibleModalBuy(false);
-      setIsVisibleModalSuccess(true);
+      setIsVisibleModalSuccess(false);
       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
     }
   }, [lessonPurchaseData]);
@@ -147,7 +149,6 @@ const LessonDetailPage = () => {
     borderRadius: '#f5f5f5',
     border: 'none',
   };
-
   return (
     <View style={styles.container}>
       {contextHolder}

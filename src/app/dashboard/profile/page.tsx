@@ -4,7 +4,7 @@ import { Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { View } from 'react-native-web';
 import styles from './styles';
-import { EditProfile, TransactionHistory } from './components';
+import { ChangePassword, EditProfile, TransactionHistory } from './components';
 import './styles.css';
 import { useRouter, useSearchParams } from 'next/navigation';
 
@@ -18,6 +18,11 @@ const items: TabsProps['items'] = [
     key: '2',
     label: 'Transaction History',
     children: <TransactionHistory />,
+  },
+  {
+    key: '3',
+    label: 'Change Password ',
+    children: <ChangePassword />,
   },
 ];
 

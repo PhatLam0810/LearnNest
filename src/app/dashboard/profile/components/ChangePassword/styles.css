@@ -1,0 +1,39 @@
+.ant-tabs {
+  height: 100%;
+}
+.ant-tabs-tabpane-active {
+  display: flex;
+  height: 100%;
+}
+.ant-tabs-content-holder {
+  display: flex;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-tabs
+  .ant-tabs-tab.ant-tabs-tab-active
+  .ant-tabs-tab-btn {
+  color: #ef405c;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-tabs .ant-tabs-ink-bar {
+  background: #ef405c;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:not(.ant-btn-primary) {
+  color: #fff;
+  background: #ef405c;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-tabs .ant-tabs-tab:hover {
+  color: #ef405c;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-input-outlined:focus,
+:where(.css-dev-only-do-not-override-1htoz2s).ant-input-outlined:focus-within {
+  border-color: #ef405c;
+}
+:where(.css-dev-only-do-not-override-1htoz2s).ant-input-outlined:hover {
+  border-color: #ef405c;
+}
+.ant-table-container {
+  margin-top: 16px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3); /* Thêm bóng cho sider */
+}

@@ -72,6 +72,25 @@ function* updateCurrentInfoSaga(action: PayloadAction<UserProfile>) {
   }
 }
 
+function* changePasswordSaga(action: PayloadAction<any>) {
+  try {
+    console.log(action.payload);
+    const { status, data }: AppAxiosRes<UserProfile> = yield call(
+      authApi.changePasswordApi,
+      action.payload,
+    );
+    if (status === 200) {
+      // yield put(authAction.setCurrentUserInfo(data.data));
+      messageApi.success('Change Password Successfully');
+    } else {
+      messageApi.error('Password is not correct ');
+      console.log(data.code);
+    }
+  } catch (e: any) {
+    console.log('getLessonDetailSaga', e.message);
+  }
+}
+
 function* verifyOtpSaga(action: PayloadAction<{ email: string; otp: number }>) {
   try {
     const { status, data }: AppAxiosRes<UserProfile> = yield call(
@@ -112,7 +131,7 @@ function* viewDetailTransactionSaga(action: PayloadAction<{ id: string }>) {
       authApi.viewTransactionDetail,
       action.payload,
     );
-    if (status === 200) {
+    if (status === 201) {
       yield put(authAction.lessonPurchaseData(data.data));
     } else {
       console.log(data.code);
@@ -181,4 +200,5 @@ export function* authSaga() {
   yield takeLatest(authAction.updateCurrentInfo, updateCurrentInfoSaga);
   yield takeLatest(authAction.lessonPurchase, lessonPurchaseSaga);
   yield takeLatest(authAction.viewDetailTransaction, viewDetailTransactionSaga);
+  yield takeLatest(authAction.changePassword, changePasswordSaga);
 }
