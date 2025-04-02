@@ -12,8 +12,7 @@
   display: flex !important;
   align-items: center;
 }
-:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
-  .ant-menu-item-selected {
+.ant-menu-light .ant-menu-item-selected {
   background-color: transparent;
   /* color: #ef405c; */
   font-size: 16px;
@@ -33,40 +32,24 @@
   font-size: 16px;
   font-family: 'Inter', sans-serif;
 }
-:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
-  .ant-menu-submenu-selected
-  > .ant-menu-submenu-title {
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title {
   /* color: #ef405c; */
   font-family: 'Inter', sans-serif;
 }
-:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
-  .ant-menu-submenu-selected
-  > .ant-menu-submenu-title
-  svg
-  path {
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title svg path {
   stroke: #fff;
 }
-:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
-  .ant-menu-item-selected
-  svg
-  path {
+.ant-menu-light .ant-menu-item-selected svg path {
   stroke: #fff;
 }
-:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
-  .ant-menu-item-selected {
+.ant-menu-light .ant-menu-item-selected {
   /* color: #ef405c !important; */
 }
-:where(.css-dev-only-do-not-override-1htoz2s).ant-menu
-  .ant-menu-submenu-title
-  .ant-menu-item-icon
-  svg
-  path {
+.ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg path {
   stroke: #fff;
 }
-:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
-  .ant-menu-submenu-selected
-  > .ant-menu-submenu-title,
-:where(.css-dev-only-do-not-override-1htoz2s).ant-menu-light
+.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title,
+.ant-menu-light
   > .ant-menu
   .ant-menu-submenu-selected
   > .ant-menu-submenu-title {
