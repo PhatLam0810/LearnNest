@@ -9,11 +9,33 @@ import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction, authQuery } from '~mdAuth/redux';
 import './styles.css';
 import { useRouter } from 'next/navigation';
+import { messageApi } from '@hooks';
 
 const ChangePassword = () => {
   const dispatch = useAppDispatch();
   const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
   const [form] = Form.useForm();
+  const [changePassword] = authQuery.useChangePasswordMutation();
+
+  const handleChangePassword = async (value: any) => {
+    try {
+      dispatch(authAction.setIsShowLoading(true));
+      const response = await changePassword(value);
+
+      if (response.data) {
+        messageApi.success('Change Password Successfully');
+        form.resetFields();
+      } else {
+        messageApi.error('Password is not correct');
+      }
+    } catch (error) {
+      console.error('Lỗi gửi OTP:', error); // In ra lỗi
+      messageApi.error('Password is not correct');
+    } finally {
+      dispatch(authAction.setIsShowLoading(false));
+    }
+  };
+
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -22,8 +44,7 @@ const ChangePassword = () => {
           style={styles.formContainer}
           initialValues={userProfile}
           onFinish={values => {
-            dispatch(authAction.changePassword(values));
-            form.resetFields();
+            handleChangePassword(values);
           }}>
           <View style={styles.formItemLayout}>
             <Form.Item

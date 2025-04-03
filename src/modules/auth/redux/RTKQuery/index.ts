@@ -46,6 +46,14 @@ export const authQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res,
     }),
+    changePassword: builder.mutation({
+      query: (params: any) => ({
+        url: '/user/changePassword',
+        method: 'PUT',
+        body: params,
+      }),
+      transformResponse: (res: any) => res,
+    }),
   }),
   overrideExisting: true,
 });
