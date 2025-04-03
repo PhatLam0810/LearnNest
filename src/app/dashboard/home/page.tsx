@@ -15,13 +15,9 @@ import { View, ScrollView, Text, FlatList } from 'react-native-web';
 import { splitData } from './functions';
 import 'antd/dist/reset.css';
 import { AnimatePresence, motion } from 'framer-motion';
-import { HeartIcon } from '@/assets/svg';
-import { PayPalButtons } from '@paypal/react-paypal-js';
-import { Modal } from 'antd';
+
 import { authAction, authQuery } from '~mdAuth/redux';
-import { LessonDetailDataResponse } from '~mdDashboard/redux/saga/type';
-import { homeApi } from '~mdDashboard/services';
-import { AppAxiosRes } from '@/types';
+
 import { messageApi } from '@hooks';
 
 const HomeOverview = () => {
