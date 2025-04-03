@@ -8,13 +8,15 @@ import { TransactionItem } from '~mdDashboard/redux/saga/type';
 import dayjs from 'dayjs';
 import { useAppDispatch, useAppSelector } from '@redux';
 import AppModalSuccess from '@components/AppModalSuccess';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 
 const TransactionHistory = () => {
   const divRef = useRef(null);
   const dispatch = useAppDispatch();
   const [height, setHeight] = useState(0);
   const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const [getTransactions, { data, error, isSuccess }] =
+    authQuery.useGetTransactionDetailMutation();
   const [isVisibleModalOverview, setIsVisibleModalModalOverview] =
     useState(false);
   const { listItem, currentData, fetchData, refresh, search } =
@@ -24,7 +26,6 @@ const TransactionHistory = () => {
         userId: userProfile?._id,
       },
     });
-  console.log(listItem);
   const columns: TableProps<TransactionItem>['columns'] = [
     {
       title: 'Transaction ID',
@@ -121,11 +122,14 @@ const TransactionHistory = () => {
           style={{ cursor: 'pointer' }}
           onRow={record => {
             return {
-              onClick: () => {
-                dispatch(
-                  authAction.viewDetailTransaction({ id: record.paymentId }),
-                );
-                setIsVisibleModalModalOverview(true);
+              onClick: async () => {
+                dispatch(authAction.setIsShowLoading(true));
+                const res = await getTransactions({ id: record.paymentId });
+                if (res) {
+                  setIsVisibleModalModalOverview(true);
+                  dispatch(authAction.setIsShowLoading(false));
+                  dispatch(authAction.lessonPurchaseData(res.data.data));
+                }
               },
             };
           }}

@@ -54,6 +54,13 @@ export const authQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res,
     }),
+    getTransactionDetail: builder.mutation({
+      query: (params: { id: string }) => ({
+        url: `/transaction/${params.id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: any) => res,
+    }),
   }),
   overrideExisting: true,
 });

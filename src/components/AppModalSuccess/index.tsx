@@ -26,7 +26,6 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
     setIsVisibleModalSuccess(false);
     dispatch(authAction.lessonPurchaseData(undefined));
   };
-
   const onViewDetail = () => {
     setIsVisibleModalSuccess(false);
     dispatch(
