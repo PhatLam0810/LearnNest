@@ -1,6 +1,8 @@
 import { AppAxiosListRes, AppAxiosRes } from '@/types';
+import { store } from '@redux';
 import api from '@services/api';
 import { useEffect, useRef, useState } from 'react';
+import { authAction } from '~mdAuth/redux';
 
 export interface PaginationParams {
   pageSize?: number;
@@ -33,7 +35,7 @@ export const useAppPagination = <T>(props: {
       isFetching.current = false;
       return;
     }
-
+    store.dispatch(authAction.setIsShowLoading(true));
     try {
       const { status, data }: AppAxiosListRes<T> = await api.post(
         props.apiUrl,
@@ -51,6 +53,7 @@ export const useAppPagination = <T>(props: {
     } catch (err) {
       console.log(err);
     } finally {
+      store.dispatch(authAction.setIsShowLoading(false));
       isFetching.current = false; // ✅ Giải phóng lock sau khi fetch xong
     }
   };
