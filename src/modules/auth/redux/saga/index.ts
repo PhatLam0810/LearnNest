@@ -142,6 +142,7 @@ function* viewDetailTransactionSaga(action: PayloadAction<{ id: string }>) {
 }
 
 function* signUpSaga(action: PayloadAction<SignUpPayload>) {
+  messageApi?.loading('SignUp', 0);
   try {
     const { params, callback } = action.payload;
 
@@ -171,6 +172,7 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
         password: params.password,
       });
     } catch (e: any) {
+      messageApi?.destroy();
       console.error('SignUp Error:', e);
       messageApi.error(e?.response?.data?.message);
       return; // Dừng saga nếu đăng ký thất bại
@@ -187,6 +189,7 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
     yield put(authAction.setSignUpInfo(signUpResponse.data.data));
     callback();
   } catch (e: any) {
+    messageApi?.destroy();
     console.error('signUpSaga error:', e);
     messageApi.error('Email already exists');
   }
