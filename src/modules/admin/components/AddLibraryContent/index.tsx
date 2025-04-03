@@ -117,12 +117,12 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                     const responseUrl = info.file.response?.data;
                     if (responseUrl) {
                       form.setFieldsValue({ url: responseUrl });
+                      getVideoDuration(responseUrl)
+                        .then(duration =>
+                          form.setFieldsValue({ duration: duration }),
+                        )
+                        .catch(error => console.error(error));
                     }
-                    getVideoDuration(responseUrl)
-                      .then(duration =>
-                        form.setFieldsValue({ duration: duration }),
-                      )
-                      .catch(error => console.error(error));
                   }
                 }}>
                 <Button type="text">Upload</Button>
