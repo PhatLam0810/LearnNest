@@ -53,8 +53,7 @@ const LoginPage = () => {
             layout="vertical"
             requiredMark={false}
             initialValues={{
-              email: signUpInfo?.userProfile?.email || 'lamtanphat@gmail.com',
-              password: 'Lamphat@081020',
+              email: signUpInfo?.userProfile?.email,
             }}
             form={form}>
             <Form.Item<FieldType>
