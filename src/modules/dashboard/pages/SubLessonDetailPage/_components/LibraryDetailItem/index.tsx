@@ -52,7 +52,6 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
         }
         if (percentWatched >= 99) {
           onWatchFinish();
-          setMaxWatched(0);
         }
       }
     }, 1000);
