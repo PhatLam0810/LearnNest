@@ -85,7 +85,7 @@ const LessonDetailPage = () => {
     if (lessonPurchaseData) {
       refetch();
       setIsVisibleModalBuy(false);
-      setIsVisibleModalSuccess(false);
+      setIsVisibleModalSuccess(true);
       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
     }
   }, [lessonPurchaseData]);

@@ -24,12 +24,13 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
   const router = useRouter();
   const onCloseModalAdd = () => {
     setIsVisibleModalSuccess(false);
+    dispatch(authAction.lessonPurchaseData(undefined));
   };
 
   const onViewDetail = () => {
     setIsVisibleModalSuccess(false);
     dispatch(
-      authAction.viewDetailTransaction({ id: lessonPurchaseData.paymentId }),
+      authAction.viewDetailTransaction({ id: lessonPurchaseData?.paymentId }),
     );
     router.replace(`/dashboard/profile?tab=${2}`);
   };

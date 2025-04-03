@@ -1,7 +1,7 @@
 import { AppAxiosListRes, AppAxiosRes } from '@/types';
-import { store } from '@redux';
 import api from '@services/api';
 import { useEffect, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { authAction } from '~mdAuth/redux';
 
 export interface PaginationParams {
@@ -19,6 +19,7 @@ export const useAppPagination = <T>(props: {
   isLazy?: boolean;
 }) => {
   const [listItem, setListItem] = useState<T[]>([]);
+  const dispatch = useDispatch();
   const [currentData, setCurrentData] =
     useState<AppAxiosListRes<T>['data']['data']>();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +36,7 @@ export const useAppPagination = <T>(props: {
       isFetching.current = false;
       return;
     }
-    store.dispatch(authAction.setIsShowLoading(true));
+    dispatch(authAction.setIsShowLoading(true));
     try {
       const { status, data }: AppAxiosListRes<T> = await api.post(
         props.apiUrl,
@@ -53,7 +54,7 @@ export const useAppPagination = <T>(props: {
     } catch (err) {
       console.log(err);
     } finally {
-      store.dispatch(authAction.setIsShowLoading(false));
+      dispatch(authAction.setIsShowLoading(false));
       isFetching.current = false; // ✅ Giải phóng lock sau khi fetch xong
     }
   };

@@ -120,7 +120,6 @@ function* lessonPurchaseSaga(action: PayloadAction<LessonPurchase>) {
       console.log(data.code);
     }
   } catch (e: any) {
-    messageApi.error('Otp is not correct');
     console.log('getLessonDetailSaga', e.message);
   }
 }
