@@ -49,6 +49,7 @@ const CreateAccountPage = () => {
 
         <Form<FieldType>
           name="register"
+          requiredMark={false}
           onFinish={data => {
             dispatch(
               authAction.signUp({
@@ -66,18 +67,44 @@ const CreateAccountPage = () => {
           layout="vertical"
           form={form}>
           <Form.Item<FieldType>
+            label={
+              <Text style={styles.labelText}>
+                <Text style={{ color: 'red' }}>*</Text> Otp
+              </Text>
+            }
             name={'otp'}
+            labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+            style={{ width: '100%', marginBottom: 0 }} // Đảm bảo Form.Item full width
             rules={[{ required: true, message: 'Otp required' }]}>
-            <AppInput placeholder="Enter Otp code" />
+            <AppInput placeholder="Enter Otp code" style={{ width: '100%' }} />
           </Form.Item>
+
           <Form.Item<FieldType>
+            label={
+              <Text style={styles.labelText}>
+                <Text style={{ color: 'red' }}>*</Text> Password
+              </Text>
+            }
             name={'password'}
+            labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+            style={{ width: '100%', marginBottom: 0 }} // Đảm bảo Form.Item full width
             rules={[{ required: true, message: 'Password required' }]}>
-            <AppInput type="Password" placeholder="Enter your password" />
+            <AppInput
+              type="Password"
+              placeholder="Enter your password"
+              style={{ width: '100%' }}
+            />
           </Form.Item>
           <Form.Item<FieldType>
+            label={
+              <Text style={styles.labelText}>
+                <Text style={{ color: 'red' }}>*</Text> Confirm Password
+              </Text>
+            }
             name={'confirmPassword'}
             dependencies={['password']}
+            labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+            style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
             rules={[
               { required: true, message: 'Confirm your password' },
               ({ getFieldValue }) => ({
@@ -89,7 +116,11 @@ const CreateAccountPage = () => {
                 },
               }),
             ]}>
-            <AppInput type="Password" placeholder="Confirm your password" />
+            <AppInput
+              type="Password"
+              placeholder="Confirm your password"
+              style={{ width: '100%' }}
+            />
           </Form.Item>
 
           <Form.Item shouldUpdate>

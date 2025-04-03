@@ -31,12 +31,12 @@ function* loginSaga(action: PayloadAction<LoginPayload>) {
       yield put(authAction.setTokenInfo(data.data));
     } else {
       messageApi?.destroy();
-      messageApi.error('Login error');
+      messageApi.error('Incorrect account or password.');
     }
   } catch (e: any) {
     console.log('getLessonDetailSaga', e.message);
     messageApi?.destroy();
-    messageApi.error('Login error');
+    messageApi.error('Incorrect account or password.');
   }
 }
 

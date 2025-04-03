@@ -69,14 +69,22 @@ const SignUpPage = () => {
               handleSendOtp(data.email);
             }}
             layout="vertical"
+            requiredMark={false}
             form={form}>
             <Form.Item<FieldType>
-              name="email"
-              rules={[
-                { required: true, message: 'Email required' },
-                { type: 'email', message: 'Invalid email format' },
-              ]}>
-              <AppInput placeholder="Enter Email" />
+              label={
+                <Text style={styles.labelText}>
+                  <Text style={{ color: 'red' }}>*</Text> Email
+                </Text>
+              }
+              name={'email'}
+              labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+              style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
+              rules={[{ required: true, message: 'Email required' }]}>
+              <AppInput
+                placeholder="Enter your email"
+                style={{ width: '100%' }}
+              />
             </Form.Item>
 
             <Form.Item<FieldType> shouldUpdate>

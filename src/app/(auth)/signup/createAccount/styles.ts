@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
   },
   subContainer: {
     paddingTop: 12,
-    paddingBottom: 24,
+    paddingBottom: 16,
     alignItems: 'center',
     gap: 8,
   },
@@ -19,6 +19,10 @@ const styles = StyleSheet.create({
     color: '#aaa',
     textAlign: 'center',
     marginBottom: 20,
+  },
+  labelText: {
+    marginTop: 16,
+    ...typography.button,
   },
   email: {
     color: '#58a6ff',

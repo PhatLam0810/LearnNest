@@ -39,10 +39,12 @@ const LoginPage = () => {
           style={{ width: '100%', height: 200, objectFit: 'contain' }}
           alt=""
         /> */}
-
-        <Text style={styles.subTitle}>
-          Sign into your account - accessall of your lessons now.
-        </Text>
+        <View style={styles.subContainer}>
+          <Text style={styles.subTitle}>Sign In</Text>
+          <Text style={styles.subDescription}>
+            Sign into your account - accessall of your lessons now.
+          </Text>
+        </View>
         <View style={{ overflow: 'hidden' }}>
           <Form<FieldType>
             name="login"
@@ -56,15 +58,41 @@ const LoginPage = () => {
               email: signUpInfo?.userProfile?.email,
             }}
             form={form}>
-            <Form.Item<FieldType>
+            {/* <Form.Item<FieldType>
               name={'email'}
               rules={[{ required: true, message: 'Email required' }]}>
               <AppInput placeholder="Enter your email" />
+            </Form.Item> */}
+            <Form.Item<FieldType>
+              label={
+                <Text style={styles.labelText}>
+                  <Text style={{ color: 'red' }}>*</Text> Email
+                </Text>
+              }
+              name={'email'}
+              labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+              style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
+              rules={[{ required: true, message: 'Email required' }]}>
+              <AppInput
+                placeholder="Enter your email"
+                style={{ width: '100%' }}
+              />
             </Form.Item>
             <Form.Item<FieldType>
+              label={
+                <Text style={styles.labelText}>
+                  <Text style={{ color: 'red' }}>*</Text> Password
+                </Text>
+              }
               name={'password'}
+              labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+              style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
               rules={[{ required: true, message: 'Password error' }]}>
-              <AppInput type="Password" placeholder="Enter your password" />
+              <AppInput
+                type="Password"
+                placeholder="Enter your password"
+                style={{ width: '100%' }}
+              />
             </Form.Item>
 
             <Form.Item<FieldType> shouldUpdate>

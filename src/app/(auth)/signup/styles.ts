@@ -19,6 +19,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 16,
   },
+  labelText: {
+    margin: 0,
+    ...typography.button,
+  },
   subContainer: {
     alignItems: 'center',
     paddingTop: 12,
