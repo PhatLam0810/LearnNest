@@ -2,12 +2,21 @@ import { baseQuery } from '@redux/RTKQuery';
 import { Category, LessonRecommendRes, LibraryType } from './types';
 import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
+import { LessonDetailDataResponse } from '../saga/type';
 
 export const dashboardQuery = baseQuery.injectEndpoints({
   endpoints: builder => ({
     getLessonRecommend: builder.query<LessonRecommendRes, void>({
       query: () => '/lesson/recommend',
       transformResponse: (res: AxiosResponse<LessonRecommendRes>) => res.data,
+    }),
+    getLessonId: builder.mutation<LessonDetailDataResponse, any>({
+      query: params => ({
+        url: `/lesson/${params.id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<LessonDetailDataResponse>) =>
+        res.data,
     }),
     getAllCategory: builder.query<Category[], void>({
       query: () => 'lesson/categories/getAll',

@@ -18,7 +18,11 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { HeartIcon } from '@/assets/svg';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { Modal } from 'antd';
-import { authQuery } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
+import { LessonDetailDataResponse } from '~mdDashboard/redux/saga/type';
+import { homeApi } from '~mdDashboard/services';
+import { AppAxiosRes } from '@/types';
+import { messageApi } from '@hooks';
 
 const HomeOverview = () => {
   const router = useRouter();
@@ -28,12 +32,23 @@ const HomeOverview = () => {
   const { data: selfCareData, isFetching } =
     dashboardQuery.useGetTodaySelfCareQuery();
   const [markAtRead] = dashboardQuery.useMarkSelfCareAsReadMutation();
-
+  const [getLessonId] = dashboardQuery.useGetLessonIdMutation();
   const [isShowSelfCare, setIsShowSelfCare] = useState(false);
 
-  const onClickLesson = (id: string) => {
-    dispatch(dashboardAction.getLessonDetail({ id }));
-    router.push('home/lesson');
+  const onClickLesson = async (id: string) => {
+    try {
+      dispatch(authAction.setIsShowLoading(true));
+      const response = await getLessonId({ id: id });
+
+      if (response.data) {
+        dispatch(dashboardAction.setLessonDetail(response.data));
+        router.push('home/lesson');
+      }
+    } catch (error) {
+      messageApi.error(error.message || 'Failed to get Lesson .');
+    } finally {
+      dispatch(authAction.setIsShowLoading(false));
+    }
   };
 
   useEffect(() => {
