@@ -7,11 +7,7 @@ import { FlatList, Image, Text, View } from 'react-native-web';
 import styles from './styles';
 import './styles.css';
 
-type AppCommentProps = {
-  data?: any;
-};
-
-const CommentSection: React.FC<AppCommentProps> = () => {
+const CommentSection = () => {
   const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
 
   const { listItem, setListItem, fetchData, filter, changeParams, refresh } =
@@ -57,14 +53,14 @@ const CommentSection: React.FC<AppCommentProps> = () => {
         borderColor: '#ddd',
       }}>
       <Image
-        source={{ uri: item.user?.avatar }}
+        source={{ uri: item.userAvatar }}
         style={{ width: 48, height: 48, borderRadius: 24 }}
         resizeMode="contain"
       />
       <View style={{ marginLeft: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ fontWeight: '600', fontSize: 14 }}>
-            {item.user?.firstName} {item.user?.lastName}
+            {item.userFirstName} {item.userLastName}
           </Text>
           <Text style={{ fontSize: 12, color: 'gray', marginLeft: 8 }}>
             {new Date(item.createdAt).toLocaleString()}
