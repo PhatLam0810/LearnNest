@@ -1,4 +1,5 @@
 import { useAppSelector } from '@redux';
+import { realTimeCommentService } from '@services/signalR';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -11,7 +12,9 @@ const Authentication = () => {
   useEffect(() => {
     if (accessToken) {
       router.replace('/dashboard/home');
+      realTimeCommentService.start();
     } else {
+      realTimeCommentService.stop();
       router.replace('/login');
     }
     if (accessTokenSignUp && !accessToken) {

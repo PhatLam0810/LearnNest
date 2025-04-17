@@ -5,6 +5,7 @@ import { LessonItem } from '~mdDashboard/components';
 import { useAppDispatch } from '@redux';
 import { useRouter } from 'next/navigation';
 import {
+  Comment,
   DailySelfCare,
   HeaderHome,
   PopularCategories,
@@ -56,7 +57,7 @@ const HomeOverview = () => {
   return (
     <View style={styles.container}>
       <HeaderHome />
-      <ScrollView style={styles.content}>
+      {/* <ScrollView style={styles.content}>
         <AnimatePresence mode="popLayout">
           {isShowSelfCare && selfCareData && (
             <motion.div
@@ -114,7 +115,8 @@ const HomeOverview = () => {
             </ScrollView>
           </motion.div>
         </AnimatePresence>
-      </ScrollView>
+      </ScrollView> */}
+      <Comment />
     </View>
   );
 };
