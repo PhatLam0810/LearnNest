@@ -9,7 +9,16 @@ class RealTimeCommentService {
   }
 
   // Lắng nghe sự kiện nhận comment
-  onCommentReceived(callback: (comment: any) => void) {
+  onCommentReceived(
+    callback: (comment: any) => void,
+    config: { clearListener?: boolean } = {},
+  ) {
+    const { clearListener } = config;
+
+    if (clearListener) {
+      this.socket?.off('ReceiveComment');
+    }
+
     this.socket.on('ReceiveComment', callback);
   }
 

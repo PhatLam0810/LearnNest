@@ -12,6 +12,7 @@ export interface PaginationParams {
   filter?: Record<string, any>;
   other?: any;
   userId?: string;
+  postId?: string;
 }
 export const useAppPagination = <T>(props: {
   apiUrl: string;
@@ -90,6 +91,7 @@ export const useAppPagination = <T>(props: {
 
   return {
     listItem,
+    setListItem,
     fetchData,
     search,
     filter,
