@@ -6,15 +6,21 @@ import React, { useState } from 'react';
 import { FlatList, Image, Text, View } from 'react-native-web';
 import styles from './styles';
 import './styles.css';
+import dayjs from 'dayjs';
+import Editor from './InputLexical';
 
-const CommentSection = () => {
+type AppCommentProps = {
+  postId: string;
+};
+
+const AppComment: React.FC<AppCommentProps> = ({ postId }) => {
   const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
 
   const { listItem, setListItem, fetchData, filter, changeParams, refresh } =
     useAppPagination<any>({
       apiUrl: 'comments/getList',
       params: {
-        postId: '1244',
+        postId: postId,
       },
     });
   const [commentText, setCommentText] = useState('');
@@ -28,15 +34,15 @@ const CommentSection = () => {
   );
 
   const handleCommentChange = (value: string) => {
-    const trimmedValue = value.trim(); // Loại bỏ khoảng trắng đầu/cuối
+    const trimmedValue = value.trim();
 
     if (!trimmedValue) {
       messageApi.error(`Comment can't empty`);
       return;
-    } // Nếu rỗng sau khi trim thì không làm gì cả
+    }
 
     realTimeCommentService.sendComment({
-      postId: '1244',
+      postId: postId,
       commentText: value,
       type: 'Lesson',
       userId: userProfile?._id,
@@ -44,51 +50,44 @@ const CommentSection = () => {
     setCommentText('');
   };
   const renderItem = ({ item }) => (
-    <View
-      key={item._id}
-      style={{
-        flexDirection: 'row',
-        padding: 16,
-        borderBottomWidth: 1,
-        borderColor: '#ddd',
-      }}>
+    <View key={item._id} style={styles.commentContainer}>
       <Image
-        source={{ uri: item.userAvatar }}
-        style={{ width: 48, height: 48, borderRadius: 24 }}
+        source={{ uri: item.user?.avatar }}
+        style={styles.avatar}
         resizeMode="contain"
       />
-      <View style={{ marginLeft: 12 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text style={{ fontWeight: '600', fontSize: 14 }}>
-            {item.userFirstName} {item.userLastName}
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.name}>
+            {item.user?.firstName} {item.user?.lastName}
           </Text>
-          <Text style={{ fontSize: 12, color: 'gray', marginLeft: 8 }}>
-            {new Date(item.createdAt).toLocaleString()}
-          </Text>
+          <Text style={styles.time}>{dayjs(item.createdAt).fromNow()}</Text>
         </View>
-        <Text style={{ marginTop: 8, fontSize: 14 }}>{item.commentText}</Text>
+        <Text style={styles.commentText}>{item.commentText}</Text>
       </View>
     </View>
   );
   return (
     <FlatList
       data={listItem}
+      nestedScrollEnabled
+      style={{ height: 500 }}
       showsVerticalScrollIndicator={false}
       ListHeaderComponent={
         <View style={{ backgroundColor: 'white', gap: 8, paddingBottom: 16 }}>
           <Text style={styles.subTitle}>
             {`Total Comments (${listItem.length})`}
           </Text>
-          <Search
+          {/* <Search
             placeholder="Enter your comments"
             enterButton="Sent"
-            allowClear
             value={commentText}
             onChange={e => setCommentText(e.target.value)}
             size="large"
             // suffix={suffix}
             onSearch={handleCommentChange}
-          />
+          /> */}
+          <Editor />
         </View>
       }
       stickyHeaderIndices={[0]}
@@ -99,4 +98,4 @@ const CommentSection = () => {
   );
 };
 
-export default CommentSection;
+export default AppComment;

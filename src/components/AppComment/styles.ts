@@ -1,4 +1,4 @@
-import { StyleSheet, typography } from '@styles';
+import { inter, StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
@@ -17,7 +17,11 @@ const styles = StyleSheet.create({
     ...typography.titleM,
   },
   subTitle: {
-    ...typography.subTitle1,
+    fontFamily: inter.style.fontFamily,
+    fontWeight: '400',
+    fontSize: 22.25,
+    letterSpacing: 0.01,
+    color: '#000',
   },
   desc: {
     color: '#FFFFFF99',
@@ -33,6 +37,40 @@ const styles = StyleSheet.create({
   buttonTitle: {
     color: '#212121',
     ...typography.buttonSmall,
+  },
+  commentContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderColor: '#ddd',
+  },
+
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  content: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  name: {
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  time: {
+    fontSize: 12,
+    color: 'gray',
+    marginLeft: 8,
+  },
+  commentText: {
+    marginTop: 8,
+    fontSize: 14,
+    flex: 1,
   },
 });
 

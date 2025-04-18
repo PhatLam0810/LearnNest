@@ -22,7 +22,7 @@ import {
 } from 'react-native-web';
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
-import { AppHeader, AppModalPayPal } from '@components';
+import { AppComment, AppHeader, AppModalPayPal } from '@components';
 import { Collapse, CollapseProps, message, Modal } from 'antd';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { authAction, authQuery } from '~mdAuth/redux';
@@ -302,6 +302,7 @@ const LessonDetailPage = () => {
             />
           </View>
         )}
+        <AppComment postId={lessonDetail._id} />
       </ScrollView>
       <AppModalPayPal
         isVisibleModalBuy={isVisibleModalBuy}

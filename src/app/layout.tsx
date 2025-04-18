@@ -14,6 +14,8 @@ import ReactPlayer from 'react-player';
 import Image from 'next/image';
 import LoadingScreen from '~mdAuth/components/Loading';
 import './styles.css';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -26,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const context = useMessage();
-
+  dayjs.extend(relativeTime);
   const imageUrl = `https://drive.google.com/uc?id=1LzuAWTcRc9vE9Q14SK8qb92hBiqd7-Ns&export=preview`;
 
   return (
