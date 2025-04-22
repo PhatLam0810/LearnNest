@@ -1,0 +1,13 @@
+.send-comment-wrapper {
+  position: relative;
+}
+.send-icon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #ef405c;
+  color: #fff;
+}

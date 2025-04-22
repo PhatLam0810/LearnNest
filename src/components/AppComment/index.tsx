@@ -8,6 +8,7 @@ import styles from './styles';
 import './styles.css';
 import dayjs from 'dayjs';
 import Editor from './InputLexical';
+import { $getRoot, EditorState } from 'lexical';
 
 type AppCommentProps = {
   postId: string;
@@ -23,31 +24,46 @@ const AppComment: React.FC<AppCommentProps> = ({ postId }) => {
         postId: postId,
       },
     });
-  const [commentText, setCommentText] = useState('');
-
+  const [plainContent, setPlainContent] = useState<string>('');
   realTimeCommentService.onCommentReceived(
     comment => {
-      console.log(comment);
       setListItem(prevList => [comment, ...prevList]);
     },
     { clearListener: true },
   );
 
-  const handleCommentChange = (value: string) => {
-    const trimmedValue = value.trim();
+  const handleCommentChange = (editorState: EditorState) => {
+    const children = editorState.toJSON().root.children;
 
+    // If children not have length => wrong default custom note => set back
+
+    const firstLinkNode = children
+      .reverse()
+      .find((x: any) =>
+        x?.children?.some(child => ['link', 'autolink'].includes(child.type)),
+      );
+    const link: string = (firstLinkNode as any)?.children?.find(x =>
+      ['link', 'autolink'].includes(x.type),
+    )?.children?.[0]?.text;
+
+    editorState.read(() => {
+      setPlainContent($getRoot().getTextContent());
+    });
+  };
+
+  const handleSendComment = () => {
+    const trimmedValue = plainContent.trim();
     if (!trimmedValue) {
       messageApi.error(`Comment can't empty`);
       return;
     }
-
     realTimeCommentService.sendComment({
       postId: postId,
-      commentText: value,
+      commentText: plainContent,
       type: 'Lesson',
       userId: userProfile?._id,
     });
-    setCommentText('');
+    setPlainContent('');
   };
   const renderItem = ({ item }) => (
     <View key={item._id} style={styles.commentContainer}>
@@ -87,7 +103,10 @@ const AppComment: React.FC<AppCommentProps> = ({ postId }) => {
             // suffix={suffix}
             onSearch={handleCommentChange}
           /> */}
-          <Editor />
+          <Editor
+            onChange={handleCommentChange}
+            handleSendComment={handleSendComment}
+          />
         </View>
       }
       stickyHeaderIndices={[0]}
