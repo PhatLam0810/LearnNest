@@ -302,7 +302,7 @@ const LessonDetailPage = () => {
             />
           </View>
         )}
-        <AppComment postId={lessonDetail._id} />
+        {/* <AppComment postId={lessonDetail._id} /> */}
       </ScrollView>
       <AppModalPayPal
         isVisibleModalBuy={isVisibleModalBuy}
