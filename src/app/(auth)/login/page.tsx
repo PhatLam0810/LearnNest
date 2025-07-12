@@ -55,7 +55,7 @@ const LoginPage = () => {
             layout="vertical"
             requiredMark={false}
             initialValues={{
-              email: signUpInfo?.userProfile?.email || 'lamtanphat08@gmail.com',
+              email: signUpInfo?.userProfile?.email || 'adminvhu@gmail.com',
             }}
             form={form}>
             {/* <Form.Item<FieldType>
@@ -85,7 +85,7 @@ const LoginPage = () => {
                 </Text>
               }
               name={'password'}
-              initialValue={'So@08102003'} // Giả sử bạn muốn đặt một giá trị mặc định
+              initialValue={'Lamphat@081020'} // Giả sử bạn muốn đặt một giá trị mặc định
               labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
               style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
               rules={[{ required: true, message: 'Password error' }]}>
