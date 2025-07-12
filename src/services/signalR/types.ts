@@ -170,7 +170,8 @@ export interface RealtimeCommentData extends RealtimeCommentBaseData {
 }
 
 export interface RealtimeCommentUpdateData extends RealtimeCommentData {
-  //
+  CommentText: string;
+  CustomNote: any;
 }
 
 export interface RealtimeCommentReplyData extends RealtimeCommentBaseData {
@@ -212,7 +213,19 @@ export interface CommentData extends CommentBaseData {
 }
 
 export interface CommentUpdateData extends CommentBaseData {
-  //
+  commentText: string;
+  customNote: any;
+  postId: string;
+  postIdOfPost: string;
+  authorId: string;
+  authorName: string;
+  gifId: any;
+  id: string;
+  mentions: any[];
+  resourceHashId: any;
+  resourceUrl: any;
+  type: string;
+  userAvatar: string;
 }
 
 export interface CommentReplyData extends CommentBaseData {
