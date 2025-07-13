@@ -18,8 +18,17 @@ export interface Library {
   };
   __v: number;
   usersCanPlay: UserId[];
+  questionList: questionItem[];
 }
 
 interface UserId {
   _id: string;
 }
+
+type questionItem = {
+  _id: string;
+  question: string;
+  answerList: string[];
+  appearTime: number;
+  correctAnswer: string;
+};

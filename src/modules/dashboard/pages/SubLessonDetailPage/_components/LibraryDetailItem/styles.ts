@@ -50,6 +50,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     opacity: 0.8,
   },
+  questionTitle: {
+    ...typography.titleM,
+  },
+  answerTitle: {
+    ...typography.subTitle2,
+    fontSize: 16,
+  },
+  button: {
+    ...typography.subTitle2,
+    backgroundColor: '#ef405c',
+    alignSelf: 'flex-end',
+    color: 'white',
+    borderRadius: 8,
+  },
 });
 
 export default styles;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import { View } from 'react-native-web';
@@ -9,7 +10,7 @@ import styles from './styles';
 import { handleConvert } from './functions';
 import NextImage from 'next/image';
 import YouTube from 'react-youtube';
-import { Modal } from 'antd';
+import { Button, Modal, Radio } from 'antd';
 
 type LibraryDetailItemProps = {
   data: Library;
@@ -26,67 +27,98 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   };
   const playerRef = useRef(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
   const [lastPlayed, setLastPlayed] = useState(0);
   const [maxWatched, setMaxWatched] = useState(0);
+  const [visibleQuestion, setVisibleQuestion] = useState(null);
+  const [shownQuestionIds, setShownQuestionIds] = useState<string[]>([]);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [modal, contextHolder] = Modal.useModal();
 
   const getYoutubeId = url => {
     const match = url.match(/(?:[?&]v=|youtu\.be\/|embed\/)([^&]+)/);
     return match ? match[1] : null;
   };
+  const player = playerRef.current;
+  const video = videoRef.current;
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (playerRef.current) {
-        const currentTime = playerRef.current.getCurrentTime();
-        const duration = playerRef.current.getDuration();
-        const percentWatched = (maxWatched / duration) * 100;
-        if (currentTime > maxWatched + 5) {
-          warning();
-          playerRef.current.pauseVideo();
-          playerRef.current.seekTo(lastPlayed);
-        } else {
-          setLastPlayed(currentTime);
-          setMaxWatched(prevMax => Math.max(prevMax, currentTime));
-        }
-        if (percentWatched >= 99) {
-          onWatchFinish();
-        }
+      const isYouTube = !!player;
+
+      const currentTime = isYouTube
+        ? Math.floor(player?.getCurrentTime?.() || 0)
+        : Math.floor(video?.currentTime || 0);
+      const duration = isYouTube
+        ? player?.getDuration?.() || 1
+        : video?.duration || 1;
+
+      if (!duration) return;
+
+      const percentWatched = (maxWatched / duration) * 100;
+
+      // 🎯 Nếu đến đúng appearTime và chưa hiện câu hỏi này
+      const matchedQuestion = data.questionList.find(
+        q => q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
+      );
+
+      if (matchedQuestion) {
+        setVisibleQuestion(matchedQuestion);
+        isYouTube ? player.pauseVideo() : video.pause();
+      }
+
+      // ✅ Chặn tua quá xa
+      if (currentTime > maxWatched + 5) {
+        warning();
+        isYouTube
+          ? (player.pauseVideo(), player.seekTo(lastPlayed))
+          : (video.pause(), (video.currentTime = lastPlayed));
+      } else {
+        setLastPlayed(currentTime);
+        setMaxWatched(prev => Math.max(prev, currentTime));
+      }
+
+      // ✅ Nếu xem xong
+      if (percentWatched >= 99) {
+        onWatchFinish();
+        clearInterval(interval);
+        setMaxWatched(0);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastPlayed, data]);
+  }, [lastPlayed, data, shownQuestionIds]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (videoRef.current) {
-        const currentTime = videoRef.current.currentTime;
-        const duration = videoRef.current.duration;
-        const percentWatched = (maxWatched / duration) * 100;
+  const handleClose = () => {
+    if (!visibleQuestion || selectedAnswer === null) return;
+    const isCorrect = selectedAnswer === visibleQuestion.correctAnswer;
+    const player = playerRef.current;
+    const video = videoRef.current;
+    if (isCorrect) {
+      // ✅ Đúng → cho chạy tiếp, không hiện lại
+      player?.playVideo?.();
+      video?.play?.();
+      setShownQuestionIds(prev => [...prev, visibleQuestion._id]); // ✅ đánh dấu là đã hiện và đúng
+      setVisibleQuestion(null);
+      setSelectedAnswer(null);
+    } else {
+      // ❌ Sai → ẩn Modal + tua về → cho phép hiện lại
+      const appearTime = visibleQuestion.appearTime;
 
-        // Chặn tua quá 5 giây so với maxWatched
-        if (currentTime > maxWatched + 5) {
-          warning();
-          videoRef.current.pause();
-          videoRef.current.currentTime = lastPlayed;
-        } else {
-          setLastPlayed(currentTime);
-          setMaxWatched(prevMax => Math.max(prevMax, currentTime));
-        }
+      player?.pauseVideo?.();
+      player?.seekTo?.(maxWatched - appearTime);
 
-        // Nếu đã xem trên 99% thì gọi onWatchFinish
-        if (percentWatched >= 99) {
-          onWatchFinish();
-          setMaxWatched(0);
-          clearInterval(interval);
-        }
+      if (video) {
+        video.pause();
+        video.currentTime = appearTime;
       }
-    }, 1000);
 
-    return () => clearInterval(interval);
-  }, [lastPlayed, data]);
+      setShownQuestionIds(prev =>
+        prev.filter(id => id !== visibleQuestion._id),
+      ); // ❌ Xóa khỏi list đã hiện
+      setVisibleQuestion(null);
+      setSelectedAnswer(null);
+    }
+  };
 
   const warning = () => {
     modal.warning({
@@ -96,7 +128,7 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
       centered: true,
     });
   };
-  console.log(data.url);
+
   const renderMedia = () => {
     switch (data.type) {
       case 'Video':
@@ -199,6 +231,43 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
     <View>
       {renderMedia()}
       {contextHolder}
+      <Modal
+        open={visibleQuestion}
+        centered
+        closable={false}
+        title={
+          <div style={styles.questionTitle}>
+            Question {visibleQuestion?.question}?
+          </div>
+        }
+        footer={[
+          <Button
+            key="ok"
+            type="primary"
+            onClick={handleClose}
+            style={styles.button}
+            disabled={selectedAnswer === null}>
+            Submit
+          </Button>,
+        ]}>
+        {visibleQuestion && (
+          <Radio.Group
+            onChange={e => setSelectedAnswer(e.target.value)}
+            value={selectedAnswer}
+            style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {visibleQuestion.answerList.map((ans, idx) => {
+              const optionLetter = String.fromCharCode(65 + idx); // A, B, C, D
+              return (
+                <Radio key={idx} value={optionLetter}>
+                  <div style={styles.answerTitle}>
+                    {optionLetter}. {ans}
+                  </div>
+                </Radio>
+              );
+            })}
+          </Radio.Group>
+        )}
+      </Modal>
     </View>
   );
 };

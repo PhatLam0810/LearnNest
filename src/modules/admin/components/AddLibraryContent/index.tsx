@@ -1,5 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
-import { Button, Divider, Form, Input, Select, Space, Upload } from 'antd';
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  Select,
+  Space,
+  TimePickerProps,
+  Upload,
+} from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { adminQuery } from '../../redux';
 import { messageApi, useAppPagination } from '@hooks';
@@ -7,9 +16,11 @@ import api from '@services/api';
 import { Library } from '~mdDashboard/types';
 import { ScrollView, View } from 'react-native-web';
 import { AppRichTextInput } from '@components';
-import { PlusOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { getVideoDuration, getYouTubeVideoDuration } from './functions';
 import debounce from 'lodash-es/debounce';
+import { TimePicker } from 'antd';
+import dayjs from 'dayjs';
 
 type AddLibraryContentProps = {
   onFinish?: (values: any) => void;
@@ -34,11 +45,13 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   });
   const [libraryType, setLibraryType] = useState('');
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
+  const [duration, setDuration] = useState<number>(0);
   const [newTag, setNewTag] = useState('');
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
       setLibraryType(initialValues.type);
+      setDuration(initialValues.duration);
     }
   }, []);
 
@@ -46,6 +59,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
     debounce((value: string) => {
       getYouTubeVideoDuration(value).then(res => {
         form.setFieldsValue({ duration: res });
+        setDuration(res);
       });
 
       form.setFieldsValue({ url: value });
@@ -65,18 +79,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
           </Form.Item>
         );
       }
-      case 'self-care': {
-        return (
-          <>
-            <Form.Item
-              label="Content"
-              name="url"
-              rules={[{ required: true, message: 'Please enter the content' }]}>
-              <AppRichTextInput />
-            </Form.Item>
-          </>
-        );
-      }
       case 'youtube': {
         return (
           <Form.Item
@@ -91,7 +93,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             <Input
               placeholder="Or enter a link"
               onChange={e => debouncedOnChange(e.target.value)}
-              style={{ marginBottom: 32 }}
             />
           </Form.Item>
         );
@@ -230,6 +231,38 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
           </Select>
         </Form.Item>
         {renderInputContent()}
+        <Form.Item label="Questions List" name="questionsList">
+          <Form.List name="questionList">
+            {(fields, { add, remove }) => (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}>
+                {fields.map(({ key, name, ...restField }) => {
+                  return (
+                    <QuestionItem
+                      key={key}
+                      {...restField}
+                      name={name}
+                      remove={remove}
+                      duration={duration}
+                    />
+                  );
+                })}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}>
+                    Add Question
+                  </Button>
+                </Form.Item>
+              </div>
+            )}
+          </Form.List>
+        </Form.Item>
       </ScrollView>
 
       <Button type="primary" htmlType="submit">
@@ -240,3 +273,121 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
 };
 
 export default AddLibraryContent;
+const QuestionItem = ({ remove, name, duration }: any) => {
+  return (
+    <div style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
+      <div
+        style={{
+          display: 'flex',
+          flex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+        <p style={{ margin: 0 }}>Question {name + 1}</p>
+        <MinusCircleOutlined onClick={() => remove(name)} />
+      </div>
+      <Form.Item name={[name, 'question']} style={{ marginBottom: 8 }}>
+        <Input placeholder="Enter question" style={{ marginBottom: 0 }} />
+      </Form.Item>
+      {['A', 'B', 'C', 'D'].map((label, index) => (
+        <Form.Item
+          key={index}
+          name={[name, 'answerList', index]}
+          rules={[{ required: true, message: `Please enter answer ${label}` }]}
+          style={{ marginBottom: 4 }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: 8,
+              alignItems: 'center',
+            }}>
+            <p style={{ margin: 0, width: 20 }}>{label}.</p>
+            <Input placeholder={`Answer ${label}`} />
+          </div>
+        </Form.Item>
+      ))}
+      <div style={{ display: 'flex', gap: 8 }}>
+        {/* Chọn đáp án đúng */}
+        <Form.Item
+          label="CorrectAnswer:"
+          name={[name, 'correctAnswer']}
+          rules={[
+            { required: true, message: 'Please select the Correct answer' },
+          ]}
+          wrapperCol={{ span: 16 }}>
+          <Select style={{ width: 60 }}>
+            <Select.Option value="A">A</Select.Option>
+            <Select.Option value="B">B</Select.Option>
+            <Select.Option value="C">C</Select.Option>
+            <Select.Option value="D">D</Select.Option>
+          </Select>
+        </Form.Item>
+        <Form.Item
+          name={[name, 'appearTime']}
+          label="AppearTime:"
+          rules={[{ required: true, message: 'Please select the appearTime' }]}
+          style={{ marginBottom: 8 }}>
+          <TimeLimitedPicker durationInSeconds={duration} />
+        </Form.Item>
+      </div>
+    </div>
+  );
+};
+
+const TimeLimitedPicker = ({
+  durationInSeconds,
+  value,
+  onChange,
+  ...props
+}: {
+  durationInSeconds: number;
+  value?: number;
+  onChange?: (value: number | null) => void;
+} & Omit<TimePickerProps, 'value' | 'onChange'>) => {
+  const maxTime = dayjs().startOf('day').add(durationInSeconds, 'second');
+
+  const disabledTime = (current: dayjs.Dayjs | null) => {
+    const maxH = maxTime.hour();
+    const maxM = maxTime.minute();
+    const maxS = maxTime.second();
+
+    return {
+      disabledHours: () =>
+        Array.from({ length: 24 }, (_, i) => i).filter(h => h > maxH),
+      disabledMinutes: (h: number) =>
+        h < maxH
+          ? []
+          : Array.from({ length: 60 }, (_, i) => i).filter(m => m > maxM),
+      disabledSeconds: (h: number, m: number) =>
+        h < maxH || m < maxM
+          ? []
+          : Array.from({ length: 60 }, (_, i) => i).filter(s => s > maxS),
+    };
+  };
+
+  // Convert từ số giây sang dayjs object
+  const dayjsValue =
+    value != null ? dayjs().startOf('day').add(value, 'second') : null;
+
+  return (
+    <TimePicker
+      {...props}
+      value={dayjsValue}
+      format={durationInSeconds >= 3600 ? 'HH:mm:ss' : 'mm:ss'}
+      showNow={false}
+      needConfirm={false}
+      disabledTime={disabledTime}
+      onChange={time => {
+        if (time) {
+          const totalSeconds =
+            time.hour() * 3600 + time.minute() * 60 + time.second();
+          onChange?.(totalSeconds); // Truyền số giây về Form
+        } else {
+          onChange?.(null);
+        }
+      }}
+    />
+  );
+};
