@@ -117,7 +117,6 @@ const LoginPage = () => {
                     disabled={!email || !password}
                     htmlType="submit">
                     Sign In
-
                   </AppButton>
                 );
               }}

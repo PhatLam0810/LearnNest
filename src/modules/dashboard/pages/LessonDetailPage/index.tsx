@@ -97,7 +97,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   //     }
   //   }, [lessonPurchaseData]);
 
-
   useEffect(() => {
     const fetchLesson = async () => {
       try {
