@@ -52,8 +52,8 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
       const isYouTube = !!player;
 
       const currentTime = isYouTube
-        ? Math.floor(player?.getCurrentTime?.() || 0)
-        : Math.floor(video?.currentTime || 0);
+        ? Math.floor(player?.getCurrentTime?.())
+        : Math.floor(video?.currentTime);
       const duration = isYouTube
         ? player?.getDuration?.() || 1
         : video?.duration || 1;
