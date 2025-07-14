@@ -32,7 +32,9 @@ const LessonDetailPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
+
   const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
   const [messageApi, contextHolder] = message.useMessage();
   const [isVisibleModalBuy, setIsVisibleModalBuy] = useState(false);

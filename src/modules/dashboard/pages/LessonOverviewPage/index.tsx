@@ -15,9 +15,9 @@ import { ScrollView, View } from 'react-native-web';
 
 const HomeOverview = () => {
   const { data, refetch } = dashboardQuery.useGetLessonRecommendQuery();
-  const userProfile = useAppSelector(
-    state => state.authReducer.tokenInfo?.userProfile,
-  );
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
+
   const router = useRouter();
   const dispatch = useAppDispatch();
 

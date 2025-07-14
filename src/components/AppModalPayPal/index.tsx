@@ -27,7 +27,8 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
   const [sendOtp] = authQuery.useSendTransactionOtpMutation();
   const [isLoading, setIsLoading] = useState(false);
   const { verifyInfo } = useAppSelector(state => state.authReducer);
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
 
   const [isVisibleVerify, setIsVisibleVerify] = useState(false);
   const handleSendOtp = async (email: string) => {

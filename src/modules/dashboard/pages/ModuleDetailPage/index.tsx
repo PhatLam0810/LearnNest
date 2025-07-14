@@ -15,7 +15,8 @@ const ModuleDetailPage = () => {
   );
   const dispatch = useAppDispatch();
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [modal, contextHolder] = Modal.useModal();
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({

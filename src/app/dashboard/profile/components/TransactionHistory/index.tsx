@@ -14,7 +14,8 @@ const TransactionHistory = () => {
   const divRef = useRef(null);
   const dispatch = useAppDispatch();
   const [height, setHeight] = useState(0);
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [getTransactions, { data, error, isSuccess }] =
     authQuery.useGetTransactionDetailMutation();
   const [isVisibleModalOverview, setIsVisibleModalModalOverview] =

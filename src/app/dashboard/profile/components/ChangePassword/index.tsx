@@ -13,7 +13,8 @@ import { messageApi } from '@hooks';
 
 const ChangePassword = () => {
   const dispatch = useAppDispatch();
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [form] = Form.useForm();
   const [changePassword] = authQuery.useChangePasswordMutation();
 

@@ -12,7 +12,8 @@ import { useRouter } from 'next/navigation';
 
 const EditProfile = () => {
   const dispatch = useAppDispatch();
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [deleteAccount] = authQuery.useDeleteAccountMutation();
   const [avatar, setAvatar] = useState(userProfile?.avatar);
   const router = useRouter();

@@ -15,7 +15,8 @@ type AppCommentProps = {
 };
 
 const AppComment: React.FC<AppCommentProps> = ({ postId }) => {
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
 
   const { listItem, setListItem, fetchData, filter, changeParams, refresh } =
     useAppPagination<any>({
