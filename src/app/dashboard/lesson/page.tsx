@@ -72,7 +72,7 @@ const Page = () => {
               data={item}
               onClick={() => {
                 dispatch(dashboardAction.getLessonDetail({ id: item._id }));
-                router.push('home/lesson');
+                router.push(`home/lesson/${item._id}`);
               }}
             />
           );

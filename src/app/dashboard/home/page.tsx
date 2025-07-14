@@ -38,7 +38,7 @@ const HomeOverview = () => {
 
       if (response.data) {
         dispatch(dashboardAction.setLessonDetail(response.data));
-        router.push('home/lesson');
+        router.push(`/dashboard/home/lesson/${id}`);
       }
     } catch (error) {
       messageApi.error(error.message || 'Failed to get Lesson .');

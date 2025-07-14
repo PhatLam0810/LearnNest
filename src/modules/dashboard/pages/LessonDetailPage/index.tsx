@@ -28,15 +28,19 @@ import { PayPalButtons } from '@paypal/react-paypal-js';
 import { authAction, authQuery } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
 
-const LessonDetailPage = () => {
+interface LessonDetailPageProps {
+  id: string;
+}
+
+const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
-  const { userProfile } =
-    useAppSelector(state => state.authReducer.tokenInfo) || {};
-
+  // const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
+  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
   const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
   const [messageApi, contextHolder] = message.useMessage();
+  const [lessonDetail, setLessonDetail] = useState<any>(null);
+  const [getLessonId] = dashboardQuery.useGetLessonIdMutation();
   const [isVisibleModalBuy, setIsVisibleModalBuy] = useState(false);
   const [isVisibleModalSuccess, setIsVisibleModalSuccess] = useState(false);
   const [itemBuy, setItemBuy] = useState(null);
@@ -59,38 +63,95 @@ const LessonDetailPage = () => {
 
   const [accessLesson, setAccessLesson] = useState(true);
 
+  // Cách cũ của PhátPhát
+  //  useEffect(() => {
+  //     if (lessonDetail.isPremium) {
+  //       setAccessLesson(false);
+  //     }
+  //     if (userProfile?.role?.level <= 2) {
+  //       setAccessLesson(true);
+  //     }
+  //     if (
+  //       dataSub?.length > 0 &&
+  //       dataSub.some(sub => sub.lessonId === lessonDetail._id)
+  //     ) {
+  //       setAccessLesson(true);
+  //     }
+  //   }, [dataSub, lessonDetail.isPremium]);
+
+  //   useEffect(() => {
+  //     if (libraries) {
+  //       setLibraryCanPlay({
+  //         libraryId: libraries[0]?._id,
+  //         userId: userProfile?._id,
+  //       });
+  //       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+  //     }
+  //   }, []);
+  //   useEffect(() => {
+  //     if (lessonPurchaseData) {
+  //       refetch();
+  //       setIsVisibleModalBuy(false);
+  //       setIsVisibleModalSuccess(true);
+  //       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+  //     }
+  //   }, [lessonPurchaseData]);
+
+
   useEffect(() => {
-    if (lessonDetail.isPremium) {
-      setAccessLesson(false);
-    }
-    if (userProfile?.role?.level <= 2) {
-      setAccessLesson(true);
-    }
+    const fetchLesson = async () => {
+      try {
+        const res = await getLessonId({ id });
+        if (res.data) {
+          setLessonDetail(res.data);
+        } else {
+          messageApi.error('khong tim thay bai hochoc');
+        }
+      } catch (err) {
+        messageApi.error('loi api');
+      }
+    };
+    if (id) fetchLesson();
+  }, [id]);
+
+  useEffect(() => {
+    if (!lessonDetail) return;
+
+    if (lessonDetail.isPremium) setAccessLesson(false);
+    if (userProfile?.role?.level <= 2) setAccessLesson(true);
     if (
       dataSub?.length > 0 &&
       dataSub.some(sub => sub.lessonId === lessonDetail._id)
     ) {
       setAccessLesson(true);
     }
-  }, [dataSub, lessonDetail.isPremium]);
 
-  useEffect(() => {
-    if (libraries) {
-      setLibraryCanPlay({
-        libraryId: libraries[0]?._id,
-        userId: userProfile?._id,
-      });
-      dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+    if (lessonDetail?.modules?.length > 0) {
+      const firstLibrary = lessonDetail.modules[0].libraries[0];
+      if (firstLibrary) {
+        setLibraryCanPlay({
+          libraryId: firstLibrary._id,
+          userId: userProfile?._id,
+        });
+      }
     }
-  }, []);
+  }, [lessonDetail, dataSub]);
+
   useEffect(() => {
     if (lessonPurchaseData) {
       refetch();
       setIsVisibleModalBuy(false);
       setIsVisibleModalSuccess(true);
-      dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
     }
   }, [lessonPurchaseData]);
+
+  if (!lessonDetail) {
+    return (
+      <div style={{ padding: 20, textAlign: 'center' }}>
+        <p>Bài học không tồn tại hoặc bị xóa</p>
+      </div>
+    );
+  }
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
@@ -297,7 +358,7 @@ const LessonDetailPage = () => {
                 <LessonItem
                   data={item}
                   onClick={() => {
-                    dispatch(dashboardAction.getLessonDetail({ id: item._id }));
+                    router.push(`/dashboard/home/lesson/${item._id}`);
                   }}
                 />
               )}

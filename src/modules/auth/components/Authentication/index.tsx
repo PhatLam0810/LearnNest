@@ -11,7 +11,6 @@ const Authentication = () => {
   );
   useEffect(() => {
     if (accessToken) {
-      router.replace('/dashboard/home');
       realTimeCommentService.start();
     } else {
       realTimeCommentService.stop();
