@@ -11,15 +11,18 @@ import { handleConvert } from './functions';
 import NextImage from 'next/image';
 import YouTube from 'react-youtube';
 import { Button, Modal, Radio } from 'antd';
+import { messageApi } from '@hooks';
 
 type LibraryDetailItemProps = {
   data: Library;
   onWatchFinish?: () => void;
+  onClickSubmit?: (answerList: any) => void;
 };
 
 const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   data,
   onWatchFinish,
+  onClickSubmit,
 }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
@@ -32,6 +35,9 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   const [visibleQuestion, setVisibleQuestion] = useState(null);
   const [shownQuestionIds, setShownQuestionIds] = useState<string[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [invalidQuestions, setInvalidQuestions] = useState<string[]>([]);
+
   const [modal, contextHolder] = Modal.useModal();
 
   const getYoutubeId = url => {
@@ -129,6 +135,41 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
     });
   };
 
+  const handleSubmit = () => {
+    const unansweredIds = data.questionList
+      .filter(q => !selectedAnswers[q._id]) // chưa chọn
+      .map(q => q._id);
+
+    if (unansweredIds.length > 0) {
+      setInvalidQuestions(unansweredIds);
+      messageApi.error('You must select all the questions!');
+      return;
+    }
+
+    // Nếu hợp lệ
+    setInvalidQuestions([]); // clear
+    onClickSubmit(selectedAnswers);
+  };
+
+  const shuffleArray = array => {
+    return [...array].sort(() => Math.random() - 0.5);
+  };
+
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+  useEffect(() => {
+    if (data?.questionList?.length > 0) {
+      const questionsWithShuffledAnswers = data.questionList.map(q => {
+        return {
+          ...q,
+        };
+      });
+
+      const shuffled = shuffleArray(questionsWithShuffledAnswers);
+      setShuffledQuestions(shuffled);
+    }
+  }, [data]);
+
   const renderMedia = () => {
     switch (data.type) {
       case 'Video':
@@ -217,16 +258,70 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
         );
       case 'Text':
         return (
-          <div
-            style={styles.text}
-            dangerouslySetInnerHTML={{ __html: data.url }}
-          />
+          <>
+            <View>
+              {shuffledQuestions.map((question, index) => {
+                const isInvalid = invalidQuestions.includes(question._id);
+
+                return (
+                  <View key={index}>
+                    <div
+                      style={{
+                        ...styles.questionTitle,
+                        color: isInvalid ? 'red' : 'black',
+                      }}>
+                      {index + 1}. Question {question.question} ?
+                    </div>
+
+                    <Radio.Group
+                      onChange={e => {
+                        const selectedValue = e.target.value;
+                        const questionId = question._id;
+
+                        setSelectedAnswers(prev => ({
+                          ...prev,
+                          [questionId]: selectedValue,
+                        }));
+
+                        // Nếu câu hỏi này đang bị báo lỗi thì loại khỏi danh sách lỗi
+                        setInvalidQuestions(prevInvalid => {
+                          if (prevInvalid.includes(questionId)) {
+                            return prevInvalid.filter(id => id !== questionId);
+                          }
+                          return prevInvalid;
+                        });
+                      }}
+                      value={selectedAnswers[question._id]}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 8,
+                      }}>
+                      {question.answerList.map((ans, idx) => {
+                        const optionLetter = String.fromCharCode(65 + idx);
+                        console.log(optionLetter);
+                        return (
+                          <Radio key={idx} value={optionLetter}>
+                            <div style={styles.answerTitle}>
+                              {optionLetter}. {ans}
+                            </div>
+                          </Radio>
+                        );
+                      })}
+                    </Radio.Group>
+                  </View>
+                );
+              })}
+            </View>
+            <Button type="primary" onClick={handleSubmit} style={styles.button}>
+              Submit
+            </Button>
+          </>
         );
       default:
         return null;
     }
   };
-
   return (
     <View>
       {renderMedia()}

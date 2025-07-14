@@ -52,6 +52,7 @@ const styles = StyleSheet.create({
   },
   questionTitle: {
     ...typography.titleM,
+    marginBottom: 8,
   },
   answerTitle: {
     ...typography.subTitle2,

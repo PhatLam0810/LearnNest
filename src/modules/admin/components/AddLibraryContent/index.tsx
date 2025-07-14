@@ -227,10 +227,11 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             <Select.Option value="Image">Image</Select.Option>
             <Select.Option value="Youtube">Link YouTube</Select.Option>
             <Select.Option value="Video">Video</Select.Option>
-            <Select.Option value="Text">Text</Select.Option>
+            <Select.Option value="Text">Test</Select.Option>
           </Select>
         </Form.Item>
-        {renderInputContent()}
+
+        {libraryType !== 'Text' && renderInputContent()}
         <Form.Item label="Questions List" name="questionsList">
           <Form.List name="questionList">
             {(fields, { add, remove }) => (
@@ -246,6 +247,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                       {...restField}
                       name={name}
                       remove={remove}
+                      libraryType={libraryType}
                       duration={duration}
                     />
                   );
@@ -273,7 +275,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
 };
 
 export default AddLibraryContent;
-const QuestionItem = ({ remove, name, duration }: any) => {
+const QuestionItem = ({ remove, name, duration, libraryType }: any) => {
   return (
     <div style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
       <div
@@ -324,13 +326,17 @@ const QuestionItem = ({ remove, name, duration }: any) => {
             <Select.Option value="D">D</Select.Option>
           </Select>
         </Form.Item>
-        <Form.Item
-          name={[name, 'appearTime']}
-          label="AppearTime:"
-          rules={[{ required: true, message: 'Please select the appearTime' }]}
-          style={{ marginBottom: 8 }}>
-          <TimeLimitedPicker durationInSeconds={duration} />
-        </Form.Item>
+        {libraryType !== 'Text' && (
+          <Form.Item
+            name={[name, 'appearTime']}
+            label="AppearTime:"
+            rules={[
+              { required: true, message: 'Please select the appearTime' },
+            ]}
+            style={{ marginBottom: 8 }}>
+            <TimeLimitedPicker durationInSeconds={duration} />
+          </Form.Item>
+        )}
       </div>
     </div>
   );

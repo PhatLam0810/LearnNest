@@ -2,6 +2,7 @@ export const convertDurationToTime = (
   duration: number = 0,
   isShortString: boolean = false,
 ): string => {
+  if (duration <= 0) return 'Test';
   const hours = Math.floor(duration / 3600);
   const minutes = Math.floor((duration % 3600) / 60);
   const seconds = duration % 60;

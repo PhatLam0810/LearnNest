@@ -113,7 +113,6 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   layoutTitleContainer: {
-    marginTop: 16,
     width: '100%',
     display: 'flex',
     gap: 24,
@@ -122,7 +121,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   layoutTitle: {
-    ...typography.titleS,
+    ...typography.titleM,
+    fontSize: 28,
   },
 });
 
