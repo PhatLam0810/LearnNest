@@ -37,7 +37,7 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [invalidQuestions, setInvalidQuestions] = useState<string[]>([]);
-
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
   const [modal, contextHolder] = Modal.useModal();
 
   const getYoutubeId = url => {
@@ -50,14 +50,13 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   useEffect(() => {
     const interval = setInterval(() => {
       if (playerRef.current) {
-        const currentTime = playerRef.current.getCurrentTime();
+        const currentTime = Math.floor(playerRef.current.getCurrentTime());
         const duration = playerRef.current.getDuration();
         const percentWatched = (maxWatched / duration) * 100;
         const matchedQuestion = data.questionList.find(
           q =>
             q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
         );
-
         if (matchedQuestion) {
           setVisibleQuestion(matchedQuestion);
           player.pauseVideo();
@@ -78,12 +77,12 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastPlayed, data]);
+  }, [lastPlayed, data, shownQuestionIds]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       if (videoRef.current) {
-        const currentTime = videoRef.current.currentTime;
+        const currentTime = Math.floor(videoRef.current.currentTime);
         const duration = videoRef.current.duration;
         const percentWatched = (maxWatched / duration) * 100;
 
@@ -117,7 +116,7 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastPlayed, data]);
+  }, [lastPlayed, data, shownQuestionIds]);
   // useEffect(() => {
   //   const interval = setInterval(() => {
   //     const isYouTube = !!player;
@@ -225,8 +224,6 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   const shuffleArray = array => {
     return [...array].sort(() => Math.random() - 0.5);
   };
-
-  const [shuffledQuestions, setShuffledQuestions] = useState([]);
 
   useEffect(() => {
     if (data?.questionList?.length > 0) {
