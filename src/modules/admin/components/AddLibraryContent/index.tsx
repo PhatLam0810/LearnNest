@@ -119,9 +119,10 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                     if (responseUrl) {
                       form.setFieldsValue({ url: responseUrl });
                       getVideoDuration(responseUrl)
-                        .then(duration =>
-                          form.setFieldsValue({ duration: duration }),
-                        )
+                        .then(duration => {
+                          form.setFieldsValue({ duration: duration });
+                          setDuration(Math.floor(duration));
+                        })
                         .catch(error => console.error(error));
                     }
                   }

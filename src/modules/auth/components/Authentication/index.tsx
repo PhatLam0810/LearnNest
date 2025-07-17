@@ -11,9 +11,9 @@ const Authentication = () => {
   );
   useEffect(() => {
     if (accessToken) {
-      realTimeCommentService.start();
+      // realTimeCommentService.start();
     } else {
-      realTimeCommentService.stop();
+      // realTimeCommentService.stop();
       router.replace('/login');
     }
     if (accessTokenSignUp && !accessToken) {
