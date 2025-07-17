@@ -47,52 +47,122 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   const player = playerRef.current;
   const video = videoRef.current;
 
+
   useEffect(() => {
     const interval = setInterval(() => {
-      const isYouTube = !!player;
-
-      const currentTime = isYouTube
-        ? Math.floor(player?.getCurrentTime?.())
-        : Math.floor(video?.currentTime);
-      const duration = isYouTube
-        ? player?.getDuration?.() || 1
-        : video?.duration || 1;
-
-      if (!duration) return;
-
-      const percentWatched = (maxWatched / duration) * 100;
-
-      // 🎯 Nếu đến đúng appearTime và chưa hiện câu hỏi này
-      const matchedQuestion = data.questionList.find(
+      if (playerRef.current) {
+        const currentTime = playerRef.current.getCurrentTime();
+        const duration = playerRef.current.getDuration();
+        const percentWatched = (maxWatched / duration) * 100;
+          const matchedQuestion = data.questionList.find(
         q => q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
       );
 
       if (matchedQuestion) {
         setVisibleQuestion(matchedQuestion);
-        isYouTube ? player.pauseVideo() : video.pause();
+          player.pauseVideo() 
       }
 
-      // ✅ Chặn tua quá xa
-      if (currentTime > maxWatched + 5) {
-        warning();
-        isYouTube
-          ? (player.pauseVideo(), player.seekTo(lastPlayed))
-          : (video.pause(), (video.currentTime = lastPlayed));
-      } else {
-        setLastPlayed(currentTime);
-        setMaxWatched(prev => Math.max(prev, currentTime));
-      }
-
-      // ✅ Nếu xem xong
-      if (percentWatched >= 99) {
-        onWatchFinish();
-        clearInterval(interval);
-        setMaxWatched(0);
+        if (currentTime > maxWatched + 5) {
+          warning();
+          playerRef.current.pauseVideo();
+          playerRef.current.seekTo(lastPlayed);
+        } else {
+          setLastPlayed(currentTime);
+          setMaxWatched(prevMax => Math.max(prevMax, currentTime));
+        }
+        if (percentWatched >= 99) {
+          onWatchFinish();
+        }
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastPlayed, data, shownQuestionIds]);
+  }, [lastPlayed, data]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (videoRef.current) {
+        const currentTime = videoRef.current.currentTime;
+        const duration = videoRef.current.duration;
+        const percentWatched = (maxWatched / duration) * 100;
+
+        // Chặn tua quá 5 giây so với maxWatched
+          const matchedQuestion = data.questionList.find(
+        q => q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
+      );
+
+      if (matchedQuestion) {
+        setVisibleQuestion(matchedQuestion);
+          video.pause();
+      }
+
+        if (currentTime > maxWatched + 5) {
+          warning();
+          videoRef.current.pause();
+          videoRef.current.currentTime = lastPlayed;
+        } else {
+          setLastPlayed(currentTime);
+          setMaxWatched(prevMax => Math.max(prevMax, currentTime));
+        }
+
+        // Nếu đã xem trên 99% thì gọi onWatchFinish
+        if (percentWatched >= 99) {
+          onWatchFinish();
+          setMaxWatched(0);
+          clearInterval(interval);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [lastPlayed, data]);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     const isYouTube = !!player;
+
+  //     const currentTime = isYouTube
+  //       ? Math.floor(player?.getCurrentTime?.())
+  //       : Math.floor(video?.currentTime);
+  //     const duration = isYouTube
+  //       ? player?.getDuration?.() || 1
+  //       : video?.duration || 1;
+
+  //     if (!duration) return;
+
+  //     const percentWatched = (maxWatched / duration) * 100;
+
+  //     // 🎯 Nếu đến đúng appearTime và chưa hiện câu hỏi này
+  //     const matchedQuestion = data.questionList.find(
+  //       q => q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
+  //     );
+
+  //     if (matchedQuestion) {
+  //       setVisibleQuestion(matchedQuestion);
+  //       isYouTube ? player.pauseVideo() : video.pause();
+  //     }
+
+  //     // ✅ Chặn tua quá xa
+  //     if (currentTime > maxWatched + 5) {
+  //       warning();
+  //       isYouTube
+  //         ? (player.pauseVideo(), player.seekTo(lastPlayed))
+  //         : (video.pause(), (video.currentTime = lastPlayed));
+  //     } else {
+  //       setLastPlayed(currentTime);
+  //       setMaxWatched(prev => Math.max(prev, currentTime));
+  //     }
+
+  //     // ✅ Nếu xem xong
+  //     if (percentWatched >= 99) {
+  //       onWatchFinish();
+  //       clearInterval(interval);
+  //       setMaxWatched(0);
+  //     }
+  //   }, 1000);
+
+  //   return () => clearInterval(interval);
+  // }, [lastPlayed, data, shownQuestionIds]);
 
   const handleClose = () => {
     if (!visibleQuestion || selectedAnswer === null) return;
