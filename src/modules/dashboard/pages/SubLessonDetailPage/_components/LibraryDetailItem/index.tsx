@@ -47,21 +47,21 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   const player = playerRef.current;
   const video = videoRef.current;
 
-
   useEffect(() => {
     const interval = setInterval(() => {
       if (playerRef.current) {
         const currentTime = playerRef.current.getCurrentTime();
         const duration = playerRef.current.getDuration();
         const percentWatched = (maxWatched / duration) * 100;
-          const matchedQuestion = data.questionList.find(
-        q => q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
-      );
+        const matchedQuestion = data.questionList.find(
+          q =>
+            q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
+        );
 
-      if (matchedQuestion) {
-        setVisibleQuestion(matchedQuestion);
-          player.pauseVideo() 
-      }
+        if (matchedQuestion) {
+          setVisibleQuestion(matchedQuestion);
+          player.pauseVideo();
+        }
 
         if (currentTime > maxWatched + 5) {
           warning();
@@ -88,14 +88,15 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
         const percentWatched = (maxWatched / duration) * 100;
 
         // Chặn tua quá 5 giây so với maxWatched
-          const matchedQuestion = data.questionList.find(
-        q => q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
-      );
+        const matchedQuestion = data.questionList.find(
+          q =>
+            q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
+        );
 
-      if (matchedQuestion) {
-        setVisibleQuestion(matchedQuestion);
+        if (matchedQuestion) {
+          setVisibleQuestion(matchedQuestion);
           video.pause();
-      }
+        }
 
         if (currentTime > maxWatched + 5) {
           warning();
