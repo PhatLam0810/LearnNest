@@ -370,6 +370,7 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
         open={visibleQuestion}
         centered
         closable={false}
+        style={{ width: 1000 }}
         title={
           <div style={styles.questionTitle}>
             Question {visibleQuestion?.question}?
