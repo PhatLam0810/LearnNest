@@ -17,6 +17,7 @@ import './styles.css';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import TidioLoader from '@components/TidioLoader';
+import Chatbox from '@components/ChatboxAi';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -83,7 +84,8 @@ export default function RootLayout({
               </View>
               <LoadingScreen />
             </PersistGate>
-            <TidioLoader />
+            <Chatbox />
+            {/* <TidioLoader /> */}
             <Authentication />
           </Provider>
         </PayPalScriptProvider>
