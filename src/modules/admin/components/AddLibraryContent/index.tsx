@@ -4,6 +4,7 @@ import {
   Divider,
   Form,
   Input,
+  InputNumber,
   Select,
   Space,
   TimePickerProps,
@@ -21,6 +22,7 @@ import { getVideoDuration, getYouTubeVideoDuration } from './functions';
 import debounce from 'lodash-es/debounce';
 import { TimePicker } from 'antd';
 import dayjs from 'dayjs';
+import { dashboardQuery } from '~mdDashboard/redux';
 
 type AddLibraryContentProps = {
   onFinish?: (values: any) => void;
@@ -36,6 +38,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
 
   const [addLibrary] = adminQuery.useAddLibraryMutation();
   const [addNewTag] = adminQuery.useAddNewTagMutation();
+  const [generateQuestion] = dashboardQuery.useGenerateQuestionMutation();
   const {
     listItem: listTag,
     search,
@@ -47,9 +50,14 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [duration, setDuration] = useState<number>(0);
   const [newTag, setNewTag] = useState('');
+  const [count, setCount] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [link, setLink] = useState('');
+
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
+      console.log(initialValues);
       setLibraryType(initialValues.type);
       setDuration(initialValues.duration);
     }
@@ -57,6 +65,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
 
   const debouncedOnChange = useCallback(
     debounce((value: string) => {
+      setLink(value);
       getYouTubeVideoDuration(value).then(res => {
         form.setFieldsValue({ duration: res });
         setDuration(res);
@@ -118,6 +127,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                     const responseUrl = info.file.response?.data;
                     if (responseUrl) {
                       form.setFieldsValue({ url: responseUrl });
+                      setLink(responseUrl);
                       getVideoDuration(responseUrl)
                         .then(duration => {
                           form.setFieldsValue({ duration: duration });
@@ -136,6 +146,24 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
     }
   };
 
+  const handleGenerate = async (params: { link: string; count: number }) => {
+    const { link, count } = params;
+    setLoading(true);
+    try {
+      const res = await generateQuestion({ url: link, count });
+      const parsedQuestions = JSON.parse(res.data);
+      form.setFieldsValue({
+        questionList: parsedQuestions,
+      });
+
+      messageApi.success(`Generated ${count} questions using AI.`);
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      messageApi.error('An error occurred while generating questions.');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <Form
       style={{
@@ -225,7 +253,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             placeholder="Select library type"
             onChange={value => setLibraryType(value)} // Cập nhật trạng thái khi chọn
             getPopupContainer={triggerNode => triggerNode.parentNode}>
-            <Select.Option value="Image">Image</Select.Option>
             <Select.Option value="Youtube">Link YouTube</Select.Option>
             <Select.Option value="Video">Video</Select.Option>
             <Select.Option value="Text">Test</Select.Option>
@@ -233,6 +260,23 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
         </Form.Item>
 
         {libraryType !== 'Text' && renderInputContent()}
+        <Space>
+          <InputNumber
+            min={1}
+            placeholder="Enter the question number"
+            value={count}
+            onChange={value => setCount(value)}
+          />
+          <Button
+            type="primary"
+            disabled={!count}
+            loading={loading}
+            onClick={() => {
+              handleGenerate({ link: link, count });
+            }}>
+            Generate
+          </Button>
+        </Space>
         <Form.Item label="Questions List" name="questionsList">
           <Form.List name="questionList">
             {(fields, { add, remove }) => (
@@ -248,6 +292,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                       {...restField}
                       name={name}
                       remove={remove}
+                      form={form}
                       libraryType={libraryType}
                       duration={duration}
                     />
@@ -276,7 +321,13 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
 };
 
 export default AddLibraryContent;
-const QuestionItem = ({ remove, name, duration, libraryType }: any) => {
+const QuestionItem = ({ remove, name, duration, libraryType, form }: any) => {
+  const answerList = form.getFieldValue([
+    'questionList',
+    name,
+    'answerList',
+  ]) || ['', '', '', ''];
+  console.log(answerList);
   return (
     <div style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
       <div
@@ -293,11 +344,11 @@ const QuestionItem = ({ remove, name, duration, libraryType }: any) => {
       <Form.Item name={[name, 'question']} style={{ marginBottom: 8 }}>
         <Input placeholder="Enter question" style={{ marginBottom: 0 }} />
       </Form.Item>
-      {['A', 'B', 'C', 'D'].map((label, index) => (
+      {answerList.map((label, index) => (
         <Form.Item
           key={index}
-          name={[name, 'answerList', index]}
-          rules={[{ required: true, message: `Please enter answer ${label}` }]}
+          name={[name, 'answerList']} // ← chính xác chỗ này
+          rules={[{ required: true, message: `Please enter answer ${index}` }]}
           style={{ marginBottom: 4 }}>
           <div
             style={{
@@ -306,8 +357,10 @@ const QuestionItem = ({ remove, name, duration, libraryType }: any) => {
               gap: 8,
               alignItems: 'center',
             }}>
-            <p style={{ margin: 0, width: 20 }}>{label}.</p>
-            <Input placeholder={`Answer ${label}`} />
+            <p style={{ margin: 0, width: 20 }}>
+              {String.fromCharCode(65 + index)}.
+            </p>
+            <Input placeholder={`Answer ${label}`} value={label} />
           </div>
         </Form.Item>
       ))}

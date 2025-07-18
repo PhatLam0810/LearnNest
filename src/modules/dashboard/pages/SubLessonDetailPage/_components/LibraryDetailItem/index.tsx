@@ -280,34 +280,6 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
             )}
           </View>
         );
-      case 'Short':
-        return (
-          <View style={styles.mediaContainer}>
-            {data.url.includes('https://drive.google.com') ? (
-              <iframe
-                src={handleConvert(data.url)}
-                width="100%"
-                height="100%"
-                allow="autoplay"
-                allowFullScreen
-              />
-            ) : (
-              <ReactPlayer
-                width="100%"
-                height="100%"
-                controls
-                key={data.url}
-                url={data.url}
-              />
-            )}
-          </View>
-        );
-      case 'Image':
-        return (
-          <View style={styles.mediaContainer}>
-            <NextImage fill src={data.url} style={styles.image} alt="" />
-          </View>
-        );
       case 'PDF':
         return (
           <View style={styles.pdfContainer}>

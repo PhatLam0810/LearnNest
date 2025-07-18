@@ -63,6 +63,14 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    generateQuestion: builder.mutation({
+      query: params => ({
+        url: '/library/generate-questions',
+        method: 'POST',
+        body: params,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });
