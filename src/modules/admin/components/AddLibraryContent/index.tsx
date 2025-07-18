@@ -274,7 +274,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             onClick={() => {
               handleGenerate({ link: link, count });
             }}>
-            Generate with AI
+            Generate
           </Button>
         </Space>
         <Form.Item label="Questions List" name="questionsList">
