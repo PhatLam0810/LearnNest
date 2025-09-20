@@ -1,15 +1,22 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Avatar, GetProp, Layout, Menu, MenuProps } from 'antd';
+import React, { useState } from 'react';
+import {
+  Avatar,
+  Button,
+  Drawer,
+  GetProp,
+  Grid,
+  Layout,
+  Menu,
+  MenuProps,
+} from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   ControlOutlined,
-  SettingOutlined,
   LogoutOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
 import './styles.css';
-import LogoIcon from '../../assets/svg/LogoICon.svg';
-import Image from 'next/image';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction } from '~mdAuth/redux';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
@@ -26,9 +33,17 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint(); // detect breakpoint
   const dispatch = useAppDispatch();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const [open, setOpen] = useState(false);
+
+  const onClickItem = (item: string) => {
+    router.replace(item);
+    setOpen(false);
+  };
 
   const menuItems: MenuItem[] = [
     {
@@ -83,77 +98,103 @@ export default function DashboardLayout({
       ],
     },
   ];
-  return (
-    <Layout
-      hasSider
-      style={{ height: '100vh', width: '100vw', backgroundColor: 'white ' }}>
-      {/* Sidebar */}
-      <Sider theme="light" style={styles.sider} width={240}>
-        <View style={{ height: '100%' }}>
-          <TouchableOpacity>
-            <View
-              style={{ alignItems: 'center', marginBottom: 20 }}
-              onClick={() => {
-                router.push('/dashboard/profile');
-              }}>
-              <Avatar
-                src={userProfile?.avatar}
-                size={100}
-                style={{ borderWidth: 2, borderColor: '#FFA726' }}
-              />
-              <Text style={styles.username}>
-                {userProfile?.firstName + ' ' + userProfile?.lastName}
-              </Text>
-              <Text style={styles.role}>{userProfile?.role?.name}</Text>
-            </View>
-          </TouchableOpacity>
-          <ScrollView
-            style={{ scrollbarWidth: 'none' }}
-            contentContainerStyle={{ minHeight: '100%' }}>
-            <Menu
-              style={{
-                backgroundColor: 'transparent',
-                borderInlineEnd: 0,
-              }}
-              selectedKeys={[pathname]}
-              items={menuItems}
-              onClick={item => {
-                router.replace(item.key);
-              }}
-            />
-            {userProfile?.role?.level <= 2 && (
-              <Menu
-                style={{
-                  backgroundColor: 'transparent',
-                  borderInlineEnd: 0,
-                }}
-                selectedKeys={[pathname]}
-                items={adminItems}
-                onClick={item => {
-                  router.replace(item.key);
-                }}
-              />
-            )}
-          </ScrollView>
+  const sidebarContent = (
+    <View style={styles.sider}>
+      <TouchableOpacity>
+        <View
+          style={{ alignItems: 'center', marginBottom: 20 }}
+          onClick={() => {
+            router.push('/dashboard/profile');
+            setOpen(false);
+          }}>
+          <Avatar
+            src={userProfile?.avatar}
+            size={100}
+            style={{ borderWidth: 2, borderColor: '#FFA726' }}
+          />
+          <Text style={styles.username}>
+            {userProfile?.firstName + ' ' + userProfile?.lastName}
+          </Text>
+          <Text style={styles.role}>{userProfile?.role?.name}</Text>
+        </View>
+      </TouchableOpacity>
+      <ScrollView
+        style={{ scrollbarWidth: 'none' }}
+        contentContainerStyle={{ minHeight: '100%' }}>
+        <Menu
+          style={{
+            backgroundColor: 'transparent',
+            borderInlineEnd: 0,
+          }}
+          selectedKeys={[pathname]}
+          items={menuItems}
+          onClick={item => {
+            onClickItem(item.key);
+          }}
+        />
+        {userProfile?.role?.level <= 2 && (
           <Menu
-            mode="inline"
             style={{
               backgroundColor: 'transparent',
               borderInlineEnd: 0,
             }}
             selectedKeys={[pathname]}
-            items={settingItems}
+            items={adminItems}
             onClick={item => {
-              router.replace(item.key);
+              onClickItem(item.key);
             }}
           />
-        </View>
-      </Sider>
-      <Content style={{ backgroundColor: 'white' }}>
-        <View style={{ flex: 1, maxHeight: '100vh', height: '100%' }}>
-          {children}
-        </View>
-      </Content>
+        )}
+      </ScrollView>
+      <Menu
+        mode="inline"
+        style={{
+          backgroundColor: 'transparent',
+          borderInlineEnd: 0,
+        }}
+        selectedKeys={[pathname]}
+        items={settingItems}
+        onClick={item => {
+          onClickItem(item.key);
+        }}
+      />
+    </View>
+  );
+
+  return (
+    <Layout
+      style={{ height: '100vh', width: '100vw', backgroundColor: 'white' }}>
+      {screens.md ? (
+        <Sider theme="light" width={240} style={{ padding: 0 }}>
+          {sidebarContent}
+        </Sider>
+      ) : (
+        <>
+          <View style={styles.btnOpenDrawerContainer}>
+            <Button
+              type="text"
+              icon={<MenuOutlined />}
+              onClick={() => setOpen(true)}
+              style={styles.btnOpenDrawer}
+            />
+          </View>
+
+          {/* Drawer */}
+          <Drawer
+            placement="left"
+            closable={false}
+            open={open}
+            onClose={() => setOpen(false)}
+            width={240}>
+            {/* Nút đóng Drawer */}
+
+            {sidebarContent}
+          </Drawer>
+        </>
+      )}
+
+      {/* Content */}
+      <Content style={{ backgroundColor: 'white' }}>{children}</Content>
     </Layout>
   );
 }

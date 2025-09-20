@@ -1,23 +1,16 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { LessonItem } from '~mdDashboard/components';
 import { useAppDispatch } from '@redux';
 import { useRouter } from 'next/navigation';
-import {
-  DailySelfCare,
-  HeaderHome,
-  PopularCategories,
-  Tags,
-} from './_components';
+import { HeaderHome, Tags } from './_components';
 import styles from './styles';
-import { View, ScrollView, Text, FlatList } from 'react-native-web';
+import { View, ScrollView, Text } from 'react-native-web';
 import { splitData } from './functions';
 import 'antd/dist/reset.css';
 import { AnimatePresence, motion } from 'framer-motion';
-
-import { authAction, authQuery } from '~mdAuth/redux';
-
+import { authAction } from '~mdAuth/redux';
 import { messageApi } from '@hooks';
 
 const HomeOverview = () => {
@@ -25,12 +18,7 @@ const HomeOverview = () => {
   const dispatch = useAppDispatch();
 
   const { data } = dashboardQuery.useGetLessonRecommendQuery();
-  const { data: selfCareData, isFetching } =
-    dashboardQuery.useGetTodaySelfCareQuery();
-  const [markAtRead] = dashboardQuery.useMarkSelfCareAsReadMutation();
   const [getLessonId] = dashboardQuery.useGetLessonIdMutation();
-  const [isShowSelfCare, setIsShowSelfCare] = useState(false);
-
   const onClickLesson = async (id: string) => {
     try {
       dispatch(authAction.setIsShowLoading(true));
@@ -47,35 +35,11 @@ const HomeOverview = () => {
     }
   };
 
-  useEffect(() => {
-    if (selfCareData) {
-      setIsShowSelfCare(!selfCareData?.isRead);
-    }
-  }, [isFetching, selfCareData]);
-
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <HeaderHome />
       <ScrollView style={styles.content}>
         <AnimatePresence mode="popLayout">
-          {isShowSelfCare && selfCareData && (
-            <motion.div
-              key={1}
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ type: 'spring' }}
-              exit={{ opacity: 0, y: -20 }}>
-              <DailySelfCare
-                title={selfCareData?.selfCare?.title}
-                content={selfCareData?.selfCare?.url}
-                onGotIt={() => {
-                  markAtRead({ id: selfCareData?._id });
-                  setIsShowSelfCare(false);
-                }}
-              />
-            </motion.div>
-          )}
-
           <motion.div key={2}>
             <View style={styles.titleContainer}>
               <Text style={styles.title}>Today lesson</Text>
@@ -115,7 +79,7 @@ const HomeOverview = () => {
           </motion.div>
         </AnimatePresence>
       </ScrollView>
-    </View>
+    </ScrollView>
   );
 };
 

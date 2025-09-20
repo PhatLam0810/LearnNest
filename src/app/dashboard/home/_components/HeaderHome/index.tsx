@@ -2,14 +2,16 @@
 import React from 'react';
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { View, Text } from 'react-native-web';
+import { View, Text, TouchableOpacity } from 'react-native-web';
 import styles from './styles';
 import Icon from '@components/icons';
 import { HeartIcon } from '@/assets/svg';
 import { useAppSelector } from '@redux';
 import { typography } from '@styles';
+import { useRouter } from 'next/navigation';
 
 const HeaderHome = () => {
+  const router = useRouter();
   const userProfile = useAppSelector(
     state => state.authReducer.tokenInfo?.userProfile,
   );
@@ -40,7 +42,14 @@ const HeaderHome = () => {
 
         {/* Icons */}
         <Icon name="notification" />
-        <Icon name="settingSuggest" />
+        <TouchableOpacity>
+          <View
+            onClick={() => {
+              router.push('/dashboard/profile');
+            }}>
+            <Icon name="settingSuggest" />
+          </View>
+        </TouchableOpacity>
       </View>
     </View>
   );

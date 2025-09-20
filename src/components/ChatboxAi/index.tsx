@@ -36,6 +36,7 @@ export default function Chatbox() {
 
     const userMsg = { role: 'user', content: message };
     setChat(prev => [...prev, userMsg]);
+    setMessage('');
     setLoading(true);
 
     try {
@@ -62,7 +63,6 @@ export default function Chatbox() {
       ]);
       setLessonInfo(null);
     } finally {
-      setMessage('');
       setLoading(false);
     }
   };

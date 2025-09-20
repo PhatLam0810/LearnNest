@@ -3,6 +3,8 @@ import { StyleSheet, typography } from '@styles';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    height: '100%',
+    scrollbarWidth: 'none',
     padding: 20,
   },
 

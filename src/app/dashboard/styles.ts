@@ -4,9 +4,23 @@ const styles = StyleSheet.create({
   sider: {
     borderTopRightRadius: 16,
     borderBottomRightRadius: 16,
-    padding: 12,
     backgroundColor: 'white',
     boxShadow: '0px 0px 4px rgba(0, 0, 0, 0.1)',
+    padding: 12,
+    height: '100%',
+  },
+  btnOpenDrawerContainer: {
+    background: 'white',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+    zIndex: 1,
+    padding: 8,
+  },
+  btnOpenDrawer: {
+    position: 'relative',
+    top: 0,
+    left: 0,
+    fontSize: 24,
+    color: '#ef405c',
   },
   username: {
     marginTop: 12,

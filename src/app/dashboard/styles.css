@@ -8,6 +8,10 @@
   color: #3f3f3f;
   font-family: 'Inter', sans-serif;
 }
+.ant-drawer-body {
+  overflow-y: hidden !important;
+  padding: 0 !important;
+}
 .ant-menu-item {
   display: flex !important;
   align-items: center;
