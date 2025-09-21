@@ -43,6 +43,34 @@ const styles = StyleSheet.create({
   driverText: {
     ...typography.body1,
   },
+
+  // -------- Responsive container --------
+  containerDesktop: {
+    width: '35%',
+    alignSelf: 'center',
+    padding: 20,
+    margin: 20,
+  },
+  containerTablet: {
+    flex: 1,
+    width: '65%',
+    alignSelf: 'center',
+    padding: 16,
+    margin: 16,
+  },
+  containerMobile: {
+    flex: 1,
+    width: '95%',
+    alignSelf: 'center',
+    padding: 12,
+    margin: 12,
+  },
+  pageWrapper: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '100vh',
+  },
 });
 
 export default styles;
