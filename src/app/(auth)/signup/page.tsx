@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Button, Card, Form, Input, message } from 'antd';
+import { Card, Form, message } from 'antd';
 import { Text, View } from 'react-native-web';
 import Link from 'next/link';
 import Icon from '@components/icons';
@@ -11,7 +11,8 @@ import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@utils';
 import { useAppDispatch } from '@redux';
 import { authAction, authQuery } from '~mdAuth/redux';
-import { messageApi } from '@hooks';
+import { useResponsive } from '@/styles/responsive';
+import typography from '@/styles/typography';
 
 type FieldType = {
   email: string;
@@ -21,8 +22,9 @@ const SignUpPage = () => {
   const [form] = Form.useForm<FieldType>();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [sendOtp, { error, isSuccess }] = authQuery.useSendOtpMutation();
+  const [sendOtp] = authQuery.useSendOtpMutation();
   const [messageApi, contextHolder] = message.useMessage();
+
   const handleLoginOauth = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -38,36 +40,45 @@ const SignUpPage = () => {
   const handleSendOtp = async (email: string) => {
     try {
       dispatch(authAction.setIsShowLoading(true));
-      const response = await sendOtp({ email: email });
-
+      const response = await sendOtp({ email });
       if (response.data) {
-        dispatch(authAction.sendOtpInfo({ email: email }));
+        dispatch(authAction.sendOtpInfo({ email }));
         router.push('signup/createAccount');
       }
-    } catch (error) {
-      console.error('Lỗi gửi OTP:', error); // In ra lỗi
+    } catch (error: any) {
+      console.error('Lỗi gửi OTP:', error);
       messageApi.error(error.message || 'Failed to send OTP.');
     } finally {
       dispatch(authAction.setIsShowLoading(false));
     }
   };
 
+  // 🔹 Responsive detect
+  const { isMobile, isTablet } = useResponsive();
+  const containerStyle = isMobile
+    ? styles.containerMobile
+    : isTablet
+      ? styles.containerTablet
+      : styles.containerDesktop;
+
   return (
-    <Card style={styles.container}>
-      {contextHolder}
-      <View style={{ flex: 1 }}>
-        <View style={styles.subContainer}>
-          <Text style={styles.subTitle}>Sign Up</Text>
-          <Text style={styles.subDescription}>
-            Access thousands of free lessons today.
-          </Text>
-        </View>
-        <View style={{ overflow: 'hidden' }}>
+    <View style={styles.pageWrapper}>
+      <Card style={containerStyle}>
+        {contextHolder}
+        <View>
+          <View style={styles.subContainer}>
+            <Text
+              style={isMobile ? typography.titleMMobile : typography.titleM}>
+              Sign Up
+            </Text>
+            <Text style={isMobile ? typography.body2Mobile : typography.body2}>
+              Access thousands of free lessons today.
+            </Text>
+          </View>
+
           <Form<FieldType>
             name="signUp"
-            onFinish={data => {
-              handleSendOtp(data.email);
-            }}
+            onFinish={data => handleSendOtp(data.email)}
             layout="vertical"
             requiredMark={false}
             form={form}>
@@ -78,8 +89,8 @@ const SignUpPage = () => {
                 </Text>
               }
               name={'email'}
-              labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-              style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
+              labelCol={{ span: 24 }}
+              style={{ width: '100%', marginBottom: 16 }}
               rules={[{ required: true, message: 'Email required' }]}>
               <AppInput
                 placeholder="Enter your email"
@@ -97,11 +108,13 @@ const SignUpPage = () => {
                 );
               }}
             </Form.Item>
+
             <View style={styles.driverContainer}>
               <View style={styles.driver}></View>
               <Text style={styles.driverText}>or</Text>
               <View style={styles.driver}></View>
             </View>
+
             <View style={styles.btnContainer}>
               <AppButton onClick={handleLoginOauth}>
                 <Icon name="google" />
@@ -109,13 +122,14 @@ const SignUpPage = () => {
               </AppButton>
             </View>
           </Form>
+
+          <View style={styles.footer}>
+            <Text>Already have an account? </Text>
+            <Link href={`/login`}>Sign In</Link>
+          </View>
         </View>
-        <View style={styles.footer}>
-          <Text>Already have an account? </Text>
-          <Link href={`/login`}>Sign In</Link>
-        </View>
-      </View>
-    </Card>
+      </Card>
+    </View>
   );
 };
 
