@@ -76,6 +76,31 @@ export const typography = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 1.2,
   },
+
+  // Reponsive Typography
+  titleMMobile: {
+    fontFamily: prompt.style.fontFamily,
+    fontWeight: '500',
+    fontSize: 18,
+    letterSpacing: 0.01,
+  },
+  body1Mobile: {
+    fontFamily: dmSans.style.fontFamily,
+    fontWeight: '400',
+    fontSize: 14,
+    letterSpacing: 1 / 100,
+  },
+  body2Mobile: {
+    fontFamily: dmSans.style.fontFamily,
+    fontWeight: '400',
+    fontSize: 12,
+  },
+  buttonMobile: {
+    fontFamily: dmSans.style.fontFamily,
+    fontWeight: '500',
+    fontSize: 14,
+    letterSpacing: 1 / 100,
+  },
 });
 
 export default typography;

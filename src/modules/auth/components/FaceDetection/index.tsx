@@ -141,22 +141,8 @@ const FaceDetection = () => {
         style={{
           position: 'absolute',
           left: 0,
-          top: 0,
+          bottom: 0,
           width: 640,
-          height: 480,
-          backgroundColor: 'black',
-          zIndex: 3,
-        }}
-      />
-
-      <canvas
-        ref={canvasRef}
-        style={{
-          position: 'absolute',
-          left: 890,
-          top: 0,
-          width: 640,
-          backgroundColor: 'red',
           height: 480,
           zIndex: 3,
         }}
