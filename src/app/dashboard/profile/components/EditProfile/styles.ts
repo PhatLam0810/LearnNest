@@ -1,27 +1,52 @@
 import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
-  container: {
+  containerDesktop: {
     flex: 1,
-    padding: 20,
-    margin: 20,
+    padding: 24,
+    margin: 24,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+
+  containerTablet: {
+    flex: 1,
+    padding: 16,
+    margin: 16,
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+
+  containerMobile: {
+    flex: 1,
+    padding: 12,
+    margin: 8,
     backgroundColor: 'white',
     borderRadius: 8,
   },
+
   formContainer: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    height: '100%',
-    justifyContent: 'space-between',
     gap: 16,
   },
+
   formItemLayout: {
     width: '100%',
     alignItems: 'center',
     gap: 16,
   },
+
+  avatarContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    position: 'relative',
+  },
+
   cameraWrap: {
     position: 'absolute',
     bottom: 0,
@@ -33,39 +58,35 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  avatarContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  inputContainer: {
-    width: '100%',
-  },
-  label: {
-    ...typography.titleS,
-    marginTop: 10,
-    marginBottom: 10,
-    display: 'block',
-  },
-  saveButton: {
-    width: '100%',
-    height: 48,
-    ...typography.button,
-    backgroundColor: '#ef405c',
-    color: '#FFF',
-  },
-  buttonDeleteContainer: {
-    position: 'absolute',
-    right: 0,
-  },
-  buttonDelete: {
-    width: '100%',
-    ...typography.button,
-    backgroundColor: '#ef405c',
-    color: '#FFF',
-  },
+
   labelText: {
     ...typography.button,
+    fontSize: 14,
+  },
+
+  buttonGroup: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+  },
+
+  buttonDelete: {
+    width: '100%',
+    backgroundColor: '#ef405c',
+    color: '#FFF',
+    border: 'none',
+    height: 42,
+    borderRadius: 6,
+  },
+
+  saveButton: {
+    width: '100%',
+    backgroundColor: '#1677ff',
+    color: '#FFF',
+    height: 42,
+    borderRadius: 6,
   },
 });
+
 export default styles;

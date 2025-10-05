@@ -1,24 +1,42 @@
 import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
-  container: {
+  containerDesktop: {
+    flex: 1,
+    gap: 12,
+    padding: 20,
+  },
+
+  containerTablet: {
+    flex: 1,
+    gap: 10,
+    padding: 16,
+  },
+
+  containerMobile: {
     flex: 1,
     gap: 8,
+    padding: 12,
   },
-  button: {
-    backgroundColor: '#ef405c',
-    padding: 4,
-    minWidth: 70,
-    borderColor: '#ef405c',
-    borderRadius: 8,
-    borderWidth: 1,
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginBottom: 8,
   },
-  buttonText: {
-    color: '#FFF',
+
+  tableContainer: {
+    flex: 1,
+    overflow: 'auto',
   },
+
   subTitle: {
-    ...typography.body1,
+    ...typography.body2,
+    fontSize: 13,
   },
+
   status: {
     padding: 4,
     width: 80,

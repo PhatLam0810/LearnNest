@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import { useAppDispatch, useAppSelector } from '@redux';
 import AppModalSuccess from '@components/AppModalSuccess';
 import { authAction, authQuery } from '~mdAuth/redux';
+import { useResponsive } from '@/styles/responsive'; // 🟢 thêm
 
 const TransactionHistory = () => {
   const divRef = useRef(null);
@@ -23,10 +24,11 @@ const TransactionHistory = () => {
   const { listItem, currentData, fetchData, refresh, search } =
     useAppPagination<TransactionItem>({
       apiUrl: '/transaction/getAllTransaction',
-      params: {
-        userId: userProfile?._id,
-      },
+      params: { userId: userProfile?._id },
     });
+
+  const { isMobile, isTablet } = useResponsive(); // 🟢 thêm
+
   const columns: TableProps<TransactionItem>['columns'] = [
     {
       title: 'Transaction ID',
@@ -35,6 +37,7 @@ const TransactionHistory = () => {
       render: (_, record) => (
         <Text style={styles.subTitle}> {record.paymentId} </Text>
       ),
+      width: isMobile ? 150 : 200,
     },
     {
       title: 'Lesson Name',
@@ -42,6 +45,7 @@ const TransactionHistory = () => {
       render: (_, record) => (
         <Text style={styles.subTitle}> {record.title} </Text>
       ),
+      width: isMobile ? 150 : 200,
     },
     {
       title: 'Amount',
@@ -57,15 +61,17 @@ const TransactionHistory = () => {
           </View>
         );
       },
+      width: isMobile ? 100 : 150,
     },
     {
       title: 'Date created',
       key: 'Date created',
       render: (_, record) => (
         <Text style={styles.subTitle}>
-          {dayjs(record.createdAt).format('HH:MM DD/MM/YYYY')}
+          {dayjs(record.createdAt).format('HH:mm DD/MM/YYYY')}
         </Text>
       ),
+      width: isMobile ? 150 : 200,
     },
     {
       title: 'Status',
@@ -75,67 +81,68 @@ const TransactionHistory = () => {
         const backgroundColor = isSuccess ? '#6BC49729' : '#EB6F7029';
         const color = isSuccess ? '#47B881' : '#f95f5b';
         return (
-          <View style={[styles.status, { backgroundColor: backgroundColor }]}>
-            <Text
-              style={[styles.subTitle, { color: color, textAlign: 'center' }]}>
+          <View style={[styles.status, { backgroundColor }]}>
+            <Text style={[styles.subTitle, { color, textAlign: 'center' }]}>
               {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
             </Text>
           </View>
         );
       },
+      width: isMobile ? 100 : 120,
     },
   ];
 
   useEffect(() => {
-    if (divRef.current) {
-      setHeight(divRef.current.offsetHeight);
-    }
+    if (divRef.current) setHeight(divRef.current.offsetHeight);
   }, []);
 
   const { Search } = Input;
+
   return (
-    <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
+    <View
+      style={
+        isMobile
+          ? styles.containerMobile
+          : isTablet
+            ? styles.containerTablet
+            : styles.containerDesktop
+      }>
+      <View style={styles.header}>
         <Search
-          placeholder="Input search text"
+          placeholder="Search transactions"
           onSearch={search}
-          style={{ width: '50%' }}
+          style={{
+            width: isMobile ? '100%' : isTablet ? '70%' : '50%',
+          }}
         />
       </View>
-      <View ref={divRef} style={{ flex: 1 }}>
+
+      <View ref={divRef} style={styles.tableContainer}>
         <Table
-          scroll={{ y: height - 100 }}
+          scroll={{ x: isMobile ? 600 : undefined, y: height - 100 }}
           columns={columns}
           dataSource={listItem}
-          onChange={res => {
-            fetchData({ pageNum: res.current });
-          }}
           pagination={{
             current: currentData?.pageNum,
             pageSize: currentData?.pageSize,
             total: currentData?.totalRecords,
+            position: ['bottomCenter'],
           }}
           style={{ cursor: 'pointer' }}
-          onRow={record => {
-            return {
-              onClick: async () => {
-                dispatch(authAction.setIsShowLoading(true));
-                const res = await getTransactions({ id: record.paymentId });
-                if (res) {
-                  setIsVisibleModalModalOverview(true);
-                  dispatch(authAction.setIsShowLoading(false));
-                  dispatch(authAction.lessonPurchaseData(res.data.data));
-                }
-              },
-            };
-          }}
+          onRow={record => ({
+            onClick: async () => {
+              dispatch(authAction.setIsShowLoading(true));
+              const res = await getTransactions({ id: record.paymentId });
+              if (res) {
+                setIsVisibleModalModalOverview(true);
+                dispatch(authAction.setIsShowLoading(false));
+                dispatch(authAction.lessonPurchaseData(res.data.data));
+              }
+            },
+          })}
         />
       </View>
+
       <AppModalSuccess
         isVisibleModalSuccess={isVisibleModalOverview}
         setIsVisibleModalSuccess={setIsVisibleModalModalOverview}
