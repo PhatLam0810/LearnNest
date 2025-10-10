@@ -12,10 +12,12 @@ import NextImage from 'next/image';
 import YouTube from 'react-youtube';
 import { Button, Modal, Radio } from 'antd';
 import { messageApi } from '@hooks';
+import { useAppSelector } from '@redux';
 
 type LibraryDetailItemProps = {
   data: Library;
   onWatchFinish?: () => void;
+  onPauseVideo?: () => void;
   onClickSubmit?: (answerList: any) => void;
 };
 
@@ -46,7 +48,10 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   };
   const player = playerRef.current;
   const video = videoRef.current;
-
+  const videoStatus = useAppSelector(
+    state => state.dashboardReducer.videoStatus,
+  );
+  console.log(videoStatus);
   useEffect(() => {
     const interval = setInterval(() => {
       if (playerRef.current) {
@@ -112,11 +117,14 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
           setMaxWatched(0);
           clearInterval(interval);
         }
+        if (!videoStatus) {
+          video.pause();
+        }
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastPlayed, data, shownQuestionIds]);
+  }, [lastPlayed, data, shownQuestionIds, videoStatus]);
   // useEffect(() => {
   //   const interval = setInterval(() => {
   //     const isYouTube = !!player;
@@ -250,6 +258,7 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
                 src={data.url}
                 width="100%"
                 height="100%"
+                autoPlay={false}
                 controls
                 controlsList="nodownload noseek"
               />
@@ -265,7 +274,7 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
                   opts={{
                     width: '100%',
                     height: '100%',
-                    playerVars: { controls: 1, autoplay: 1 },
+                    playerVars: { controls: 1, autoplay: 0 },
                   }}
                   style={{
                     position: 'absolute',

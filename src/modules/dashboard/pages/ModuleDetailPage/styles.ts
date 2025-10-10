@@ -105,12 +105,6 @@ const styles = StyleSheet.create({
     ...typography.body2,
     color: '#8D8D8D',
   },
-  layout: {
-    width: '100%',
-    height: '100%',
-    gap: 24,
-    overflow: 'hidden',
-  },
   layoutTitleContainer: {
     width: '100%',
     display: 'flex',

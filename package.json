@@ -19,6 +19,7 @@
     "@react-pdf/renderer": "^4.1.6",
     "@reduxjs/toolkit": "^2.5.0",
     "@svgr/webpack": "^8.1.0",
+    "@tensorflow-models/face-landmarks-detection": "^1.0.6",
     "@tensorflow-models/facemesh": "^0.0.5",
     "@tensorflow/tfjs": "^4.22.0",
     "@tiptap/extension-image": "^2.11.3",

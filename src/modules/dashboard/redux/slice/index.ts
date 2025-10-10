@@ -11,6 +11,7 @@ import { Library } from '~mdDashboard/types';
 const initialState: HomeInitialState = {
   lessonDetail: {},
   subLessonDetail: {},
+  videoStatus: true,
 };
 
 export const dashboardSlice = createSlice({
@@ -43,6 +44,9 @@ export const dashboardSlice = createSlice({
     },
     setSelectedLibrary: (s, a: PayloadAction<Library>) => {
       s.selectedLibrary = a.payload;
+    },
+    setVideoStatus: (s, a: PayloadAction<boolean>) => {
+      s.videoStatus = a.payload;
     },
   },
 });

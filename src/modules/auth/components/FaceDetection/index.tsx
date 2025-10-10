@@ -1,173 +1,147 @@
+'use client';
 import React, { useRef, useEffect, useState } from 'react';
-import Webcam from 'react-webcam';
 import * as tf from '@tensorflow/tfjs';
 import * as facemesh from '@tensorflow-models/facemesh';
-import { usePathname, useRouter } from 'next/navigation';
+import { Modal } from 'antd';
+import { useRouter } from 'next/navigation';
+import { useAppDispatch } from '@redux';
+import { dashboardAction } from '~mdDashboard/redux';
 
 const FaceDetection = () => {
-  const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [showWarning, setShowWarning] = useState(false);
-  const [openCamera, setOpenCamera] = useState(true);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const offFaceCountRef = useRef(0);
+  const [showWarning, setShowWarning] = useState(false);
+  const [warningText, setWarningText] = useState('');
   const router = useRouter();
-  const animationFrameIdRef = useRef(null);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    let model = null;
-    let isMounted = true; // 👈 để tránh leak vòng lặp
+    let model: facemesh.FaceMesh | null = null;
+    let animationFrameId: number;
+    let isMounted = true;
+
+    // 🚀 Khởi tạo webcam thật
+    const setupCamera = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 640, height: 480 },
+          audio: false,
+        });
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+      } catch (err) {
+        Modal.error({
+          title: 'Không thể mở camera 🚫',
+          content:
+            'Vui lòng kiểm tra lại kết nối camera và cho phép truy cập webcam.',
+          onOk: () => router.back(),
+        });
+      }
+    };
 
     const runFaceMesh = async () => {
-      console.log('🚀 Init TensorFlow backend...');
+      console.log('🚀 Đang khởi tạo TensorFlow backend...');
       await tf.setBackend('webgl');
       await tf.ready();
-      console.log('✅ TensorFlow backend ready');
 
-      console.log('📦 Loading FaceMesh model...');
+      console.log('📦 Đang tải model FaceMesh...');
       model = await facemesh.load();
-      console.log('✅ FaceMesh model loaded');
+      console.log('✅ Model FaceMesh đã sẵn sàng.');
 
       const detect = async () => {
-        if (!isMounted) return; // 👈 đã unmount thì dừng hẳn
+        if (!isMounted || !videoRef.current || !canvasRef.current || !model)
+          return;
+        const video = videoRef.current;
+        const ctx = canvasRef.current.getContext('2d');
+        if (!ctx) return;
 
-        try {
-          if (!webcamRef.current) {
-            console.log('⏸️ webcamRef chưa sẵn sàng');
-          } else if (webcamRef.current.video.readyState !== 4) {
-            console.log('📷 Camera chưa sẵn sàng');
-          } else {
-            const video = webcamRef.current.video;
-            const videoWidth = video.videoWidth;
-            const videoHeight = video.videoHeight;
+        const predictions = await model.estimateFaces(video);
 
-            // gán kích thước cho canvas và video
-            webcamRef.current.video.width = videoWidth;
-            webcamRef.current.video.height = videoHeight;
-            canvasRef.current.width = videoWidth;
-            canvasRef.current.height = videoHeight;
+        ctx.clearRect(0, 0, video.videoWidth, video.videoHeight);
+        ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+        if (predictions.length > 0) {
+          const keypoints = predictions[0].scaledMesh;
+          offFaceCountRef.current = 0; // reset khi phát hiện lại khuôn mặt
 
-            console.log('🎥 Detecting frame...');
-            const predictions = await model.estimateFaces({ input: video });
-            const ctx = canvasRef.current.getContext('2d');
-            ctx.clearRect(0, 0, videoWidth, videoHeight);
+          // 🎯 Vẽ landmark lên khuôn mặt
 
-            if (predictions.length > 0) {
-              console.log(`😀 Phát hiện ${predictions.length} khuôn mặt`);
+          // 🔍 Tính hướng đầu (yaw/pitch)
+          const leftCheek = keypoints[234];
+          const rightCheek = keypoints[454];
 
-              predictions.forEach((prediction, idx) => {
-                const keypoints = prediction.scaledMesh;
+          const yaw = (rightCheek[0] - leftCheek[0]) / 200; // quay trái/phải
 
-                // vẽ keypoints
-                keypoints.forEach(([x, y]) => {
-                  ctx.beginPath();
-                  ctx.arc(x, y, 1.5, 0, 2 * Math.PI);
-                  ctx.fillStyle = 'aqua';
-                  ctx.fill();
-                });
+          let offCenter = false;
 
-                // check hướng mặt
-                const leftEye = keypoints[33];
-                const rightEye = keypoints[263];
-                const eyeDx = Math.abs(leftEye[0] - rightEye[0]);
-
-                if (eyeDx < 50) {
-                  offFaceCountRef.current += 1;
-                  console.log(
-                    '⚠️ Mặt không nhìn thẳng:',
-                    offFaceCountRef.current,
-                  );
-                } else {
-                  offFaceCountRef.current = 0;
-                  console.log('✅ Mặt nhìn thẳng');
-                }
-
-                if (offFaceCountRef.current >= 3) {
-                  setShowWarning(true);
-                } else {
-                  setShowWarning(false);
-                }
-              });
-            } else {
-              offFaceCountRef.current += 1;
-              console.log('❌ Không tìm thấy mặt:', offFaceCountRef.current);
-
-              if (offFaceCountRef.current >= 3) {
-                setShowWarning(true);
-              }
-            }
+          if (yaw < 0.5) {
+            offCenter = true;
           }
-        } catch (err) {
-          console.error('❌ detect error:', err);
+
+          if (offCenter) {
+            setShowWarning(true);
+            dispatch(dashboardAction.setVideoStatus(false));
+          } else {
+            setShowWarning(false);
+            dispatch(dashboardAction.setVideoStatus(true));
+          }
+        } else {
+          // Không phát hiện khuôn mặt
+          offFaceCountRef.current += 1;
+          if (offFaceCountRef.current >= 10) {
+            setWarningText('🚨 Không phát hiện khuôn mặt!');
+            setShowWarning(true);
+          }
         }
 
-        // tiếp tục loop nếu còn mounted
-        if (isMounted) {
-          animationFrameIdRef.current = requestAnimationFrame(detect);
-        }
+        if (isMounted) animationFrameId = requestAnimationFrame(detect);
       };
 
-      console.log('▶️ Bắt đầu detection loop...');
       detect();
     };
 
-    if (openCamera) {
-      runFaceMesh();
-    }
+    setupCamera().then(runFaceMesh);
 
     return () => {
-      // cleanup
       isMounted = false;
-      if (animationFrameIdRef.current) {
-        cancelAnimationFrame(animationFrameIdRef.current);
-        animationFrameIdRef.current = null;
-        console.log('🛑 Stop detection loop (cleanup)');
-      }
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      model = null;
+      console.log('🛑 Dừng detection loop.');
     };
-  }, [openCamera]);
+  }, [router]);
 
   return (
-    <div style={{ width: 640, height: 480 }}>
-      <Webcam
-        ref={webcamRef}
-        audio={false}
-        videoConstraints={{ facingMode: 'user' }}
-        onUserMediaError={err => {
-          alert(
-            '⚠️ No webcam detected. Please connect a camera to use this feature.',
-          );
-          router.back(); // 👈 Quay lại trang trước
-          setOpenCamera(false);
-        }}
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <video
+        ref={videoRef}
+        height="200"
         style={{
-          position: 'absolute',
-          left: 0,
-          bottom: 0,
-          width: 640,
-          height: 480,
-          zIndex: 3,
+          float: 'left',
+          overflow: 'hidden',
+          zIndex: 4,
+        }}
+      />
+      <canvas
+        ref={canvasRef}
+        width="200"
+        height="480"
+        style={{
+          display: 'none',
         }}
       />
 
-      {/* Modal cảnh báo nếu không nhìn thẳng */}
-      {showWarning && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '30%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'rgba(255, 0, 0, 0.85)',
-            color: 'white',
-            padding: 20,
-            borderRadius: 10,
-            zIndex: 1000,
-            fontSize: 18,
-            fontWeight: 'bold',
-            textAlign: 'center',
-          }}>
-          🚨 Please look straight at the screen!
-        </div>
-      )}
+      <Modal
+        open={showWarning}
+        centered
+        closable={false}
+        footer={null}
+        style={{ textAlign: 'center' }}>
+        <p style={{ fontSize: 18, fontWeight: 'bold', color: 'red' }}>
+          {warningText}
+        </p>
+      </Modal>
     </div>
   );
 };

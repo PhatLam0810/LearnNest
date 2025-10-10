@@ -11,6 +11,7 @@ export type HomeInitialState = {
   selectedSubLessonStart?: SelectedSubLessonPayload;
   selectedModule?: Module;
   selectedLibrary?: Library;
+  videoStatus: boolean;
 };
 
 export type SelectedSubLessonPayload = {

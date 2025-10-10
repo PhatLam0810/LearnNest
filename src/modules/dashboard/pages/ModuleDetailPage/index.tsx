@@ -166,64 +166,63 @@ const ModuleDetailPage = () => {
     <View style={styles.container}>
       {contextHolder}
       <AppHeader title={selectedModule?.title} subTitle={lessonDetail?.title} />
-      <View style={styles.layout}>
-        <View style={{ flex: 1, flexDirection: 'row', gap: 24 }}>
-          <ScrollView
-            style={{ width: '70%' }}
-            contentContainerStyle={{ paddingBottom: 100 }}>
-            {selectedLibrary?.type === 'Text' ? (
-              <>
-                <View style={styles.layoutTitleContainer}>
-                  <View style={{ width: '100%', flex: 1 }}>
-                    <Text style={styles.layoutTitle}>
-                      {selectedLibrary?.title}
-                    </Text>
-                  </View>
-                </View>
-                <LibraryDetailItem
-                  data={selectedLibrary}
-                  onWatchFinish={onWatchFinish}
-                  onClickSubmit={handleSubmit}
-                />
-              </>
-            ) : (
-              <>
-                <LibraryDetailItem
-                  data={selectedLibrary}
-                  onWatchFinish={onWatchFinish}
-                />
-                <View style={styles.layoutTitleContainer}>
-                  <View style={{ width: '100%', flex: 1 }}>
-                    <Text style={styles.layoutTitle}>
-                      {selectedLibrary?.title}
-                    </Text>
-                    <Text style={styles.description}>
-                      {selectedLibrary?.description}
-                    </Text>
-                  </View>
-                </View>
-              </>
-            )}
-          </ScrollView>
-          <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-            {lessonDetail?.modules?.length > 0 && (
-              <View style={styles.lessonContent}>
-                <Text style={styles.lessonContentTitle}>Lesson Content</Text>
-                <View style={{ gap: 12 }}>
-                  <Collapse
-                    bordered={false}
-                    defaultActiveKey={[0]}
-                    expandIcon={({ isActive }) => (
-                      <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                    )}
-                    items={getItems(panelStyle)}
-                  />
+      <View style={{ flexDirection: 'row', gap: 24 }}>
+        <ScrollView
+          style={{ width: '70%' }}
+          contentContainerStyle={{ paddingBottom: 100 }}>
+          {selectedLibrary?.type === 'Text' ? (
+            <>
+              <View style={styles.layoutTitleContainer}>
+                <View style={{ width: '100%', flex: 1 }}>
+                  <Text style={styles.layoutTitle}>
+                    {selectedLibrary?.title}
+                  </Text>
                 </View>
               </View>
-            )}
-          </ScrollView>
-        </View>
-        <FaceDetection />
+              <LibraryDetailItem
+                data={selectedLibrary}
+                onWatchFinish={onWatchFinish}
+                onClickSubmit={handleSubmit}
+              />
+            </>
+          ) : (
+            <>
+              <LibraryDetailItem
+                data={selectedLibrary}
+                onWatchFinish={onWatchFinish}
+              />
+              <View style={styles.layoutTitleContainer}>
+                <View style={{ width: '100%', flex: 1 }}>
+                  <Text style={styles.layoutTitle}>
+                    {selectedLibrary?.title}
+                  </Text>
+                  <Text style={styles.description}>
+                    {selectedLibrary?.description}
+                  </Text>
+                </View>
+              </View>
+            </>
+          )}
+        </ScrollView>
+        <ScrollView
+          style={{ height: 1000, scrollbarWidth: 'none' }}
+          contentContainerStyle={{ paddingBottom: 100 }}>
+          {lessonDetail?.modules?.length > 0 && (
+            <View>
+              <Text style={styles.lessonContentTitle}>Lesson Content</Text>
+              <View style={{ gap: 12 }}>
+                <Collapse
+                  bordered={false}
+                  defaultActiveKey={[0]}
+                  expandIcon={({ isActive }) => (
+                    <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                  )}
+                  items={getItems(panelStyle)}
+                />
+              </View>
+            </View>
+          )}
+        </ScrollView>
       </View>
     </View>
   );

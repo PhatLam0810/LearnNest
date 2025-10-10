@@ -85,7 +85,7 @@ const LibraryManage = () => {
 
   useEffect(() => {
     if (divRef.current) {
-      setHeight(divRef.current.offsetHeight);
+      setHeight(divRef.current.offsetHeight * 3);
     }
   }, []);
 
