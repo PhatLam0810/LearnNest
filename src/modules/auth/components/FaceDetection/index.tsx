@@ -7,7 +7,11 @@ import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '@redux';
 import { dashboardAction } from '~mdDashboard/redux';
 
-const FaceDetection = () => {
+type FaceDetectionProps = {
+  onPauseVideo: () => void;
+};
+
+const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const offFaceCountRef = useRef(0);
@@ -93,6 +97,7 @@ const FaceDetection = () => {
           if (offFaceCountRef.current >= 10) {
             setWarningText('🚨 Không phát hiện khuôn mặt!');
             setShowWarning(true);
+            onPauseVideo();
           }
         }
 
@@ -113,10 +118,10 @@ const FaceDetection = () => {
   }, [router]);
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
+    <div style={{ display: 'flex' }}>
       <video
         ref={videoRef}
-        height="200"
+        height="250"
         style={{
           float: 'left',
           overflow: 'hidden',

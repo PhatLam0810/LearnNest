@@ -1,9 +1,11 @@
-import React, { CSSProperties, useEffect, useState } from 'react';
+import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
-import LibraryDetailItem from '../SubLessonDetailPage/_components/LibraryDetailItem';
+import LibraryDetailItem, {
+  LibraryDetailItemHandle,
+} from '../SubLessonDetailPage/_components/LibraryDetailItem';
 import { AppHeader } from '@components';
 import { Button, Collapse, CollapseProps, Modal } from 'antd';
 import { convertDurationToTime } from '@utils';
@@ -15,6 +17,7 @@ const ModuleDetailPage = () => {
     state => state.dashboardReducer,
   );
   const dispatch = useAppDispatch();
+  const libraryRef = useRef<LibraryDetailItemHandle>(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
@@ -162,6 +165,11 @@ const ModuleDetailPage = () => {
 
     showModal(correctCount, totalQuestions, score, isPass);
   };
+
+  const handlePauseVideo = () => {
+    libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
+  };
+
   return (
     <View style={styles.container}>
       {contextHolder}
@@ -180,6 +188,7 @@ const ModuleDetailPage = () => {
                 </View>
               </View>
               <LibraryDetailItem
+                ref={libraryRef}
                 data={selectedLibrary}
                 onWatchFinish={onWatchFinish}
                 onClickSubmit={handleSubmit}
@@ -188,6 +197,7 @@ const ModuleDetailPage = () => {
           ) : (
             <>
               <LibraryDetailItem
+                ref={libraryRef}
                 data={selectedLibrary}
                 onWatchFinish={onWatchFinish}
               />
@@ -208,18 +218,21 @@ const ModuleDetailPage = () => {
           style={{ height: 1000, scrollbarWidth: 'none' }}
           contentContainerStyle={{ paddingBottom: 100 }}>
           {lessonDetail?.modules?.length > 0 && (
-            <View>
-              <Text style={styles.lessonContentTitle}>Lesson Content</Text>
-              <View style={{ gap: 12 }}>
-                <Collapse
-                  bordered={false}
-                  defaultActiveKey={[0]}
-                  expandIcon={({ isActive }) => (
-                    <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                  )}
-                  items={getItems(panelStyle)}
-                />
-              </View>
+            <View style={{ gap: 24 }}>
+              <ScrollView contentContainerStyle={{ aspectRatio: 16 / 19 }}>
+                <Text style={styles.lessonContentTitle}>Lesson Content</Text>
+                <View style={{ gap: 12 }}>
+                  <Collapse
+                    bordered={false}
+                    defaultActiveKey={[0]}
+                    expandIcon={({ isActive }) => (
+                      <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                    )}
+                    items={getItems(panelStyle)}
+                  />
+                </View>
+              </ScrollView>
+              <FaceDetection onPauseVideo={handlePauseVideo} />
             </View>
           )}
         </ScrollView>

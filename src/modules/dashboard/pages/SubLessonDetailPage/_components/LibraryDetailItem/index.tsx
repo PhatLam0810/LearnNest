@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import { View } from 'react-native-web';
 import { Document, Page } from 'react-pdf';
 import { FullscreenOutlined } from '@ant-design/icons';
-import ReactPlayer from 'react-player';
 import { Library } from '~mdDashboard/types';
 import styles from './styles';
-import { handleConvert } from './functions';
-import NextImage from 'next/image';
 import YouTube from 'react-youtube';
 import { Button, Modal, Radio } from 'antd';
 import { messageApi } from '@hooks';
@@ -20,12 +23,13 @@ type LibraryDetailItemProps = {
   onPauseVideo?: () => void;
   onClickSubmit?: (answerList: any) => void;
 };
-
-const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
-  data,
-  onWatchFinish,
-  onClickSubmit,
-}) => {
+export interface LibraryDetailItemHandle {
+  pauseAll: () => void;
+}
+const LibraryDetailItem = forwardRef<
+  LibraryDetailItemHandle,
+  LibraryDetailItemProps
+>(({ data, onWatchFinish, onClickSubmit }, ref) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -51,7 +55,6 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
   const videoStatus = useAppSelector(
     state => state.dashboardReducer.videoStatus,
   );
-  console.log(videoStatus);
   useEffect(() => {
     const interval = setInterval(() => {
       if (playerRef.current) {
@@ -125,53 +128,15 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
 
     return () => clearInterval(interval);
   }, [lastPlayed, data, shownQuestionIds, videoStatus]);
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     const isYouTube = !!player;
 
-  //     const currentTime = isYouTube
-  //       ? Math.floor(player?.getCurrentTime?.())
-  //       : Math.floor(video?.currentTime);
-  //     const duration = isYouTube
-  //       ? player?.getDuration?.() || 1
-  //       : video?.duration || 1;
-
-  //     if (!duration) return;
-
-  //     const percentWatched = (maxWatched / duration) * 100;
-
-  //     // 🎯 Nếu đến đúng appearTime và chưa hiện câu hỏi này
-  //     const matchedQuestion = data.questionList.find(
-  //       q => q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
-  //     );
-
-  //     if (matchedQuestion) {
-  //       setVisibleQuestion(matchedQuestion);
-  //       isYouTube ? player.pauseVideo() : video.pause();
-  //     }
-
-  //     // ✅ Chặn tua quá xa
-  //     if (currentTime > maxWatched + 5) {
-  //       warning();
-  //       isYouTube
-  //         ? (player.pauseVideo(), player.seekTo(lastPlayed))
-  //         : (video.pause(), (video.currentTime = lastPlayed));
-  //     } else {
-  //       setLastPlayed(currentTime);
-  //       setMaxWatched(prev => Math.max(prev, currentTime));
-  //     }
-
-  //     // ✅ Nếu xem xong
-  //     if (percentWatched >= 99) {
-  //       onWatchFinish();
-  //       clearInterval(interval);
-  //       setMaxWatched(0);
-  //     }
-  //   }, 1000);
-
-  //   return () => clearInterval(interval);
-  // }, [lastPlayed, data, shownQuestionIds]);
-
+  useImperativeHandle(ref, () => ({
+    pauseAll: () => {
+      if (videoRef.current) videoRef.current.pause();
+      if (playerRef.current) {
+        playerRef.current.pauseVideo();
+      }
+    },
+  }));
   const handleClose = () => {
     if (!visibleQuestion || selectedAnswer === null) return;
     const isCorrect = selectedAnswer === visibleQuestion.correctAnswer;
@@ -415,6 +380,6 @@ const LibraryDetailItem: React.FC<LibraryDetailItemProps> = ({
       </Modal>
     </View>
   );
-};
-
+});
+LibraryDetailItem.displayName = 'LibraryDetailItem';
 export default LibraryDetailItem;

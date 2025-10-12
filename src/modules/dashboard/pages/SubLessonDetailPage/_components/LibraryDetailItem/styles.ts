@@ -8,6 +8,7 @@ const styles = StyleSheet.create({
   mediaContainer: {
     width: '100%',
     aspectRatio: 16 / 9,
+
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: '#00000010',
@@ -64,6 +65,17 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     color: 'white',
     borderRadius: 8,
+  },
+  layoutTitleContainer: {
+    width: '100%',
+    display: 'flex',
+    gap: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  layoutTitle: {
+    ...typography.titleM,
+    fontSize: 28,
   },
 });
 
