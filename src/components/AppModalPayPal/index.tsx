@@ -112,10 +112,6 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
         handlePurchaseSuccess(Math.random().toString(32), 'failed');
       } else if (error.code === 'ACTION_REJECTED') {
         handlePurchaseSuccess(Math.random().toString(32), 'failed');
-      } else if (error.code === 'CALL_EXCEPTION') {
-        messageApi.error('Lỗi smart contract: có thể tham số không hợp lệ.');
-      } else {
-        messageApi.error(`Transaction failed: ${error.message || error}`);
       }
     } finally {
       setIsLoading(false);
