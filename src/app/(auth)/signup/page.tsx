@@ -40,7 +40,7 @@ const SignUpPage = () => {
   const handleSendOtp = async (email: string) => {
     try {
       dispatch(authAction.setIsShowLoading(true));
-      const response = await sendOtp({ email });
+      const response = await sendOtp({ email, type: 0 });
       if (response.data) {
         dispatch(authAction.sendOtpInfo({ email }));
         router.push('signup/createAccount');

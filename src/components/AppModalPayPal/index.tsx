@@ -53,7 +53,7 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
   const handleSendOtp = async (email: string) => {
     setIsLoading(true);
     try {
-      const response = await sendOtp({ email: email });
+      const response = await sendOtp({ email: email, type: 1 });
       if (response.data) {
         messageApi.open({
           type: 'success',
@@ -210,34 +210,23 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
       <View style={{ flex: 1 }}>
         {contextHolder}
         <LessonContent data={data} accessLesson={accessLesson} />
-        {verifyInfo ? (
-          <View style={styles.buttonGroup}>
-            <Button
-              type="primary"
-              style={styles.button}
-              onClick={createTransaction}
-              loading={isLoading}>
-              Continue with MetaMask
-            </Button>
-            <Button
-              type="primary"
-              style={styles.button}
-              onClick={createConnection}
-              loading={isLoading}>
-              Continue with WalletConnect
-            </Button>
-          </View>
-        ) : (
+
+        <View style={styles.buttonGroup}>
           <Button
             type="primary"
             style={styles.button}
-            onClick={() => {
-              handleSendOtp(userProfile?.email);
-            }}
+            onClick={createTransaction}
             loading={isLoading}>
-            Verify with OTP
+            Continue with MetaMask
           </Button>
-        )}
+          <Button
+            type="primary"
+            style={styles.button}
+            onClick={createConnection}
+            loading={isLoading}>
+            Continue with WalletConnect
+          </Button>
+        </View>
       </View>
       <VerifyOtpModal
         isVisible={isVisibleVerify}

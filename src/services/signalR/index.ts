@@ -5,7 +5,7 @@ class RealTimeCommentService {
   private socket: Socket;
 
   constructor() {
-    this.socket = io('http://127.0.0.1:9999'); // thay bằng URL BE của bạn
+    // this.socket = io('http://127.0.0.1:9999'); // thay bằng URL BE của bạn
   }
 
   // Lắng nghe sự kiện nhận comment

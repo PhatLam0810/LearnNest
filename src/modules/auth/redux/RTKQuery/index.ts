@@ -9,7 +9,7 @@ export const authQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<LessonRecommendRes>) => res.data,
     }),
     sendOtp: builder.mutation({
-      query: (params: { email: string }) => ({
+      query: (params: { email: string; type: number }) => ({
         url: '/otp/send',
         method: 'POST',
         body: params,
@@ -17,7 +17,7 @@ export const authQuery = baseQuery.injectEndpoints({
       transformResponse: (response: any) => response,
     }),
     sendTransactionOtp: builder.mutation({
-      query: (params: { email: string }) => ({
+      query: (params: { email: string; type: number }) => ({
         url: '/otp/sendTransaction',
         method: 'POST',
         body: params,

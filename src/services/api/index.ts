@@ -7,8 +7,7 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
-export const BASE_URL_AUTH =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:9999';
+export const BASE_URL_AUTH = process.env.NEXT_PUBLIC_API_BASE_URL;
 const api = axios.create({
   baseURL: BASE_URL_AUTH,
   headers,
