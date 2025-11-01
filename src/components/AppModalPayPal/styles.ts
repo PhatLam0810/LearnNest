@@ -13,6 +13,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#ef405c',
     color: '#FFF',
   },
+  buttonGroup: {
+    flexDirection: 'column',
+    gap: 16,
+  },
 });
 
 export default styles;

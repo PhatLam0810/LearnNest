@@ -15,6 +15,11 @@ import './styles.css';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Chatbox from '@components/ChatboxAi';
+import { WagmiProvider } from 'wagmi';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import walletConnectConfig from '@services/walletconnect';
+
+const queryClient = new QueryClient();
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -42,19 +47,23 @@ export default function RootLayout({
             intent: 'capture',
           }}>
           <Provider store={store}>
-            <PersistGate persistor={persistor}>
-              <View
-                style={{
-                  flex: 1,
-                  width: '100vw',
-                  height: '100vh',
-                  backgroundColor: '#F9F9F9',
-                }}>
-                {context}
-                {children}
-              </View>
-              <LoadingScreen />
-            </PersistGate>
+            <WagmiProvider config={walletConnectConfig}>
+              <QueryClientProvider client={queryClient}>
+                <PersistGate persistor={persistor}>
+                  <View
+                    style={{
+                      flex: 1,
+                      width: '100vw',
+                      height: '100vh',
+                      backgroundColor: '#F9F9F9',
+                    }}>
+                    {context}
+                    {children}
+                  </View>
+                  <LoadingScreen />
+                </PersistGate>
+              </QueryClientProvider>
+            </WagmiProvider>
             <Chatbox />
             <Authentication />
           </Provider>

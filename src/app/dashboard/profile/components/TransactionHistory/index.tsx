@@ -33,7 +33,9 @@ const TransactionHistory = () => {
       dataIndex: 'transactionId',
       key: 'transactionId',
       render: (_, record) => (
-        <Text style={styles.subTitle}> {record.paymentId} </Text>
+        <Text style={styles.subTitle} numberOfLines={1}>
+          {record.paymentId.slice(0, 20)}...
+        </Text>
       ),
     },
     {
@@ -48,11 +50,10 @@ const TransactionHistory = () => {
       dataIndex: 'Amount',
       key: 'Amount',
       render: (_, record) => {
-        const amount = (record?.amount || 0).toLocaleString('en-US');
         return (
           <View style={{ display: 'flex', gap: 8 }}>
             <Text style={[styles.subTitle, { color: '#f95f5b' }]}>
-              - {amount}$
+              - {record?.amount} {record.currency}
             </Text>
           </View>
         );
@@ -88,7 +89,7 @@ const TransactionHistory = () => {
 
   useEffect(() => {
     if (divRef.current) {
-      setHeight(divRef.current.offsetHeight);
+      setHeight(divRef.current.offsetHeight * 3);
     }
   }, []);
 

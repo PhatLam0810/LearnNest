@@ -54,6 +54,9 @@ export const authSlice = createSlice({
     },
 
     viewDetailTransaction: (s, a: PayloadAction<{ id: string }>) => {},
+    walletAddress: (s, a: PayloadAction<string>) => {
+      s.walletAddress = a.payload;
+    },
   },
 });
 

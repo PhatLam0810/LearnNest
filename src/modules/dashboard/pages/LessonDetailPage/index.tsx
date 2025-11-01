@@ -364,7 +364,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
             />
           </View>
         )}
-        {/* <AppComment postId={lessonDetail._id} /> */}
       </ScrollView>
       <AppModalPayPal
         isVisibleModalBuy={isVisibleModalBuy}

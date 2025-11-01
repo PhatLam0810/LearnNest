@@ -48,7 +48,7 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
             <View style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
               <Text style={styles.titleText}>Buy Lesson Successfully</Text>
               <Text style={[styles.subTitle, { color: '#47B881' }]}>
-                - {(lessonPurchaseData?.amount || 0).toLocaleString('en-US')}$
+                - {lessonPurchaseData?.amount} {lessonPurchaseData?.currency}
               </Text>
             </View>
           </>
@@ -63,7 +63,7 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
             <View style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
               <Text style={styles.titleText}>Buy Lesson Failed</Text>
               <Text style={[styles.subTitle, { color: '#f95f5b' }]}>
-                - {(lessonPurchaseData?.amount || 0).toLocaleString('en-US')}$
+                - {lessonPurchaseData?.amount} {lessonPurchaseData?.currency}
               </Text>
             </View>
           </>
@@ -79,8 +79,8 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
           }}>
           <View style={styles.row}>
             <Text style={styles.rowTitle}>Transaction ID</Text>
-            <Text style={styles.rowSubTitle}>
-              {lessonPurchaseData?.paymentId}
+            <Text style={styles.rowSubTitle} numberOfLines={1}>
+              {lessonPurchaseData?.paymentId.slice(0, 20)}...
             </Text>
           </View>
           <View style={styles.row}>
@@ -95,11 +95,6 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
           </View>
         </View>
         <View style={styles.buttonContainer}>
-          {isDetail && (
-            <Button onClick={onViewDetail} style={styles.cancelButton}>
-              View Detail
-            </Button>
-          )}
           <Button
             onClick={onCloseModalAdd}
             type="primary"

@@ -39,6 +39,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const [isPremium, setIsPremium] = useState(initialValues?.isPremium);
 
   const [listSelected, setListSelected] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isVisibleModalSelect, setIsVisibleModalSelect] = useState(false);
 
   const onFinish = (values: CreateLessonFrom) => {
@@ -59,6 +60,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             form.resetFields();
             onDone && onDone(res);
             setListSelected([]);
+            setIsLoading(false);
           })
           .catch(() => {
             messageApi.error('Add new lesson failed!');
@@ -144,16 +146,17 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                           },
                           {
                             validator: (_, value) =>
-                              value && value > 500
+                              value && value > 10
                                 ? Promise.reject(
-                                    new Error('Maximum price is $500!'),
+                                    new Error('Maximum price is 10 ETH!'),
                                   )
                                 : Promise.resolve(),
                           },
                         ]}>
                         <InputNumber
-                          addonAfter="$"
-                          min={1}
+                          addonAfter="ETH"
+                          min={0.0001}
+                          step={0.0001}
                           value={initialValues?.price || 0}
                           placeholder="Enter price"
                           style={{ width: '100%' }}
@@ -254,7 +257,14 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               )}
             />
           </ScrollView>
-          <Button style={styles.btn} type="primary" htmlType="submit">
+          <Button
+            loading={isLoading}
+            onClick={() => {
+              setIsLoading(true);
+            }}
+            style={styles.btn}
+            type="primary"
+            htmlType="submit">
             Done
           </Button>
         </Form>

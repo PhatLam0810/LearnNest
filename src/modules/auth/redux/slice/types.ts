@@ -19,6 +19,7 @@ export type AuthInitialState = {
   isLoading: boolean;
   lessonPurchase?: LessonPurchasePayLoad;
   lessonPurchaseData?: LessonPurchaseData;
+  walletAddress?: string;
 };
 
 export type LoginPayload = LoginApiReq;
