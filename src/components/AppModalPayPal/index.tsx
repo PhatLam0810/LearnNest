@@ -206,23 +206,32 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
       <View style={{ flex: 1 }}>
         {contextHolder}
         <LessonContent data={data} accessLesson={accessLesson} />
-
-        <View style={styles.buttonGroup}>
+        {verifyInfo ? (
+          <View style={styles.buttonGroup}>
+            <Button
+              type="primary"
+              style={styles.button}
+              onClick={createTransaction}
+              loading={isLoading}>
+              Continue with MetaMask
+            </Button>
+            <Button
+              type="primary"
+              style={styles.button}
+              onClick={createConnection}
+              loading={isLoading}>
+              Continue with WalletConnect
+            </Button>
+          </View>
+        ) : (
           <Button
             type="primary"
             style={styles.button}
-            onClick={createTransaction}
+            onClick={() => handleSendOtp(userProfile?.email)}
             loading={isLoading}>
-            Continue with MetaMask
+            Verify OTP
           </Button>
-          <Button
-            type="primary"
-            style={styles.button}
-            onClick={createConnection}
-            loading={isLoading}>
-            Continue with WalletConnect
-          </Button>
-        </View>
+        )}
       </View>
       <VerifyOtpModal
         isVisible={isVisibleVerify}

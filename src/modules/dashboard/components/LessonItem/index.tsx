@@ -8,6 +8,8 @@ import styles from './styles';
 import { Text, View } from 'react-native-web';
 import LessonThumbnail from '../LessonThumbnail';
 import { authQuery } from '~mdAuth/redux';
+import { useAppSelector } from '@redux';
+
 type LessonItemProps = {
   data: {
     thumbnail: string;
@@ -30,12 +32,16 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
     data || {};
   const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
   const [accessLesson, setAccessLesson] = useState(true);
+  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
   useEffect(() => {
     if (isPremium) {
       setAccessLesson(false);
     }
 
-    if (dataSub?.length > 0 && dataSub.some(sub => sub.lessonId === _id)) {
+    if (
+      dataSub?.length > 0 &&
+      dataSub.some(sub => sub.userId === userProfile._id)
+    ) {
       setAccessLesson(true);
     }
   }, [dataSub, isPremium]);

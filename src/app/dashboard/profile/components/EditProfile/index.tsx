@@ -33,7 +33,16 @@ const EditProfile = () => {
             <Form.Item name="avatar" noStyle>
               <AppUploadToServer showUploadList={false} onChange={setAvatar}>
                 <View>
-                  <Avatar src={avatar} size={100} icon={<UserOutlined />} />
+                  <Avatar
+                    src={avatar}
+                    size={100}
+                    icon={<UserOutlined />}
+                    style={{
+                      borderWidth: 1,
+                      borderColor: '#000',
+                      backgroundColor: '#ef405c',
+                    }}
+                  />
                   <View style={styles.cameraWrap}>
                     <CameraOutlined />
                   </View>

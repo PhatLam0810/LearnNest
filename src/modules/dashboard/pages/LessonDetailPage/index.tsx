@@ -120,7 +120,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     if (userProfile?.role?.level <= 2) setAccessLesson(true);
     if (
       dataSub?.length > 0 &&
-      dataSub.some(sub => sub.lessonId === lessonDetail._id)
+      dataSub.some(sub => sub.userId === userProfile._id)
     ) {
       setAccessLesson(true);
     }

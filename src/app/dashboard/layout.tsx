@@ -15,6 +15,7 @@ import {
   ControlOutlined,
   LogoutOutlined,
   MenuOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import './styles.css';
 import { useAppDispatch, useAppSelector } from '@redux';
@@ -110,7 +111,12 @@ export default function DashboardLayout({
           <Avatar
             src={userProfile?.avatar}
             size={100}
-            style={{ borderWidth: 2, borderColor: '#FFA726' }}
+            icon={<UserOutlined />}
+            style={{
+              borderWidth: 1,
+              borderColor: '#000',
+              backgroundColor: '#ef405c',
+            }}
           />
           <Text style={styles.username}>
             {userProfile?.firstName + ' ' + userProfile?.lastName}
