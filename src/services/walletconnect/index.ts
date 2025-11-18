@@ -6,7 +6,7 @@ const walletConnectConfig = createConfig({
   chains: [sepolia], // ✅ chỉ cần 1 lần
   connectors: [
     walletConnect({
-      projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || '',
+      projectId: '3155a65758f7b38413655d9bb5c16e37',
       metadata: {
         name: 'LearnNest',
         description: 'Buy Lesson',
@@ -17,7 +17,9 @@ const walletConnectConfig = createConfig({
     }),
   ],
   transports: {
-    [sepolia.id]: http(process.env.NEXT_PUBLIC_ALCHEMY_API_URL),
+    [sepolia.id]: http(
+      'https://eth-sepolia.g.alchemy.com/v2/I_eQ0rIIHwfehJQpC3ZGx',
+    ),
   },
 });
 export default walletConnectConfig;
