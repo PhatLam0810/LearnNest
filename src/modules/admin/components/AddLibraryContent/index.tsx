@@ -327,7 +327,6 @@ const QuestionItem = ({ remove, name, duration, libraryType, form }: any) => {
     name,
     'answerList',
   ]) || ['', '', '', ''];
-  console.log(answerList);
   return (
     <div style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
       <div
@@ -360,7 +359,7 @@ const QuestionItem = ({ remove, name, duration, libraryType, form }: any) => {
             <p style={{ margin: 0, width: 20 }}>
               {String.fromCharCode(65 + index)}.
             </p>
-            <Input placeholder={`Answer ${label}`} value={label} />
+            <Input placeholder={`Answer ${label}`} />
           </div>
         </Form.Item>
       ))}
