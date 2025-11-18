@@ -122,11 +122,9 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
     setIsLoading(true);
     try {
       const res = await connect({ connector: connectors[0] });
-      console.log(res);
     } catch (error) {
       messageApi.error('Bạn đã từ chối kết nối ví.');
       handlePurchaseSuccess(Math.random().toString(32), 'failed');
-      console.log(error);
     } finally {
       setIsLoading(false);
     }
