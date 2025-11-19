@@ -36,7 +36,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   // const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
   const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
   const [messageApi, contextHolder] = message.useMessage();
   const [lessonDetail, setLessonDetail] = useState<any>(null);
@@ -124,7 +125,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     if (userProfile?.role?.level <= 2) setAccessLesson(true);
     if (
       dataSub?.length > 0 &&
-      dataSub.some(sub => sub.userId === userProfile._id)
+      dataSub.some(sub => sub.userId === userProfile?._id)
     ) {
       setAccessLesson(true);
     }

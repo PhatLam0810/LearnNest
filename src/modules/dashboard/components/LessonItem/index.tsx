@@ -32,7 +32,8 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
     data || {};
   const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
   const [accessLesson, setAccessLesson] = useState(true);
-  const { userProfile } = useAppSelector(state => state.authReducer.tokenInfo);
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
   useEffect(() => {
     if (isPremium) {
       setAccessLesson(false);
@@ -40,7 +41,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
 
     if (
       dataSub?.length > 0 &&
-      dataSub.some(sub => sub.userId === userProfile._id)
+      dataSub.some(sub => sub.userId === userProfile?._id)
     ) {
       setAccessLesson(true);
     }
