@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { LessonItem } from '~mdDashboard/components';
 import { useAppDispatch } from '@redux';
@@ -17,7 +17,7 @@ const HomeOverview = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const { data } = dashboardQuery.useGetLessonRecommendQuery();
+  const { data, isLoading } = dashboardQuery.useGetLessonRecommendQuery();
   const [getLessonId] = dashboardQuery.useGetLessonIdMutation();
   const onClickLesson = async (id: string) => {
     try {
@@ -34,6 +34,14 @@ const HomeOverview = () => {
       dispatch(authAction.setIsShowLoading(false));
     }
   };
+
+  useEffect(() => {
+    if (isLoading) {
+      dispatch(authAction.setIsShowLoading(true));
+    } else {
+      dispatch(authAction.setIsShowLoading(false));
+    }
+  }, [isLoading]);
 
   return (
     <ScrollView style={styles.container}>

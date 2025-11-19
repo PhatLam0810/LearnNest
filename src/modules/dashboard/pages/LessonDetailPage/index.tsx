@@ -99,6 +99,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
 
   useEffect(() => {
     const fetchLesson = async () => {
+      dispatch(authAction.setIsShowLoading(true));
+
       try {
         const res = await getLessonId({ id });
         if (res.data) {
@@ -108,6 +110,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         }
       } catch (err) {
         messageApi.error('loi api');
+      } finally {
+        dispatch(authAction.setIsShowLoading(false));
       }
     };
     if (id) fetchLesson();
@@ -145,11 +149,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   }, [lessonPurchaseData]);
 
   if (!lessonDetail) {
-    return (
-      <div style={{ padding: 20, textAlign: 'center' }}>
-        <p>Bài học không tồn tại hoặc bị xóa</p>
-      </div>
-    );
+    return;
   }
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
