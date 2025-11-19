@@ -16,7 +16,6 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const offFaceCountRef = useRef(0);
   const [showWarning, setShowWarning] = useState(false);
-  const [warningText, setWarningText] = useState('');
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -95,7 +94,6 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
           // Không phát hiện khuôn mặt
           offFaceCountRef.current += 1;
           if (offFaceCountRef.current >= 10) {
-            setWarningText('🚨 Không phát hiện khuôn mặt!');
             setShowWarning(true);
             onPauseVideo();
           }
@@ -138,13 +136,13 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
       />
 
       <Modal
-        open={showWarning}
+        open={false}
         centered
         closable={false}
         footer={null}
         style={{ textAlign: 'center' }}>
         <p style={{ fontSize: 18, fontWeight: 'bold', color: 'red' }}>
-          {warningText}
+          🚨 Không phát hiện khuôn mặt!
         </p>
       </Modal>
     </div>

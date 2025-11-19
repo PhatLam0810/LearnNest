@@ -155,7 +155,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
       form.setFieldsValue({
         questionList: parsedQuestions,
       });
-
       messageApi.success(`Generated ${count} questions using AI.`);
     } catch (error) {
       console.error('Error generating questions:', error);
@@ -301,7 +300,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 <Form.Item>
                   <Button
                     type="dashed"
-                    onClick={() => add()}
+                    onClick={() => add({ answerList: ['', '', '', ''] })}
                     block
                     icon={<PlusOutlined />}>
                     Add Question
@@ -322,11 +321,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
 
 export default AddLibraryContent;
 const QuestionItem = ({ remove, name, duration, libraryType, form }: any) => {
-  const answerList = form.getFieldValue([
-    'questionList',
-    name,
-    'answerList',
-  ]) || ['', '', '', ''];
   return (
     <div style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
       <div
@@ -343,26 +337,30 @@ const QuestionItem = ({ remove, name, duration, libraryType, form }: any) => {
       <Form.Item name={[name, 'question']} style={{ marginBottom: 8 }}>
         <Input placeholder="Enter question" style={{ marginBottom: 0 }} />
       </Form.Item>
-      {answerList.map((label, index) => (
-        <Form.Item
-          key={index}
-          name={[name, 'answerList']} // ← chính xác chỗ này
-          rules={[{ required: true, message: `Please enter answer ${index}` }]}
-          style={{ marginBottom: 4 }}>
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'row',
-              gap: 8,
-              alignItems: 'center',
-            }}>
-            <p style={{ margin: 0, width: 20 }}>
-              {String.fromCharCode(65 + index)}.
-            </p>
-            <Input placeholder={`Answer ${label}`} />
-          </div>
-        </Form.Item>
-      ))}
+      <Form.List name={[name, 'answerList']}>
+        {fields =>
+          fields.map((field, answerIndex) => (
+            <Form.Item
+              key={field.key}
+              name={field.name}
+              rules={[{ required: true }]}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  gap: 8,
+                  alignItems: 'center',
+                }}>
+                <p style={{ margin: 0, width: 20 }}>
+                  {String.fromCharCode(65 + answerIndex)}.
+                </p>
+                <Input placeholder={`Answer`} />
+              </div>
+            </Form.Item>
+          ))
+        }
+      </Form.List>
+
       <div style={{ display: 'flex', gap: 8 }}>
         {/* Chọn đáp án đúng */}
         <Form.Item

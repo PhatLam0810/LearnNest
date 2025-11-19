@@ -215,7 +215,13 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     <View style={styles.container}>
       {contextHolder}
       <AppHeader title="Lesson" />
-      <ScrollView style={{ scrollbarWidth: 'none' }}>
+      <ScrollView
+        style={{
+          height: 1000,
+          scrollbarWidth: 'none',
+          paddingBottom: 200,
+        }}
+        contentContainerStyle={{ paddingBottom: 20 }}>
         <View style={{ marginTop: 12, gap: 16 }}>
           <View style={{ flexDirection: 'row', gap: 12 }}>
             {lessonDetail?.categories?.map((item, index) => (
@@ -227,7 +233,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
             ))}
           </View>
           <Text style={styles.title}>{lessonDetail?.title}</Text>
-          <View style={{ flexDirection: 'row', height: '100%', gap: 12 }}>
+          <View style={{ flexDirection: 'row', flex: 1, gap: 12 }}>
             <View style={{ flex: 2.4 }}>
               <Text style={styles.description}>
                 {lessonDetail?.description}
@@ -262,8 +268,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               <View
                 style={{
                   flex: 1,
-                  width: '100%',
-                  height: '100%',
                   minHeight: 200,
                   borderRadius: 12,
                   overflow: 'hidden',

@@ -167,7 +167,7 @@ const ModuleDetailPage = () => {
   };
 
   const handlePauseVideo = () => {
-    libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
+    // libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
   };
 
   return (
@@ -219,6 +219,8 @@ const ModuleDetailPage = () => {
           contentContainerStyle={{ paddingBottom: 100 }}>
           {lessonDetail?.modules?.length > 0 && (
             <View style={{ gap: 24 }}>
+              <FaceDetection onPauseVideo={handlePauseVideo} />
+
               <ScrollView contentContainerStyle={{ aspectRatio: 16 / 19 }}>
                 <Text style={styles.lessonContentTitle}>Lesson Content</Text>
                 <View style={{ gap: 12 }}>
@@ -232,7 +234,6 @@ const ModuleDetailPage = () => {
                   />
                 </View>
               </ScrollView>
-              <FaceDetection onPauseVideo={handlePauseVideo} />
             </View>
           )}
         </ScrollView>

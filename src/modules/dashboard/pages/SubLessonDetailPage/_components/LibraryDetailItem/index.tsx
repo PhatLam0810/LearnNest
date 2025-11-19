@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { View } from 'react-native-web';
+import { ScrollView, View } from 'react-native-web';
 import { Document, Page } from 'react-pdf';
 import { FullscreenOutlined } from '@ant-design/icons';
 import { Library } from '~mdDashboard/types';
@@ -272,7 +272,12 @@ const LibraryDetailItem = forwardRef<
         );
       case 'Text':
         return (
-          <>
+          <ScrollView
+            style={{
+              height: 1000,
+              scrollbarWidth: 'none',
+              paddingBottom: 400,
+            }}>
             <View>
               {shuffledQuestions.map((question, index) => {
                 const isInvalid = invalidQuestions.includes(question._id);
@@ -330,7 +335,7 @@ const LibraryDetailItem = forwardRef<
             <Button type="primary" onClick={handleSubmit} style={styles.button}>
               Submit
             </Button>
-          </>
+          </ScrollView>
         );
       default:
         return null;
