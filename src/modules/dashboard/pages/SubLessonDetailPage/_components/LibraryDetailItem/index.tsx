@@ -283,7 +283,7 @@ const LibraryDetailItem = forwardRef<
                 const isInvalid = invalidQuestions.includes(question._id);
 
                 return (
-                  <View key={index}>
+                  <View key={index} style={{ marginBottom: 16 }}>
                     <div
                       style={{
                         ...styles.questionTitle,
