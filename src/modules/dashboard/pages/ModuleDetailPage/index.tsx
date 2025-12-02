@@ -1,7 +1,8 @@
+// ModuleDetailPage.tsx (phần cập nhật)
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
-import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import { CaretRightOutlined, PlayCircleOutlined, EyeOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import LibraryDetailItem, {
   LibraryDetailItemHandle,
@@ -11,6 +12,7 @@ import { Button, Collapse, CollapseProps, Modal } from 'antd';
 import { convertDurationToTime } from '@utils';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { FaceDetection } from '~mdAuth/components';
+import ViewersListModal from '~mdDashboard/components/ViewersListModal';
 
 const ModuleDetailPage = () => {
   const { selectedModule, lessonDetail, selectedLibrary } = useAppSelector(
@@ -22,16 +24,20 @@ const ModuleDetailPage = () => {
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [modal, contextHolder] = Modal.useModal();
+
+  // Thêm state cho modal viewers
+  const [showViewersModal, setShowViewersModal] = useState(false);
+
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index,
       label: (
-        <div style={styles.moduleContentHeader}>
-          <p style={styles.learnedSkillText}>{item.title}</p>
-          <p style={styles.learnedSkillText}>
+        <View style={styles.moduleContentHeader}>
+          <Text style={styles.learnedSkillText}>{item.title}</Text>
+          <Text style={styles.learnedSkillText}>
             Total Libraries: {item.libraries.length}
-          </p>
-        </div>
+          </Text>
+        </View>
       ),
       children: (
         <View style={{ gap: 8, marginTop: 8 }}>
@@ -119,27 +125,28 @@ const ModuleDetailPage = () => {
     dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
     dispatch(dashboardAction.setSelectedLibrary(nextLibrary));
   };
+
   const showModal = (correctCount, totalQuestions, score, isPass) => {
     modal.info({
       title: 'Result',
       content: (
-        <div>
-          <p>
+        <View>
+          <Text>
             ✅ Correct answers: {correctCount}/{totalQuestions}
-          </p>
-          <p>
-            🏆 Score: <strong>{score}</strong> / 10
-          </p>
+          </Text>
+          <Text>
+            🏆 Score: <Text>{score}</Text> / 10
+          </Text>
           {!isPass && (
-            <p style={{ color: 'red' }}>
+            <Text style={{ color: 'red' }}>
               ❌ You have failed the exam. Please try again.
-            </p>
+            </Text>
           )}
-        </div>
+        </View>
       ),
       onOk: () => {
         if (isPass) {
-          onWatchFinish(); // Call callback when passed
+          onWatchFinish();
         }
       },
     });
@@ -150,30 +157,41 @@ const ModuleDetailPage = () => {
     let correctCount = 0;
 
     selectedLibrary.questionList.forEach(question => {
-      const userAnswer = selectedAnswers[question._id]; // từ object người dùng chọn
-      const correctAnswer = question.correctAnswer; // từ dữ liệu câu hỏi
+      const userAnswer = selectedAnswers[question._id];
+      const correctAnswer = question.correctAnswer;
 
       if (userAnswer === correctAnswer) {
         correctCount++;
       }
     });
 
-    const score = ((correctCount / totalQuestions) * 10).toFixed(2); // giữ 2 số lẻ
-
-    // Hiển thị kết quả trong modal
+    const score = ((correctCount / totalQuestions) * 10).toFixed(2);
     const isPass = correctCount >= (2 / 3) * totalQuestions;
 
     showModal(correctCount, totalQuestions, score, isPass);
   };
 
   const handlePauseVideo = () => {
-    // libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
+    // libraryRef.current?.pauseAll();
   };
 
   return (
     <View style={styles.container}>
       {contextHolder}
       <AppHeader title={selectedModule?.title} subTitle={lessonDetail?.title} />
+
+      {/* Thêm nút View Viewers */}
+      {selectedLibrary && (
+        <Button
+          type="primary"
+          icon={<EyeOutlined />}
+          onClick={() => setShowViewersModal(true)}
+          style={{ marginBottom: 16, marginLeft: 16 }}
+        >
+          Xem người đã xem video
+        </Button>
+      )}
+
       <View style={{ flexDirection: 'row', gap: 24 }}>
         <ScrollView
           style={{ width: '70%' }}
@@ -238,6 +256,14 @@ const ModuleDetailPage = () => {
           )}
         </ScrollView>
       </View>
+
+      {/* Modal hiển thị danh sách người xem */}
+      <ViewersListModal
+        lessonId={lessonDetail?._id || ''}
+        visible={showViewersModal}
+        onClose={() => setShowViewersModal(false)}
+        videoTitle={selectedLibrary?.title}
+      />
     </View>
   );
 };
