@@ -1,5 +1,6 @@
 import { baseQuery } from '@redux/RTKQuery';
 import { AxiosResponse } from 'axios';
+import { bo } from 'node_modules/@tanstack/query-core/build/modern/hydration-CeGZtiZv';
 import { LibraryType } from '~mdDashboard/redux/RTKQuery/types';
 import { Category } from '~mdDashboard/redux/saga/type';
 
@@ -133,6 +134,14 @@ export const adminQuery = baseQuery.injectEndpoints({
         body,
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
+    getUserInfoById: builder.mutation({
+      query: (params: { _id: string }) => ({
+        url: `user/getUserInfoById/${params._id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: any) => res.data,
     }),
   }),
   overrideExisting: true,

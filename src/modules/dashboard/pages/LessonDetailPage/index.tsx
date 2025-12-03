@@ -123,12 +123,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
 
     if (lessonDetail.isPremium) setAccessLesson(false);
     if (userProfile?.role?.level <= 2) setAccessLesson(true);
-    if (
-      dataSub?.length > 0 &&
-      dataSub.some(sub => sub.userId === userProfile?._id)
-    ) {
-      setAccessLesson(true);
-    }
 
     if (lessonDetail?.modules?.length > 0) {
       const firstLibrary = lessonDetail.modules[0].libraries[0];
@@ -139,7 +133,24 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         });
       }
     }
-  }, [lessonDetail, dataSub]);
+  }, [lessonDetail]);
+
+  useEffect(() => {
+    if (!dataSub || !userProfile?._id || !lessonDetail) return;
+
+    const hasPurchased = dataSub.some(
+      sub =>
+        sub.userId === userProfile._id &&
+        sub.lessonId === lessonDetail._id &&
+        sub.status === 'success',
+    );
+
+    if (hasPurchased) {
+      setAccessLesson(true);
+    } else {
+      setAccessLesson(false);
+    }
+  }, [dataSub, lessonDetail]);
 
   useEffect(() => {
     if (lessonPurchaseData) {

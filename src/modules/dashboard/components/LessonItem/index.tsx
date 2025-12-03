@@ -38,14 +38,25 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
     if (isPremium) {
       setAccessLesson(false);
     }
+  }, [isPremium]);
 
-    if (
-      dataSub?.length > 0 &&
-      dataSub.some(sub => sub.userId === userProfile?._id)
-    ) {
+  useEffect(() => {
+    if (!dataSub || !userProfile?._id || !data) return;
+
+    const hasPurchased = dataSub.some(
+      sub =>
+        sub.userId === userProfile._id &&
+        sub.lessonId === data._id &&
+        sub.status === 'success',
+    );
+
+    if (hasPurchased) {
       setAccessLesson(true);
+    } else {
+      setAccessLesson(false);
     }
-  }, [dataSub, isPremium]);
+    if (userProfile?.role?.level <= 2) setAccessLesson(true);
+  }, [dataSub, data]);
 
   return (
     <Card
