@@ -23,10 +23,21 @@ import {
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
 import { AppComment, AppHeader, AppModalPayPal } from '@components';
-import { Collapse, CollapseProps, message, Modal } from 'antd';
+import {
+  Collapse,
+  CollapseProps,
+  message,
+  Modal,
+  Tooltip,
+  Button,
+  Space,
+} from 'antd'; // Thêm Tooltip, Button, Space
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { authAction, authQuery } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
+
+import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
+import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/AppVideoWatchersButton';
 
 interface LessonDetailPageProps {
   id: string;
@@ -63,6 +74,14 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const numColumns = lessonDetail?.learnedSkills?.length >= 10 ? 2 : 1;
 
   const [accessLesson, setAccessLesson] = useState(true);
+
+  // CHỈ THÊM 3 DÒNG STATE MỚI NÀY
+  const [watcherModalVisible, setWatcherModalVisible] = useState(false);
+  const [selectedSubLessonId, setSelectedSubLessonId] = useState<string | null>(
+    null,
+  );
+  const [selectedSubLessonTitle, setSelectedSubLessonTitle] =
+    useState<string>('');
 
   // Cách cũ của PhátPhát
   //  useEffect(() => {
@@ -178,39 +197,76 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       children: (
         <View style={{ gap: 8, marginTop: 8 }}>
           {item.libraries.map((subItem, subIndex) => (
-            <TouchableOpacity
+            <View
               key={subIndex}
-              style={[
-                !subItem?.usersCanPlay?.some(
-                  id => id._id === userProfile?._id,
-                ) && styles.disabledButton,
-                !accessLesson && styles.disabledButton,
-              ]}>
-              <View
-                style={styles.buttonModule}
-                onClick={() => {
-                  if (!accessLesson) {
-                    return;
-                  }
-                  if (
-                    subItem?.usersCanPlay?.some(
-                      id => id._id === userProfile?._id,
-                    )
-                  ) {
-                    dispatch(dashboardAction.setSelectedModule(item));
-                    dispatch(dashboardAction.setSelectedLibrary(subItem));
-                    router.push('/dashboard/home/lesson/moduleDetail');
-                  }
-                }}>
-                <PlayCircleOutlined />
-                <View style={{ paddingTop: 7, paddingBottom: 7 }}>
-                  <Text style={styles.moduleItemTitle}>{subItem.title}</Text>
-                  <Text style={styles.moduleItemTime}>
-                    {convertDurationToTime(subItem.duration)}
-                  </Text>
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                style={[
+                  !subItem?.usersCanPlay?.some(
+                    id => id._id === userProfile?._id,
+                  ) && styles.disabledButton,
+                  !accessLesson && styles.disabledButton,
+                  { flex: 1 },
+                ]}>
+                <View
+                  style={[
+                    styles.buttonModule,
+                    {
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    },
+                  ]}
+                  onClick={() => {
+                    if (!accessLesson) return;
+                    if (
+                      subItem?.usersCanPlay?.some(
+                        id => id._id === userProfile?._id,
+                      )
+                    ) {
+                      dispatch(dashboardAction.setSelectedModule(item));
+                      dispatch(dashboardAction.setSelectedLibrary(subItem));
+                      router.push('/dashboard/home/lesson/moduleDetail');
+                    }
+                  }}>
+                  {/* LEFT AREA: TITLE + TIME */}
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <PlayCircleOutlined />
+                    <View>
+                      <Text style={styles.moduleItemTitle}>
+                        {subItem.title}
+                      </Text>
+                      <Text style={styles.moduleItemTime}>
+                        {convertDurationToTime(subItem.duration)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* RIGHT AREA: WATCHERS BUTTON */}
+                  {userProfile?.role?.level <= 2 && (
+                    <AppVideoWatchersButton
+                      subLessonId={subItem._id}
+                      subLessonTitle={subItem.title}
+                      disabled={
+                        !accessLesson ||
+                        !subItem?.usersCanPlay?.some(
+                          id => id._id === userProfile?._id,
+                        )
+                      }
+                      onClick={e => {
+                        e.stopPropagation();
+                        setSelectedSubLessonId(subItem._id);
+                        setSelectedSubLessonTitle(subItem.title);
+                        setWatcherModalVisible(true);
+                      }}
+                    />
+                  )}
                 </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           ))}
         </View>
       ),
@@ -381,6 +437,21 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
           </View>
         )}
       </ScrollView>
+
+      <Modal
+        title={<span>Người đã xem: {selectedSubLessonTitle}</span>}
+        open={watcherModalVisible}
+        onCancel={() => setWatcherModalVisible(false)}
+        footer={null}
+        width={700}>
+        <AppVideoWatchers
+          subLessonId={selectedSubLessonId || ''}
+          subLessonTitle={selectedSubLessonTitle}
+          userId={userProfile?._id || ''}
+          onClose={() => setWatcherModalVisible(false)}
+        />
+      </Modal>
+
       <AppModalPayPal
         isVisibleModalBuy={isVisibleModalBuy}
         setIsVisibleModalBuy={setIsVisibleModalBuy}
