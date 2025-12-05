@@ -109,9 +109,9 @@ const AppModalPayPal: React.FC<AppModalPayPalProps> = ({
         messageApi.error(
           'Bạn không có đủ ETH trong ví để thực hiện giao dịch.',
         );
-        handlePurchaseSuccess(Math.random().toString(32), 'failed');
+        // handlePurchaseSuccess(Math.random().toString(32), 'failed');
       } else if (error.code === 'ACTION_REJECTED') {
-        handlePurchaseSuccess(Math.random().toString(32), 'failed');
+        // handlePurchaseSuccess(Math.random().toString(32), 'failed');
       }
     } finally {
       setIsLoading(false);
