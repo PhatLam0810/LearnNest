@@ -317,7 +317,6 @@ const LibraryDetailItem = forwardRef<
                       }}>
                       {question.answerList.map((ans, idx) => {
                         const optionLetter = String.fromCharCode(65 + idx);
-                        console.log(optionLetter);
                         return (
                           <Radio key={idx} value={optionLetter}>
                             <div style={styles.answerTitle}>

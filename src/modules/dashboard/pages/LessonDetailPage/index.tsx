@@ -140,7 +140,21 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   useEffect(() => {
     if (!lessonDetail) return;
 
-    if (lessonDetail.isPremium) setAccessLesson(false);
+    if (lessonDetail.isPremium) {
+      if (!dataSub || !userProfile?._id) return;
+      const hasPurchased = dataSub.some(
+        sub =>
+          sub.userId === userProfile._id &&
+          sub.lessonId === lessonDetail._id &&
+          sub.status === 'success',
+      );
+
+      if (hasPurchased) {
+        setAccessLesson(true);
+      } else {
+        setAccessLesson(false);
+      }
+    }
     if (userProfile?.role?.level <= 2) setAccessLesson(true);
 
     if (lessonDetail?.modules?.length > 0) {
@@ -152,24 +166,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         });
       }
     }
-  }, [lessonDetail]);
-
-  // useEffect(() => {
-  //   if (!dataSub || !userProfile?._id || !lessonDetail) return;
-
-  //   const hasPurchased = dataSub.some(
-  //     sub =>
-  //       sub.userId === userProfile._id &&
-  //       sub.lessonId === lessonDetail._id &&
-  //       sub.status === 'success',
-  //   );
-
-  //   if (hasPurchased) {
-  //     setAccessLesson(true);
-  //   } else {
-  //     setAccessLesson(false);
-  //   }
-  // }, [dataSub, lessonDetail]);
+  }, [lessonDetail, dataSub]);
 
   useEffect(() => {
     if (lessonPurchaseData) {
@@ -246,7 +243,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   </View>
 
                   {/* RIGHT AREA: WATCHERS BUTTON */}
-                  {userProfile?.role?.level <= 2 && (
+                  {/* {userProfile?.role?.level <= 2 && (
                     <AppVideoWatchersButton
                       subLessonId={subItem._id}
                       subLessonTitle={subItem.title}
@@ -263,7 +260,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                         setWatcherModalVisible(true);
                       }}
                     />
-                  )}
+                  )} */}
                 </View>
               </TouchableOpacity>
             </View>
