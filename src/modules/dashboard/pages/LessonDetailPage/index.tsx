@@ -161,6 +161,29 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     return;
   }
 
+  const handleLibraryClick = async (subItem, item) => {
+    if (!accessLesson) return;
+
+    const canPlay = subItem?.usersCanPlay?.some(
+      id => id._id === userProfile?._id,
+    );
+
+    // 🔥 Nếu role <= 2 thì đi sang trang xem lịch sử kết quả
+    if (userProfile?.role?.level <= 2) {
+      router.push(
+        `/dashboard/home/lesson/resultHistory?libraryId=${subItem?._id}`,
+      );
+      return;
+    }
+
+    // 🔥 Logic cũ: user được phép xem bài học
+    if (canPlay) {
+      dispatch(dashboardAction.setSelectedModule(item));
+      dispatch(dashboardAction.setSelectedLibrary(subItem));
+      router.push('/dashboard/home/lesson/moduleDetail');
+    }
+  };
+
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index.toString(),
@@ -185,20 +208,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               ]}>
               <View
                 style={styles.buttonModule}
-                onClick={() => {
-                  if (!accessLesson) {
-                    return;
-                  }
-                  if (
-                    subItem?.usersCanPlay?.some(
-                      id => id._id === userProfile?._id,
-                    )
-                  ) {
-                    dispatch(dashboardAction.setSelectedModule(item));
-                    dispatch(dashboardAction.setSelectedLibrary(subItem));
-                    router.push('/dashboard/home/lesson/moduleDetail');
-                  }
-                }}>
+                onClick={() => handleLibraryClick(subItem, item)}>
                 <PlayCircleOutlined />
                 <View style={{ paddingTop: 7, paddingBottom: 7 }}>
                   <Text style={styles.moduleItemTitle}>{subItem.title}</Text>

@@ -19,6 +19,7 @@ const ModuleDetailPage = () => {
   const dispatch = useAppDispatch();
   const libraryRef = useRef<LibraryDetailItemHandle>(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
+  const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [modal, contextHolder] = Modal.useModal();
@@ -163,11 +164,21 @@ const ModuleDetailPage = () => {
     // Hiển thị kết quả trong modal
     const isPass = correctCount >= (2 / 3) * totalQuestions;
 
+    submitResultTest({
+      userId: userProfile?._id,
+      libraryId: selectedLibrary._id,
+      score: Number(score),
+      name: selectedLibrary.title,
+      userName: userProfile?.firstName,
+      isPass,
+      totalQuestions: totalQuestions,
+      correctCount: correctCount,
+    });
     showModal(correctCount, totalQuestions, score, isPass);
   };
 
   const handlePauseVideo = () => {
-    // libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
+    libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
   };
 
   return (

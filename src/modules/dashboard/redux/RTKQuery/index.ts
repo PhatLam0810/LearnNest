@@ -71,6 +71,21 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    submitResultTest: builder.mutation({
+      query: params => ({
+        url: '/lesson/resultTest',
+        method: 'POST',
+        body: params,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getLibraryResultTest: builder.mutation({
+      query: params => ({
+        url: `/lesson/library/resultTest/${params.libraryId}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });
