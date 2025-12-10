@@ -3,12 +3,9 @@ import { Text, View } from 'react-native-web';
 import { Input, Table, TableProps } from 'antd';
 import dayjs from 'dayjs';
 import { useAppPagination } from '@hooks';
-import { useAppDispatch } from '@redux';
-import AppModalSuccess from '@components/AppModalSuccess';
 import { useSearchParams } from 'next/navigation';
 import styles from './styles';
 import { AppHeader } from '@components';
-import { adminQuery } from '~mdAdmin/redux';
 interface ResultItem {
   _id: string;
   name: string;
@@ -24,7 +21,6 @@ interface ResultItem {
 
 const ResultTestHistoryPage = () => {
   const divRef = useRef(null);
-  const dispatch = useAppDispatch();
   const [height, setHeight] = useState(0);
   const searchParams = useSearchParams();
   const libraryId = searchParams.get('libraryId');
@@ -85,10 +81,10 @@ const ResultTestHistoryPage = () => {
   }, []);
 
   const { Search } = Input;
-
+  const title = listItem.map(item => item.name)[0];
   return (
     <View style={styles.container}>
-      <AppHeader title={'fasfasf'} subTitle={'fasfsa'} />
+      <AppHeader title={title} />
       <View
         style={{
           flexDirection: 'row',
