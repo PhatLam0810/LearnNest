@@ -212,6 +212,8 @@ const LibraryDetailItem = forwardRef<
   }, [data]);
 
   const renderMedia = () => {
+    if (!data?.type) return null;
+
     switch (data.type) {
       case 'Video':
       case 'Youtube':

@@ -1,3 +1,19 @@
 .ant-card-body {
   padding: 0px !important;
 }
+
+.lesson-card {
+  overflow: visible;
+  overflow-y: visible;
+  overflow-x: visible;
+}
+
+.lesson-card .ant-card-body {
+  overflow: visible;
+  overflow-y: visible;
+  overflow-x: visible;
+}
+
+.lesson-card.ant-card-hoverable:hover {
+  z-index: 1;
+}

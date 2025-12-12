@@ -43,20 +43,23 @@ const Thumbnail = ({ data }) => {
 
 const LibraryItem: React.FC<LibraryItemProps> = ({ data, onClick, style }) => {
   return (
-    <Card style={{ ...styles.container, ...style }} hoverable>
-      <View style={{ flex: 1 }}>
-        <View onClick={onClick}>
-          <View style={styles.image}>
-            <Thumbnail data={data} />
-          </View>
-          <View>
-            <Text numberOfLines={2} style={styles.title}>
-              {data?.title}
-            </Text>
-            <Text numberOfLines={2} style={styles.desc}>
-              {data?.description}
-            </Text>
-          </View>
+    <Card
+      style={{ ...styles.container, ...style }}
+      hoverable
+      styles={{
+        body: { padding: 0, display: 'flex', flexDirection: 'column' },
+      }}>
+      <View onClick={onClick} style={{ flex: 1 }}>
+        <View style={styles.image}>
+          <Thumbnail data={data} />
+        </View>
+        <View style={{ padding: 12 }}>
+          <Text numberOfLines={1} style={styles.title}>
+            {data?.title}
+          </Text>
+          <Text numberOfLines={2} style={styles.desc}>
+            {data?.description}
+          </Text>
         </View>
       </View>
     </Card>

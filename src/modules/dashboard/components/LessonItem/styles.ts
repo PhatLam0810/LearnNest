@@ -2,15 +2,21 @@ import { dmSans, StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
-    width: 325,
-    padding: 12,
+    width: '100%',
+    minWidth: 0,
+    padding: 0,
     backgroundColor: '#F9F9F9',
+  },
+  content: {
+    padding: 12,
   },
   title: {
     color: '#212121',
     ...typography.subTitle1,
     marginBottom: 8,
     marginTop: 12,
+    lineHeight: 22,
+    minHeight: 44, // keep 2 lines height to align cards
   },
   desc: {
     color: '#8D8D8D',
@@ -18,6 +24,8 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     fontSize: 14,
     letterSpacing: 0.01,
+    lineHeight: 20,
+    minHeight: 60, // keep 3 lines height to align cards
   },
   price: {
     ...typography.titleS,

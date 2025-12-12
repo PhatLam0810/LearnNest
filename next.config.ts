@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
       'drive.google.com',
       'img.youtube.com',
       'www.youtube.com',
+      'www.servermania.com',
+      'miro.medium.com',
     ], // Thêm hostname vào đây
   },
 };

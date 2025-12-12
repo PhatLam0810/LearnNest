@@ -5,13 +5,12 @@ const styles = StyleSheet.create({
     ...typography.body1,
     width: '100%',
     height: 56,
-    backgroundColor: '#F9F9F9',
-    borderWidth: 0,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   filled: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E3E3E3',
   },
 });
 

@@ -30,7 +30,7 @@ const LessonModule: React.FC<LessonModuleProps> = ({
               <div>
                 {item?.subLessons?.map(subItem => (
                   <Card
-                    bordered
+                    variant="outlined"
                     hoverable
                     className="lesson-item"
                     key={subItem._id}

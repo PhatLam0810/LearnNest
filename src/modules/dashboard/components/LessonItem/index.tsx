@@ -55,6 +55,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
 
   return (
     <Card
+      className="lesson-card"
       styles={{ body: { display: 'flex', height: '100%' } }}
       hoverable
       style={Object.assign({}, styles.container, style)}>
@@ -69,14 +70,18 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
           style={{
             width: '100%',
             aspectRatio: 16 / 9,
-            borderRadius: 8,
+            borderTopLeftRadius: 8,
+            borderTopRightRadius: 8,
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
             overflow: 'hidden',
             backgroundColor: 'gray',
+            position: 'relative',
           }}>
           <LessonThumbnail thumbnail={thumbnail} />
         </View>
 
-        <View style={{ flex: 1 }}>
+        <View style={[styles.content, { flex: 1 }]}>
           <Text style={styles.title} numberOfLines={2}>
             {title}
           </Text>
@@ -88,19 +93,19 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
               Cost price: {price} ETH
             </Text>
           )}
-        </View>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            gap: 4,
-            marginTop: 8,
-            alignItems: 'center',
-          }}>
-          <ClockCircleOutlined style={styles.time} />
-          <Text style={styles.time}>
-            {dayjs(createdAt).format('MM/DD/YYYY HH:mm')}
-          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 4,
+              marginTop: 8,
+              alignItems: 'center',
+            }}>
+            <ClockCircleOutlined style={styles.time} />
+            <Text style={styles.time}>
+              {dayjs(createdAt).format('MM/DD/YYYY HH:mm')}
+            </Text>
+          </View>
         </View>
       </View>
     </Card>

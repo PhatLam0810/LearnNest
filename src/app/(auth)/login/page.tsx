@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
+import Image from 'next/image';
 import { Card, Form } from 'antd';
 import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -53,106 +54,137 @@ const LoginPage = () => {
       ? styles.containerTablet
       : styles.containerDesktop;
 
+  const layoutStyle = isMobile
+    ? styles.layoutMobile
+    : isTablet
+      ? styles.layoutTablet
+      : styles.layoutDesktop;
+
   return (
     <View style={styles.pageWrapper}>
-      <Card style={containerStyle}>
-        <View style={{ flex: 1 }}>
-          {/* <Image
+      <View style={layoutStyle}>
+        {!isMobile && !isTablet && (
+          <View style={styles.heroDesktop}>
+            {/* <Image
           src={logo}
           style={{ width: '100%', height: 200, objectFit: 'contain' }}
           alt=""
         /> */}
-          <View style={styles.subContainer}>
-            <Text
-              style={isMobile ? typography.titleMMobile : typography.titleM}>
-              Sign In
-            </Text>
-            <Text style={styles.subDescription}>
-              Sign into your account - accessall of your lessons now.
+            <Image
+              src="/images/login.webp"
+              alt="Login illustration (Đăng nhập học nhanh hơn)"
+              width={460}
+              height={360}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                borderRadius: 16,
+              }}
+              priority
+            />
+            <Text style={styles.heroSlogan}>
+              Learn smarter, grow faster — Personalize your learning journey.
             </Text>
           </View>
-          <View style={{ overflow: 'hidden' }}>
-            <Form<FieldType>
-              name="login"
-              onFinish={data => {
-                dispatch(authAction.login(data));
-              }}
-              autoComplete="off"
-              layout="vertical"
-              requiredMark={false}
-              initialValues={{
-                email: signUpInfo?.userProfile?.email || '',
-                // 'adminvhu@gmail.com',
-              }}
-              form={form}>
-              {/* <Form.Item<FieldType>
+        )}
+        <Card
+          variant={!isMobile ? 'outlined' : 'borderless'}
+          style={containerStyle}
+          styles={{ body: { padding: isMobile ? 10 : 16 } }}>
+          <View style={styles.formWrapper}>
+            <View style={styles.subContainer}>
+              <Text
+                style={isMobile ? typography.titleMMobile : typography.titleM}>
+                Sign In
+              </Text>
+              <Text style={styles.subDescription}>
+                Sign into your account - accessall of your lessons now.
+              </Text>
+            </View>
+            <View style={{ overflow: 'hidden' }}>
+              <Form<FieldType>
+                name="login"
+                onFinish={data => {
+                  dispatch(authAction.login(data));
+                }}
+                autoComplete="off"
+                layout="vertical"
+                requiredMark={false}
+                initialValues={{
+                  email: signUpInfo?.userProfile?.email || '',
+                }}
+                form={form}>
+                {/* <Form.Item<FieldType>
               name={'email'}
               rules={[{ required: true, message: 'Email required' }]}>
               <AppInput placeholder="Enter your email" />
             </Form.Item> */}
-              <Form.Item<FieldType>
-                label={
-                  <Text style={styles.labelText}>
-                    <Text style={{ color: 'red' }}>*</Text> Email
-                  </Text>
-                }
-                name={'email'}
-                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-                style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
-                rules={[{ required: true, message: 'Email required' }]}>
-                <AppInput
-                  placeholder="Enter your email"
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
-              <Form.Item<FieldType>
-                label={
-                  <Text style={styles.labelText}>
-                    <Text style={{ color: 'red' }}>*</Text> Password
-                  </Text>
-                }
-                name={'password'}
-                // initialValue={'Lamphat@081020'} // Giả sử bạn muốn đặt một giá trị mặc định
-                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-                style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
-                rules={[{ required: true, message: 'Password error' }]}>
-                <AppInput
-                  type="Password"
-                  placeholder="Enter your password"
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
+                <Form.Item<FieldType>
+                  label={
+                    <Text style={styles.labelText}>
+                      <Text style={{ color: 'red' }}>*</Text> Email
+                    </Text>
+                  }
+                  name={'email'}
+                  labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+                  style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
+                  rules={[{ required: true, message: 'Email required' }]}>
+                  <AppInput
+                    placeholder="Enter your email"
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
+                <Form.Item<FieldType>
+                  label={
+                    <Text style={styles.labelText}>
+                      <Text style={{ color: 'red' }}>*</Text> Password
+                    </Text>
+                  }
+                  name={'password'}
+                  // initialValue={'Lamphat@081020'} // Giả sử bạn muốn đặt một giá trị mặc định
+                  labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+                  style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
+                  rules={[{ required: true, message: 'Password error' }]}>
+                  <AppInput
+                    type="Password"
+                    placeholder="Enter your password"
+                    style={{ width: '100%' }}
+                  />
+                </Form.Item>
 
-              <Form.Item<FieldType> shouldUpdate>
-                {({ getFieldsValue }) => {
-                  const { email, password } = getFieldsValue();
-                  return (
-                    <AppButton
-                      type="primary"
-                      disabled={!email || !password}
-                      htmlType="submit">
-                      Sign In
-                    </AppButton>
-                  );
-                }}
-              </Form.Item>
-              <View style={styles.driverContainer}>
-                <View style={styles.driver}></View>
-                <Text style={styles.driverText}>or</Text>
-                <View style={styles.driver}></View>
-              </View>
-              <AppButton onClick={handleLoginOauth}>
-                <Icon name="google" />
-                Sign in with Google
-              </AppButton>
-            </Form>
+                <Form.Item<FieldType> shouldUpdate style={{ marginBottom: 12 }}>
+                  {({ getFieldsValue }) => {
+                    const { email, password } = getFieldsValue();
+                    return (
+                      <AppButton
+                        type="primary"
+                        aria-label="Sign in to your account"
+                        style={styles.primaryButton}
+                        disabled={!email || !password}
+                        htmlType="submit">
+                        Sign In
+                      </AppButton>
+                    );
+                  }}
+                </Form.Item>
+
+                <AppButton
+                  aria-label="Sign in with Google"
+                  onClick={handleLoginOauth}
+                  style={styles.googleButton}>
+                  <Icon name="google" />
+                  Sign in with Google
+                </AppButton>
+              </Form>
+            </View>
+            <View style={styles.footer}>
+              <Text>Don’t have an account? </Text>
+              <Link href={`/signup`}>Sign Up</Link>
+            </View>
           </View>
-          <View style={styles.footer}>
-            <Text>Don’t have an account? </Text>
-            <Link href={`/signup`}>Sign Up</Link>
-          </View>
-        </View>
-      </Card>
+        </Card>
+      </View>
     </View>
   );
 };

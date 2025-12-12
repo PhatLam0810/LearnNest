@@ -24,6 +24,12 @@ const ModuleList = () => {
 
   return (
     <View style={styles.container}>
+      <Text
+        accessibilityRole="header"
+        aria-level={1}
+        style={[styles.title, { marginBottom: 4 }]}>
+        Modules
+      </Text>
       <View style={{ gap: 8, marginBottom: 20 }}>
         <Search
           placeholder="Search"
@@ -31,6 +37,7 @@ const ModuleList = () => {
           allowClear
           size="large"
           // suffix={suffix}
+          aria-label="Search modules"
           onSearch={search}
         />
         <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -38,12 +45,13 @@ const ModuleList = () => {
             <Text style={styles.title}>Sort By</Text>
             <Select
               style={{ width: 120 }}
-              defaultValue={{ label: 'desc', value: 'desc' }}
+              defaultValue="desc"
               options={[
                 { label: 'desc', value: 'desc' },
                 { label: 'asc', value: 'asc' },
               ]}
               placeholder="Category"
+              aria-label="Sort modules"
               onSelect={data => {
                 changeParams({ sortBy: data });
               }}

@@ -14,3 +14,30 @@
   ):not([colspan])::before {
   display: none !important;
 }
+
+/* Remove focus/error glow on inputs; keep only border color */
+.ant-input:focus,
+.ant-input:focus-within,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper:focus-within,
+.ant-input-focused,
+.ant-input-affix-wrapper-focused,
+.ant-form-item-has-error .ant-input,
+.ant-form-item-has-error .ant-input-affix-wrapper {
+  box-shadow: none !important;
+}
+
+/* Brand border color on focus; red on error */
+.ant-input:focus,
+.ant-input:focus-within,
+.ant-input-focused,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper:focus-within,
+.ant-input-affix-wrapper-focused {
+  border-color: #4f46e5 !important;
+}
+
+.ant-form-item-has-error .ant-input,
+.ant-form-item-has-error .ant-input-affix-wrapper {
+  border-color: #ef4444 !important;
+}

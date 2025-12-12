@@ -6,6 +6,10 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
   },
+  pageWrapper: {
+    paddingBottom: 200,
+    gap: 16,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -42,13 +46,39 @@ const styles = StyleSheet.create({
     color: '#8D8D8D',
     paddingBottom: 12,
   },
+  contentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 24,
+  },
+  mainColumn: {
+    flex: 3,
+    minWidth: 0,
+  },
+  sideColumn: {
+    flex: 1.2,
+    minWidth: 340,
+    maxWidth: 420,
+  },
+  thumbnailCard: {
+    flex: 1,
+    minHeight: 260,
+    width: '100%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: 'gray',
+    position: 'relative',
+  },
   whatLearnTitle: {
     ...typography.subTitle1,
-    color: '#FFA726',
+    fontWeight: '600',
+    color: '#000',
   },
   learnedSkillText: {
     ...typography.subTitle2,
     margin: 0,
+    fontWeight: '400',
+    color: '#000',
   },
   moduleContentHeader: {
     display: 'flex',
@@ -89,16 +119,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   lessonContent: {
-    marginTop: 30,
+    marginTop: 16,
     paddingTop: 24,
     paddingBottom: 24,
     gap: 12,
   },
   lessonContentTitle: {
-    fontFamily: inter.style.fontFamily,
-    fontWeight: '400',
-    fontSize: 22.25,
-    letterSpacing: 0.01,
+    ...typography.subTitle1,
+    fontWeight: '600',
     color: '#000',
   },
   disabledButton: {

@@ -1,68 +1,49 @@
 'use client';
-import { messageApi, useAppPagination } from '@hooks';
-import { FlatList, Text, View } from 'react-native-web';
+import { useAppPagination } from '@hooks';
+import { FlatList, ScrollView, Text, View } from 'react-native-web';
 import { LessonItem } from '~mdDashboard/components';
 import styles from './styles';
 import './styles.css';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { useRouter } from 'next/navigation';
-import Search from 'antd/es/input/Search';
-import { Select } from 'antd';
 import { UpdateLessonForm } from './_components';
-import { useState } from 'react';
-import { adminQuery } from '~mdAdmin/redux';
+import { useEffect, useState } from 'react';
+import { useLessonSearchContext } from './lessonSearchContext';
 
 const Page = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const { keyword, sortBy } = useLessonSearchContext();
 
-  const { listItem, fetchData, search, filter, changeParams, refresh } =
-    useAppPagination<any>({
-      apiUrl: 'lesson/getAllLesson',
-    });
+  const { listItem, fetchData, changeParams } = useAppPagination<any>({
+    apiUrl: 'lesson/getAllLesson',
+    isLazy: true,
+  });
   const [isVisible, setIsVisible] = useState(false);
   const [dataEdit, setDataEdit] = useState<any>();
 
   const { data } = dashboardQuery.useGetAllCategoryQuery();
 
+  useEffect(() => {
+    changeParams({ search: keyword, sortBy });
+  }, [keyword, sortBy]);
+
   return (
     <View style={styles.container}>
-      <View style={{ gap: 8, marginBottom: 20 }}>
-        <Search
-          placeholder="Search"
-          enterButton="Search"
-          allowClear
-          size="large"
-          onSearch={search}
-        />
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <View style={{ gap: 2 }}>
-            <Text style={styles.title}>Sort By</Text>
-            <Select
-              style={{ width: 120 }}
-              defaultValue={{ label: 'desc', value: 'desc' }}
-              options={[
-                { label: 'Desc', value: 'desc' },
-                { label: 'Asc', value: 'asc' },
-              ]}
-              placeholder="Sort"
-              onSelect={data => {
-                changeParams({ sortBy: data });
-              }}
-            />
-          </View>
-        </View>
-      </View>
       <FlatList
         data={listItem}
-        stickyHeaderHiddenOnScroll={true}
+        stickyHeaderHiddenOnScroll
         keyExtractor={(item, index) => item._id + index}
-        numColumns={5}
-        contentContainerStyle={{ gap: 6 }}
-        columnWrapperStyle={{ gap: '0.5%' }}
+        numColumns={4}
+        contentContainerStyle={{
+          gap: 16,
+          paddingBottom: 48,
+          overflow: 'visible',
+        }}
+        columnWrapperStyle={{ gap: 16 }}
         showsVerticalScrollIndicator={false}
         onEndReached={fetchData}
         renderItem={({ item }) => {
@@ -70,6 +51,7 @@ const Page = () => {
             <LessonItem
               key={item._id}
               data={item}
+              style={styles.lessonItem}
               onClick={() => {
                 dispatch(dashboardAction.getLessonDetail({ id: item._id }));
                 router.push(`home/lesson/${item._id}`);

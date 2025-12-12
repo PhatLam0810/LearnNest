@@ -32,7 +32,14 @@ const ProfilePage: React.FC = () => {
   const tab = searchParams.get('tab') || '1'; // Lấy `tab` từ URL, mặc định là '1'
   return (
     <View style={styles.container}>
-      <Tabs defaultActiveKey={tab} items={items} />
+      <View style={{ marginBottom: 12 }}>
+        <h1 style={{ margin: 0 }}>Profile</h1>
+      </View>
+      <Tabs
+        aria-label="Profile settings tabs"
+        defaultActiveKey={tab}
+        items={items}
+      />
     </View>
   );
 };

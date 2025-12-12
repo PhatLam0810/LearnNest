@@ -65,6 +65,17 @@
   cursor: pointer;
 }
 
+.lesson-pill-button {
+  display: inline-flex;
+  align-self: center;
+  min-width: 220px;
+  width: auto;
+  height: 36px;
+  padding: 12px 32px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
 .label {
   font-size: 16px;
   color: #fff;

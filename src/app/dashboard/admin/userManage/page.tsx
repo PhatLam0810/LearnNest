@@ -7,6 +7,7 @@ import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
 import { adminQuery } from '~mdAdmin/redux';
 import { UserOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 const UserManage = () => {
   const { listItem, currentData } = useAppPagination<UserItem>({
     apiUrl: 'user/getListUser',
@@ -25,14 +26,32 @@ const UserManage = () => {
 
   const columns: TableProps<UserItem>['columns'] = [
     {
+      title: 'Avatar',
+      dataIndex: 'avatar',
+      key: 'avatar',
+      render: (value: string) => (
+        <Avatar
+          src={value}
+          size={48}
+          icon={<UserOutlined />}
+          style={{
+            borderWidth: 1,
+            borderColor: '#000',
+            backgroundColor: '#ef405c',
+          }}
+        />
+      ),
+    },
+    {
+      title: 'Username',
+      dataIndex: 'username',
+      key: 'username',
+      render: (value: string) => <Text>{value}</Text>,
+    },
+    {
       title: 'First Name',
       dataIndex: 'firstName',
       key: 'firstName',
-    },
-    {
-      title: 'Last Name',
-      dataIndex: 'lastName',
-      key: 'lastName',
     },
     {
       title: 'Email',
@@ -40,10 +59,12 @@ const UserManage = () => {
       key: 'email',
     },
     {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-      render: (value: UserItem['role']) => <Text>{value?.name}</Text>,
+      title: 'Date Created',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (value: string) => (
+        <Text>{dayjs(value).format('DD/MM/YYYY HH:mm')}</Text>
+      ),
     },
   ];
 
@@ -52,6 +73,7 @@ const UserManage = () => {
       <Table
         columns={columns}
         dataSource={listItem}
+        rowKey={record => record._id}
         pagination={{
           current: currentData?.pageNum,
           pageSize: currentData?.pageSize,

@@ -4,10 +4,9 @@ import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { LessonItem } from '~mdDashboard/components';
 import { useAppDispatch } from '@redux';
 import { useRouter } from 'next/navigation';
-import { HeaderHome, Tags } from './_components';
+import { Tags } from './_components';
 import styles from './styles';
 import { View, ScrollView, Text } from 'react-native-web';
-import { splitData } from './functions';
 import 'antd/dist/reset.css';
 import { AnimatePresence, motion } from 'framer-motion';
 import { authAction } from '~mdAuth/redux';
@@ -44,46 +43,43 @@ const HomeOverview = () => {
   }, [isLoading]);
 
   return (
-    <ScrollView style={styles.container}>
-      <HeaderHome />
-      <ScrollView style={styles.content}>
+    <ScrollView style={styles.container} aria-label="Home dashboard overview">
+      <ScrollView
+        style={styles.content}
+        aria-label="Recommended lessons"
+        contentContainerStyle={styles.contentContainer}>
         <AnimatePresence mode="popLayout">
           <motion.div key={2}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.title}>Today lesson</Text>
-              <Tags title="For you" backgroundColor="#FFA726" />
+            <View style={styles.section}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>Today lesson</Text>
+                <Tags title="For you" backgroundColor="#FFA726" />
+              </View>
+              <View style={styles.recommendGrid}>
+                {data?.today && (
+                  <LessonItem
+                    data={data?.today}
+                    onClick={() => onClickLesson(data.today._id)}
+                  />
+                )}
+              </View>
             </View>
-            {data?.today && (
-              <LessonItem
-                data={data?.today}
-                onClick={() => onClickLesson(data.today._id)}
-              />
-            )}
 
-            <View style={styles.titleContainer}>
-              <Text style={styles.title}>Just added</Text>
-              <Tags title="New" backgroundColor="#0059C7" />
-            </View>
-            <ScrollView
-              horizontal
-              contentContainerStyle={{ width: '100%' }}
-              style={{ scrollbarWidth: 'none' }}>
-              <View style={{ gap: 12 }}>
-                {splitData(data?.recommend || []).map((arr, arrIndex) => (
-                  <View
-                    key={arrIndex}
-                    style={{ flexDirection: 'row', gap: '0.5%' }}>
-                    {arr.map((item, index) => (
-                      <LessonItem
-                        key={index}
-                        data={item}
-                        onClick={() => onClickLesson(item._id)}
-                      />
-                    ))}
-                  </View>
+            <View style={[styles.section, styles.sectionSpacing]}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>Just added</Text>
+                <Tags title="New" backgroundColor="#0059C7" />
+              </View>
+              <View style={styles.recommendGrid}>
+                {(data?.recommend || []).map((item, index) => (
+                  <LessonItem
+                    key={index}
+                    data={item}
+                    onClick={() => onClickLesson(item._id)}
+                  />
                 ))}
               </View>
-            </ScrollView>
+            </View>
           </motion.div>
         </AnimatePresence>
       </ScrollView>

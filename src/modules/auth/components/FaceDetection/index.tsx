@@ -116,12 +116,16 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
   }, [router]);
 
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{ display: 'flex', width: '100%', flex: 1 }}>
       <video
         ref={videoRef}
-        height="250"
         style={{
-          float: 'left',
+          width: '100%',
+          height: 240,
+          maxHeight: 260,
+          aspectRatio: '4 / 3',
+          objectFit: 'cover',
+          display: 'block',
           overflow: 'hidden',
           zIndex: 4,
         }}

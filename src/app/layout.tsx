@@ -39,7 +39,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body style={{ margin: 0, padding: 0, overflow: 'hidden' }}>
+      <body style={{ margin: 0, padding: 0, overflow: 'auto' }}>
         <PayPalScriptProvider
           options={{
             clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
@@ -53,9 +53,11 @@ export default function RootLayout({
                   <View
                     style={{
                       flex: 1,
-                      width: '100vw',
-                      height: '100vh',
+                      width: '100%',
+                      minHeight: '100vh',
                       backgroundColor: '#F9F9F9',
+                      overflowX: 'hidden',
+                      overflowY: 'auto',
                     }}>
                     {context}
                     {children}

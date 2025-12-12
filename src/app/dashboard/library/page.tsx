@@ -1,23 +1,33 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { LibraryItem } from './_components';
-import { FlatList, Image, Modal, Text, View } from 'react-native-web';
+import { FlatList, Image, Modal, View } from 'react-native-web';
 import styles from './styles';
 import { useAppPagination } from '@hooks';
 import ReactPlayer from 'react-player';
 import { Document, Page } from 'react-pdf';
-import Search from 'antd/es/input/Search';
-import { Select } from 'antd';
 import { Library } from '~mdDashboard/types';
 
 const LibraryList = () => {
-  const { listItem, fetchData, refresh, search, changeParams } =
-    useAppPagination<Library>({
-      apiUrl: '/library/getAllLibrary',
-    });
+  const { listItem, fetchData, currentData } = useAppPagination<Library>({
+    apiUrl: '/library/getAllLibrary',
+  });
 
   const [selectedItem, setSelectedItem] = useState<Library>();
   const [isVisibleModalVideo, setIsVisibleModalVideo] = useState(false);
+  const layoutHeight = useRef(0);
+  const contentHeight = useRef(0);
+  const lastFetchAt = useRef(0);
+  const expectedTotal =
+    currentData?.totalPages && currentData?.pageSize
+      ? currentData.totalPages * currentData.pageSize
+      : undefined;
+
+  React.useEffect(() => {
+    if (!expectedTotal) return;
+    if (listItem.length >= expectedTotal) return;
+    fetchData();
+  }, [listItem.length, expectedTotal]);
 
   const renderModalContent = () => {
     if (!selectedItem) return null;
@@ -43,6 +53,7 @@ const LibraryList = () => {
         return (
           <Image
             source={selectedItem.url}
+            accessibilityLabel={selectedItem.title || 'Library image preview'}
             style={{ width: '100%', height: '100%' }}
             resizeMode="contain"
           />
@@ -54,43 +65,28 @@ const LibraryList = () => {
 
   return (
     <View style={styles.container}>
-      <View style={{ gap: 8, marginBottom: 20 }}>
-        <Search
-          placeholder="Search"
-          enterButton="Search"
-          allowClear
-          size="large"
-          // suffix={suffix}
-          onSearch={search}
-        />
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <View style={{ gap: 2 }}>
-            <Text style={styles.title}>Sort By</Text>
-            <Select
-              style={{ width: 120 }}
-              defaultValue={{ label: 'desc', value: 'desc' }}
-              options={[
-                { label: 'desc', value: 'desc' },
-                { label: 'asc', value: 'asc' },
-              ]}
-              placeholder="Category"
-              onSelect={data => {
-                changeParams({ sortBy: data });
-              }}
-            />
-          </View>
-        </View>
-      </View>
       <FlatList
         data={listItem}
         stickyHeaderHiddenOnScroll
         keyExtractor={(item, index) => item._id + index}
         numColumns={4}
-        contentContainerStyle={{ gap: 6 }}
-        columnWrapperStyle={{ gap: '0.5%' }}
-        showsVerticalScrollIndicator={false}
-        onEndReached={fetchData}
-        renderItem={({ item, index }) => (
+        contentContainerStyle={{
+          gap: 16,
+          paddingBottom: 48,
+          overflow: 'visible',
+        }}
+        columnWrapperStyle={{ gap: 16 }}
+        onLayout={e => {
+          layoutHeight.current = e.nativeEvent.layout.height;
+        }}
+        onContentSizeChange={(w, h) => {
+          contentHeight.current = h;
+          if (h <= layoutHeight.current && lastFetchAt.current === 0) {
+            lastFetchAt.current = Date.now();
+            fetchData();
+          }
+        }}
+        renderItem={({ item }) => (
           <LibraryItem
             key={item._id}
             data={item}
@@ -113,6 +109,7 @@ const LibraryList = () => {
             justifyContent: 'center',
             alignItems: 'center',
           }}
+          aria-label="Library detail modal"
           onClick={() => setIsVisibleModalVideo(false)}>
           <View
             style={{

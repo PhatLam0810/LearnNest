@@ -1,62 +1,60 @@
-.sider {
-  background-color: #f0f2f5; /* Màu nền sáng */
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1); /* Thêm bóng cho sider */
-}
 .ant-menu-item-group .ant-menu-item-group-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #3f3f3f;
-  font-family: 'Inter', sans-serif;
+  display: none !important;
 }
 .ant-drawer-body {
   overflow-y: hidden !important;
   padding: 0 !important;
 }
-.ant-menu-item {
-  display: flex !important;
-  align-items: center;
+.ant-menu-inline {
+  border-inline-end: 0 !important;
 }
-.ant-menu-light .ant-menu-item-selected {
-  background-color: transparent;
-  /* color: #ef405c; */
-  font-size: 16px;
-  font-family: 'Inter', sans-serif;
-  font-weight: 400;
-}
-.ant-menu-submenu-title {
-  font-size: 16px;
-  margin-left: 10px;
-  align-items: center;
+.ant-menu .ant-menu-item,
+.ant-menu .ant-menu-submenu-title {
   display: flex !important;
-  font-weight: 400;
-  font-family: 'Inter', sans-serif;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 64px;
+  gap: 6px;
+  border-radius: 14px;
+  padding: 8px 8px !important;
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-align: center;
+}
+.ant-menu-inline .ant-menu-item,
+.ant-menu-inline .ant-menu-submenu-title {
+  padding-inline: 0 !important;
 }
 .ant-menu-title-content {
-  margin-left: 10px;
-  font-size: 16px;
-  font-family: 'Inter', sans-serif;
+  margin: 0 !important;
 }
-.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title {
-  /* color: #ef405c; */
-  font-family: 'Inter', sans-serif;
-}
-.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title svg path {
-  stroke: #fff;
-}
-.ant-menu-light .ant-menu-item-selected svg path {
-  stroke: #fff;
+.ant-menu .ant-menu-item-icon {
+  font-size: 20px;
 }
 .ant-menu-light .ant-menu-item-selected {
-  /* color: #ef405c !important; */
+  background-color: #eef2f5 !important;
+  color: #111827 !important;
+  border-radius: 14px;
 }
-.ant-menu .ant-menu-submenu-title .ant-menu-item-icon svg path {
-  stroke: #fff;
+.ant-menu-light .ant-menu-item-selected .ant-menu-title-content {
+  color: #111827 !important;
 }
-.ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title,
-.ant-menu-light
-  > .ant-menu
-  .ant-menu-submenu-selected
-  > .ant-menu-submenu-title {
-  color: #fff;
-  background-color: #ef405c;
+.ant-menu-light .ant-menu-item:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+.ant-menu {
+  background: transparent;
+}
+.sider-scroll {
+  width: 100%;
+  height: 100%;
+  scrollbar-width: none; /* hide scrollbar in Firefox */
+}
+.sider-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }

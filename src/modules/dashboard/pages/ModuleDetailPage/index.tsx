@@ -6,11 +6,11 @@ import { useAppDispatch, useAppSelector } from '@redux';
 import LibraryDetailItem, {
   LibraryDetailItemHandle,
 } from '../SubLessonDetailPage/_components/LibraryDetailItem';
-import { AppHeader } from '@components';
 import { Button, Collapse, CollapseProps, Modal } from 'antd';
 import { convertDurationToTime } from '@utils';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { FaceDetection } from '~mdAuth/components';
+import { useResponsive } from '@/styles/responsive';
 
 const ModuleDetailPage = () => {
   const { selectedModule, lessonDetail, selectedLibrary } = useAppSelector(
@@ -23,6 +23,7 @@ const ModuleDetailPage = () => {
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [modal, contextHolder] = Modal.useModal();
+  const { isMobile, isTablet } = useResponsive();
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index,
@@ -147,10 +148,11 @@ const ModuleDetailPage = () => {
   };
 
   const handleSubmit = (selectedAnswers: any) => {
-    const totalQuestions = selectedLibrary.questionList.length;
+    const totalQuestions = selectedLibrary?.questionList?.length || 0;
+    if (!totalQuestions) return;
     let correctCount = 0;
 
-    selectedLibrary.questionList.forEach(question => {
+    selectedLibrary?.questionList?.forEach(question => {
       const userAnswer = selectedAnswers[question._id]; // từ object người dùng chọn
       const correctAnswer = question.correctAnswer; // từ dữ liệu câu hỏi
 
@@ -181,16 +183,62 @@ const ModuleDetailPage = () => {
     libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
   };
 
+  if (!selectedLibrary) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>No library selected</Text>
+      </View>
+    );
+  }
+
+  const layoutRowStyle = [
+    styles.layoutRow,
+    isMobile && { flexDirection: 'column', gap: 16 },
+    !isMobile && { height: 'calc(100vh - 120px)', overflow: 'hidden' },
+  ] as any;
+
+  const mainColumnStyle = [
+    styles.mainColumn,
+    { display: 'flex', gap: 24 },
+    isMobile && { width: '100%' },
+    !isMobile && { overflowY: 'auto', maxHeight: '100%' },
+  ] as any;
+
+  const videoStickyStyle = [
+    styles.videoSticky,
+    isMobile && { position: 'relative', top: 0 },
+  ] as any;
+
+  const sideColumnStyle = [
+    styles.sideColumn,
+    isMobile && {
+      width: '100%',
+      minWidth: '100%',
+      maxWidth: '100%',
+      position: 'relative',
+      top: 0,
+      gap: 12,
+    },
+    !isMobile && { maxHeight: '100%', overflow: 'hidden' },
+  ] as any;
+
+  const lessonScrollStyle = [
+    styles.lessonScroll,
+    isMobile && { maxHeight: 'none', overflowY: 'visible', padding: 0 },
+  ] as any;
+
+  const lessonScrollContentStyle = [
+    styles.lessonScrollContent,
+    isMobile && { paddingBottom: 0 },
+  ] as any;
+
   return (
     <View style={styles.container}>
       {contextHolder}
-      <AppHeader title={selectedModule?.title} subTitle={lessonDetail?.title} />
-      <View style={{ flexDirection: 'row', gap: 24 }}>
-        <ScrollView
-          style={{ width: '70%' }}
-          contentContainerStyle={{ paddingBottom: 100 }}>
+      <View style={layoutRowStyle}>
+        <View style={mainColumnStyle}>
           {selectedLibrary?.type === 'Text' ? (
-            <>
+            <View style={videoStickyStyle}>
               <View style={styles.layoutTitleContainer}>
                 <View style={{ width: '100%', flex: 1 }}>
                   <Text style={styles.layoutTitle}>
@@ -204,9 +252,9 @@ const ModuleDetailPage = () => {
                 onWatchFinish={onWatchFinish}
                 onClickSubmit={handleSubmit}
               />
-            </>
+            </View>
           ) : (
-            <>
+            <View style={videoStickyStyle}>
               <LibraryDetailItem
                 ref={libraryRef}
                 data={selectedLibrary}
@@ -222,32 +270,35 @@ const ModuleDetailPage = () => {
                   </Text>
                 </View>
               </View>
-            </>
-          )}
-        </ScrollView>
-        <ScrollView
-          style={{ height: 1000, scrollbarWidth: 'none' }}
-          contentContainerStyle={{ paddingBottom: 100 }}>
-          {lessonDetail?.modules?.length > 0 && (
-            <View style={{ gap: 24 }}>
-              <FaceDetection onPauseVideo={handlePauseVideo} />
-
-              <ScrollView contentContainerStyle={{ aspectRatio: 16 / 19 }}>
-                <Text style={styles.lessonContentTitle}>Lesson Content</Text>
-                <View style={{ gap: 12 }}>
-                  <Collapse
-                    bordered={false}
-                    defaultActiveKey={[0]}
-                    expandIcon={({ isActive }) => (
-                      <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                    )}
-                    items={getItems(panelStyle)}
-                  />
-                </View>
-              </ScrollView>
             </View>
           )}
-        </ScrollView>
+        </View>
+
+        {lessonDetail?.modules?.length > 0 && (
+          <View style={sideColumnStyle}>
+            <View style={styles.faceWrapper}>
+              <FaceDetection onPauseVideo={handlePauseVideo} />
+            </View>
+
+            <ScrollView
+              style={lessonScrollStyle}
+              contentContainerStyle={lessonScrollContentStyle}>
+              <View style={styles.lessonContentHeader}>
+                <Text style={styles.lessonContentTitle}>Lesson Content</Text>
+              </View>
+              <View style={{ gap: 12 }}>
+                <Collapse
+                  bordered={false}
+                  defaultActiveKey={[0]}
+                  expandIcon={({ isActive }) => (
+                    <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                  )}
+                  items={getItems(panelStyle)}
+                />
+              </View>
+            </ScrollView>
+          </View>
+        )}
       </View>
     </View>
   );

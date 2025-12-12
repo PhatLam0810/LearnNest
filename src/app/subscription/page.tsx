@@ -20,7 +20,9 @@ const Page = () => {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.title}>SUBSCRIPTION PLAN</Text>
+        <Text style={styles.title} accessibilityRole="header" aria-level={1}>
+          SUBSCRIPTION PLAN
+        </Text>
       </View>
       <View style={styles.subWrap}>
         {subs.map((item, index) => {
@@ -41,6 +43,7 @@ const Page = () => {
                   setSubSelected(item);
                   setIsVisible(true);
                 }}
+                aria-label={`Buy ${item.title} plan for ${item.amount} dollars per month`}
                 style={Object.assign({}, styles.button, {
                   backgroundColor: item.color,
                 })}>
@@ -55,7 +58,9 @@ const Page = () => {
           style={styles.modalContent}
           onClick={() => {
             setIsVisible(false);
-          }}>
+          }}
+          accessibilityRole="dialog"
+          aria-label="PayPal checkout modal">
           <View
             style={styles.paypalButton}
             onClick={e => {

@@ -2,19 +2,26 @@
 import React, { useState } from 'react';
 import {
   Avatar,
+  Badge,
   Button,
   Drawer,
+  Dropdown,
   GetProp,
   Grid,
+  Input,
   Layout,
   Menu,
   MenuProps,
+  Space,
 } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  BellOutlined,
   ControlOutlined,
+  FilterOutlined,
   LogoutOutlined,
   MenuOutlined,
+  SearchOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import './styles.css';
@@ -24,8 +31,10 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import Icon from '@components/icons';
 import { LessonIcon } from '@/assets/svg';
+import LessonSearchBar from './lesson/_components/LessonSearchBar';
+import { LessonSearchProvider } from './lesson/lessonSearchContext';
 
-const { Sider, Content } = Layout;
+const { Sider, Content, Header } = Layout;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
 export default function DashboardLayout({
   children,
@@ -40,6 +49,8 @@ export default function DashboardLayout({
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [open, setOpen] = useState(false);
+  const isLessonPage = pathname.startsWith('/dashboard/lesson');
+  const isAdmin = userProfile?.role?.level <= 2;
 
   const onClickItem = (item: string) => {
     router.replace(item);
@@ -55,28 +66,9 @@ export default function DashboardLayout({
         { key: '/dashboard/home', label: 'Home', icon: <Icon name="home" /> },
         { key: '/dashboard/lesson', label: 'Lesson', icon: <LessonIcon /> },
         {
-          key: '/dashboard/library/0',
+          key: '/dashboard/library',
           label: 'Library',
           icon: <Icon name="library" />,
-        },
-      ],
-    },
-  ];
-
-  const adminItems: MenuItem[] = [
-    {
-      key: 'Admin',
-      label: 'ADMIN',
-      type: 'group',
-      children: [
-        {
-          key: '/dashboard/admin',
-          label: 'Admin',
-          icon: <ControlOutlined />,
-          children: [
-            { key: '/dashboard/admin/userManage', label: 'User Manage' },
-            { key: '/dashboard/admin/lessonManage', label: 'Lesson Manage' },
-          ],
         },
       ],
     },
@@ -99,65 +91,45 @@ export default function DashboardLayout({
       ],
     },
   ];
+  const Logo = () => (
+    <TouchableOpacity
+      onClick={() => {
+        router.push('/dashboard/home');
+        setOpen(false);
+      }}>
+      <View style={styles.logo}>
+        <View style={styles.logoMark}>
+          <Text style={styles.logoMarkText}>LN</Text>
+        </View>
+        <Text style={styles.logoText}>LearnNest</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   const sidebarContent = (
     <View style={styles.sider}>
-      <TouchableOpacity>
-        <View
-          style={{ alignItems: 'center', marginBottom: 20 }}
-          onClick={() => {
-            router.push('/dashboard/profile');
-            setOpen(false);
-          }}>
-          <Avatar
-            src={userProfile?.avatar}
-            size={100}
-            icon={<UserOutlined />}
-            style={{
-              borderWidth: 1,
-              borderColor: '#000',
-              backgroundColor: '#ef405c',
-            }}
-          />
-          <Text style={styles.username}>
-            {userProfile?.firstName + ' ' + userProfile?.lastName}
-          </Text>
-          <Text style={styles.role}>{userProfile?.role?.name}</Text>
-        </View>
-      </TouchableOpacity>
       <ScrollView
-        style={{ scrollbarWidth: 'none' }}
-        contentContainerStyle={{ minHeight: '100%' }}>
+        style={{ scrollbarWidth: 'none', flex: 1 }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: 12,
+          width: '100%',
+          height: '100%',
+          scrollbarWidth: 'none',
+        }}>
         <Menu
-          style={{
-            backgroundColor: 'transparent',
-            borderInlineEnd: 0,
-          }}
+          mode="inline"
+          style={styles.menu}
           selectedKeys={[pathname]}
           items={menuItems}
           onClick={item => {
             onClickItem(item.key);
           }}
         />
-        {userProfile?.role?.level <= 2 && (
-          <Menu
-            style={{
-              backgroundColor: 'transparent',
-              borderInlineEnd: 0,
-            }}
-            selectedKeys={[pathname]}
-            items={adminItems}
-            onClick={item => {
-              onClickItem(item.key);
-            }}
-          />
-        )}
       </ScrollView>
       <Menu
         mode="inline"
-        style={{
-          backgroundColor: 'transparent',
-          borderInlineEnd: 0,
-        }}
+        style={styles.menu}
         selectedKeys={[pathname]}
         items={settingItems}
         onClick={item => {
@@ -167,40 +139,172 @@ export default function DashboardLayout({
     </View>
   );
 
-  return (
-    <Layout
-      style={{ height: '100vh', width: '100vw', backgroundColor: 'white' }}>
-      {screens.md ? (
-        <Sider theme="light" width={240} style={{ padding: 0 }}>
-          {sidebarContent}
-        </Sider>
-      ) : (
-        <>
-          <View style={styles.btnOpenDrawerContainer}>
+  const TopBar = () => (
+    <View style={styles.topbar}>
+      {!screens.md && (
+        <Button
+          type="text"
+          icon={<MenuOutlined />}
+          onClick={() => setOpen(true)}
+          style={styles.btnOpenDrawer}
+        />
+      )}
+      <View style={styles.topbarRow}>
+        <Logo />
+        <View style={{ flex: 1 }}>
+          {isLessonPage ? (
+            <LessonSearchBar />
+          ) : (
+            <View style={styles.searchWrap}>
+              <Input
+                prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                suffix={
+                  <Dropdown
+                    trigger={['hover']}
+                    menu={{
+                      items: [
+                        { key: 'desc', label: 'Desc' },
+                        { key: 'asc', label: 'Asc' },
+                      ],
+                    }}>
+                    <Button
+                      type="text"
+                      icon={<FilterOutlined style={{ fontSize: 18 }} />}
+                      style={{ borderRadius: 999, color: '#475569' }}
+                      aria-label="Filter search"
+                    />
+                  </Dropdown>
+                }
+                placeholder="Tìm kiếm khóa học, bài viết, video..."
+                allowClear
+                size="large"
+                style={styles.searchInput}
+              />
+            </View>
+          )}
+        </View>
+        <Space size={12} style={styles.actions}>
+          <Badge count={3} size="small">
             <Button
               type="text"
-              icon={<MenuOutlined />}
-              onClick={() => setOpen(true)}
-              style={styles.btnOpenDrawer}
+              icon={<BellOutlined />}
+              style={styles.iconBtn}
+              aria-label="Thông báo"
             />
-          </View>
+          </Badge>
+          <Dropdown
+            trigger={['hover']}
+            menu={{
+              expandIcon: null,
+              items: [
+                isAdmin
+                  ? {
+                      key: 'admin',
+                      label: 'Admin',
+                      icon: <ControlOutlined />,
+                      children: [
+                        {
+                          key: 'admin-user',
+                          label: 'User Manage',
+                          onClick: () =>
+                            router.push('/dashboard/admin/userManage'),
+                        },
+                        {
+                          key: 'admin-lesson',
+                          label: 'Lesson Manage',
+                          onClick: () =>
+                            router.push('/dashboard/admin/lessonManage'),
+                        },
+                      ],
+                    }
+                  : null,
+                {
+                  key: 'profile',
+                  label: 'Settings',
+                  icon: <UserOutlined />,
+                  onClick: () => router.push('/dashboard/profile'),
+                },
+                {
+                  type: 'divider',
+                  key: 'divider-1',
+                },
+                {
+                  key: 'logout',
+                  label: 'Logout',
+                  icon: <LogoutOutlined />,
+                  onClick: () => dispatch(authAction.logout()),
+                },
+              ].filter(Boolean) as MenuProps['items'],
+            }}>
+            <Avatar
+              src={userProfile?.avatar}
+              icon={<UserOutlined />}
+              style={styles.avatar}
+            />
+          </Dropdown>
+        </Space>
+      </View>
+    </View>
+  );
 
-          {/* Drawer */}
-          <Drawer
-            placement="left"
-            closable={false}
-            open={open}
-            onClose={() => setOpen(false)}
-            width={240}>
-            {/* Nút đóng Drawer */}
+  const contentStyle = isLessonPage
+    ? {
+        ...styles.content,
+        minHeight: 'auto',
+        height: 'auto',
+        overflow: 'visible',
+        overflowY: 'visible',
+        paddingBottom: 32,
+      }
+    : {
+        ...styles.content,
+        height: 'calc(100vh - 64px)',
+        overflowY: 'auto',
+      };
 
-            {sidebarContent}
-          </Drawer>
-        </>
+  const layout = (
+    <Layout style={{ minHeight: '100vh', backgroundColor: '#fff' }}>
+      <Header
+        style={{
+          padding: 0,
+          background: '#fff',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+        }}>
+        <TopBar />
+      </Header>
+
+      {!screens.md && (
+        <Drawer
+          placement="left"
+          closable={false}
+          open={open}
+          onClose={() => setOpen(false)}
+          width={280}
+          styles={{ body: { padding: 0 } }}>
+          {sidebarContent}
+        </Drawer>
       )}
 
-      {/* Content */}
-      <Content style={{ backgroundColor: 'white' }}>{children}</Content>
+      <Layout style={{ backgroundColor: '#f5f7fb' }}>
+        {screens.md && (
+          <Sider
+            theme="light"
+            width={110}
+            collapsed={false}
+            style={styles.antSider}>
+            {sidebarContent}
+          </Sider>
+        )}
+        <Content style={contentStyle}>{children}</Content>
+      </Layout>
     </Layout>
   );
+
+  if (isLessonPage) {
+    return <LessonSearchProvider>{layout}</LessonSearchProvider>;
+  }
+
+  return layout;
 }

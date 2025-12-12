@@ -13,13 +13,7 @@ import Icon from '@components/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { LessonItem, LessonThumbnail } from '~mdDashboard/components';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
-import {
-  FlatList,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native-web';
+import { FlatList, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
 import { AppComment, AppHeader, AppModalPayPal } from '@components';
@@ -60,10 +54,10 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       ) || 0)
     );
   }, 0);
-  const numColumns = lessonDetail?.learnedSkills?.length >= 10 ? 2 : 1;
+  const numColumns = 2;
 
   const [accessLesson, setAccessLesson] = useState(true);
-
+  const [activePanelKeys, setActivePanelKeys] = useState<string[]>([]);
   // Cách cũ của PhátPhát
   //  useEffect(() => {
   //     if (lessonDetail.isPremium) {
@@ -185,47 +179,74 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   };
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
-    lessonDetail?.modules?.map((item, index) => ({
-      key: index.toString(),
-      label: (
-        <div style={styles.moduleContentHeader}>
-          <p style={styles.learnedSkillText}>{item.title}</p>
-          <p style={styles.learnedSkillText}>
-            Total Libraries: {item.libraries.length}
-          </p>
-        </div>
-      ),
-      children: (
-        <View style={{ gap: 8, marginTop: 8 }}>
-          {item.libraries.map((subItem, subIndex) => (
-            <TouchableOpacity
-              key={subIndex}
-              style={[
-                !subItem?.usersCanPlay?.some(
-                  id => id._id === userProfile?._id,
-                ) && styles.disabledButton,
-                !accessLesson && styles.disabledButton,
-              ]}>
-              <View
-                style={styles.buttonModule}
-                onClick={() => handleLibraryClick(subItem, item)}>
-                <PlayCircleOutlined />
-                <View style={{ paddingTop: 7, paddingBottom: 7 }}>
-                  <Text style={styles.moduleItemTitle}>{subItem.title}</Text>
-                  <Text style={styles.moduleItemTime}>
-                    {convertDurationToTime(subItem.duration)}
-                  </Text>
+    lessonDetail?.modules?.map((item, index) => {
+      const panelKey = index.toString();
+      const isActive = activePanelKeys.includes(panelKey);
+
+      return {
+        key: panelKey,
+        label: (
+          <div style={styles.moduleContentHeader}>
+            <p
+              style={{
+                ...styles.learnedSkillText,
+                color: isActive ? '#fff' : '#000',
+              }}>
+              {item.title}
+            </p>
+            <p
+              style={{
+                ...styles.learnedSkillText,
+                color: isActive ? '#fff' : '#000',
+              }}>
+              Total Libraries: {item.libraries.length}
+            </p>
+          </div>
+        ),
+        children: (
+          <View style={{ gap: 8, marginTop: 8 }}>
+            {item.libraries.map((subItem, subIndex) => (
+              <TouchableOpacity
+                key={subIndex}
+                style={[
+                  !subItem?.usersCanPlay?.some(
+                    id => id._id === userProfile?._id,
+                  ) && styles.disabledButton,
+                  !accessLesson && styles.disabledButton,
+                ]}>
+                <View
+                  style={styles.buttonModule}
+                  onClick={() => {
+                    if (!accessLesson) {
+                      return;
+                    }
+                    if (
+                      subItem?.usersCanPlay?.some(
+                        id => id._id === userProfile?._id,
+                      )
+                    ) {
+                      dispatch(dashboardAction.setSelectedModule(item));
+                      dispatch(dashboardAction.setSelectedLibrary(subItem));
+                      router.push('/dashboard/home/lesson/moduleDetail');
+                    }
+                  }}>
+                  <PlayCircleOutlined />
+                  <View style={{ paddingTop: 7, paddingBottom: 7 }}>
+                    <Text style={styles.moduleItemTitle}>{subItem.title}</Text>
+                    <Text style={styles.moduleItemTime}>
+                      {convertDurationToTime(subItem.duration)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ),
-      style: panelStyle,
-    })) || [];
+              </TouchableOpacity>
+            ))}
+          </View>
+        ),
+        style: panelStyle,
+      };
+    }) || [];
 
   const panelStyle: React.CSSProperties = {
-    marginBottom: 12,
     background: '#f5f5f5',
     borderRadius: '#f5f5f5',
     border: 'none',
@@ -233,15 +254,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   return (
     <View style={styles.container}>
       {contextHolder}
-      <AppHeader title="Lesson" />
-      <ScrollView
-        style={{
-          height: 1000,
-          scrollbarWidth: 'none',
-          paddingBottom: 200,
-        }}
-        contentContainerStyle={{ paddingBottom: 20 }}>
-        <View style={{ marginTop: 12, gap: 16 }}>
+      <View style={styles.pageWrapper}>
+        <View style={{ marginTop: 12 }}>
           <View style={{ flexDirection: 'row', gap: 12 }}>
             {lessonDetail?.categories?.map((item, index) => (
               <View style={styles.container} key={index}>
@@ -251,19 +265,27 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               </View>
             ))}
           </View>
-          <Text style={styles.title}>{lessonDetail?.title}</Text>
-          <View style={{ flexDirection: 'row', flex: 1, gap: 12 }}>
-            <View style={{ flex: 2.4 }}>
-              <Text style={styles.description}>
+          <Text style={styles.title}>{lessonDetail?.title.trim()}</Text>
+          <View style={styles.contentRow}>
+            <View style={styles.mainColumn}>
+              <Text
+                style={{
+                  ...styles.description,
+                  maxWidth: '90%',
+                  marginTop: 12,
+                }}>
                 {lessonDetail?.description}
               </Text>
-              <View style={{ paddingTop: 10, paddingBottom: 10, gap: 10 }}>
-                <Text style={styles.whatLearnTitle}>What you’ll learn:</Text>
+              <View style={{ paddingBottom: 10 }}>
+                <Text style={{ ...styles.whatLearnTitle }}>
+                  What you’ll learn:
+                </Text>
                 <FlatList
                   data={lessonDetail?.learnedSkills}
-                  numColumns={numColumns} // Dynamically set columns
-                  key={numColumns} // Force re-render when column count changes
+                  numColumns={numColumns}
+                  key={numColumns}
                   keyExtractor={(item, index) => index.toString()}
+                  style={{ maxWidth: '90%', marginTop: 12 }}
                   renderItem={({ item }) => (
                     <View
                       style={{
@@ -273,7 +295,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                         flex: 1,
                       }}>
                       <CheckOutlined
-                        style={{ color: '#ef405c', marginRight: 12 }}
+                        style={{
+                          marginRight: 8,
+                          color: '#f05123',
+                          fontWeight: '500',
+                        }}
                       />
                       <Text style={styles.learnedSkillText}>
                         {item.replace(/\n+/g, '\n')}
@@ -282,16 +308,54 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   )}
                 />
               </View>
+
+              {lessonDetail?.modules?.length > 0 && (
+                <View style={{ ...styles.lessonContent, maxWidth: '90%' }}>
+                  <Text style={styles.lessonContentTitle}>Lesson Content</Text>
+                  <View style={{ gap: 12 }}>
+                    <Collapse
+                      bordered={false}
+                      expandIcon={({ isActive }) => (
+                        <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                      )}
+                      activeKey={activePanelKeys}
+                      onChange={keys =>
+                        setActivePanelKeys(Array.isArray(keys) ? keys : [keys])
+                      }
+                      items={getItems(panelStyle)}
+                    />
+                  </View>
+                </View>
+              )}
+
+              {lessonDetail?.relatedLessons?.length > 0 && (
+                <View style={{ ...styles.lessonContent, maxWidth: '90%' }}>
+                  <Text style={styles.lessonContentTitle}>Related Lessons</Text>
+                  <FlatList
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={lessonDetail.relatedLessons}
+                    contentContainerStyle={{ gap: 8 }}
+                    renderItem={({ item }) => (
+                      <LessonItem
+                        data={item}
+                        onClick={() => {
+                          router.push(`/dashboard/home/lesson/${item._id}`);
+                        }}
+                      />
+                    )}
+                  />
+                </View>
+              )}
             </View>
-            <View style={{ flex: 1, gap: 16, display: 'flex' }}>
-              <View
-                style={{
-                  flex: 1,
-                  minHeight: 200,
-                  borderRadius: 12,
-                  overflow: 'hidden',
-                  backgroundColor: 'gray',
-                }}>
+            <View
+              style={{
+                ...styles.sideColumn,
+                position: 'sticky',
+                top: 8,
+                gap: 16,
+              }}>
+              <View style={styles.thumbnailCard}>
                 {!accessLesson && (
                   <View style={styles.premium}>
                     <DollarOutlined style={{ color: '#FFF', fontSize: 24 }} />
@@ -302,7 +366,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               {!accessLesson ? (
                 <View>
                   <button
-                    className="button"
+                    className="button lesson-pill-button"
                     onClick={() => {
                       setItemBuy(lessonDetail);
                       setIsVisibleModalBuy(true);
@@ -321,7 +385,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               ) : (
                 <View>
                   <button
-                    className="button"
+                    className="button lesson-pill-button"
                     onClick={() => {
                       const modules = lessonDetail.modules;
                       const libraries = modules[0].libraries[0];
@@ -352,42 +416,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
             </View>
           </View>
         </View>
-
-        {lessonDetail?.modules?.length > 0 && (
-          <View style={styles.lessonContent}>
-            <Text style={styles.lessonContentTitle}>Lesson Content</Text>
-            <View style={{ gap: 12 }}>
-              <Collapse
-                bordered={false}
-                expandIcon={({ isActive }) => (
-                  <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                )}
-                items={getItems(panelStyle)}
-              />
-            </View>
-          </View>
-        )}
-
-        {lessonDetail?.relatedLessons?.length > 0 && (
-          <View style={styles.lessonContent}>
-            <Text style={styles.lessonContentTitle}>Related Lessons</Text>
-            <FlatList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              data={lessonDetail.relatedLessons}
-              contentContainerStyle={{ gap: 8 }}
-              renderItem={({ item }) => (
-                <LessonItem
-                  data={item}
-                  onClick={() => {
-                    router.push(`/dashboard/home/lesson/${item._id}`);
-                  }}
-                />
-              )}
-            />
-          </View>
-        )}
-      </ScrollView>
+      </View>
       <AppModalPayPal
         isVisibleModalBuy={isVisibleModalBuy}
         setIsVisibleModalBuy={setIsVisibleModalBuy}

@@ -6,21 +6,44 @@ const styles = StyleSheet.create({
     height: '100%',
     scrollbarWidth: 'none',
     padding: 20,
+    overflow: 'visible',
   },
-
   content: {
     scrollbarWidth: 'none',
+    gap: 24,
+    overflow: 'visible',
+  },
+  contentContainer: {
+    flexGrow: 1,
+    gap: 24,
+    overflow: 'visible',
   },
   scrollView: { gap: 16 },
+  section: {
+    width: '100%',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    gap: 12,
+    overflow: 'visible',
+  },
+  sectionSpacing: {
+    marginTop: 24,
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 16,
     marginBottom: 16,
   },
   title: { ...typography.titleS },
-  titleWrap: {},
+  recommendGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    columnGap: 16,
+    rowGap: 20,
+    width: '100%',
+    overflow: 'visible',
+  },
   profileContainer: {
     padding: 8,
     alignItems: 'center',
