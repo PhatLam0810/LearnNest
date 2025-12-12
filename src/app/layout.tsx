@@ -66,7 +66,7 @@ export default function RootLayout({
                 </PersistGate>
               </QueryClientProvider>
             </WagmiProvider>
-            <Chatbox />
+            {/* <Chatbox /> */}
             <Authentication />
           </Provider>
         </PayPalScriptProvider>

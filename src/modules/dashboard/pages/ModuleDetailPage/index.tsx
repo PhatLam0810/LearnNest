@@ -277,7 +277,7 @@ const ModuleDetailPage = () => {
         {lessonDetail?.modules?.length > 0 && (
           <View style={sideColumnStyle}>
             <View style={styles.faceWrapper}>
-              <FaceDetection onPauseVideo={handlePauseVideo} />
+              {/* <FaceDetection onPauseVideo={handlePauseVideo} /> */}
             </View>
 
             <ScrollView
