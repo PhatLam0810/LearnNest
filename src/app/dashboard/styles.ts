@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     minHeight: 'calc(100vh - 64px)',
     padding: 24,
+    height: 'calc(100vh - 64px)',
     overflowY: 'auto',
   },
   btnOpenDrawer: {

@@ -49,7 +49,6 @@ export default function DashboardLayout({
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [open, setOpen] = useState(false);
-  const isLessonPage = pathname.startsWith('/dashboard/lesson');
   const isAdmin = userProfile?.role?.level <= 2;
 
   const onClickItem = (item: string) => {
@@ -247,21 +246,6 @@ export default function DashboardLayout({
     </View>
   );
 
-  const contentStyle = isLessonPage
-    ? {
-        ...styles.content,
-        minHeight: 'auto',
-        height: 'auto',
-        overflow: 'visible',
-        overflowY: 'visible',
-        paddingBottom: 32,
-      }
-    : {
-        ...styles.content,
-        height: 'calc(100vh - 64px)',
-        overflowY: 'auto',
-      };
-
   const layout = (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#fff' }}>
       <Header
@@ -297,7 +281,7 @@ export default function DashboardLayout({
             {sidebarContent}
           </Sider>
         )}
-        <Content style={contentStyle}>{children}</Content>
+        <Content style={styles.content}>{children}</Content>
       </Layout>
     </Layout>
   );
