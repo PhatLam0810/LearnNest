@@ -20,7 +20,7 @@ const Page = () => {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.title} accessibilityRole="header" aria-level={1}>
+        <Text style={styles.title} aria-level={1}>
           SUBSCRIPTION PLAN
         </Text>
       </View>
@@ -59,7 +59,6 @@ const Page = () => {
           onClick={() => {
             setIsVisible(false);
           }}
-          accessibilityRole="dialog"
           aria-label="PayPal checkout modal">
           <View
             style={styles.paypalButton}

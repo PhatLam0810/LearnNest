@@ -29,7 +29,7 @@ const LessonSearchBar: React.FC = () => {
       menu={{
         items: sortItems,
         selectedKeys: [sortBy],
-        onClick: ({ key }) => setSortBy(key),
+        onClick: ({ key }) => setSortBy(key as 'desc' | 'asc'),
       }}>
       <Button
         type="text"

@@ -55,6 +55,7 @@ export default function DashboardLayout({
     router.replace(item);
     setOpen(false);
   };
+  const isLessonPage = pathname.startsWith('/dashboard/lesson');
 
   const menuItems: MenuItem[] = [
     {

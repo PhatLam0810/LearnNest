@@ -21,6 +21,8 @@ import { Collapse, CollapseProps, message, Modal } from 'antd';
 import { PayPalButtons } from '@paypal/react-paypal-js';
 import { authAction, authQuery } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
+import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/AppVideoWatchersButton';
+import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
 
 interface LessonDetailPageProps {
   id: string;
@@ -58,6 +60,13 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
 
   const [accessLesson, setAccessLesson] = useState(true);
   const [activePanelKeys, setActivePanelKeys] = useState<string[]>([]);
+  const [watcherModalVisible, setWatcherModalVisible] = useState(false);
+  const [selectedSubLessonId, setSelectedSubLessonId] = useState<string | null>(
+    null,
+  );
+  const [selectedSubLessonTitle, setSelectedSubLessonTitle] =
+    useState<string>('');
+
   // Cách cũ của PhátPhát
   //  useEffect(() => {
   //     if (lessonDetail.isPremium) {
@@ -179,47 +188,44 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   };
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
-    lessonDetail?.modules?.map((item, index) => {
-      const panelKey = index.toString();
-      const isActive = activePanelKeys.includes(panelKey);
-
-      return {
-        key: panelKey,
-        label: (
-          <div style={styles.moduleContentHeader}>
-            <p
+    lessonDetail?.modules?.map((item, index) => ({
+      key: index.toString(),
+      label: (
+        <div style={styles.moduleContentHeader}>
+          <p style={styles.learnedSkillText}>{item.title}</p>
+          <p style={styles.learnedSkillText}>
+            Total Libraries: {item.libraries.length}
+          </p>
+        </div>
+      ),
+      children: (
+        <View style={{ gap: 8, marginTop: 8 }}>
+          {item.libraries.map((subItem, subIndex) => (
+            <TouchableOpacity
+              key={subIndex}
               style={{
-                ...styles.learnedSkillText,
-                color: isActive ? '#fff' : '#000',
+                flexDirection: 'row',
+                alignItems: 'center',
               }}>
-              {item.title}
-            </p>
-            <p
-              style={{
-                ...styles.learnedSkillText,
-                color: isActive ? '#fff' : '#000',
-              }}>
-              Total Libraries: {item.libraries.length}
-            </p>
-          </div>
-        ),
-        children: (
-          <View style={{ gap: 8, marginTop: 8 }}>
-            {item.libraries.map((subItem, subIndex) => (
               <TouchableOpacity
-                key={subIndex}
                 style={[
                   !subItem?.usersCanPlay?.some(
                     id => id._id === userProfile?._id,
                   ) && styles.disabledButton,
                   !accessLesson && styles.disabledButton,
+                  { flex: 1 },
                 ]}>
                 <View
-                  style={styles.buttonModule}
+                  style={[
+                    styles.buttonModule,
+                    {
+                      flexDirection: 'row',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    },
+                  ]}
                   onClick={() => {
-                    if (!accessLesson) {
-                      return;
-                    }
+                    if (!accessLesson) return;
                     if (
                       subItem?.usersCanPlay?.some(
                         id => id._id === userProfile?._id,
@@ -230,21 +236,40 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       router.push('/dashboard/home/lesson/moduleDetail');
                     }
                   }}>
-                  <PlayCircleOutlined />
-                  <View style={{ paddingTop: 7, paddingBottom: 7 }}>
-                    <Text style={styles.moduleItemTitle}>{subItem.title}</Text>
-                    <Text style={styles.moduleItemTime}>
-                      {convertDurationToTime(subItem.duration)}
-                    </Text>
+                  {/* LEFT AREA: TITLE + TIME */}
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <PlayCircleOutlined />
+                    <View>
+                      <Text style={styles.moduleItemTitle}>
+                        {subItem.title}
+                      </Text>
+                      <Text style={styles.moduleItemTime}>
+                        {convertDurationToTime(subItem.duration)}
+                      </Text>
+                    </View>
                   </View>
+
+                  {/* RIGHT AREA: WATCHERS BUTTON */}
+                  {userProfile?.role?.level <= 2 && (
+                    <AppVideoWatchersButton
+                      subLessonId={subItem._id}
+                      subLessonTitle={subItem.title}
+                      onClick={e => {
+                        e.stopPropagation();
+                        setSelectedSubLessonId(subItem._id);
+                        setSelectedSubLessonTitle(subItem.title);
+                        setWatcherModalVisible(true);
+                      }}
+                    />
+                  )}
                 </View>
               </TouchableOpacity>
-            ))}
-          </View>
-        ),
-        style: panelStyle,
-      };
-    }) || [];
+            </TouchableOpacity>
+          ))}
+        </View>
+      ),
+      style: panelStyle,
+    })) || [];
 
   const panelStyle: React.CSSProperties = {
     background: '#f5f5f5',
@@ -416,7 +441,57 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
             </View>
           </View>
         </View>
+
+        {lessonDetail?.modules?.length > 0 && (
+          <View style={styles.lessonContent}>
+            <Text style={styles.lessonContentTitle}>Lesson Content</Text>
+            <View style={{ gap: 12 }}>
+              <Collapse
+                bordered={false}
+                expandIcon={({ isActive }) => (
+                  <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                )}
+                items={getItems(panelStyle)}
+              />
+            </View>
+          </View>
+        )}
+
+        {lessonDetail?.relatedLessons?.length > 0 && (
+          <View style={styles.lessonContent}>
+            <Text style={styles.lessonContentTitle}>Related Lessons</Text>
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={lessonDetail.relatedLessons}
+              contentContainerStyle={{ gap: 8 }}
+              renderItem={({ item }) => (
+                <LessonItem
+                  data={item}
+                  onClick={() => {
+                    router.push(`/dashboard/home/lesson/${item._id}`);
+                  }}
+                />
+              )}
+            />
+          </View>
+        )}
       </View>
+
+      <Modal
+        title={selectedSubLessonTitle}
+        open={watcherModalVisible}
+        onCancel={() => setWatcherModalVisible(false)}
+        footer={null}
+        width={700}>
+        <AppVideoWatchers
+          subLessonId={selectedSubLessonId || ''}
+          subLessonTitle={selectedSubLessonTitle}
+          userId={userProfile?._id || ''}
+          onClose={() => setWatcherModalVisible(false)}
+        />
+      </Modal>
+
       <AppModalPayPal
         isVisibleModalBuy={isVisibleModalBuy}
         setIsVisibleModalBuy={setIsVisibleModalBuy}

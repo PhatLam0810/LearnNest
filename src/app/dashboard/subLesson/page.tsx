@@ -26,10 +26,7 @@ const SubLessonList = () => {
 
   return (
     <View style={styles.container}>
-      <Text
-        accessibilityRole="header"
-        aria-level={1}
-        style={[styles.title, { marginBottom: 4 }]}>
+      <Text aria-level={1} style={[styles.title, { marginBottom: 4 }]}>
         Sub-lessons
       </Text>
       <View style={{ gap: 8, marginBottom: 20 }}>
