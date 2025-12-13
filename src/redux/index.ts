@@ -1,7 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import createSagaMiddleware from 'redux-saga';
 import { persistStore } from 'redux-persist';
-import rootSaga from './sagas';
 import rootReducer from './reducers';
 import { baseQuery } from './RTKQuery';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
@@ -20,7 +19,13 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-sagaMiddleware.run(rootSaga);
+// Only run saga on client side to avoid SSR issues
+// Use dynamic import to prevent SSR evaluation
+if (typeof window !== 'undefined') {
+  import('./sagas').then(({ default: rootSaga }) => {
+    sagaMiddleware.run(rootSaga);
+  });
+}
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

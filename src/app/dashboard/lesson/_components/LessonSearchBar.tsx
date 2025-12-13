@@ -5,10 +5,12 @@ import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { View } from 'react-native-web';
 import styles from '../../styles';
 import { useLessonSearchContext } from '../lessonSearchContext';
+import { useResponsive } from '@/styles/responsive';
 
 const LessonSearchBar: React.FC = () => {
   const { setKeyword, sortBy, setSortBy } = useLessonSearchContext();
   const [text, setText] = useState('');
+  const { isMobile, isTablet } = useResponsive();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -43,25 +45,38 @@ const LessonSearchBar: React.FC = () => {
     </Dropdown>
   );
 
+  // Match searchWrap style from layout.tsx
+  const searchWrapStyle = {
+    ...styles.searchWrap,
+    maxWidth: isMobile ? '100%' : isTablet ? 400 : 540,
+  };
+
+  const searchInputStyle = {
+    ...styles.searchInput,
+    height: isMobile ? 36 : 40,
+    paddingHorizontal: isMobile ? 10 : 12,
+    fontSize: isMobile ? 14 : 16,
+  };
+
   return (
-    <View
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
+    <View style={searchWrapStyle}>
       <Input
-        prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-        suffix={filterButton}
-        placeholder="Search lessons"
+        prefix={
+          <SearchOutlined
+            style={{
+              color: '#94a3b8',
+              fontSize: isMobile ? 16 : 18,
+            }}
+          />
+        }
+        suffix={!isMobile ? filterButton : undefined}
+        placeholder={isMobile ? 'Search...' : 'Search lessons'}
         allowClear
-        size="large"
+        size={isMobile ? 'middle' : 'large'}
         value={text}
         onChange={e => setText(e.target.value)}
         onPressEnter={() => setKeyword(text.trim())}
-        style={{ ...styles.searchInput, flex: 1, maxWidth: 540 }}
+        style={searchInputStyle}
       />
     </View>
   );

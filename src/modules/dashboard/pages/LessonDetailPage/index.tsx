@@ -23,6 +23,7 @@ import { authAction, authQuery } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
 import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/AppVideoWatchersButton';
 import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
+import { useResponsive } from '@/styles/responsive';
 
 interface LessonDetailPageProps {
   id: string;
@@ -56,7 +57,10 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       ) || 0)
     );
   }, 0);
-  const numColumns = 2;
+
+  // Responsive hook
+  const { isMobile, isTablet, isDesktop } = useResponsive();
+  const numColumns = isMobile ? 1 : 2;
 
   const [accessLesson, setAccessLesson] = useState(true);
   const [activePanelKeys, setActivePanelKeys] = useState<string[]>([]);
@@ -276,41 +280,87 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     borderRadius: '#f5f5f5',
     border: 'none',
   };
+  // Responsive container styles
+  const containerStyle = {
+    ...styles.container,
+    paddingLeft: isMobile ? 12 : isTablet ? 16 : 20,
+    paddingRight: isMobile ? 12 : isTablet ? 16 : 20,
+  };
+
+  // Responsive content row styles
+  const contentRowStyle = {
+    ...styles.contentRow,
+    flexDirection: (isMobile ? 'column' : 'row') as 'row' | 'column',
+    gap: isMobile ? 16 : isTablet ? 20 : 24,
+  };
+
+  // Responsive main column styles
+  const mainColumnStyle = {
+    ...styles.mainColumn,
+    maxWidth: isMobile ? '100%' : '90%',
+  };
+
+  // Responsive side column styles
+  const sideColumnStyle = {
+    ...styles.sideColumn,
+    minWidth: isMobile ? '100%' : isTablet ? 280 : 340,
+    maxWidth: isMobile ? '100%' : isTablet ? 360 : 420,
+    position: (isMobile ? 'relative' : 'sticky') as 'relative' | 'sticky',
+    top: isMobile ? 0 : 8,
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={containerStyle}>
       {contextHolder}
       <View style={styles.pageWrapper}>
         <View style={{ marginTop: 12 }}>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
+          <View
+            style={{
+              flexDirection: isMobile ? 'column' : 'row',
+              gap: 12,
+              flexWrap: 'wrap',
+            }}>
             {lessonDetail?.categories?.map((item, index) => (
-              <View style={styles.container} key={index}>
-                <View style={{ flex: 1, paddingRight: 20 }}>
-                  <Text style={styles.chip}>{item.name}</Text>
-                </View>
+              <View key={index}>
+                <Text style={styles.chip}>{item.name}</Text>
               </View>
             ))}
           </View>
-          <Text style={styles.title}>{lessonDetail?.title.trim()}</Text>
-          <View style={styles.contentRow}>
-            <View style={styles.mainColumn}>
+          <Text
+            style={{
+              ...styles.title,
+              fontSize: isMobile ? 18 : isTablet ? 20 : 22.78,
+            }}>
+            {lessonDetail?.title.trim()}
+          </Text>
+          <View style={contentRowStyle}>
+            <View style={mainColumnStyle}>
               <Text
                 style={{
                   ...styles.description,
-                  maxWidth: '90%',
+                  maxWidth: isMobile ? '100%' : '90%',
                   marginTop: 12,
+                  fontSize: isMobile ? 14 : 16,
                 }}>
                 {lessonDetail?.description}
               </Text>
               <View style={{ paddingBottom: 10 }}>
-                <Text style={{ ...styles.whatLearnTitle }}>
-                  What you’ll learn:
+                <Text
+                  style={{
+                    ...styles.whatLearnTitle,
+                    fontSize: isMobile ? 16 : 18,
+                  }}>
+                  What you&apos;ll learn:
                 </Text>
                 <FlatList
                   data={lessonDetail?.learnedSkills}
                   numColumns={numColumns}
                   key={numColumns}
                   keyExtractor={(item, index) => index.toString()}
-                  style={{ maxWidth: '90%', marginTop: 12 }}
+                  style={{
+                    maxWidth: isMobile ? '100%' : '90%',
+                    marginTop: 12,
+                  }}
                   renderItem={({ item }) => (
                     <View
                       style={{
@@ -335,8 +385,18 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               </View>
 
               {lessonDetail?.modules?.length > 0 && (
-                <View style={{ ...styles.lessonContent, maxWidth: '90%' }}>
-                  <Text style={styles.lessonContentTitle}>Lesson Content</Text>
+                <View
+                  style={{
+                    ...styles.lessonContent,
+                    maxWidth: isMobile ? '100%' : '90%',
+                  }}>
+                  <Text
+                    style={{
+                      ...styles.lessonContentTitle,
+                      fontSize: isMobile ? 16 : 18,
+                    }}>
+                    Lesson Content
+                  </Text>
                   <View style={{ gap: 12 }}>
                     <Collapse
                       bordered={false}
@@ -354,8 +414,18 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               )}
 
               {lessonDetail?.relatedLessons?.length > 0 && (
-                <View style={{ ...styles.lessonContent, maxWidth: '90%' }}>
-                  <Text style={styles.lessonContentTitle}>Related Lessons</Text>
+                <View
+                  style={{
+                    ...styles.lessonContent,
+                    maxWidth: isMobile ? '100%' : '90%',
+                  }}>
+                  <Text
+                    style={{
+                      ...styles.lessonContentTitle,
+                      fontSize: isMobile ? 16 : 18,
+                    }}>
+                    Related Lessons
+                  </Text>
                   <FlatList
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -373,17 +443,20 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                 </View>
               )}
             </View>
-            <View
-              style={{
-                ...styles.sideColumn,
-                position: 'sticky',
-                top: 8,
-                gap: 16,
-              }}>
-              <View style={styles.thumbnailCard}>
+            <View style={{ ...sideColumnStyle, gap: 16 }}>
+              <View
+                style={{
+                  ...styles.thumbnailCard,
+                  minHeight: isMobile ? 200 : 260,
+                }}>
                 {!accessLesson && (
                   <View style={styles.premium}>
-                    <DollarOutlined style={{ color: '#FFF', fontSize: 24 }} />
+                    <DollarOutlined
+                      style={{
+                        color: '#FFF',
+                        fontSize: isMobile ? 20 : 24,
+                      }}
+                    />
                   </View>
                 )}
                 <LessonThumbnail thumbnail={lessonDetail.thumbnail} />
@@ -441,41 +514,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
             </View>
           </View>
         </View>
-
-        {lessonDetail?.modules?.length > 0 && (
-          <View style={styles.lessonContent}>
-            <Text style={styles.lessonContentTitle}>Lesson Content</Text>
-            <View style={{ gap: 12 }}>
-              <Collapse
-                bordered={false}
-                expandIcon={({ isActive }) => (
-                  <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                )}
-                items={getItems(panelStyle)}
-              />
-            </View>
-          </View>
-        )}
-
-        {lessonDetail?.relatedLessons?.length > 0 && (
-          <View style={styles.lessonContent}>
-            <Text style={styles.lessonContentTitle}>Related Lessons</Text>
-            <FlatList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              data={lessonDetail.relatedLessons}
-              contentContainerStyle={{ gap: 8 }}
-              renderItem={({ item }) => (
-                <LessonItem
-                  data={item}
-                  onClick={() => {
-                    router.push(`/dashboard/home/lesson/${item._id}`);
-                  }}
-                />
-              )}
-            />
-          </View>
-        )}
       </View>
 
       <Modal
@@ -483,7 +521,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         open={watcherModalVisible}
         onCancel={() => setWatcherModalVisible(false)}
         footer={null}
-        width={700}>
+        width={isMobile ? '95%' : isTablet ? 600 : 700}>
         <AppVideoWatchers
           subLessonId={selectedSubLessonId || ''}
           subLessonTitle={selectedSubLessonTitle}

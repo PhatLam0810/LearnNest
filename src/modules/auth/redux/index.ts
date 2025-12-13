@@ -1,3 +1,4 @@
 export * from './RTKQuery';
-export * from './saga';
 export * from './slice';
+// Saga is exported separately to avoid SSR issues
+export { authSaga } from './saga';

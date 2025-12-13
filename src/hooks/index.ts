@@ -1,14 +1,26 @@
 'use client';
 import { message } from 'antd';
 import { MessageInstance } from 'antd/es/message/interface';
-import { createRef, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 export * from './pagination';
 
-export let messageApi = createRef<MessageInstance>().current;
+export let messageApi: MessageInstance | null = null;
 
 export const useMessage = () => {
+  const [mounted, setMounted] = useState(false);
   const [api, context] = message.useMessage();
-  messageApi = api;
+
+  useEffect(() => {
+    setMounted(true);
+    messageApi = api;
+  }, [api]);
+
+  // Return null context during SSR to avoid hydration issues
+  // This prevents the hook from being called during SSR
+  if (!mounted) {
+    return null;
+  }
+
   return context;
 };
 

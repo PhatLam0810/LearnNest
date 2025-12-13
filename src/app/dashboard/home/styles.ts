@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     width: '100%',
     overflow: 'visible',
   },
+  // Responsive styles will be applied inline in component
   profileContainer: {
     padding: 8,
     alignItems: 'center',

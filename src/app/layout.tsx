@@ -1,5 +1,4 @@
 'use client';
-import { useMessage } from '@/hooks';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { persistor, store } from '@redux';
 import React from 'react';
@@ -18,6 +17,7 @@ import Chatbox from '@components/ChatboxAi';
 import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import walletConnectConfig from '@services/walletconnect';
+import MessageProvider from '@components/MessageProvider';
 
 const queryClient = new QueryClient();
 
@@ -31,7 +31,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const context = useMessage();
   dayjs.extend(relativeTime);
 
   return (
@@ -50,6 +49,7 @@ export default function RootLayout({
             <WagmiProvider config={walletConnectConfig}>
               <QueryClientProvider client={queryClient}>
                 <PersistGate persistor={persistor}>
+                  <MessageProvider />
                   <View
                     style={{
                       flex: 1,
@@ -59,7 +59,6 @@ export default function RootLayout({
                       overflowX: 'hidden',
                       overflowY: 'auto',
                     }}>
-                    {context}
                     {children}
                   </View>
                   <LoadingScreen />

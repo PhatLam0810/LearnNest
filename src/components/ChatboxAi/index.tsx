@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAppSelector } from '@redux';
 import { useRouter } from 'next/navigation';
@@ -15,6 +15,7 @@ import {
 import styles from './styles';
 
 export default function Chatbox() {
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [chat, setChat] = useState<{ role: string; content: string }[]>([]);
@@ -30,6 +31,11 @@ export default function Chatbox() {
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const router = useRouter();
+
+  // Ensure component only renders on client to avoid hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -66,7 +72,10 @@ export default function Chatbox() {
       setLoading(false);
     }
   };
-  if (!userProfile) return null;
+
+  // Prevent hydration mismatch by only rendering after mount
+  if (!mounted || !userProfile) return null;
+
   return (
     <View style={styles.wrapper}>
       {open ? (

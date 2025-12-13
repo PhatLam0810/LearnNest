@@ -33,6 +33,7 @@ import Icon from '@components/icons';
 import { LessonIcon } from '@/assets/svg';
 import LessonSearchBar from './lesson/_components/LessonSearchBar';
 import { LessonSearchProvider } from './lesson/lessonSearchContext';
+import { useResponsive } from '@/styles/responsive';
 
 const { Sider, Content, Header } = Layout;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
@@ -50,6 +51,9 @@ export default function DashboardLayout({
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [open, setOpen] = useState(false);
   const isAdmin = userProfile?.role?.level <= 2;
+
+  // Responsive hook
+  const { isMobile, isTablet } = useResponsive();
 
   const onClickItem = (item: string) => {
     router.replace(item);
@@ -91,20 +95,47 @@ export default function DashboardLayout({
       ],
     },
   ];
-  const Logo = () => (
-    <TouchableOpacity
-      onClick={() => {
-        router.push('/dashboard/home');
-        setOpen(false);
-      }}>
-      <View style={styles.logo}>
-        <View style={styles.logoMark}>
-          <Text style={styles.logoMarkText}>LN</Text>
+  const Logo = () => {
+    const logoStyle = {
+      ...styles.logo,
+      gap: isMobile ? 8 : 10,
+      paddingVertical: isMobile ? 8 : 12,
+      paddingHorizontal: isMobile ? 8 : 10,
+    };
+
+    const logoMarkStyle = {
+      ...styles.logoMark,
+      width: isMobile ? 36 : 44,
+      height: isMobile ? 36 : 44,
+      borderRadius: isMobile ? 8 : 12,
+    };
+
+    const logoMarkTextStyle = {
+      ...styles.logoMarkText,
+      fontSize: isMobile ? 14 : 16,
+    };
+
+    const logoTextStyle = {
+      ...styles.logoText,
+      fontSize: isMobile ? 14 : 16,
+      display: isMobile ? 'none' : 'flex', // Hide text on mobile
+    };
+
+    return (
+      <TouchableOpacity
+        onClick={() => {
+          router.push('/dashboard/home');
+          setOpen(false);
+        }}>
+        <View style={logoStyle}>
+          <View style={logoMarkStyle}>
+            <Text style={logoMarkTextStyle}>LN</Text>
+          </View>
+          <Text style={logoTextStyle}>LearnNest</Text>
         </View>
-        <Text style={styles.logoText}>LearnNest</Text>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   const sidebarContent = (
     <View style={styles.sider}>
@@ -139,113 +170,172 @@ export default function DashboardLayout({
     </View>
   );
 
-  const TopBar = () => (
-    <View style={styles.topbar}>
-      {!screens.md && (
-        <Button
-          type="text"
-          icon={<MenuOutlined />}
-          onClick={() => setOpen(true)}
-          style={styles.btnOpenDrawer}
-        />
-      )}
-      <View style={styles.topbarRow}>
-        <Logo />
-        <View style={{ flex: 1 }}>
-          {isLessonPage ? (
-            <LessonSearchBar />
-          ) : (
-            <View style={styles.searchWrap}>
-              <Input
-                prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-                suffix={
-                  <Dropdown
-                    trigger={['hover']}
-                    menu={{
-                      items: [
-                        { key: 'desc', label: 'Desc' },
-                        { key: 'asc', label: 'Asc' },
-                      ],
-                    }}>
-                    <Button
-                      type="text"
-                      icon={<FilterOutlined style={{ fontSize: 18 }} />}
-                      style={{ borderRadius: 999, color: '#475569' }}
-                      aria-label="Filter search"
+  const TopBar = () => {
+    // Responsive topbar styles
+    const topbarStyle = {
+      ...styles.topbar,
+      paddingHorizontal: isMobile ? 12 : isTablet ? 16 : 24,
+      minHeight: isMobile ? 56 : 64,
+    };
+
+    const topbarRowStyle = {
+      ...styles.topbarRow,
+      gap: isMobile ? 8 : isTablet ? 16 : 24,
+    };
+
+    const searchWrapStyle = {
+      ...styles.searchWrap,
+      maxWidth: isMobile ? '100%' : isTablet ? 400 : 540,
+    };
+
+    const searchInputStyle = {
+      ...styles.searchInput,
+      height: isMobile ? 36 : 40,
+      paddingHorizontal: isMobile ? 10 : 12,
+      fontSize: isMobile ? 14 : 16,
+    };
+
+    const actionsStyle = {
+      ...styles.actions,
+      gap: isMobile ? 8 : isTablet ? 12 : 16,
+    };
+
+    const iconBtnStyle = {
+      ...styles.iconBtn,
+      fontSize: isMobile ? 18 : 20,
+      padding: isMobile ? 4 : 8,
+    };
+
+    const avatarStyle = {
+      ...styles.avatar,
+      width: isMobile ? 32 : 40,
+      height: isMobile ? 32 : 40,
+    };
+
+    return (
+      <View style={topbarStyle}>
+        {!screens.md && (
+          <Button
+            type="text"
+            icon={<MenuOutlined style={{ fontSize: isMobile ? 18 : 20 }} />}
+            onClick={() => setOpen(true)}
+            style={{
+              ...styles.btnOpenDrawer,
+              padding: isMobile ? 4 : 8,
+            }}
+          />
+        )}
+        <View style={topbarRowStyle}>
+          <Logo />
+          <View style={{ flex: 1, minWidth: 0 }}>
+            {isLessonPage ? (
+              <LessonSearchBar />
+            ) : (
+              <View style={searchWrapStyle}>
+                <Input
+                  prefix={
+                    <SearchOutlined
+                      style={{
+                        color: '#94a3b8',
+                        fontSize: isMobile ? 16 : 18,
+                      }}
                     />
-                  </Dropdown>
-                }
-                placeholder="Tìm kiếm khóa học, bài viết, video..."
-                allowClear
-                size="large"
-                style={styles.searchInput}
+                  }
+                  suffix={
+                    !isMobile && (
+                      <Dropdown
+                        trigger={['hover']}
+                        menu={{
+                          items: [
+                            { key: 'desc', label: 'Desc' },
+                            { key: 'asc', label: 'Asc' },
+                          ],
+                        }}>
+                        <Button
+                          type="text"
+                          icon={<FilterOutlined style={{ fontSize: 18 }} />}
+                          style={{ borderRadius: 999, color: '#475569' }}
+                          aria-label="Filter search"
+                        />
+                      </Dropdown>
+                    )
+                  }
+                  placeholder={
+                    isMobile
+                      ? 'Tìm kiếm...'
+                      : 'Tìm kiếm khóa học, bài viết, video...'
+                  }
+                  allowClear
+                  size={isMobile ? 'middle' : 'large'}
+                  style={searchInputStyle}
+                />
+              </View>
+            )}
+          </View>
+          <Space size={isMobile ? 8 : 12} style={actionsStyle}>
+            <Badge count={3} size="small">
+              <Button
+                type="text"
+                icon={<BellOutlined />}
+                style={iconBtnStyle}
+                aria-label="Thông báo"
               />
-            </View>
-          )}
+            </Badge>
+            <Dropdown
+              trigger={['hover', 'click']}
+              menu={{
+                expandIcon: null,
+                items: [
+                  isAdmin
+                    ? {
+                        key: 'admin',
+                        label: 'Admin',
+                        icon: <ControlOutlined />,
+                        children: [
+                          {
+                            key: 'admin-user',
+                            label: 'User Manage',
+                            onClick: () =>
+                              router.push('/dashboard/admin/userManage'),
+                          },
+                          {
+                            key: 'admin-lesson',
+                            label: 'Lesson Manage',
+                            onClick: () =>
+                              router.push('/dashboard/admin/lessonManage'),
+                          },
+                        ],
+                      }
+                    : null,
+                  {
+                    key: 'profile',
+                    label: 'Settings',
+                    icon: <UserOutlined />,
+                    onClick: () => router.push('/dashboard/profile'),
+                  },
+                  {
+                    type: 'divider',
+                    key: 'divider-1',
+                  },
+                  {
+                    key: 'logout',
+                    label: 'Logout',
+                    icon: <LogoutOutlined />,
+                    onClick: () => dispatch(authAction.logout()),
+                  },
+                ].filter(Boolean) as MenuProps['items'],
+              }}>
+              <Avatar
+                src={userProfile?.avatar}
+                icon={<UserOutlined />}
+                style={avatarStyle}
+              />
+            </Dropdown>
+          </Space>
         </View>
-        <Space size={12} style={styles.actions}>
-          <Badge count={3} size="small">
-            <Button
-              type="text"
-              icon={<BellOutlined />}
-              style={styles.iconBtn}
-              aria-label="Thông báo"
-            />
-          </Badge>
-          <Dropdown
-            trigger={['hover']}
-            menu={{
-              expandIcon: null,
-              items: [
-                isAdmin
-                  ? {
-                      key: 'admin',
-                      label: 'Admin',
-                      icon: <ControlOutlined />,
-                      children: [
-                        {
-                          key: 'admin-user',
-                          label: 'User Manage',
-                          onClick: () =>
-                            router.push('/dashboard/admin/userManage'),
-                        },
-                        {
-                          key: 'admin-lesson',
-                          label: 'Lesson Manage',
-                          onClick: () =>
-                            router.push('/dashboard/admin/lessonManage'),
-                        },
-                      ],
-                    }
-                  : null,
-                {
-                  key: 'profile',
-                  label: 'Settings',
-                  icon: <UserOutlined />,
-                  onClick: () => router.push('/dashboard/profile'),
-                },
-                {
-                  type: 'divider',
-                  key: 'divider-1',
-                },
-                {
-                  key: 'logout',
-                  label: 'Logout',
-                  icon: <LogoutOutlined />,
-                  onClick: () => dispatch(authAction.logout()),
-                },
-              ].filter(Boolean) as MenuProps['items'],
-            }}>
-            <Avatar
-              src={userProfile?.avatar}
-              icon={<UserOutlined />}
-              style={styles.avatar}
-            />
-          </Dropdown>
-        </Space>
       </View>
-    </View>
-  );
+    );
+  };
 
   const layout = (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#fff' }}>

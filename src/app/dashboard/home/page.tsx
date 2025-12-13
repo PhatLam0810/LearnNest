@@ -11,6 +11,7 @@ import 'antd/dist/reset.css';
 import { AnimatePresence, motion } from 'framer-motion';
 import { authAction } from '~mdAuth/redux';
 import { messageApi } from '@hooks';
+import { useResponsive } from '@/styles/responsive';
 
 const HomeOverview = () => {
   const router = useRouter();
@@ -42,8 +43,29 @@ const HomeOverview = () => {
     }
   }, [isLoading]);
 
+  // Responsive hook
+  const { isMobile, isTablet } = useResponsive();
+
+  // Responsive container styles
+  const containerStyle = {
+    ...styles.container,
+    padding: isMobile ? 12 : isTablet ? 16 : 20,
+  };
+
+  // Responsive grid styles
+  const recommendGridStyle = {
+    ...styles.recommendGrid,
+    gridTemplateColumns: isMobile
+      ? 'repeat(1, minmax(0, 1fr))'
+      : isTablet
+        ? 'repeat(2, minmax(0, 1fr))'
+        : 'repeat(4, minmax(0, 1fr))',
+    columnGap: isMobile ? 12 : 16,
+    rowGap: isMobile ? 16 : 20,
+  };
+
   return (
-    <ScrollView style={styles.container} aria-label="Home dashboard overview">
+    <ScrollView style={containerStyle} aria-label="Home dashboard overview">
       <ScrollView
         style={styles.content}
         aria-label="Recommended lessons"
@@ -52,10 +74,16 @@ const HomeOverview = () => {
           <motion.div key={2}>
             <View style={styles.section}>
               <View style={styles.titleContainer}>
-                <Text style={styles.title}>Today lesson</Text>
+                <Text
+                  style={{
+                    ...styles.title,
+                    fontSize: isMobile ? 18 : 20,
+                  }}>
+                  Today lesson
+                </Text>
                 <Tags title="For you" backgroundColor="#FFA726" />
               </View>
-              <View style={styles.recommendGrid}>
+              <View style={recommendGridStyle}>
                 {data?.today && (
                   <LessonItem
                     data={data?.today}
@@ -67,10 +95,16 @@ const HomeOverview = () => {
 
             <View style={[styles.section, styles.sectionSpacing]}>
               <View style={styles.titleContainer}>
-                <Text style={styles.title}>Just added</Text>
+                <Text
+                  style={{
+                    ...styles.title,
+                    fontSize: isMobile ? 18 : 20,
+                  }}>
+                  Just added
+                </Text>
                 <Tags title="New" backgroundColor="#0059C7" />
               </View>
-              <View style={styles.recommendGrid}>
+              <View style={recommendGridStyle}>
                 {(data?.recommend || []).map((item, index) => (
                   <LessonItem
                     key={index}

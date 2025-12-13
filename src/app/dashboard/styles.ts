@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
     top: 0,
     zIndex: 10,
     borderBottom: '1px solid #f0f0f0',
+    minHeight: 64,
   },
   topbarRow: {
     display: 'flex',

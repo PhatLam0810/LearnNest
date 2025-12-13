@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { UpdateLessonForm } from './_components';
 import { useEffect, useState } from 'react';
 import { useLessonSearchContext } from './lessonSearchContext';
+import { useResponsive } from '@/styles/responsive';
 
 const Page = () => {
   const dispatch = useAppDispatch();
@@ -17,6 +18,10 @@ const Page = () => {
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const { keyword, sortBy } = useLessonSearchContext();
+
+  // Responsive hook
+  const { isMobile, isTablet } = useResponsive();
+  const numColumns = isMobile ? 1 : isTablet ? 2 : 4;
 
   const { listItem, fetchData, changeParams } = useAppPagination<any>({
     apiUrl: 'lesson/getAllLesson',
@@ -31,19 +36,34 @@ const Page = () => {
     changeParams({ search: keyword, sortBy });
   }, [keyword, sortBy]);
 
+  // Responsive container styles
+  const containerStyle = {
+    ...styles.container,
+    padding: isMobile ? 12 : isTablet ? 16 : 20,
+  };
+
+  // Responsive lesson item styles
+  const lessonItemStyle = {
+    ...styles.lessonItem,
+    maxWidth: isMobile ? '100%' : isTablet ? '48%' : '24%',
+  };
+
   return (
-    <View style={styles.container}>
+    <View style={containerStyle}>
       <FlatList
+        key={numColumns} // Force re-render when numColumns changes
         data={listItem}
         stickyHeaderHiddenOnScroll
         keyExtractor={(item, index) => item._id + index}
-        numColumns={4}
+        numColumns={numColumns}
         contentContainerStyle={{
-          gap: 16,
+          gap: isMobile ? 12 : 16,
           paddingBottom: 48,
           overflow: 'visible',
         }}
-        columnWrapperStyle={{ gap: 16 }}
+        columnWrapperStyle={
+          numColumns > 1 ? { gap: isMobile ? 12 : 16 } : undefined
+        }
         showsVerticalScrollIndicator={false}
         onEndReached={fetchData}
         renderItem={({ item }) => {
@@ -51,7 +71,7 @@ const Page = () => {
             <LessonItem
               key={item._id}
               data={item}
-              style={styles.lessonItem}
+              style={lessonItemStyle}
               onClick={() => {
                 dispatch(dashboardAction.getLessonDetail({ id: item._id }));
                 router.push(`home/lesson/${item._id}`);
