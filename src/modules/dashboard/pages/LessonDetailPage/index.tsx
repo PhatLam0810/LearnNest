@@ -174,9 +174,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     const canPlay = subItem?.usersCanPlay?.some(
       id => id._id === userProfile?._id,
     );
-
     // 🔥 Nếu role <= 2 thì đi sang trang xem lịch sử kết quả
-    if (userProfile?.role?.level <= 2) {
+    if (userProfile?.role?.level <= 2 && subItem.type === 'Text') {
       router.push(
         `/dashboard/home/lesson/resultHistory?libraryId=${subItem?._id}`,
       );
@@ -228,18 +227,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       alignItems: 'center',
                     },
                   ]}
-                  onClick={() => {
-                    if (!accessLesson) return;
-                    if (
-                      subItem?.usersCanPlay?.some(
-                        id => id._id === userProfile?._id,
-                      )
-                    ) {
-                      dispatch(dashboardAction.setSelectedModule(item));
-                      dispatch(dashboardAction.setSelectedLibrary(subItem));
-                      router.push('/dashboard/home/lesson/moduleDetail');
-                    }
-                  }}>
+                  onClick={() => handleLibraryClick(subItem, item)}>
                   {/* LEFT AREA: TITLE + TIME */}
                   <View style={{ flexDirection: 'row', gap: 10 }}>
                     <PlayCircleOutlined />
@@ -254,7 +242,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   </View>
 
                   {/* RIGHT AREA: WATCHERS BUTTON */}
-                  {userProfile?.role?.level <= 2 && (
+                  {userProfile?.role?.level <= 2 && subItem.type !== 'Text' && (
                     <AppVideoWatchersButton
                       subLessonId={subItem._id}
                       subLessonTitle={subItem.title}
