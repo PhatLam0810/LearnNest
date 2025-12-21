@@ -140,7 +140,7 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
       />
 
       <Modal
-        open={false}
+        open={showWarning}
         centered
         closable={false}
         footer={null}
