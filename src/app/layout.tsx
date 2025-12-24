@@ -18,8 +18,22 @@ import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import walletConnectConfig from '@services/walletconnect';
 import MessageProvider from '@components/MessageProvider';
+import '@mysten/dapp-kit/dist/index.css';
+import {
+  SuiClientProvider,
+  WalletProvider,
+  createNetworkConfig,
+} from '@mysten/dapp-kit';
 
+import { getFullnodeUrl } from '@mysten/sui/client';
 const queryClient = new QueryClient();
+
+const { networkConfig } = createNetworkConfig({
+  localnet: { url: getFullnodeUrl('localnet') },
+  devnet: { url: getFullnodeUrl('devnet') },
+  testnet: { url: getFullnodeUrl('testnet') },
+  mainnet: { url: getFullnodeUrl('mainnet') },
+});
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -48,21 +62,27 @@ export default function RootLayout({
           <Provider store={store}>
             <WagmiProvider config={walletConnectConfig}>
               <QueryClientProvider client={queryClient}>
-                <PersistGate persistor={persistor}>
-                  <MessageProvider />
-                  <View
-                    style={{
-                      flex: 1,
-                      width: '100%',
-                      minHeight: '100vh',
-                      backgroundColor: '#F9F9F9',
-                      overflowX: 'hidden',
-                      overflowY: 'auto',
-                    }}>
-                    {children}
-                  </View>
-                  <LoadingScreen />
-                </PersistGate>
+                <SuiClientProvider
+                  networks={networkConfig}
+                  defaultNetwork="devnet">
+                  <WalletProvider>
+                    <PersistGate persistor={persistor}>
+                      <MessageProvider />
+                      <View
+                        style={{
+                          flex: 1,
+                          width: '100%',
+                          minHeight: '100vh',
+                          backgroundColor: '#F9F9F9',
+                          overflowX: 'hidden',
+                          overflowY: 'auto',
+                        }}>
+                        {children}
+                      </View>
+                      <LoadingScreen />
+                    </PersistGate>
+                  </WalletProvider>
+                </SuiClientProvider>
               </QueryClientProvider>
             </WagmiProvider>
             <Chatbox />

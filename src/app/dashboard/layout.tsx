@@ -34,6 +34,7 @@ import { LessonIcon } from '@/assets/svg';
 import LessonSearchBar from './lesson/_components/LessonSearchBar';
 import { LessonSearchProvider } from './lesson/lessonSearchContext';
 import { useResponsive } from '@/styles/responsive';
+import { ConnectButton } from '@mysten/dapp-kit';
 
 const { Sider, Content, Header } = Layout;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
@@ -273,6 +274,7 @@ export default function DashboardLayout({
             )}
           </View>
           <Space size={isMobile ? 8 : 12} style={actionsStyle}>
+            <ConnectButton />
             <Badge count={3} size="small">
               <Button
                 type="text"

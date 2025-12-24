@@ -24,6 +24,7 @@ import AppModalSuccess from '@components/AppModalSuccess';
 import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/AppVideoWatchersButton';
 import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
 import { useResponsive } from '@/styles/responsive';
+import AppModalSuiPay from '@components/AppModalSuiPay/components/AppModalSuiPay';
 
 interface LessonDetailPageProps {
   id: string;
@@ -503,7 +504,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
           </View>
         </View>
       </View>
-
       <Modal
         title={selectedSubLessonTitle}
         open={watcherModalVisible}
@@ -517,8 +517,13 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
           onClose={() => setWatcherModalVisible(false)}
         />
       </Modal>
-
-      <AppModalPayPal
+      {/* <AppModalPayPal
+        isVisibleModalBuy={isVisibleModalBuy}
+        setIsVisibleModalBuy={setIsVisibleModalBuy}
+        data={lessonDetail}
+        accessLesson={accessLesson}
+      /> */}
+      <AppModalSuiPay
         isVisibleModalBuy={isVisibleModalBuy}
         setIsVisibleModalBuy={setIsVisibleModalBuy}
         data={lessonDetail}
