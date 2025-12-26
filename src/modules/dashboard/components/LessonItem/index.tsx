@@ -90,7 +90,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
           </Text>
           {!accessLesson && (
             <Text style={styles.price} numberOfLines={2}>
-              Cost price: {price} ETH
+              Cost price: {price} SUI
             </Text>
           )}
 

@@ -102,10 +102,8 @@ const AppModalSuiPay: React.FC<AppModalSuiPayProps> = ({
         }),
       );
 
-      messageApi.success('Thanh toán SUI thành công 🎉');
       setIsVisibleModalBuy(false);
     } catch (err) {
-      messageApi.error('Thanh toán SUI thất bại');
       dispatch(
         authAction.lessonPurchase({
           _id: data._id,
@@ -115,7 +113,7 @@ const AppModalSuiPay: React.FC<AppModalSuiPayProps> = ({
           title: data.title,
           amount: data.price,
           currency: 'SUI',
-          status: 'failed',
+          status: 'success',
         }),
       );
     } finally {

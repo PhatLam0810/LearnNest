@@ -261,11 +261,7 @@ export default function DashboardLayout({
                       </Dropdown>
                     )
                   }
-                  placeholder={
-                    isMobile
-                      ? 'Tìm kiếm...'
-                      : 'Tìm kiếm khóa học, bài viết, video...'
-                  }
+                  placeholder={'Search'}
                   allowClear
                   size={isMobile ? 'middle' : 'large'}
                   style={searchInputStyle}

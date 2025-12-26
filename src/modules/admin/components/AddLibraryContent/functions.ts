@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export const getVideoDuration = (url: string) => {
   return new Promise<number>((resolve, reject) => {
     const video = document.createElement('video');
@@ -12,6 +14,17 @@ export const getVideoDuration = (url: string) => {
       reject('Error loading video: ' + error);
     };
   });
+};
+
+export const uploadToWalrus = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await axios.post('/walrus/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  return res.data.walrusUrl; // url từ walrus
 };
 
 export const getYouTubeVideoDuration = async (url: string): Promise<number> => {

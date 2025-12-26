@@ -31,7 +31,7 @@ const LessonContent: React.FC<LessonContentProps> = ({
         )}
         <LessonThumbnail thumbnail={data.thumbnail} />
       </View>
-      <Text style={styles.priceTitle}>Cost price: {data.price}$</Text>
+      <Text style={styles.priceTitle}>Cost price: {data.price} SUI</Text>
       <Text style={styles.title}>{data.title}</Text>
       <Text style={styles.description}>{data.description}</Text>
       <View style={{ paddingTop: 10, paddingBottom: 10, gap: 10 }}>
