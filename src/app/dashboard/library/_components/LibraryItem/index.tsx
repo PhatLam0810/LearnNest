@@ -46,14 +46,18 @@ const Thumbnail = ({ data }) => {
       </View>
     );
   }
-
+  const EMPTY_IMAGE =
+    'https://storage.googleapis.com/myproject0810/uploads/1752760987701-noname%20%282%29.mp4?GoogleAccessId=firebase-adminsdk-fbsvc%40my-project-c7f44.iam.gserviceaccount.com&Expires=1898553600&Signature=ibnGSV3WdPW6tGVw1YIMZPNlYMstPJhFTrU0VnyCzhiMm17laPbN6i5%2Bkd7XGdsG2twkvNQ3H3At8ap26ehMUIY0qDIdV0ZXir3pevtLPg%2F7TGxgO6k8G8rUwcnrMlqkuowt6ujko4joYaCOgGmThidDxV71SX0Ea%2FSVxYSFly%2FCmlbmoJYmGe0LqHGh0HGxiLLvZcKIsN3Q6t3xGepBu8p%2BgDxHjiW2l%2FknZfNlGzbvcptXShXDncalG7UkgWWYiauKv88x%2FjNZSJ7lXdRL2LIEzRDoI2Zg0g%2FPZeE95FDJpVjqpVDEwTNUo3%2FXH%2FLFuLnTWyqbpHqEtrmkJNcfRQ%3D%3D';
   return (
     <Image
-      src={src}
-      onError={handleImageError}
-      layout="fill"
-      objectFit="cover"
+      src={src || EMPTY_IMAGE}
       alt={data?.title || ''}
+      fill
+      style={{ objectFit: 'cover' }}
+      onError={e => {
+        const target = e.target as HTMLImageElement;
+        target.src = EMPTY_IMAGE;
+      }}
     />
   );
 };

@@ -45,6 +45,7 @@ const nextConfig: NextConfig = {
       'www.youtube.com',
       'www.servermania.com',
       'miro.medium.com',
+      'aggregator.walrus-testnet.walrus.space',
     ], // Thêm hostname vào đây
   },
 };

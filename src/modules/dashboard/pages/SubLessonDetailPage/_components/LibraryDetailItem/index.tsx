@@ -446,7 +446,7 @@ const LibraryDetailItem = forwardRef<
       case 'Youtube':
         return (
           <View style={styles.mediaContainer}>
-            {data.url.includes('https://storage.googleapis.com') ? (
+            {data.type === 'Video' ? (
               <video
                 ref={videoRef}
                 src={data.url}

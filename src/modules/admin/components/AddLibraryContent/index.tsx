@@ -9,6 +9,7 @@ import {
   Space,
   TimePickerProps,
   Upload,
+  UploadFile,
 } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { adminQuery } from '../../redux';
@@ -18,7 +19,11 @@ import { Library } from '~mdDashboard/types';
 import { ScrollView, View } from 'react-native-web';
 import { AppRichTextInput } from '@components';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { getVideoDuration, getYouTubeVideoDuration } from './functions';
+import {
+  getVideoDuration,
+  getYouTubeVideoDuration,
+  uploadToWalrus,
+} from './functions';
 import debounce from 'lodash-es/debounce';
 import { TimePicker } from 'antd';
 import dayjs from 'dayjs';
@@ -52,6 +57,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   const [newTag, setNewTag] = useState('');
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [link, setLink] = useState('');
 
   useEffect(() => {
@@ -121,23 +127,85 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
               <Upload
                 maxCount={1}
                 listType="picture-card"
-                action={api.defaults.baseURL + '/upload'}
-                onChange={info => {
-                  if (info.file.status === 'done') {
-                    const responseUrl = info.file.response?.data;
-                    if (responseUrl) {
-                      form.setFieldsValue({ url: responseUrl });
-                      setLink(responseUrl);
-                      getVideoDuration(responseUrl)
-                        .then(duration => {
-                          form.setFieldsValue({ duration: duration });
-                          setDuration(Math.floor(duration));
-                        })
-                        .catch(error => console.error(error));
-                    }
+                accept="video/*"
+                fileList={fileList}
+                onRemove={() => {
+                  setFileList([]);
+                  form.setFieldsValue({ url: undefined, duration: undefined });
+                  setLink('');
+                  setDuration(0);
+                }}
+                beforeUpload={async file => {
+                  // 1. Hiện item ở trạng thái uploading
+                  const uploadItem: UploadFile = {
+                    uid: file.uid,
+                    name: file.name,
+                    status: 'uploading',
+                    percent: 0,
+                    type: file.type,
+                  };
+
+                  setFileList([uploadItem]);
+                  setLoading(true);
+
+                  messageApi.loading({
+                    content: 'Uploading to Walrus...',
+                    key: 'walrus',
+                  });
+
+                  try {
+                    // 2. Upload lên Walrus
+                    const { videoUrl } = await uploadToWalrus(file);
+
+                    // 3. Cập nhật item → done
+                    setFileList([
+                      {
+                        ...uploadItem,
+                        status: 'done',
+                        url: videoUrl, // để preview nếu cần
+                        percent: 100,
+                      },
+                    ]);
+
+                    // 4. set form
+                    form.setFieldsValue({ url: videoUrl });
+                    setLink(videoUrl);
+
+                    const duration = await getVideoDuration(videoUrl);
+                    form.setFieldsValue({ duration: Math.floor(duration) });
+                    setDuration(Math.floor(duration));
+
+                    messageApi.success({
+                      content: 'Upload Walrus success!',
+                      key: 'walrus',
+                    });
+                  } catch (err) {
+                    console.error(err);
+
+                    // 5. Cập nhật item → error
+                    setFileList([
+                      {
+                        ...uploadItem,
+                        status: 'error',
+                      },
+                    ]);
+
+                    messageApi.error({
+                      content: 'Upload Walrus failed',
+                      key: 'walrus',
+                    });
+                  } finally {
+                    setLoading(false);
                   }
+
+                  // ❌ chặn AntD upload mặc định
+                  return Upload.LIST_IGNORE;
                 }}>
-                <Button type="text">Upload</Button>
+                {fileList.length === 0 && (
+                  <Button loading={loading} type="text">
+                    {loading ? 'Uploading...' : 'Upload video'}
+                  </Button>
+                )}
               </Upload>
             </>
           </Form.Item>

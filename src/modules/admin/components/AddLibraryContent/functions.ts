@@ -16,15 +16,43 @@ export const getVideoDuration = (url: string) => {
   });
 };
 
-export const uploadToWalrus = async (file: File): Promise<string> => {
-  const formData = new FormData();
-  formData.append('file', file);
+export const uploadToWalrus = async (file: File) => {
+  const publisherUrl = process.env.NEXT_PUBLIC_PUBLISHER_URL; // vd https://publisher.walrus-testnet.walrus.space
+  const aggregatorUrl = process.env.NEXT_PUBLIC_AGGREGATOR_URL; // vd https://aggregator.walrus-testnet.walrus.space
+  const epochs = 1;
 
-  const res = await axios.post('/walrus/upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+  const res = await fetch(`${publisherUrl}/v1/blobs?epochs=${epochs}`, {
+    method: 'PUT',
+    body: file,
   });
 
-  return res.data.walrusUrl; // url từ walrus
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text);
+  }
+
+  /**
+   * Walrus thường trả về:
+   * {
+   *   blobId: "...",
+   *   ...
+   * }
+   */
+  const info = await res.json();
+
+  const blobId = info?.blobId ?? info?.newlyCreated?.blobObject?.blobId;
+
+  if (!blobId) {
+    console.error('Walrus response invalid:', info);
+    throw new Error('Cannot extract blobId from Walrus response');
+  }
+
+  const videoUrl = `${aggregatorUrl}/v1/blobs/${blobId}`;
+  return {
+    blobId,
+    videoUrl,
+    info,
+  };
 };
 
 export const getYouTubeVideoDuration = async (url: string): Promise<number> => {
