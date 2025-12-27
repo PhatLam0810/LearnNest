@@ -23,6 +23,11 @@ import { messageApi } from '@hooks';
 import { AppUploadImageCrop, DraggableList } from '@components';
 import { Lesson } from '~mdDashboard/redux/saga/type';
 import { getYouTubeThumbnail } from '@utils/youtube';
+import { bcs } from '@mysten/sui/bcs';
+import { Transaction } from '@mysten/sui/transactions';
+import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import { useAppDispatch } from '@redux';
+import { adminAction } from '@/modules/admin/redux';
 
 type CreateLessonFormProps = {
   initialValues?: Lesson;
@@ -37,11 +42,49 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const [form] = Form.useForm();
   const [addLesson] = adminQuery.useAddLessonMutation();
   const [isPremium, setIsPremium] = useState(initialValues?.isPremium);
-
+  const dispatch = useAppDispatch();
   const [listSelected, setListSelected] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isVisibleModalSelect, setIsVisibleModalSelect] = useState(false);
+  const { mutateAsync } = useSignAndExecuteTransaction();
+  const client = useSuiClient();
 
+  async function waitForTx(client, digest) {
+    for (let i = 0; i < 10; i++) {
+      try {
+        return await client.getTransactionBlock({
+          digest,
+          options: { showEffects: true },
+        });
+      } catch {
+        await new Promise(r => setTimeout(r, 500));
+      }
+    }
+    throw new Error('Tx not found');
+  }
+  const handleSubmit = async lessonData => {
+    // ===== create DataObject on-chain =====
+    const tx = new Transaction();
+    const mist = BigInt(Math.floor(Number(lessonData.price) * 1e9));
+
+    tx.moveCall({
+      target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::transaction::create_data`,
+      arguments: [
+        tx.pure(
+          bcs
+            .vector(bcs.u8())
+            .serialize(new TextEncoder().encode(lessonData.title)),
+        ),
+        tx.pure.u64(mist),
+      ],
+    });
+
+    // ký & gửi tx
+    const data = await mutateAsync({ transaction: tx });
+    const res = await waitForTx(client, data.digest);
+    const createdObjectId = res.effects?.created?.[0]?.reference?.objectId;
+    dispatch(adminAction.setObjectId(createdObjectId));
+  };
   const onFinish = (values: CreateLessonFrom) => {
     const lessonData = {
       ...values,
@@ -51,6 +94,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
         0,
       ),
     };
+    handleSubmit(lessonData);
     onFormFinish
       ? onFormFinish(lessonData)
       : addLesson(lessonData)
@@ -154,9 +198,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                           },
                         ]}>
                         <InputNumber
-                          addonAfter="ETH"
-                          min={0.0001}
-                          step={0.0001}
+                          addonAfter="SUI"
                           value={initialValues?.price || 0}
                           placeholder="Enter price"
                           style={{ width: '100%' }}

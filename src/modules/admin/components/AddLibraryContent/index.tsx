@@ -136,7 +136,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                   setDuration(0);
                 }}
                 beforeUpload={async file => {
-                  // 1. Hiện item ở trạng thái uploading
                   const uploadItem: UploadFile = {
                     uid: file.uid,
                     name: file.name,
@@ -154,10 +153,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                   });
 
                   try {
-                    // 2. Upload lên Walrus
                     const { videoUrl } = await uploadToWalrus(file);
-
-                    // 3. Cập nhật item → done
                     setFileList([
                       {
                         ...uploadItem,
@@ -166,8 +162,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                         percent: 100,
                       },
                     ]);
-
-                    // 4. set form
                     form.setFieldsValue({ url: videoUrl });
                     setLink(videoUrl);
 
@@ -180,9 +174,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                       key: 'walrus',
                     });
                   } catch (err) {
-                    console.error(err);
-
-                    // 5. Cập nhật item → error
                     setFileList([
                       {
                         ...uploadItem,

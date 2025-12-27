@@ -19,6 +19,7 @@ export type AdminInitialState = {
   createLesson: CreateLessonData;
   createModule: CreateModuleData;
   createSubModule: CreateSubModuleData;
+  objectId: string;
 };
 
 type CreateLessonData = CreateLessonDataResponse;

@@ -26,6 +26,7 @@ const initialState: AdminInitialState = {
     title: '',
     description: '',
   },
+  objectId: '',
 };
 
 export const adminSlice = createSlice({
@@ -53,7 +54,9 @@ export const adminSlice = createSlice({
     ) => {
       state.createSubModule = action.payload;
     },
-
+    setObjectId: (state, action: PayloadAction<any>) => {
+      state.objectId = action.payload;
+    },
     getCreateLibrary: (_s, _a: PayloadAction<CreateLibraryPayLoad>) => {},
     updateLibrary: (_s, _a: PayloadAction<UpdateLibraryPayLoad>) => {},
     updateLesson: (_s, _a: PayloadAction<UpdateLessonPayLoad>) => {},

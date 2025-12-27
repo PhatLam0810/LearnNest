@@ -29,10 +29,12 @@ import { getFullnodeUrl } from '@mysten/sui/client';
 const queryClient = new QueryClient();
 
 const { networkConfig } = createNetworkConfig({
-  localnet: { url: getFullnodeUrl('localnet') },
-  devnet: { url: getFullnodeUrl('devnet') },
-  testnet: { url: getFullnodeUrl('testnet') },
-  mainnet: { url: getFullnodeUrl('mainnet') },
+  testnet: {
+    url: getFullnodeUrl('testnet'),
+    variables: {
+      helloWorldPackageId: process.env.NEXT_PUBLIC_PACKAGE_ID,
+    },
+  },
 });
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -62,9 +64,7 @@ export default function RootLayout({
           <Provider store={store}>
             <WagmiProvider config={walletConnectConfig}>
               <QueryClientProvider client={queryClient}>
-                <SuiClientProvider
-                  networks={networkConfig}
-                  defaultNetwork="devnet">
+                <SuiClientProvider networks={networkConfig}>
                   <WalletProvider>
                     <PersistGate persistor={persistor}>
                       <MessageProvider />

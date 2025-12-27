@@ -36,6 +36,7 @@ const AppModalSuiPay: React.FC<AppModalSuiPayProps> = ({
 
   const [sendOtp] = authQuery.useSendTransactionOtpMutation();
   const { verifyInfo } = useAppSelector(state => state.authReducer);
+  const { objectId } = useAppSelector(state => state.adminReducer);
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
 
@@ -77,12 +78,18 @@ const AppModalSuiPay: React.FC<AppModalSuiPayProps> = ({
       // giá khóa học (SUI → MIST)
       const priceMist = BigInt(Number(data.price) * 1_000_000_000);
 
-      const [coin] = tx.splitCoins(tx.gas, [priceMist]);
+      // Tách coin từ gas
+      const [paymentCoin] = tx.splitCoins(tx.gas, [priceMist]);
 
-      tx.transferObjects(
-        [coin],
-        '0xfdb7acd068a49571c5469aff4825760de2a08dd37e7e8f148c5c652f38109455', // đổi thành ví admin của anh
-      );
+      // Gọi smart contract buy_data
+
+      tx.moveCall({
+        target: `${process.env.NEXT_PUBLIC_PACKAGE_ID}::transaction::buy_data`,
+        arguments: [
+          tx.object(objectId), // Object DataObject
+          paymentCoin, // Coin<SUI>
+        ],
+      });
 
       const result = await signAndExecute({
         transaction: tx,
@@ -113,7 +120,7 @@ const AppModalSuiPay: React.FC<AppModalSuiPayProps> = ({
           title: data.title,
           amount: data.price,
           currency: 'SUI',
-          status: 'success',
+          status: 'faile',
         }),
       );
     } finally {
