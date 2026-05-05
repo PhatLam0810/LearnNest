@@ -1,12 +1,12 @@
 import { useAppPagination } from '@hooks';
 import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, Text, View } from 'react-native-web';
-import styles from './styles';
-import { Button, Modal as AntdModal } from 'antd';
+import { Button, Modal as AntdModal, Grid } from 'antd';
 import { Module } from '~mdDashboard/redux/saga/type';
 import { ModuleItem } from '@/app/dashboard/module/_components';
 import Search from 'antd/es/input/Search';
 import { AddModuleContent } from '~mdAdmin/components';
+import './styles.scss';
 type ModalSelectModuleProps = {
   isVisible: boolean;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -53,9 +53,9 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
 
   return (
     <Modal visible={isVisible} transparent animationType="fade">
-      <View style={styles.modal} onClick={closeModal}>
-        <View style={styles.content} onClick={e => e.stopPropagation()}>
-          <View style={{ gap: 8, marginBottom: 20 }}>
+      <div className="modal" onClick={closeModal}>
+        <div className="content" onClick={e => e.stopPropagation()}>
+          <div style={{ gap: 8, marginBottom: 20 }}>
             <Search
               placeholder="Search"
               enterButton="Search"
@@ -64,7 +64,7 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
               // suffix={suffix}
               onSearch={search}
             />
-          </View>
+          </div>
           <FlatList
             data={listItem}
             numColumns={5}
@@ -84,24 +84,24 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
                   onClick={() => handleSelectModuleLesson(item)}
                   style={
                     selectedItems.findIndex(sItem => sItem._id === item._id) !==
-                      -1 && styles.itemSelected
+                      -1 && ''
                   }
                 />
               );
             }}
           />
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <Button style={styles.button} onClick={handleDone}>
-              <Text style={styles.buttonText}>Done</Text>
+          <div style={{ flexDirection: 'row', gap: 12 }}>
+            <Button className="button" onClick={handleDone}>
+              <div className="buttonText">Done</div>
             </Button>
             <Button
-              style={styles.buttonAddNew}
+              className="buttonAddNew"
               onClick={() => setIsVisibleModalAddNew(true)}>
-              <Text>Add new module</Text>
+              <div className="buttonText">Add new modfasfasfule</div>
             </Button>
-          </View>
-        </View>
-      </View>
+          </div>
+        </div>
+      </div>
       <AntdModal
         open={isVisibleModalAddNew}
         onCancel={closeModalAddNew}

@@ -1,0 +1,143 @@
+$font-prompt: 'Prompt', sans-serif;
+$font-dm-sans: 'DM Sans', sans-serif;
+$font-inter: 'Inter', sans-serif;
+
+$primary-red: #ef405c;
+
+@mixin titleM {
+  font-family: $font-prompt;
+  font-weight: 500;
+  font-size: 22.78px;
+  letter-spacing: 0.01em;
+}
+
+@mixin titleS {
+  font-family: $font-prompt;
+  font-weight: 400;
+  font-size: 20.25px;
+  letter-spacing: 0.01em;
+}
+
+@mixin titleSM {
+  font-family: $font-prompt;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
+
+@mixin subTitle1 {
+  font-family: $font-dm-sans;
+  font-weight: 500;
+  font-size: 16.4px;
+  letter-spacing: 0.005em;
+}
+
+@mixin subTitle2 {
+  font-family: $font-dm-sans;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+@mixin body1 {
+  font-family: $font-dm-sans;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+}
+
+@mixin body2 {
+  font-family: $font-dm-sans;
+  font-weight: 400;
+  font-size: 14px;
+}
+
+@mixin caption {
+  font-family: $font-dm-sans;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+@mixin button {
+  font-family: $font-dm-sans;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.01em;
+}
+
+@mixin buttonSmall {
+  font-family: $font-dm-sans;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 1.2px;
+}
+
+@mixin titleMMobile {
+  font-family: $font-prompt;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+}
+
+@mixin body1Mobile {
+  font-family: $font-dm-sans;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
+
+@mixin body2Mobile {
+  font-family: $font-dm-sans;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+@mixin buttonMobile {
+  font-family: $font-dm-sans;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
+
+.title-m {
+  @include titleM;
+}
+.title-s {
+  @include titleS;
+}
+.title-sm {
+  @include titleSM;
+}
+.subtitle-1 {
+  @include subTitle1;
+}
+.subtitle-2 {
+  @include subTitle2;
+}
+.body-1 {
+  @include body1;
+}
+.body-2 {
+  @include body2;
+}
+.caption {
+  @include caption;
+}
+.button {
+  @include button;
+}
+.button-small {
+  @include buttonSmall;
+}
+.title-m-mobile {
+  @include titleMMobile;
+}
+.body-1-mobile {
+  @include body1Mobile;
+}
+.body-2-mobile {
+  @include body2Mobile;
+}
+.button-mobile {
+  @include buttonMobile;
+}
