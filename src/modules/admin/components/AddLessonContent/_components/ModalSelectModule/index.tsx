@@ -1,12 +1,13 @@
 import { useAppPagination } from '@hooks';
-import React, { useEffect, useState } from 'react';
-import { FlatList, Modal, Text, View } from 'react-native-web';
-import { Button, Modal as AntdModal, Grid } from 'antd';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList } from 'react-native-web';
+import { Button, Modal } from 'antd';
 import { Module } from '~mdDashboard/redux/saga/type';
 import { ModuleItem } from '@/app/dashboard/module/_components';
 import Search from 'antd/es/input/Search';
 import { AddModuleContent } from '~mdAdmin/components';
 import './styles.scss';
+import { useAppSelector } from '@redux';
 type ModalSelectModuleProps = {
   isVisible: boolean;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,18 +23,30 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
   const { listItem, fetchData, refresh, search } = useAppPagination<Module>({
     apiUrl: 'lesson/getAllModule',
   });
-  const [isVisibleModalAddNew, setIsVisibleModalAddNew] = useState(false);
-  const closeModalAddNew = () => setIsVisibleModalAddNew(false);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
-
   const closeModal = () => setIsVisible(false);
-
+  const { isLoading } = useAppSelector(state => state.authReducer);
   const handleDone = () => {
     onFinish(selectedItems);
     closeModal();
     setSelectedItems([]);
   };
+  const observer = useRef<IntersectionObserver>(null);
 
+  const lastElementRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (observer.current) observer.current.disconnect();
+
+      observer.current = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && listItem) {
+          fetchData();
+        }
+      });
+
+      if (node) observer.current.observe(node);
+    },
+    [listItem, fetchData],
+  );
   const handleSelectModuleLesson = (data: any) => {
     if (selectedItems.some(item => item._id === data._id)) {
       setSelectedItems(selectedItems.filter(item => item._id !== data._id));
@@ -52,7 +65,13 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
   }, [isVisible]);
 
   return (
-    <Modal visible={isVisible} transparent animationType="fade">
+    <Modal
+      open={isVisible}
+      footer={null}
+      onCancel={closeModal}
+      loading={isLoading}
+      width={'70%'}
+      style={{ top: 20 }}>
       <div className="modal" onClick={closeModal}>
         <div className="content" onClick={e => e.stopPropagation()}>
           <div style={{ gap: 8, marginBottom: 20 }}>
@@ -61,60 +80,36 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
               enterButton="Search"
               allowClear
               size="large"
-              // suffix={suffix}
               onSearch={search}
             />
           </div>
-          <FlatList
-            data={listItem}
-            numColumns={5}
-            onEndReached={fetchData}
-            columnWrapperStyle={{ gap: '0.5%' }}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item, index) => item._id + index}
-            renderItem={({ item, index }) => {
-              return (
-                <ModuleItem
-                  data={item}
-                  key={item._id + index}
-                  title={item.title}
-                  description={item.description}
-                  durations={item.durations}
-                  subLessons={item.subLessons.length}
-                  onClick={() => handleSelectModuleLesson(item)}
-                  style={
-                    selectedItems.findIndex(sItem => sItem._id === item._id) !==
-                      -1 && ''
-                  }
-                />
-              );
-            }}
-          />
+          <div className="container">
+            <div className="grid">
+              {listItem.map((item, index) => {
+                const isSelected = selectedItems.some(s => s._id === item._id);
+                const isLastElement = listItem.length === index + 1;
+
+                return (
+                  <div
+                    key={`${item._id}-${index}`}
+                    ref={isLastElement ? lastElementRef : null}>
+                    <ModuleItem
+                      data={item}
+                      onClick={() => handleSelectModuleLesson(item)}
+                      className={isSelected ? 'item-selected' : ''}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
           <div style={{ flexDirection: 'row', gap: 12 }}>
             <Button className="button" onClick={handleDone}>
-              <div className="buttonText">Done</div>
-            </Button>
-            <Button
-              className="buttonAddNew"
-              onClick={() => setIsVisibleModalAddNew(true)}>
-              <div className="buttonText">Add new modfasfasfule</div>
+              <div className="button-text">Done</div>
             </Button>
           </div>
         </div>
       </div>
-      <AntdModal
-        open={isVisibleModalAddNew}
-        onCancel={closeModalAddNew}
-        onClose={closeModalAddNew}
-        footer={null}
-        getContainer={false}>
-        <AddModuleContent
-          onDone={() => {
-            refresh();
-            closeModalAddNew();
-          }}
-        />
-      </AntdModal>
     </Modal>
   );
 };

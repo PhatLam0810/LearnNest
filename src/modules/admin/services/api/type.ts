@@ -1,3 +1,5 @@
+import { Library } from '~mdDashboard/types/lesson';
+import { Sublesson } from '~mdDashboard/redux/saga/type';
 export interface CreateLessonParams {
   title: string;
   description: string;
@@ -46,9 +48,14 @@ export interface UpdateSubLessonParams {
 export interface UpdateModuleParams {
   _id: string;
   title: string;
+  durations: number;
   description: string;
-  duration: number;
-  subLessons: string[];
+  createdAt: string;
+  hasSubLesson: boolean;
+  updatedAt: string;
+  subLessons?: Sublesson[];
+  libraries?: Library[];
+  __v: number;
 }
 
 export interface CreateModuleParams {

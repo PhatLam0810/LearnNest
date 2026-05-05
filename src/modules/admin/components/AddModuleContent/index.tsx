@@ -12,7 +12,7 @@ import { DraggableList } from '@components';
 import { ModalSelectLibrary } from '../AddSubLessonContent/components';
 
 type AddModuleContentProps = {
-  onFinish?: (values: any) => void;
+  onFinish?: (values: Module) => void;
   onDone?: (data: Module) => void;
   initialValues?: Module;
 };

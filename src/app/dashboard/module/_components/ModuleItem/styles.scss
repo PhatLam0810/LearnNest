@@ -1,0 +1,27 @@
+@use 'app/global.scss' as *;
+.container {
+  padding: 8px;
+  min-height: 200px;
+  margin-bottom: 6px;
+}
+.ant-card-head {
+  padding: 0px;
+  .ant-card-head-title {
+    @include titleS;
+    display: -webkit-inline-box;
+    justify-content: center;
+    font-weight: 500;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    text-align: center;
+    font-weight: 500;
+  }
+}
+
+.title {
+  @include subTitle1;
+  text-align: center;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
