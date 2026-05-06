@@ -53,7 +53,7 @@ const LibraryDetailItem = forwardRef<
 
   const useVideoTracking = (subLessonId: string) => {
     const [isTracking, setIsTracking] = useState(false);
-    const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const trackingIntervalRef = useRef<any | null>(null);
     const lastSentAtRef = useRef<number>(0);
     const lastPositionRef = useRef<number>(0);
     const maxWatchedRef = useRef<number>(0);

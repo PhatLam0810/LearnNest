@@ -12,11 +12,9 @@ import {
   CreateLessonPayLoad,
   CreateLibraryPayLoad,
   CreateModulePayLoad,
-  CreateSubModulePayLoad,
   UpdateLessonPayLoad,
   UpdateLibraryPayLoad,
   UpdateModulePayLoad,
-  UpdateSubLessonPayLoad,
 } from '../slice/type';
 import { messageApi } from '@hooks';
 
@@ -57,28 +55,6 @@ function* getCreateModuleSaga(action: PayloadAction<CreateModulePayLoad>) {
     }
   } catch (error) {
     messageApi?.error('Failed to add Module');
-  }
-}
-
-function* getCreateSubModuleSaga(
-  action: PayloadAction<CreateSubModulePayLoad>,
-) {
-  try {
-    const { params, callback } = action.payload;
-    const { status, data }: AppAxiosRes<CreateLessonDataResponse[]> =
-      yield call(adminApi.createSubModuleApi, params);
-    if (status === 201) {
-      yield put(adminAction.setCreateSubModule(data.data));
-      if (callback) {
-        callback();
-      }
-      messageApi?.success('Submodule added successfully!');
-    } else {
-      console.log(data.code);
-    }
-  } catch (error) {
-    console.log(error);
-    messageApi?.error('Failed to add Submodule');
   }
 }
 
@@ -142,26 +118,6 @@ function* updateLessonSaga(action: PayloadAction<UpdateLessonPayLoad>) {
   }
 }
 
-function* updateSubLessonSaga(action: PayloadAction<UpdateSubLessonPayLoad>) {
-  try {
-    const { params, callback } = action.payload;
-    const { status, data }: AppAxiosRes<any> = yield call(
-      adminApi.updateSubLessonApi,
-      params,
-    );
-    if (status === 200) {
-      if (callback) {
-        callback();
-      }
-      messageApi?.success('SubLesson update successfully!');
-    } else {
-      console.log(data.code);
-    }
-  } catch (error) {
-    messageApi?.error('Failed to update SubLesson');
-  }
-}
-
 function* updateModuleSaga(action: PayloadAction<UpdateModulePayLoad>) {
   try {
     const { params, callback } = action.payload;
@@ -185,10 +141,8 @@ function* updateModuleSaga(action: PayloadAction<UpdateModulePayLoad>) {
 export function* adminSaga() {
   yield takeLatest(adminAction.getCreateLessons, getCreateLessonsSaga);
   yield takeLatest(adminAction.getCreateModule, getCreateModuleSaga);
-  yield takeLatest(adminAction.getCreateSubModule, getCreateSubModuleSaga);
   yield takeLatest(adminAction.getCreateLibrary, getCreateLibrarySaga);
   yield takeLatest(adminAction.updateLibrary, updateLibrarySaga);
   yield takeLatest(adminAction.updateLesson, updateLessonSaga);
-  yield takeLatest(adminAction.updateSubLesson, updateSubLessonSaga);
   yield takeLatest(adminAction.updateModule, updateModuleSaga);
 }

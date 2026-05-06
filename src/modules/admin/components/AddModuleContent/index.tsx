@@ -7,9 +7,8 @@ import { Module } from '~mdDashboard/redux/saga/type';
 import { PlusOutlined } from '@ant-design/icons';
 import { messageApi } from '@hooks';
 import styles from './styles';
-import { DragLibraryItem } from './components';
+import { DragLibraryItem, ModalSelectLibrary } from './components';
 import { DraggableList } from '@components';
-import { ModalSelectLibrary } from '../AddSubLessonContent/components';
 
 type AddModuleContentProps = {
   onFinish?: (values: Module) => void;

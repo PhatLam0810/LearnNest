@@ -107,7 +107,6 @@ const EditProfile = () => {
         title="Delete Lesson"
         open={modelDelete}
         onCancel={onCloseDelete}
-        onClose={onCloseDelete}
         onOk={() => {
           deleteAccount({ Userid: userProfile._id })
             .unwrap()

@@ -1,9 +1,8 @@
-import { LibraryItem } from '@/app/dashboard/library/_components';
 import { useWindowSize } from '@hooks';
-import { Collapse, CollapseProps, Modal } from 'antd';
+import { Modal } from 'antd';
 import React from 'react';
 import { FlatList, ScrollView, View } from 'react-native-web';
-import LibraryDetailItem from '~mdDashboard/pages/SubLessonDetailPage/_components/LibraryDetailItem';
+import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
 import { Module } from '~mdDashboard/redux/saga/type';
 
 type ModalModuleOverviewProps = {
@@ -22,24 +21,10 @@ const ModalModuleOverview: React.FC<ModalModuleOverviewProps> = ({
     setIsVisible(false);
   };
 
-  const items: CollapseProps['items'] = data?.subLessons?.map(item => ({
-    key: item._id,
-    label: item.title,
-    children: (
-      <FlatList
-        scrollEnabled={false}
-        keyExtractor={i => i._id}
-        data={item.libraries}
-        renderItem={({ item }) => <LibraryDetailItem data={item} />}
-      />
-    ),
-  }));
-
   return (
     <Modal
       open={isVisible}
       onCancel={closeModal}
-      onClose={closeModal}
       title={data?.title}
       closable={false}
       footer={false}
@@ -58,7 +43,6 @@ const ModalModuleOverview: React.FC<ModalModuleOverviewProps> = ({
             return <LibraryDetailItem data={item} />;
           }}
         />
-        <Collapse items={items} defaultActiveKey={['1']} />
       </ScrollView>
     </Modal>
   );

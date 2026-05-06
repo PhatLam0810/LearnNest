@@ -43,12 +43,8 @@ const Thumbnail = ({ data }) => {
 
 const LibraryItem: React.FC<LibraryItemProps> = ({ data, onClick, style }) => {
   let firstLibrary = undefined;
-  if (data?.hasSubLesson || data?.subLessons?.length > 0) {
-    const firstSubLesson = data?.subLessons[0];
-    if (firstSubLesson?.libraries?.length > 0) {
-      firstLibrary = firstSubLesson?.libraries[0];
-    }
-  } else if (data?.libraries?.length > 0) {
+
+  if (data?.libraries?.length > 0) {
     firstLibrary = data?.libraries[0];
   }
 

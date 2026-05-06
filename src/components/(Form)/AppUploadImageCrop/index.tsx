@@ -98,7 +98,7 @@ const ImageCropUpload: React.FC<ImageCropUploadProps> = ({
         open={image && isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}>
-        <div style={{ position: 'relative', height: '400px', width: '100%' }}>
+        <div style={{ position: 'relative', height: '500px', width: '100%' }}>
           <Cropper
             image={image}
             crop={crop}

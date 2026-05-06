@@ -1,5 +1,4 @@
 import { useAppSelector } from '@redux';
-import { realTimeCommentService } from '@services/signalR';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 

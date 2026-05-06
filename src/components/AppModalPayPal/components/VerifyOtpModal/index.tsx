@@ -37,7 +37,6 @@ const VerifyOtpModal: React.FC<VerifyOtpModalProps> = ({
     <Modal
       open={isVisible}
       onCancel={onClose}
-      onClose={onClose}
       footer={null}
       centered
       closable={false}>

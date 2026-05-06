@@ -14,10 +14,10 @@ import {
 } from 'antd';
 import { messageApi, useAppPagination, useWindowSize } from '@hooks';
 import { PlusOutlined } from '@ant-design/icons';
-import { AddLibraryContent, ModalBulkData } from '~mdAdmin/components';
+import { AddLibraryContent } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import { Library } from '~mdDashboard/types';
-import LibraryDetailItem from '~mdDashboard/pages/SubLessonDetailPage/_components/LibraryDetailItem';
+import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
 import { UpdateLibraryForm } from '@/app/dashboard/library/_components';
 
 const LibraryManage = () => {
@@ -170,7 +170,6 @@ const LibraryManage = () => {
       <Modal
         open={isVisibleModalAdd}
         onCancel={onCloseModalAdd}
-        onClose={onCloseModalAdd}
         footer={null}
         title="Add Library">
         <AddLibraryContent initialValues={selectedItem} onDone={onDone} />
@@ -180,7 +179,6 @@ const LibraryManage = () => {
         title="Delete Library"
         open={openDelete}
         onCancel={onCloseDelete}
-        onClose={onCloseDelete}
         onOk={() => {
           deleteItem({ _id: selectedItem?._id })
             .unwrap()

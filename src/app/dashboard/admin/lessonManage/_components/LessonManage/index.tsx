@@ -144,7 +144,6 @@ const LessonManage = () => {
       <Modal
         open={isVisibleModalAdd}
         onCancel={onCloseModalAdd}
-        onClose={onCloseModalAdd}
         footer={null}
         width={'80%'}
         centered
@@ -159,7 +158,6 @@ const LessonManage = () => {
         title="Delete Lesson"
         open={openDelete}
         onCancel={onCloseDelete}
-        onClose={onCloseDelete}
         onOk={() => {
           deleteItem({ _id: selectedItem?._id })
             .unwrap()

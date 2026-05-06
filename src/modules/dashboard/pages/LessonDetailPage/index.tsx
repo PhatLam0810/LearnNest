@@ -16,9 +16,7 @@ import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { FlatList, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
-import { AppComment, AppHeader, AppModalPayPal } from '@components';
 import { Collapse, CollapseProps, message, Modal } from 'antd';
-import { PayPalButtons } from '@paypal/react-paypal-js';
 import { authAction, authQuery } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
 import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/AppVideoWatchersButton';
@@ -128,22 +126,22 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   useEffect(() => {
     if (!lessonDetail) return;
 
-    if (lessonDetail.isPremium) {
-      if (!dataSub || !userProfile?._id) return;
-      const hasPurchased = dataSub.some(
-        sub =>
-          sub.userId === userProfile._id &&
-          sub.lessonId === lessonDetail._id &&
-          sub.status === 'success',
-      );
+    // if (lessonDetail.isPremium) {
+    // if (!dataSub || !userProfile?._id) return;
+    // const hasPurchased = dataSub.some(
+    //   sub =>
+    //     sub.userId === userProfile._id &&
+    //     sub.lessonId === lessonDetail._id &&
+    //     sub.status === 'success',
+    // );
 
-      if (hasPurchased) {
-        setAccessLesson(true);
-      } else {
-        setAccessLesson(false);
-      }
-    }
-    if (userProfile?.role?.level <= 2) setAccessLesson(true);
+    // if (hasPurchased) {
+    //   setAccessLesson(true);
+    // } else {
+    //   setAccessLesson(false);
+    // }
+    // }
+    // if (userProfile?.role?.level <= 2) setAccessLesson(true);
 
     if (lessonDetail?.modules?.length > 0) {
       const firstLibrary = lessonDetail.modules[0].libraries[0];
@@ -518,12 +516,12 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         />
       </Modal>
 
-      <AppModalPayPal
+      {/* <AppModalPayPal
         isVisibleModalBuy={isVisibleModalBuy}
         setIsVisibleModalBuy={setIsVisibleModalBuy}
         data={lessonDetail}
         accessLesson={accessLesson}
-      />
+      /> */}
       <AppModalSuccess
         isVisibleModalSuccess={isVisibleModalSuccess}
         setIsVisibleModalSuccess={setIsVisibleModalSuccess}

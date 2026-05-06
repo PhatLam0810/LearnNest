@@ -39,7 +39,6 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
       open={isVisibleModalSuccess}
       onCancel={onCloseModalAdd}
       closable={false}
-      onClose={onCloseModalAdd}
       footer={null}>
       <View style={{ flex: 1, alignItems: 'center', gap: 16 }}>
         {lessonPurchaseData?.status === 'success' ? (

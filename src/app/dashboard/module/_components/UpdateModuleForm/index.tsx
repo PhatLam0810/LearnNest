@@ -53,7 +53,6 @@ const UpdateModuleForm: React.FC<UpdateModuleFormProps> = ({
     <Modal
       open={isVisible}
       onCancel={onCloseModalAdd}
-      onClose={onCloseModalAdd}
       footer={null}
       width={'80%'}
       centered>

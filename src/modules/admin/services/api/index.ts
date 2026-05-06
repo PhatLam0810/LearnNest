@@ -7,7 +7,6 @@ import {
   UpdateLessonParams,
   UpdateLibraryParams,
   UpdateModuleParams,
-  UpdateSubLessonParams,
 } from './type';
 
 export const createLessonApi = (params: CreateLessonParams) =>
@@ -15,9 +14,6 @@ export const createLessonApi = (params: CreateLessonParams) =>
 
 export const createModuleApi = (params: CreateModuleParams) =>
   api.post(`/lesson/addModule/${params.lessonId}`, params.modules);
-
-export const createSubModuleApi = (params: CreateSubModuleParams) =>
-  api.post(`/lesson/addSubLesson/${params.moduleId}`, params.subLessons);
 
 export const createLibraryApi = (params: CreateLibraryParams) =>
   api.post(`/library`, params);
@@ -27,9 +23,6 @@ export const updateLibraryApi = (params: UpdateLibraryParams) =>
 
 export const updateLessonApi = (params: UpdateLessonParams) =>
   api.put(`/lesson`, params);
-
-export const updateSubLessonApi = (params: UpdateSubLessonParams) =>
-  api.put(`/lesson/updateSubLesson`, params);
 
 export const updateModuleApi = (params: UpdateModuleParams) =>
   api.put(`/lesson/updateModule`, params);

@@ -6,7 +6,7 @@ import { Button, Input, Modal, Space, Table, TableProps, Tag } from 'antd';
 import { messageApi, useAppPagination, useWindowSize } from '@hooks';
 import { Module } from '~mdDashboard/redux/saga/type';
 import { PlusOutlined } from '@ant-design/icons';
-import { AddModuleContent, ModalBulkData } from '~mdAdmin/components';
+import { AddModuleContent } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import api from '@services/api';
 import { ModalModuleOverview } from './_components';
@@ -144,7 +144,6 @@ const ModuleManage = () => {
       <Modal
         open={isVisibleModalAdd}
         onCancel={onCloseModalAdd}
-        onClose={onCloseModalAdd}
         footer={null}
         width={'80%'}
         centered
@@ -158,7 +157,6 @@ const ModuleManage = () => {
         title="Delete Module"
         open={openDelete}
         onCancel={onCloseDelete}
-        onClose={onCloseDelete}
         onOk={() => {
           deleteItem({ _id: selectedItem?._id })
             .unwrap()
@@ -170,29 +168,6 @@ const ModuleManage = () => {
         }}>
         <Text>{`Delete Module: ${selectedItem?.title}`}</Text>
       </Modal>
-      <ModalBulkData
-        title="Bulk Module"
-        isVisible={isVisibleModalBulk}
-        setIsVisible={setIsVisibleModalBulk}
-        onOk={async data => {
-          messageApi.loading('Bulk...', 0);
-          const apiResponse = await api.post(
-            'lesson/BulkModuleWithName',
-            data,
-            {
-              headers: { 'Content-Type': 'multipart/form-data' },
-            },
-          );
-          messageApi.destroy();
-          if (apiResponse.status === 201) {
-            messageApi.success('Bulk Successfully!');
-            refresh();
-            setIsVisibleModalBulk(false);
-            return;
-          }
-          messageApi.error('Bulk Failed!');
-        }}
-      />
       <ModalModuleOverview
         data={data}
         isVisible={isVisibleModalOverview}

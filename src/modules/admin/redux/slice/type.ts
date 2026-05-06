@@ -7,7 +7,6 @@ import {
   UpdateLessonParams,
   UpdateLibraryParams,
   UpdateModuleParams,
-  UpdateSubLessonParams,
 } from '../../services/api/type';
 import {
   CreateLessonDataResponse,
@@ -31,5 +30,4 @@ export type CreateSubModulePayLoad = PayLoadCallBack<CreateSubModuleParams>;
 export type CreateLibraryPayLoad = PayLoadCallBack<CreateLibraryParams>;
 export type UpdateLibraryPayLoad = PayLoadCallBack<UpdateLibraryParams>;
 export type UpdateLessonPayLoad = PayLoadCallBack<UpdateLessonParams>;
-export type UpdateSubLessonPayLoad = PayLoadCallBack<UpdateSubLessonParams>;
 export type UpdateModulePayLoad = PayLoadCallBack<UpdateModuleParams>;

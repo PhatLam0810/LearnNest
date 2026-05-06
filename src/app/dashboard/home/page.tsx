@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import { Tags } from './_components';
 import styles from './styles';
 import { View, ScrollView, Text } from 'react-native-web';
-import 'antd/dist/reset.css';
 import { AnimatePresence, motion } from 'framer-motion';
 import { authAction } from '~mdAuth/redux';
 import { messageApi } from '@hooks';

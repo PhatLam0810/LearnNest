@@ -1,19 +1,19 @@
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useRef } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
-import LibraryDetailItem, {
-  LibraryDetailItemHandle,
-} from '../SubLessonDetailPage/_components/LibraryDetailItem';
-import { Button, Collapse, CollapseProps, Modal } from 'antd';
+import { Collapse, CollapseProps, Modal } from 'antd';
 import { convertDurationToTime } from '@utils';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { FaceDetection } from '~mdAuth/components';
 import { useResponsive } from '@/styles/responsive';
+import LibraryDetailItem, {
+  LibraryDetailItemHandle,
+} from '~mdDashboard/components/LibraryDetailItem';
 
 const ModuleDetailPage = () => {
-  const { selectedModule, lessonDetail, selectedLibrary } = useAppSelector(
+  const { lessonDetail, selectedLibrary } = useAppSelector(
     state => state.dashboardReducer,
   );
   const dispatch = useAppDispatch();

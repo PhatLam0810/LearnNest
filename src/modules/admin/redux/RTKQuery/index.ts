@@ -1,6 +1,5 @@
 import { baseQuery } from '@redux/RTKQuery';
 import { AxiosResponse } from 'axios';
-import { bo } from 'node_modules/@tanstack/query-core/build/modern/hydration-CeGZtiZv';
 import { LibraryType } from '~mdDashboard/redux/RTKQuery/types';
 import { Category } from '~mdDashboard/redux/saga/type';
 
@@ -20,14 +19,6 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
 
-    addSubLesson: builder.mutation<any, any>({
-      query: (body: any) => ({
-        url: 'lesson/addSubLesson',
-        method: 'POST',
-        body,
-      }),
-      transformResponse: (res: AxiosResponse<any>) => res.data,
-    }),
     addModule: builder.mutation<any, any>({
       query: (body: any) => ({
         url: 'lesson/addModule',
@@ -61,13 +52,7 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
-    deleteSubLesson: builder.mutation({
-      query: (params: { _id: string }) => ({
-        url: `/lesson/sublesson/${params._id}`,
-        method: 'DELETE',
-      }),
-      transformResponse: (res: AxiosResponse<any>) => res.data,
-    }),
+
     deleteModule: builder.mutation({
       query: (params: { _id: string }) => ({
         url: `/lesson/module/${params._id}`,

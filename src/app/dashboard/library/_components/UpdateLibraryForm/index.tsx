@@ -63,7 +63,6 @@ const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({
     <Modal
       open={isVisible}
       onCancel={onCloseModalAdd}
-      onClose={onCloseModalAdd}
       footer={null}
       title="Add Library">
       <AddLibraryContent initialValues={data} onFinish={onFinish} />

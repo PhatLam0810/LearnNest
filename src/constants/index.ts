@@ -1,4 +1,4 @@
-import { ImagePDF, ImageVideo, ImageYoutube } from 'public/images';
+import { ImagePDF, ImageVideo, ImageYoutube } from '../../public/images';
 
 export const typeItem: { [type: string]: any } = {
   Youtube: ImageYoutube,

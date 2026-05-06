@@ -24,11 +24,11 @@ const LessonContent: React.FC<LessonContentProps> = ({
           overflow: 'hidden',
           backgroundColor: 'gray',
         }}>
-        {!accessLesson && (
+        {/* {!accessLesson && (
           <View style={styles.premium}>
             <DollarOutlined style={{ color: '#FFF', fontSize: 24 }} />
           </View>
-        )}
+        )} */}
         <LessonThumbnail thumbnail={data.thumbnail} />
       </View>
       <Text style={styles.priceTitle}>Cost price: {data.price}$</Text>

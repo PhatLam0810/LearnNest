@@ -10,7 +10,6 @@ import {
   UpdateLessonPayLoad,
   UpdateLibraryPayLoad,
   UpdateModulePayLoad,
-  UpdateSubLessonPayLoad,
 } from './type';
 import {
   CreateLessonDataResponse,
@@ -57,7 +56,6 @@ export const adminSlice = createSlice({
     getCreateLibrary: (_s, _a: PayloadAction<CreateLibraryPayLoad>) => {},
     updateLibrary: (_s, _a: PayloadAction<UpdateLibraryPayLoad>) => {},
     updateLesson: (_s, _a: PayloadAction<UpdateLessonPayLoad>) => {},
-    updateSubLesson: (_s, _a: PayloadAction<UpdateSubLessonPayLoad>) => {},
     updateModule: (_s, _a: PayloadAction<UpdateModulePayLoad>) => {},
   },
 });

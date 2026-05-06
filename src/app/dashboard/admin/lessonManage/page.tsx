@@ -4,14 +4,8 @@ import { Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { View } from 'react-native-web';
 import styles from './styles';
-import {
-  ModuleManage,
-  SubLessonManage,
-  LessonManage,
-  LibraryManage,
-} from './_components';
+import { ModuleManage, LessonManage, LibraryManage } from './_components';
 import './styles.css';
-
 const onChange = (key: string) => {};
 
 const items: TabsProps['items'] = [

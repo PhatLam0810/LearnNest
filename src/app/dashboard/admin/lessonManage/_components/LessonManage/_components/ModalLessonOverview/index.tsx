@@ -6,7 +6,7 @@ import { Lesson } from '~mdDashboard/redux/saga/type';
 import styles from './styles';
 import { LessonThumbnail } from '~mdDashboard/components';
 import { CheckOutlined } from '@ant-design/icons';
-import LibraryDetailItem from '~mdDashboard/pages/SubLessonDetailPage/_components/LibraryDetailItem';
+import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
 
 type ModalLessonOverviewProps = {
   isVisible: boolean;
@@ -37,26 +37,6 @@ const ModalLessonOverview: React.FC<ModalLessonOverviewProps> = ({
           />
         ),
       };
-    } else if (mItem.subLessons.length > 0) {
-      const nestedItem: CollapseProps['items'] = mItem.subLessons.map(sItem => {
-        return {
-          key: sItem._id,
-          label: sItem.title,
-          children: (
-            <FlatList
-              scrollEnabled={false}
-              keyExtractor={i => i._id}
-              data={sItem.libraries}
-              renderItem={({ item }) => <LibraryDetailItem data={item} />}
-            />
-          ),
-        };
-      });
-      return {
-        key: mItem._id,
-        label: mItem.title,
-        children: <Collapse items={nestedItem} />,
-      };
     }
   });
 
@@ -64,7 +44,6 @@ const ModalLessonOverview: React.FC<ModalLessonOverviewProps> = ({
     <Modal
       open={isVisible}
       onCancel={closeModal}
-      onClose={closeModal}
       centered
       width={'80%'}
       closable={false}

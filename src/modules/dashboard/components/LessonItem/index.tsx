@@ -34,24 +34,24 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
   const [accessLesson, setAccessLesson] = useState(true);
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
-  useEffect(() => {
-    if (isPremium) {
-      if (!dataSub || !userProfile?._id || !data) return;
-      const hasPurchased = dataSub.some(
-        sub =>
-          sub.userId === userProfile._id &&
-          sub.lessonId === data._id &&
-          sub.status === 'success',
-      );
+  // useEffect(() => {
+  //   if (isPremium) {
+  //     if (!dataSub || !userProfile?._id || !data) return;
+  //     const hasPurchased = dataSub.some(
+  //       sub =>
+  //         sub.userId === userProfile._id &&
+  //         sub.lessonId === data._id &&
+  //         sub.status === 'success',
+  //     );
 
-      if (hasPurchased) {
-        setAccessLesson(true);
-      } else {
-        setAccessLesson(false);
-      }
-    }
-    if (userProfile?.role?.level <= 2) setAccessLesson(true);
-  }, [isPremium, dataSub, data]);
+  //     if (hasPurchased) {
+  //       setAccessLesson(true);
+  //     } else {
+  //       setAccessLesson(false);
+  //     }
+  //   }
+  //   if (userProfile?.role?.level <= 2) setAccessLesson(true);
+  // }, [isPremium, dataSub, data]);
 
   return (
     <Card

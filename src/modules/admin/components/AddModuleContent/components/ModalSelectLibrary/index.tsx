@@ -69,7 +69,7 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
           </View>
           <FlatList
             data={listItem}
-            numColumns={5}
+            numColumns={4}
             onEndReached={fetchData}
             columnWrapperStyle={{ gap: '0.5%' }}
             showsVerticalScrollIndicator={false}
@@ -102,7 +102,6 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
       <AntdModal
         open={isVisibleModalAddNew}
         onCancel={closeModalAddNew}
-        onClose={closeModalAddNew}
         footer={null}
         getContainer={false}>
         <AddLibraryContent

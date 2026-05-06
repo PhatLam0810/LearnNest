@@ -1,22 +1,17 @@
 'use client';
-import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import { persistor, store } from '@redux';
 import React from 'react';
 import { View } from 'react-native-web';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Authentication } from '~mdAuth/components';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
 import { pdfjs } from 'react-pdf';
 import LoadingScreen from '~mdAuth/components/Loading';
 import './styles.css';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Chatbox from '@components/ChatboxAi';
-import { WagmiProvider } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import walletConnectConfig from '@services/walletconnect';
 import MessageProvider from '@components/MessageProvider';
 
 const queryClient = new QueryClient();
@@ -39,36 +34,27 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body style={{ margin: 0, padding: 0, overflow: 'auto' }}>
-        <PayPalScriptProvider
-          options={{
-            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || '',
-            currency: 'USD',
-            intent: 'capture',
-          }}>
-          <Provider store={store}>
-            <WagmiProvider config={walletConnectConfig}>
-              <QueryClientProvider client={queryClient}>
-                <PersistGate persistor={persistor}>
-                  <MessageProvider />
-                  <View
-                    style={{
-                      flex: 1,
-                      width: '100%',
-                      minHeight: '100vh',
-                      backgroundColor: '#F9F9F9',
-                      overflowX: 'hidden',
-                      overflowY: 'auto',
-                    }}>
-                    {children}
-                  </View>
-                  <LoadingScreen />
-                </PersistGate>
-              </QueryClientProvider>
-            </WagmiProvider>
-            <Chatbox />
-            <Authentication />
-          </Provider>
-        </PayPalScriptProvider>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <PersistGate persistor={persistor}>
+              <MessageProvider />
+              <View
+                style={{
+                  flex: 1,
+                  width: '100%',
+                  minHeight: '100vh',
+                  backgroundColor: '#F9F9F9',
+                  overflowX: 'hidden',
+                  overflowY: 'auto',
+                }}>
+                {children}
+              </View>
+              <LoadingScreen />
+            </PersistGate>
+          </QueryClientProvider>
+          <Chatbox />
+          <Authentication />
+        </Provider>
       </body>
     </html>
   );
