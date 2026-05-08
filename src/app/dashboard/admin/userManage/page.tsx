@@ -37,7 +37,7 @@ const UserManage = () => {
           style={{
             borderWidth: 1,
             borderColor: '#000',
-            backgroundColor: '#ef405c',
+            backgroundColor: 'var(--color-vhu-primary)',
           }}
         />
       ),
@@ -99,7 +99,7 @@ const UserManage = () => {
               style={{
                 borderWidth: 1,
                 borderColor: '#000',
-                backgroundColor: '#ef405c',
+                backgroundColor: 'var(--color-vhu-primary)',
               }}
             />
 

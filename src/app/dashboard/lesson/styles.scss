@@ -1,0 +1,5 @@
+@use 'app/global.scss' as *;
+
+.ant-input-group-addon .ant-btn {
+  background-color: $color-vhu-primary;
+}

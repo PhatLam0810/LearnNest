@@ -2,8 +2,8 @@
 
 .ant-input-group-addon {
   .ant-btn {
-    background-color: $primary-red;
-    border-color: $primary-red;
+    background-color: $color-vhu-primary;
+    border-color: $color-vhu-primary;
   }
 }
 .modal {
@@ -20,7 +20,7 @@
 }
 
 .button {
-  background-color: $primary-red;
+  background-color: $color-vhu-primary;
   align-self: flex-end;
   padding: 12px;
   border-radius: 8px;
@@ -28,7 +28,7 @@
 
   .button-text {
     color: white;
-    background-color: $primary-red;
+    background-color: $color-vhu-primary;
   }
 }
 

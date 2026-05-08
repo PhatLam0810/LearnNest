@@ -7,7 +7,7 @@ import styles from './styles';
 import { AppButton, AppInput, AppUploadToServer } from '@components';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction, authQuery } from '~mdAuth/redux';
-import './styles.css';
+import './styles.scss';
 import { useRouter } from 'next/navigation';
 import { messageApi } from '@hooks';
 

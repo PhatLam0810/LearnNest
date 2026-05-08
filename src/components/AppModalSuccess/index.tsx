@@ -4,7 +4,7 @@ import styles from './styles';
 import { Button, Modal } from 'antd';
 import { authAction } from '~mdAuth/redux';
 import { useAppDispatch, useAppSelector } from '@redux';
-import './styles.css';
+import './styles.scss';
 import Icon from '@components/icons';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';

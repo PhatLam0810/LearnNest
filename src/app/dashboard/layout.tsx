@@ -30,6 +30,7 @@ import { authAction } from '~mdAuth/redux';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import Icon from '@components/icons';
+import Image from 'next/image';
 import { LessonIcon } from '@/assets/svg';
 import LessonSearchBar from './lesson/_components/LessonSearchBar';
 import { LessonSearchProvider } from './lesson/lessonSearchContext';
@@ -99,14 +100,14 @@ export default function DashboardLayout({
     const logoStyle = {
       ...styles.logo,
       gap: isMobile ? 8 : 10,
-      paddingVertical: isMobile ? 8 : 12,
-      paddingHorizontal: isMobile ? 8 : 10,
+      paddingVertical: isMobile ? 8 : 0,
+      paddingHorizontal: isMobile ? 8 : 0,
     };
 
     const logoMarkStyle = {
       ...styles.logoMark,
-      width: isMobile ? 36 : 44,
-      height: isMobile ? 36 : 44,
+      width: isMobile ? 36 : 65,
+      height: isMobile ? 36 : 65,
       borderRadius: isMobile ? 8 : 12,
     };
 
@@ -129,7 +130,19 @@ export default function DashboardLayout({
         }}>
         <View style={logoStyle}>
           <View style={logoMarkStyle}>
-            <Text style={logoMarkTextStyle}>LN</Text>
+            <Image
+              src="/images/LogoVhu.png"
+              alt=""
+              width={460}
+              height={360}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+                borderRadius: 16,
+              }}
+              priority
+            />
           </View>
           <Text style={logoTextStyle}>LearnNest</Text>
         </View>

@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 48,
     ...typography.button,
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
     color: '#FFF',
   },
   buttonDeleteContainer: {
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   buttonDelete: {
     width: '100%',
     ...typography.button,
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
     color: '#FFF',
   },
   labelText: {

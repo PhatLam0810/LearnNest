@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
   },
 
   btn: {
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
   },
   btnContainerUpload: {
     display: 'flex',

@@ -5,7 +5,7 @@ import type { TabsProps } from 'antd';
 import { View } from 'react-native-web';
 import styles from './styles';
 import { ChangePassword, EditProfile, TransactionHistory } from './components';
-import './styles.css';
+import './styles.scss';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 const items: TabsProps['items'] = [

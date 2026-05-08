@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   btn: {
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
   },
   libraryItem: {
     padding: 12,

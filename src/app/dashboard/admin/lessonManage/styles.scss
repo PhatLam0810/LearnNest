@@ -1,3 +1,5 @@
+@use 'app/global.scss' as *;
+
 .ant-tabs {
   height: 100%;
 }
@@ -9,27 +11,27 @@
   display: flex;
 }
 .ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #ef405c;
+  color: $color-vhu-primary;
 }
 .ant-tabs .ant-tabs-ink-bar {
-  background: #ef405c;
+  background: $color-vhu-primary;
 }
 .ant-input-search
   > .ant-input-group
   > .ant-input-group-addon:last-child
   .ant-input-search-button:not(.ant-btn-primary) {
   color: #fff;
-  background: #ef405c;
+  background: $color-vhu-primary;
 }
 .ant-tabs .ant-tabs-tab:hover {
-  color: #ef405c;
+  color: $color-vhu-primary;
 }
 .ant-input-outlined:focus,
 .ant-input-outlined:focus-within {
-  border-color: #ef405c;
+  border-color: $color-vhu-primary;
 }
 .ant-input-outlined:hover {
-  border-color: #ef405c;
+  border-color: $color-vhu-primary;
 }
 .ant-table-container {
   margin-top: 16px;
@@ -46,27 +48,27 @@
   display: flex;
 }
 .ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
-  color: #ef405c;
+  color: $color-vhu-primary;
 }
 .ant-tabs .ant-tabs-ink-bar {
-  background: #ef405c;
+  background: $color-vhu-primary;
 }
 .ant-input-search
   > .ant-input-group
   > .ant-input-group-addon:last-child
   .ant-input-search-button:not(.ant-btn-primary) {
   color: #fff;
-  background: #ef405c;
+  background: $color-vhu-primary;
 }
 .ant-tabs .ant-tabs-tab:hover {
-  color: #ef405c;
+  color: $color-vhu-primary;
 }
 .ant-input-outlined:focus,
 .ant-input-outlined:focus-within {
-  border-color: #ef405c;
+  border-color: $color-vhu-primary;
 }
 .ant-input-outlined:hover {
-  border-color: #ef405c;
+  border-color: $color-vhu-primary;
 }
 .ant-table-container {
   margin-top: 16px;
@@ -75,18 +77,18 @@
 .ant-table-wrapper .ant-table-thead > tr > th,
 .ant-table-wrapper .ant-table-thead > tr > th,
 .ant-table-wrapper .ant-table-thead > tr > td {
-  background-color: #ef405c;
+  background-color: $color-vhu-primary;
   color: #fff;
 }
 .ant-pagination .ant-pagination-item-active {
-  border-color: #ef405c;
-  background-color: #ef405c;
+  border-color: $color-vhu-primary;
+  background-color: $color-vhu-primary;
 }
 .ant-pagination .ant-pagination-item-active a {
   color: #fff;
 }
 .ant-pagination .ant-pagination-item-active:hover {
-  border-color: #ef405c;
+  border-color: $color-vhu-primary;
 }
 .ant-pagination .ant-pagination-item-active:hover a {
   color: #fff;

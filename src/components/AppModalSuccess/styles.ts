@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   verifyButton: {
     ...typography.button,
     width: '100%',
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
     color: '#FFF',
   },
 });

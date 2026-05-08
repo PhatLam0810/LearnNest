@@ -7,7 +7,7 @@ import Search from 'antd/es/input/Search';
 import { Button, Modal as AntdModal } from 'antd';
 import { Library } from '~mdDashboard/types';
 import { AddLibraryContent } from '~mdAdmin/components';
-import './styles.css';
+import './styles.scss';
 
 type ModalSelectLibraryProps = {
   isVisible: boolean;

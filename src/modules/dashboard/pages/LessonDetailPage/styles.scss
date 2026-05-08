@@ -1,3 +1,5 @@
+@use 'app/global.scss' as *;
+
 .icon-arrow {
   font-size: 20px;
   cursor: pointer;
@@ -60,7 +62,7 @@
   height: 48px;
   width: 100%;
   border: none;
-  background: #ef405c;
+  background-color: $color-vhu-primary;
   border-radius: 8px;
   cursor: pointer;
 }
@@ -100,7 +102,7 @@
 }
 
 .button:hover {
-  background: #ef405c;
+  background: $vhu-light-blue;
 }
 
 .button:hover svg {
@@ -137,7 +139,7 @@
   margin: 8px 0;
 }
 .ant-collapse-item-active .ant-collapse-header {
-  background-color: #ef405c;
+  background-color: $vhu-light-blue;
   color: #fff !important;
   border-radius: 8px 8px 0 0 !important;
 }

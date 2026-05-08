@@ -3,7 +3,7 @@ import { useAppPagination } from '@hooks';
 import { FlatList, ScrollView, Text, View } from 'react-native-web';
 import { LessonItem } from '~mdDashboard/components';
 import styles from './styles';
-import './styles.css';
+import './styles.scss';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { useRouter } from 'next/navigation';

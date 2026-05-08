@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: '#ff6b35',
     alignItems: 'center',
     justifyContent: 'center',
     display: 'flex',
@@ -100,7 +99,7 @@ const styles = StyleSheet.create({
   },
   avatar: {
     cursor: 'pointer',
-    backgroundColor: '#ff6b35',
+    backgroundColor: 'var(--color-vhu-primary)',
     width: 40,
     height: 40,
   },

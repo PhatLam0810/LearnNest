@@ -59,7 +59,7 @@ const ModuleDetailPage = () => {
                   style={[
                     styles.buttonModule,
                     selectedLibrary?._id === subItem._id && {
-                      backgroundColor: '#ef405c',
+                      backgroundColor: 'var(--color-vhu-primary)',
                       color: '#FFF',
                     },
                   ]}>

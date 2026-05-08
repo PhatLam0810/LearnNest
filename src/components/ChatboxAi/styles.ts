@@ -21,7 +21,7 @@ export default StyleSheet.create({
     overflow: 'hidden',
   },
   header: {
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
     padding: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -86,12 +86,12 @@ export default StyleSheet.create({
   },
   lessonPrice: {
     marginTop: 4,
-    color: '#EF405C',
+    color: 'var(--color-vhu-primary)',
     fontWeight: '600',
   },
   lessonLink: {
     textAlign: 'center',
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
     color: 'white',
     paddingVertical: 8,
     borderRadius: 8,
@@ -118,7 +118,7 @@ export default StyleSheet.create({
     borderBottomLeftRadius: 6,
   },
   sendBtn: {
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderTopRightRadius: 6,
@@ -129,7 +129,7 @@ export default StyleSheet.create({
     color: 'white',
   },
   fab: {
-    backgroundColor: '#ef405c',
+    backgroundColor: 'var(--color-vhu-primary)',
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 9999,

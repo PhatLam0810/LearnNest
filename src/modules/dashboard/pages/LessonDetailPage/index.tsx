@@ -6,7 +6,7 @@ import {
   CaretRightOutlined,
   DollarOutlined,
 } from '@ant-design/icons';
-import './styles.css';
+import './styles.scss';
 
 import { useRouter } from 'next/navigation';
 import Icon from '@components/icons';

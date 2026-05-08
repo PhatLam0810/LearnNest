@@ -43,7 +43,7 @@ const LessonModule: React.FC<LessonModuleProps> = ({
                     style={
                       subLessonSelected?.moduleId === item._id &&
                       subLessonSelected?.subLesson._id === subItem._id
-                        ? { backgroundColor: '#ef405c' }
+                        ? { backgroundColor: 'var(--color-vhu-primary)' }
                         : {}
                     }>
                     <div className="lesson-item-container">

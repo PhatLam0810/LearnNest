@@ -7,6 +7,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { Authentication } from '~mdAuth/components';
 import { pdfjs } from 'react-pdf';
 import LoadingScreen from '~mdAuth/components/Loading';
+import '../styles/variables.css';
 import './styles.css';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';

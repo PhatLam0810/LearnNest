@@ -6,10 +6,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   button: {
-    backgroundColor: '#ef405c',
+    backgroundColor: '',
     padding: 4,
     minWidth: 70,
-    borderColor: '#ef405c',
+    borderColor: 'var(--color-vhu-primary)',
     borderRadius: 8,
     borderWidth: 1,
   },

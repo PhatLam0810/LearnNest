@@ -47,7 +47,9 @@ const LessonContent: React.FC<LessonContentProps> = ({
                 margin: 5,
                 flex: 1,
               }}>
-              <CheckOutlined style={{ color: '#ef405c', marginRight: 12 }} />
+              <CheckOutlined
+                style={{ color: 'var(--color-vhu-primary)', marginRight: 12 }}
+              />
               <Text style={styles.learnedSkillText}>{item}</Text>
             </View>
           )}
