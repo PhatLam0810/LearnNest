@@ -180,7 +180,7 @@ const ModuleDetailPage = () => {
   };
 
   const handlePauseVideo = () => {
-    libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
+    // libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
   };
 
   if (!selectedLibrary) {
