@@ -3,7 +3,6 @@ import {
   CreateLessonParams,
   CreateLibraryParams,
   CreateModuleParams,
-  CreateSubModuleParams,
   UpdateLessonParams,
   UpdateLibraryParams,
   UpdateModuleParams,

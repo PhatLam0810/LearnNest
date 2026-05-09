@@ -2,6 +2,7 @@ import { baseQuery } from '@redux/RTKQuery';
 import { AxiosResponse } from 'axios';
 import { LibraryType } from '~mdDashboard/redux/RTKQuery/types';
 import { Category } from '~mdDashboard/redux/saga/type';
+import { DeleteAdminRoleParams, SetRoleParams } from './type';
 
 export const adminQuery = baseQuery.injectEndpoints({
   endpoints: builder => ({
@@ -125,6 +126,23 @@ export const adminQuery = baseQuery.injectEndpoints({
       query: (params: { _id: string }) => ({
         url: `user/getUserInfoById/${params._id}`,
         method: 'GET',
+      }),
+      transformResponse: (res: any) => res.data,
+    }),
+
+    setAdminRole: builder.mutation({
+      query: (params: SetRoleParams) => ({
+        url: `user/setAdminRole/`,
+        method: 'POST',
+        body: params,
+      }),
+      transformResponse: (res: any) => res.data,
+    }),
+    deleteAdminRole: builder.mutation({
+      query: (params: DeleteAdminRoleParams) => ({
+        url: `user/removeAdminRole/`,
+        method: 'PUT',
+        body: params,
       }),
       transformResponse: (res: any) => res.data,
     }),
