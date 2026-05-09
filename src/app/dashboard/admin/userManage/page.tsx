@@ -20,6 +20,7 @@ import { adminQuery } from '~mdAdmin/redux';
 import { UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useAppSelector } from '@redux';
+import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
 const UserManage = () => {
   const { listItem, currentData, refresh } = useAppPagination<UserItem>({
     apiUrl: 'user/getListUser',
@@ -37,14 +38,15 @@ const UserManage = () => {
     }
   }, [userInfo]);
   const isAdmin = userProfile?.role?.level <= 1;
-  const [isModalRoleOpen, setIsModalRoleOpen] = useState(false);
-
-  const [roleForm] = Form.useForm();
+  const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
+  const [createUserForm] = Form.useForm<CreateUserParams>();
 
   const [setAdminRole, { isLoading: isLoadingSetRole }] =
     adminQuery.useSetAdminRoleMutation();
   const [deleteAdminRole, { isLoading: isLoadingDeleteRole }] =
     adminQuery.useDeleteAdminRoleMutation();
+  const [createUser, { isLoading: isLoadingCreateUser }] =
+    adminQuery.useCreateUserMutation();
   const [messageApi, contextHolder] = message.useMessage();
 
   const handleSetAdminRole = async (userId: string, role: number) => {
@@ -59,6 +61,7 @@ const UserManage = () => {
       messageApi.error('Cập nhật role thất bại');
     }
   };
+
   const handleDeleteAdminRole = async (_id: string, roleId: string) => {
     try {
       await deleteAdminRole({
@@ -69,6 +72,16 @@ const UserManage = () => {
       messageApi.success('Cập nhật role thành công');
     } catch (error) {
       messageApi.error('Cập nhật role thất bại');
+    }
+  };
+  const handleCreateUser = async (value: CreateUserParams) => {
+    try {
+      await createUser(value).unwrap();
+      refresh();
+      setIsModalCreateUserOpen(false);
+      messageApi.success('Tạo user thành công thành công');
+    } catch (error) {
+      messageApi.error(error?.data?.message);
     }
   };
 
@@ -97,9 +110,14 @@ const UserManage = () => {
       render: (value: string) => <Text>{value}</Text>,
     },
     {
-      title: 'First Name',
-      dataIndex: 'firstName',
-      key: 'firstName',
+      title: 'Full Name',
+      dataIndex: 'fullName',
+      key: 'fullName',
+    },
+    {
+      title: 'Student ID ',
+      dataIndex: 'studentId',
+      key: 'studentId',
     },
     {
       title: 'Email',
@@ -111,12 +129,11 @@ const UserManage = () => {
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (value: string) => (
-        <Text>{dayjs(value).format('DD/MM/YYYY HH:mm')}</Text>
+        <Text>{dayjs(value).format('DD/MM/YYYY')}</Text>
       ),
     },
 
     {
-      title: 'Action',
       key: 'action',
       render: (_: any, record: UserItem) => (
         <Space>
@@ -148,7 +165,7 @@ const UserManage = () => {
   return (
     <View style={styles.container}>
       {contextHolder}
-      <Button type="primary" onClick={() => setIsModalRoleOpen(true)}>
+      <Button type="primary" onClick={() => setIsModalCreateUserOpen(true)}>
         Add User Account
       </Button>
       <Table
@@ -188,7 +205,10 @@ const UserManage = () => {
               <b>Username:</b> {userInfo.username}
             </Text>
             <Text>
-              <b>First Name:</b> {userInfo.firstName}
+              <b>Full Name:</b> {userInfo.fullName}
+            </Text>
+            <Text>
+              <b>Student ID:</b> {userInfo.studentId}
             </Text>
             <Text>
               <b>Email:</b> {userInfo.email}
@@ -198,34 +218,55 @@ const UserManage = () => {
       </Modal>
       <Modal
         title="Add User Account"
-        open={isModalRoleOpen}
-        onCancel={() => setIsModalRoleOpen(false)}
-        // onOk={handleAddRole}
-        // confirmLoading={isLoadingAddRole}
-      >
-        <Form form={roleForm} layout="vertical">
+        open={isModalCreateUserOpen}
+        onCancel={() => setIsModalCreateUserOpen(false)}
+        onOk={() => handleCreateUser(createUserForm.getFieldsValue())}
+        confirmLoading={isLoadingCreateUser}>
+        <Form form={createUserForm} layout="vertical">
           <Form.Item
-            label="Role Name"
-            name="name"
+            label="Full Name"
+            name="fullName"
             rules={[
               {
                 required: true,
-                message: 'Nhập role name',
+                message: 'Nhập họ và tên',
               },
             ]}>
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Permissions"
-            name="permissions"
+            label="Email"
+            name="email"
             rules={[
               {
                 required: true,
-                message: 'Nhập permissions',
+                message: 'Nhập email',
               },
             ]}>
-            <Input placeholder="fa, user, admin" />
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Mã sinh viên"
+            name="studentId"
+            rules={[
+              {
+                required: true,
+                message: 'Nhập mã sinh viên',
+              },
+            ]}>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[
+              {
+                required: true,
+                message: 'Nhập password',
+              },
+            ]}>
+            <Input />
           </Form.Item>
         </Form>
       </Modal>

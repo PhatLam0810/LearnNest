@@ -32,6 +32,7 @@ export interface UserProfile {
   _id: string;
   firstName: string;
   lastName: string;
+  fullName: string;
   username: string;
   email: string;
   bio: string;

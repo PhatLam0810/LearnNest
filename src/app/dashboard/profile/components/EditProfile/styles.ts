@@ -67,5 +67,8 @@ const styles = StyleSheet.create({
   labelText: {
     ...typography.button,
   },
+  fullNameText: {
+    ...typography.subTitle1,
+  },
 });
 export default styles;

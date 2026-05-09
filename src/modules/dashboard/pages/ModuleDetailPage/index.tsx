@@ -171,7 +171,7 @@ const ModuleDetailPage = () => {
       libraryId: selectedLibrary._id,
       score: Number(score),
       name: selectedLibrary.title,
-      userName: userProfile?.firstName,
+      userName: userProfile?.fullName,
       isPass,
       totalQuestions: totalQuestions,
       correctCount: correctCount,

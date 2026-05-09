@@ -49,24 +49,9 @@ const EditProfile = () => {
                 </View>
               </AppUploadToServer>
             </Form.Item>
-            <Form.Item
-              label={<Text style={styles.labelText}>First Name</Text>}
-              name="firstName"
-              labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-              style={{ width: '100%', margin: 0 }} // Đảm bảo Form.Item full width
-            >
-              <AppInput placeholder="First Name" style={{ width: '100%' }} />
-            </Form.Item>
-
-            <Form.Item
-              label={<Text style={styles.labelText}>Last Name</Text>}
-              name="lastName"
-              labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-              style={{ width: '100%', margin: 0 }} // Đảm bảo Form.Item full width
-            >
-              <AppInput placeholder="Last Name" style={{ width: '100%' }} />
-            </Form.Item>
-
+            <View>
+              <Text style={styles.labelText}>{userProfile.fullName}</Text>
+            </View>
             <Form.Item
               label={<Text style={styles.labelText}>User Name</Text>}
               name="username"
@@ -87,7 +72,7 @@ const EditProfile = () => {
                 placeholder="Enter a bio (max 250 chars.)"
               />
             </Form.Item>
-            <View style={styles.buttonDeleteContainer}>
+            {/* <View style={styles.buttonDeleteContainer}>
               <Button
                 onClick={() => {
                   setModalDelete(true);
@@ -95,7 +80,7 @@ const EditProfile = () => {
                 style={styles.buttonDelete}>
                 Delete Account
               </Button>
-            </View>
+            </View> */}
           </View>
           {/* Nút lưu */}
           <Button type="primary" htmlType="submit" style={styles.saveButton}>

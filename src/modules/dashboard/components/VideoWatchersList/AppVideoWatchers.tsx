@@ -36,6 +36,7 @@ interface WatcherItem {
   username?: string;
   firstName?: string;
   lastName?: string;
+  fullName?: string;
   email?: string;
   avatar?: string;
   watchedAt: string;
@@ -107,8 +108,8 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
   }, []);
 
   const getDisplayName = useCallback((item: WatcherItem): string => {
-    if (item.firstName || item.lastName) {
-      return `${item.firstName || ''} ${item.lastName || ''}`.trim();
+    if (item.fullName) {
+      return item.fullName;
     }
     if (item.username) return item.username;
     if (item.email) return item.email.split('@')[0];

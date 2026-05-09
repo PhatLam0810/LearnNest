@@ -5,6 +5,9 @@
 .ant-menu-item:not(.ant-menu-item-disabled):focus-visible {
   outline: none !important;
 }
+.ant-btn-color-primary {
+  background-color: #1d418a !important;
+}
 
 .ant-table-wrapper
   .ant-table-thead

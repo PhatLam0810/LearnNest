@@ -14,11 +14,11 @@ const items: TabsProps['items'] = [
     label: 'Profile',
     children: <EditProfile />,
   },
-  {
-    key: '2',
-    label: 'Transaction History',
-    children: <TransactionHistory />,
-  },
+  // {
+  //   key: '2',
+  //   label: 'Transaction History',
+  //   children: <TransactionHistory />,
+  // },
   {
     key: '3',
     label: 'Change Password ',
