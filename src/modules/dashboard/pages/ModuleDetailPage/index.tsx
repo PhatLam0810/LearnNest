@@ -279,13 +279,12 @@ const ModuleDetailPage = () => {
             <View style={styles.faceWrapper}>
               <FaceDetection onPauseVideo={handlePauseVideo} />
             </View>
-
+            <View style={styles.lessonContentHeader}>
+              <Text style={styles.lessonContentTitle}>Lesson Content</Text>
+            </View>
             <ScrollView
               style={lessonScrollStyle}
               contentContainerStyle={lessonScrollContentStyle}>
-              <View style={styles.lessonContentHeader}>
-                <Text style={styles.lessonContentTitle}>Lesson Content</Text>
-              </View>
               <View style={{ gap: 12 }}>
                 <Collapse
                   bordered={false}

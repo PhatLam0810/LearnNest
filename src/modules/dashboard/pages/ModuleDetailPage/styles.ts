@@ -144,7 +144,9 @@ const styles = StyleSheet.create({
     maxHeight: 'calc(100vh - 420px)', // fit with camera + spacing to avoid page scroll
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    paddingRight: 16,
+    paddingLeft: 16,
+    paddingBottom: 16,
     boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
     overflowY: 'auto',
   },
@@ -153,12 +155,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   lessonContentHeader: {
-    position: 'sticky' as any,
-    top: 0,
-    zIndex: 4,
-    paddingTop: 4,
-    paddingBottom: 12,
     backgroundColor: '#fff',
+    width: '100%',
+    paddingRight: 16,
+    paddingLeft: 16,
+    paddingTop: 16,
   },
   layoutTitleContainer: {
     width: '100%',
