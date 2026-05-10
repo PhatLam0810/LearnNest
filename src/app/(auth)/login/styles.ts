@@ -43,7 +43,14 @@ const styles = StyleSheet.create({
   driverText: {
     ...typography.body1,
   },
-
+  forgotWrapper: {
+    alignItems: 'flex-end',
+    marginBottom: 16,
+  },
+  forgotTitle: {
+    color: 'var(--color-vhu-primary)',
+    cursor: 'pointer',
+  },
   // -------- Responsive container --------
   containerDesktop: {
     flex: 1,

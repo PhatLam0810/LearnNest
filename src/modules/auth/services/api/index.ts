@@ -36,3 +36,9 @@ export const updateCurrentInfoApi = (params: UserProfile) =>
 
 export const changePasswordApi = (params: any) =>
   api.put(`/user/changePassword`, params);
+
+export const resetPasswordApi = (params: {
+  email: string;
+  otp: string;
+  newPassword: string;
+}) => api.post('/resetPassword', params);

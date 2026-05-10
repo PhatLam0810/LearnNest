@@ -20,6 +20,7 @@ export type AuthInitialState = {
   lessonPurchase?: LessonPurchasePayLoad;
   lessonPurchaseData?: LessonPurchaseData;
   walletAddress?: string;
+  errorPassword?: string;
 };
 
 export type LoginPayload = LoginApiReq;
