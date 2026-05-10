@@ -1,73 +1,85 @@
 import { useWindowSize } from '@hooks';
-import { Collapse, CollapseProps, Modal } from 'antd';
+import { Collapse, Modal } from 'antd';
 import React from 'react';
-import { FlatList, ScrollView, Text, View } from 'react-native-web';
-import { Lesson } from '~mdDashboard/redux/saga/type';
-import styles from './styles';
+import { ScrollView, Text, View } from 'react-native-web';
 import { LessonThumbnail } from '~mdDashboard/components';
 import { CheckOutlined } from '@ant-design/icons';
 import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
-
-type ModalLessonOverviewProps = {
-  isVisible: boolean;
-  setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  data: Lesson;
-};
-const ModalLessonOverview: React.FC<ModalLessonOverviewProps> = ({
-  isVisible,
-  setIsVisible,
-  data,
-}) => {
+import styles from './styles';
+const ModalLessonOverview = ({ isVisible, setIsVisible, data }: any) => {
   const { width } = useWindowSize();
-  const closeModal = () => {
-    setIsVisible(false);
-  };
 
-  const items: CollapseProps['items'] = data?.modules?.map(mItem => {
-    if (mItem.libraries.length > 0) {
-      return {
-        key: mItem._id,
-        label: mItem.title,
-        children: (
-          <FlatList
-            scrollEnabled={false}
-            keyExtractor={i => i._id}
-            data={mItem.libraries}
-            renderItem={({ item }) => <LibraryDetailItem data={item} />}
-          />
-        ),
-      };
-    }
-  });
+  const items =
+    data?.modules?.map((m: any) => ({
+      key: m._id,
+      label: <div style={styles.moduleHeader}>{m.title}</div>,
+      children: (
+        <div>
+          {m.libraries?.map((lib: any) => (
+            <div key={lib._id} style={styles.libraryItem}>
+              <LibraryDetailItem data={lib} />
+            </div>
+          ))}
+        </div>
+      ),
+    })) || [];
 
   return (
     <Modal
       open={isVisible}
-      onCancel={closeModal}
-      centered
-      width={'80%'}
-      closable={false}
+      onCancel={() => setIsVisible(false)}
       footer={false}
-      title={data?.title}>
-      <ScrollView
-        style={{ height: (width * 0.8 * 9) / 16, scrollbarWidth: 'none' }}>
-        <View style={styles.descContainer}>
-          <View style={{ flex: 3 }}>
-            <Text>{data?.description}</Text>
-            {data?.learnedSkills.map((item, index) => (
-              <View key={index}>
-                <CheckOutlined />
-                <Text>{item}</Text>
-              </View>
-            ))}
-          </View>
-          <View style={{ flex: 1 }}>
-            <View style={styles.thumbnailWrap}>
-              <LessonThumbnail thumbnail={data?.thumbnail} />
-            </View>
-          </View>
-        </View>
-        <Collapse items={items} />
+      width="85%"
+      centered
+      title={
+        <div style={{ fontSize: 18, fontWeight: 700 }}>{data?.title}</div>
+      }>
+      <ScrollView style={{ height: (width * 0.85 * 9) / 16 }}>
+        <div style={styles.modalBody}>
+          {/* HEADER */}
+          <div style={styles.header}>
+            <div style={styles.title}>{data?.title}</div>
+            <div style={styles.subtitle}>
+              Khám phá nội dung chi tiết của khóa học
+            </div>
+          </div>
+
+          {/* BODY */}
+          <div style={styles.layout}>
+            {/* LEFT */}
+            <div style={styles.left}>
+              <div style={styles.card}>
+                <Text style={styles.desc}>{data?.description}</Text>
+
+                <div>
+                  {data?.learnedSkills?.map((s: string, i: number) => (
+                    <div key={i} style={styles.skillItem}>
+                      <CheckOutlined style={{ color: '#52c41a' }} />
+                      <Text style={styles.skillText}>{s}</Text>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={styles.moduleCard}>
+                <Collapse
+                  bordered={false}
+                  items={items}
+                  style={{ background: 'transparent' }}
+                />
+              </div>
+            </div>
+
+            {/* RIGHT (sticky preview) */}
+            <div style={styles.right}>
+              <div style={styles.card}>
+                <div style={styles.thumbnailWrap}>
+                  <LessonThumbnail thumbnail={data?.thumbnail} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </ScrollView>
     </Modal>
   );

@@ -11,10 +11,10 @@ const styles = StyleSheet.create({
   },
   libraryItemSelected: {
     borderWidth: 2,
-    borderColor: '#FD2159',
+    borderColor: 'var(--color-vhu-primary)',
   },
   button: {
-    backgroundColor: '#FD2159',
+    backgroundColor: 'var(--color-vhu-primary)',
     alignSelf: 'flex-start',
     paddingTop: 12,
     paddingBottom: 12,

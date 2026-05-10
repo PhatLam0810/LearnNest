@@ -20,10 +20,10 @@ const styles = StyleSheet.create({
   },
   itemSelected: {
     borderWidth: 2,
-    borderColor: '#FD2159',
+    borderColor: 'var(--color-vhu-primary)',
   },
   button: {
-    backgroundColor: '#FD2159',
+    backgroundColor: 'var(--color-vhu-primary)',
     alignSelf: 'flex-end',
     paddingTop: 12,
     paddingBottom: 12,
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
   buttonAddNew: {
     alignSelf: 'flex-start',
-    backgroundColor: '#FD2159',
+    backgroundColor: 'var(--color-vhu-primary)',
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 12,

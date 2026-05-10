@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   button: {
-    backgroundColor: '',
+    backgroundColor: 'var(--color-vhu-primary)',
     padding: 4,
     minWidth: 70,
     borderColor: 'var(--color-vhu-primary)',
