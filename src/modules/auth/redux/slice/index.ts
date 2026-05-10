@@ -9,10 +9,12 @@ import {
 import { persistReducer } from 'redux-persist';
 import { storage } from '@redux/storage';
 import { LessonPurchase, UserProfile } from '~mdAuth/services/api/type';
+import { OtpType } from '@/constants/otp-type.enum';
 
 const initialState: AuthInitialState = {
   isLoading: false,
   verifyInfo: false,
+  errorPassword: null,
 };
 
 export const authSlice = createSlice({
@@ -57,6 +59,29 @@ export const authSlice = createSlice({
     walletAddress: (s, a: PayloadAction<string>) => {
       s.walletAddress = a.payload;
     },
+
+    setErrorPassword: (s, a: PayloadAction<string | null>) => {
+      s.errorPassword = a.payload;
+    },
+
+    sendOtp: (
+      _s,
+      _a: PayloadAction<{
+        email: string;
+        type: OtpType;
+        onSuccess?: () => void;
+        onError?: () => void;
+      }>,
+    ) => {},
+
+    resetPassword: (
+      _s,
+      _a: PayloadAction<{
+        email: string;
+        otp: string;
+        newPassword: string;
+      }>,
+    ) => {},
   },
 });
 
