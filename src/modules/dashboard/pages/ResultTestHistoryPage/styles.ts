@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     ...typography.titleS,
   },
   button: {
-    backgroundColor: '#FD2159',
+    backgroundColor: 'var(--color-vhu-primary)',
     alignSelf: 'flex-start',
     paddingTop: 12,
     paddingBottom: 12,

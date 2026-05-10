@@ -143,3 +143,6 @@ $vhu-light-blue: #88c1e9;
 .button-mobile {
   @include buttonMobile;
 }
+.hide-default-radio .ant-radio {
+  display: none;
+}

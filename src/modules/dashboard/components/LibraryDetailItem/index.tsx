@@ -40,7 +40,7 @@ const LibraryDetailItem = forwardRef<
   const [maxWatched, setMaxWatched] = useState(0);
   const [visibleQuestion, setVisibleQuestion] = useState<any>(null);
   const [shownQuestionIds, setShownQuestionIds] = useState<string[]>([]);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, any>>(
     {},
   );
@@ -541,27 +541,39 @@ const LibraryDetailItem = forwardRef<
         );
       case 'Text':
         return (
-          <ScrollView
-            style={{
-              height: 1000,
-              scrollbarWidth: 'none',
-              paddingBottom: 400,
-            }}>
-            <View>
+          <ScrollView style={styles.quizContainer}>
+            {/* HEADER */}
+            <View style={styles.quizHeader}>
+              <div style={styles.quizTitle}>Lesson Assessment</div>
+              <div style={styles.quizDescription}>
+                Complete all questions before submitting your answers.
+              </div>
+            </View>
+            {/* QUESTIONS */}
+            <View style={styles.quizContent}>
               {shuffledQuestions.map((question: any, index: number) => {
                 const isInvalid = invalidQuestions.includes(question._id);
-
                 return (
-                  <View key={index} style={{ marginBottom: 16 }}>
-                    <div
-                      style={{
-                        ...styles.questionTitle,
-                        color: isInvalid ? 'red' : 'black',
-                      }}>
-                      {index + 1}. Question {question.question} ?
+                  <View
+                    key={index}
+                    style={{
+                      ...styles.questionCard,
+                      ...(isInvalid ? styles.questionCardInvalid : {}),
+                    }}>
+                    {/* QUESTION */}
+                    <div style={styles.questionTop}>
+                      <div style={styles.questionNumber}>{index + 1}</div>
+                      <div
+                        style={{
+                          ...styles.questionText,
+                          color: isInvalid ? '#ef4444' : '#111827',
+                        }}>
+                        {question.question}
+                      </div>
                     </div>
-
+                    {/* ANSWERS */}
                     <Radio.Group
+                      className="customQuizRadio"
                       onChange={e => {
                         const selectedValue = e.target.value;
                         const questionId = question._id;
@@ -570,28 +582,50 @@ const LibraryDetailItem = forwardRef<
                           ...prev,
                           [questionId]: selectedValue,
                         }));
-
                         setInvalidQuestions(prevInvalid => {
                           if (prevInvalid.includes(questionId)) {
                             return prevInvalid.filter(id => id !== questionId);
                           }
+
                           return prevInvalid;
                         });
                       }}
                       value={selectedAnswers[question._id]}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 8,
-                      }}>
+                      style={styles.answerGroup}>
                       {question.answerList.map((ans: any, idx: number) => {
                         const optionLetter = String.fromCharCode(65 + idx);
+
+                        const isSelected =
+                          selectedAnswers[question._id] === optionLetter;
                         return (
-                          <Radio key={idx} value={optionLetter}>
-                            <div style={styles.answerTitle}>
-                              {optionLetter}. {ans}
-                            </div>
-                          </Radio>
+                          <div
+                            key={idx}
+                            style={{
+                              ...styles.answerOption,
+                              ...(isSelected
+                                ? styles.answerOptionSelected
+                                : {}),
+                            }}>
+                            <Radio
+                              rootClassName="hide-default-radio"
+                              className="customQuizRadioItem"
+                              value={optionLetter}
+                              style={styles.radioButton}>
+                              <div style={styles.answerContent}>
+                                <div
+                                  style={{
+                                    ...styles.answerLetterBox,
+                                    ...(isSelected
+                                      ? styles.answerLetterBoxSelected
+                                      : {}),
+                                  }}>
+                                  {optionLetter}
+                                </div>
+
+                                <div style={styles.answerLabel}>{ans}</div>
+                              </div>
+                            </Radio>
+                          </div>
                         );
                       })}
                     </Radio.Group>
@@ -599,9 +633,16 @@ const LibraryDetailItem = forwardRef<
                 );
               })}
             </View>
-            <Button type="primary" onClick={handleSubmit} style={styles.button}>
-              Submit
-            </Button>
+
+            {/* FOOTER */}
+            <View style={styles.quizFooter}>
+              <Button
+                type="primary"
+                onClick={handleSubmit}
+                style={styles.submitQuizButton}>
+                Submit Answers
+              </Button>
+            </View>
           </ScrollView>
         );
       default:
@@ -616,39 +657,64 @@ const LibraryDetailItem = forwardRef<
         open={visibleQuestion}
         centered
         closable={false}
-        style={{ width: 1000 }}
-        title={
-          <div style={styles.questionTitle}>
-            Question {visibleQuestion?.question}?
+        footer={null}
+        maskStyle={{
+          backdropFilter: 'blur(6px)',
+          backgroundColor: 'rgba(0,0,0,0.6)',
+        }}
+        width={600}
+        styles={{
+          content: {
+            borderRadius: 16,
+            padding: 0,
+            overflow: 'hidden',
+            backgroundColor: '#fff',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+          },
+        }}>
+        <div style={styles.modalWrapper}>
+          {/* HEADER */}
+          <div style={styles.modalHeader}>
+            <div style={styles.modalTitle}>
+              Question {visibleQuestion?.question}
+            </div>
+            <div style={styles.modalSubTitle}>
+              Choose the correct answer to continue learning
+            </div>
           </div>
-        }
-        footer={[
-          <Button
-            key="ok"
-            type="primary"
-            onClick={handleClose}
-            style={styles.button}
-            disabled={selectedAnswer === null}>
-            Submit
-          </Button>,
-        ]}>
-        {visibleQuestion && (
-          <Radio.Group
-            onChange={e => setSelectedAnswer(e.target.value)}
-            value={selectedAnswer}
-            style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {visibleQuestion.answerList.map((ans: any, idx: number) => {
-              const optionLetter = String.fromCharCode(65 + idx);
+
+          {/* BODY */}
+          <div style={styles.modalBody}>
+            {visibleQuestion?.answerList?.map((ans: any, idx: number) => {
+              const letter = String.fromCharCode(65 + idx);
+              const isSelected = selectedAnswer === letter;
+
               return (
-                <Radio key={idx} value={optionLetter}>
-                  <div style={styles.answerTitle}>
-                    {optionLetter}. {ans}
-                  </div>
-                </Radio>
+                <div
+                  key={idx}
+                  onClick={() => setSelectedAnswer(letter)}
+                  style={{
+                    ...styles.answerCard,
+                    ...(isSelected ? styles.answerCardSelected : {}),
+                  }}>
+                  <div style={styles.answerLetter}>{letter}</div>
+                  <div style={styles.answerText}>{ans}</div>
+                </div>
               );
             })}
-          </Radio.Group>
-        )}
+          </div>
+
+          {/* FOOTER */}
+          <div style={styles.modalFooter}>
+            <Button
+              type="primary"
+              disabled={!selectedAnswer}
+              onClick={handleClose}
+              style={styles.submitButton}>
+              Submit Answer
+            </Button>
+          </div>
+        </div>
       </Modal>
     </View>
   );
