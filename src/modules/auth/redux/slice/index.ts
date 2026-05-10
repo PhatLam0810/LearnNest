@@ -59,29 +59,6 @@ export const authSlice = createSlice({
     walletAddress: (s, a: PayloadAction<string>) => {
       s.walletAddress = a.payload;
     },
-
-    setErrorPassword: (s, a: PayloadAction<string | null>) => {
-      s.errorPassword = a.payload;
-    },
-
-    sendOtp: (
-      _s,
-      _a: PayloadAction<{
-        email: string;
-        type: OtpType;
-        onSuccess?: () => void;
-        onError?: () => void;
-      }>,
-    ) => {},
-
-    resetPassword: (
-      _s,
-      _a: PayloadAction<{
-        email: string;
-        otp: string;
-        newPassword: string;
-      }>,
-    ) => {},
   },
 });
 

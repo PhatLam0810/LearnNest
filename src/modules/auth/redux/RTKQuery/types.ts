@@ -47,3 +47,9 @@ export interface PopularCategory {
   updatedAt: string;
   __v: number;
 }
+export interface ResetPassWord {
+  email: string;
+
+  otp: number;
+  newPassword: string;
+}

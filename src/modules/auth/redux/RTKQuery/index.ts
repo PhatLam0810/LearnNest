@@ -1,5 +1,5 @@
 import { baseQuery } from '@redux/RTKQuery';
-import { LessonRecommendRes, SubscriptionsRes } from './types';
+import { LessonRecommendRes, ResetPassWord, SubscriptionsRes } from './types';
 import { AxiosResponse } from 'axios';
 
 export const authQuery = baseQuery.injectEndpoints({
@@ -58,6 +58,14 @@ export const authQuery = baseQuery.injectEndpoints({
       query: (params: { id: string }) => ({
         url: `/transaction/${params.id}`,
         method: 'GET',
+      }),
+      transformResponse: (res: any) => res,
+    }),
+    resetPassword: builder.mutation({
+      query: (params: ResetPassWord) => ({
+        url: `/resetPassword`,
+        method: 'POST',
+        body: params,
       }),
       transformResponse: (res: any) => res,
     }),

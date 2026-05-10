@@ -26,7 +26,6 @@ const LoginPage = () => {
   const dispatch = useAppDispatch();
   const { signUpInfo } = useAppSelector(state => state.authReducer);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
-  const [loginFailCount, setLoginFailCount] = useState(0);
   const handleLoginOauth = async () => {
     const provider = new GoogleAuthProvider();
     try {
@@ -39,20 +38,12 @@ const LoginPage = () => {
       console.error('Login Error:', error);
     }
   };
-  const errorPassword = useAppSelector(
-    state => state.authReducer.errorPassword,
-  );
+
   useEffect(() => {
     if (accessToken) {
       router.push('/dashboard/home');
     }
   }, [accessToken]);
-
-  useEffect(() => {
-    if (errorPassword) {
-      setLoginFailCount(prev => prev + 1);
-    }
-  }, [errorPassword]);
 
   const { isMobile, isTablet } = useResponsive();
 
@@ -160,15 +151,13 @@ const LoginPage = () => {
                     style={{ width: '100%' }}
                   />
                 </Form.Item>
-                {loginFailCount >= 3 && (
-                  <View style={styles.forgotWrapper}>
-                    <Text
-                      style={styles.forgotTitle}
-                      onPress={() => router.push('/forgot-password')}>
-                      Forgot Password?
-                    </Text>
-                  </View>
-                )}
+                <View style={styles.forgotWrapper}>
+                  <Text
+                    style={styles.forgotTitle}
+                    onPress={() => router.push('/forgotPassword')}>
+                    Forgot Password?
+                  </Text>
+                </View>
                 <Form.Item<FieldType> shouldUpdate style={{ marginBottom: 12 }}>
                   {({ getFieldsValue }) => {
                     const { email, password } = getFieldsValue();

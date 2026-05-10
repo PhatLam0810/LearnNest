@@ -29,7 +29,6 @@ function* loginSaga(action: PayloadAction<LoginPayload>) {
       messageApi?.destroy();
       messageApi.success('Login successfully!');
       yield put(authAction.setTokenInfo(data.data));
-      yield put(authAction.setErrorPassword(null));
     } else {
       messageApi?.destroy();
       messageApi.error('Incorrect account or password.');
@@ -38,33 +37,6 @@ function* loginSaga(action: PayloadAction<LoginPayload>) {
     console.log('getLessonDetailSaga', e.message);
     messageApi?.destroy();
     messageApi.error('Incorrect account or password.');
-    yield put(authAction.setErrorPassword(`Login failed ${Date.now()}`));
-  }
-}
-
-function* resetPasswordSaga(action: PayloadAction<any>) {
-  try {
-    const { status } = yield call(authApi.resetPasswordApi, action.payload);
-
-    if (status === 201 || status === 200) {
-      messageApi.success('Reset password successfully!');
-    }
-  } catch (e: any) {
-    messageApi.error('Reset password failed');
-  }
-}
-
-function* sendOtpSaga(action: PayloadAction<any>) {
-  try {
-    const res = yield call(authApi.sendOtpApi, action.payload);
-
-    messageApi.success('OTP sent');
-
-    action.payload?.onSuccess?.();
-  } catch (e: any) {
-    messageApi.error('Email không tồn tại');
-
-    action.payload?.onError?.();
   }
 }
 
@@ -231,6 +203,4 @@ export function* authSaga() {
   yield takeLatest(authAction.lessonPurchase, lessonPurchaseSaga);
   yield takeLatest(authAction.viewDetailTransaction, viewDetailTransactionSaga);
   yield takeLatest(authAction.changePassword, changePasswordSaga);
-  yield takeLatest(authAction.resetPassword, resetPasswordSaga);
-  yield takeLatest(authAction.sendOtp, sendOtpSaga);
 }
