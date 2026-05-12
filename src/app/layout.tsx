@@ -50,11 +50,11 @@ export default function RootLayout({
                 }}>
                 {children}
               </View>
+              <Authentication />
+              <Chatbox />
               <LoadingScreen />
             </PersistGate>
           </QueryClientProvider>
-          <Chatbox />
-          <Authentication />
         </Provider>
       </body>
     </html>
