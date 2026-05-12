@@ -23,6 +23,7 @@ import debounce from 'lodash-es/debounce';
 import { TimePicker } from 'antd';
 import dayjs from 'dayjs';
 import { dashboardQuery } from '~mdDashboard/redux';
+import './styles.scss';
 
 type AddLibraryContentProps = {
   onFinish?: (values: any) => void;
@@ -53,15 +54,23 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState('');
-
+  const [fileUpload, setFileUpload] = useState<any[]>([]);
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
       console.log(initialValues);
       setLibraryType(initialValues.type);
       setDuration(initialValues.duration);
+      setFileUpload([
+        {
+          uid: '-1',
+          name: 'video.mp4',
+          status: 'done',
+          url: initialValues.url,
+        },
+      ]);
     }
-  }, []);
+  }, [initialValues]);
 
   const debouncedOnChange = useCallback(
     debounce((value: string) => {
@@ -111,6 +120,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
           <Form.Item
             name="url"
             label="File / Link"
+            required
             rules={[
               {
                 required: true,
@@ -120,10 +130,30 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             <>
               <Upload
                 maxCount={1}
+                fileList={fileUpload}
                 listType="picture-card"
                 action={api.defaults.baseURL + '/upload'}
+                onRemove={() => setFileUpload([])}
                 onChange={info => {
+                  if (info.file.status === 'uploading') {
+                    setFileUpload([
+                      {
+                        uid: info.file.uid,
+                        name: info.file.name,
+                        status: info.file.status,
+                        url: info.file.response?.data,
+                      },
+                    ]);
+                  }
                   if (info.file.status === 'done') {
+                    setFileUpload([
+                      {
+                        uid: info.file.uid,
+                        name: info.file.name,
+                        status: info.file.status,
+                        url: info.file.response?.data,
+                      },
+                    ]);
                     const responseUrl = info.file.response?.data;
                     if (responseUrl) {
                       form.setFieldsValue({ url: responseUrl });
@@ -205,7 +235,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             placeholder="Select tags"
             mode="multiple"
             onSearch={search}
-            dropdownRender={menu => (
+            popupRender={menu => (
               <>
                 {menu}
                 <Divider style={{ margin: '8px 0' }} />
@@ -291,7 +321,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                       {...restField}
                       name={name}
                       remove={remove}
-                      form={form}
                       libraryType={libraryType}
                       duration={duration}
                     />
@@ -320,7 +349,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
 };
 
 export default AddLibraryContent;
-const QuestionItem = ({ remove, name, duration, libraryType, form }: any) => {
+const QuestionItem = ({ remove, name, duration, libraryType }: any) => {
   return (
     <div style={{ display: 'flex', gap: 8, flexDirection: 'column' }}>
       <div
@@ -340,23 +369,15 @@ const QuestionItem = ({ remove, name, duration, libraryType, form }: any) => {
       <Form.List name={[name, 'answerList']}>
         {fields =>
           fields.map((field, answerIndex) => (
-            <Form.Item
-              key={field.key}
-              name={field.name}
-              rules={[{ required: true }]}>
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  gap: 8,
-                  alignItems: 'center',
-                }}>
-                <p style={{ margin: 0, width: 20 }}>
-                  {String.fromCharCode(65 + answerIndex)}.
-                </p>
-                <Input placeholder={`Answer`} />
-              </div>
-            </Form.Item>
+            <div key={field.key} className="answerItemContainer">
+              <div> {String.fromCharCode(65 + answerIndex)}.</div>
+              <Form.Item
+                style={{ margin: 0, flex: 1 }}
+                key={field.key}
+                name={field.name}>
+                <Input placeholder={`Answer ${answerIndex + 1}`} />
+              </Form.Item>
+            </div>
           ))
         }
       </Form.List>

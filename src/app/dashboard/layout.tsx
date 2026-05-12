@@ -241,59 +241,9 @@ export default function DashboardLayout({
         <View style={topbarRowStyle}>
           <Logo />
           <View style={{ flex: 1, minWidth: 0 }}>
-            {isLessonPage ? (
-              <LessonSearchBar />
-            ) : (
-              <View style={searchWrapStyle}>
-                <Input
-                  prefix={
-                    <SearchOutlined
-                      style={{
-                        color: '#94a3b8',
-                        fontSize: isMobile ? 16 : 18,
-                      }}
-                    />
-                  }
-                  suffix={
-                    !isMobile && (
-                      <Dropdown
-                        trigger={['hover']}
-                        menu={{
-                          items: [
-                            { key: 'desc', label: 'Desc' },
-                            { key: 'asc', label: 'Asc' },
-                          ],
-                        }}>
-                        <Button
-                          type="text"
-                          icon={<FilterOutlined style={{ fontSize: 18 }} />}
-                          style={{ borderRadius: 999, color: '#475569' }}
-                          aria-label="Filter search"
-                        />
-                      </Dropdown>
-                    )
-                  }
-                  placeholder={
-                    isMobile
-                      ? 'Tìm kiếm...'
-                      : 'Tìm kiếm khóa học, bài viết, video...'
-                  }
-                  allowClear
-                  size={isMobile ? 'middle' : 'large'}
-                  style={searchInputStyle}
-                />
-              </View>
-            )}
+            {isLessonPage ? <LessonSearchBar /> : null}
           </View>
           <Space size={isMobile ? 8 : 12} style={actionsStyle}>
-            <Badge count={3} size="small">
-              <Button
-                type="text"
-                icon={<BellOutlined />}
-                style={iconBtnStyle}
-                aria-label="Thông báo"
-              />
-            </Badge>
             <Dropdown
               trigger={['hover', 'click']}
               menu={{

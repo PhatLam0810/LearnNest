@@ -37,7 +37,6 @@ const UserManage = () => {
       setIsModalOpen(true);
     }
   }, [userInfo]);
-  const isAdmin = userProfile?.role?.level <= 1;
   const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
   const [createUserForm] = Form.useForm<CreateUserParams>();
 
@@ -84,7 +83,6 @@ const UserManage = () => {
       messageApi.error(error?.data?.message);
     }
   };
-
   const columns: TableProps<UserItem>['columns'] = [
     {
       title: 'Avatar',
@@ -104,10 +102,10 @@ const UserManage = () => {
       ),
     },
     {
-      title: 'Username',
-      dataIndex: 'username',
-      key: 'username',
-      render: (value: string) => <Text>{value}</Text>,
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      render: (record: any) => <Text>{record ? record?.name : 'User'}</Text>,
     },
     {
       title: 'Full Name',
@@ -135,29 +133,29 @@ const UserManage = () => {
 
     {
       key: 'action',
-      render: (_: any, record: UserItem) => (
+      render: (record: UserItem) => (
         <Space>
-          {isAdmin ? (
+          {record.role?.level === 1 ? null : (
             <View>
-              {record.role?.level <= 1 ? (
+              {record.role?.level ? (
                 <Button
                   danger
                   loading={isLoadingDeleteRole}
                   onClick={() =>
                     handleDeleteAdminRole(record._id, record.role._id)
                   }>
-                  Remove Admin {record.role.level}
+                  Remove Admin
                 </Button>
               ) : (
                 <Button
                   type="primary"
                   loading={isLoadingSetRole}
                   onClick={() => handleSetAdminRole(record._id, 2)}>
-                  Set Admin {record.role?.level}
+                  Set Admin
                 </Button>
               )}
             </View>
-          ) : null}
+          )}
         </Space>
       ),
     },
