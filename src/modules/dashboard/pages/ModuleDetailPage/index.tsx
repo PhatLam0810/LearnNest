@@ -1,4 +1,4 @@
-import React, { CSSProperties, useRef } from 'react';
+import React, { CSSProperties, useEffect, useRef } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
@@ -24,6 +24,20 @@ const ModuleDetailPage = () => {
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [modal, contextHolder] = Modal.useModal();
   const { isMobile, isTablet } = useResponsive();
+
+  const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
+  const currentIndex = libraries.findIndex(
+    lib => lib._id === selectedLibrary?._id,
+  );
+  useEffect(() => {
+    if (userProfile.role.level <= 2) {
+      setLibraryCanPlay({
+        libraryId: libraries[currentIndex + 1],
+        userId: userProfile?._id,
+      });
+    }
+  }, [libraries]);
+
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index,

@@ -55,7 +55,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       ) || 0)
     );
   }, 0);
-
+  const librariesItem = libraries.map(lib => lib._id);
   // Responsive hook
   const { isMobile, isTablet, isDesktop } = useResponsive();
   const numColumns = isMobile ? 1 : 2;
@@ -68,40 +68,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   );
   const [selectedSubLessonTitle, setSelectedSubLessonTitle] =
     useState<string>('');
-
-  // Cách cũ của PhátPhát
-  //  useEffect(() => {
-  //     if (lessonDetail.isPremium) {
-  //       setAccessLesson(false);
-  //     }
-  //     if (userProfile?.role?.level <= 2) {
-  //       setAccessLesson(true);
-  //     }
-  //     if (
-  //       dataSub?.length > 0 &&
-  //       dataSub.some(sub => sub.lessonId === lessonDetail._id)
-  //     ) {
-  //       setAccessLesson(true);
-  //     }
-  //   }, [dataSub, lessonDetail.isPremium]);
-
-  //   useEffect(() => {
-  //     if (libraries) {
-  //       setLibraryCanPlay({
-  //         libraryId: libraries[0]?._id,
-  //         userId: userProfile?._id,
-  //       });
-  //       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
-  //     }
-  //   }, []);
-  //   useEffect(() => {
-  //     if (lessonPurchaseData) {
-  //       refetch();
-  //       setIsVisibleModalBuy(false);
-  //       setIsVisibleModalSuccess(true);
-  //       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
-  //     }
-  //   }, [lessonPurchaseData]);
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -153,6 +119,15 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       }
     }
   }, [lessonDetail, dataSub]);
+
+  useEffect(() => {
+    if (userProfile.role.level <= 2) {
+      setLibraryCanPlay({
+        libraryId: librariesItem,
+        userId: userProfile?._id,
+      });
+    }
+  }, [libraries]);
 
   useEffect(() => {
     if (lessonPurchaseData) {
