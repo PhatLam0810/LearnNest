@@ -181,7 +181,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     }
 
     // 🔥 Logic cũ: user được phép xem bài học
-    if (canPlay) {
+    if (canPlay || userProfile?.role?.level <= 2) {
       dispatch(dashboardAction.setSelectedModule(item));
       dispatch(dashboardAction.setSelectedLibrary(subItem));
       router.push('/dashboard/home/lesson/moduleDetail');

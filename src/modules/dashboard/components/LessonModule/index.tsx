@@ -61,9 +61,7 @@ const LessonModule: React.FC<LessonModuleProps> = ({
             ),
           },
         ];
-        return (
-          <Collapse items={items} defaultActiveKey={['0']} key={module._id} />
-        );
+        return <Collapse items={items} defaultActiveKey={['0']} key={index} />;
       })}
     </View>
   );

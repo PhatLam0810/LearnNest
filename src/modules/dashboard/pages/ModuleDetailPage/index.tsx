@@ -24,6 +24,14 @@ const ModuleDetailPage = () => {
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [modal, contextHolder] = Modal.useModal();
   const { isMobile, isTablet } = useResponsive();
+
+  const isAdmin = userProfile?.role?.level <= 2;
+
+  const hasAccess = item => {
+    return (
+      isAdmin || item?.usersCanPlay?.some(user => user._id === userProfile?._id)
+    );
+  };
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index,
@@ -41,20 +49,12 @@ const ModuleDetailPage = () => {
             return (
               <TouchableOpacity
                 key={subIndex}
-                style={[
-                  !subItem?.usersCanPlay?.some(
-                    id => id._id === userProfile?._id,
-                  ) && styles.disabledButton,
-                ]}>
+                style={[!hasAccess(subItem) && styles.disabledButton]}>
                 <View
                   onClick={() => {
-                    if (
-                      subItem?.usersCanPlay?.some(
-                        id => id._id === userProfile?._id,
-                      )
-                    ) {
-                      dispatch(dashboardAction.setSelectedLibrary(subItem));
-                    }
+                    if (!hasAccess(subItem)) return;
+
+                    dispatch(dashboardAction.setSelectedLibrary(subItem));
                   }}
                   style={[
                     styles.buttonModule,
