@@ -104,9 +104,9 @@ const HomeOverview = () => {
                 <Tags title="New" backgroundColor="#0059C7" />
               </View>
               <View style={recommendGridStyle}>
-                {(data?.recommend || []).map((item, index) => (
+                {(data?.recommend || []).map(item => (
                   <LessonItem
-                    key={index}
+                    key={item._id}
                     data={item}
                     onClick={() => onClickLesson(item._id)}
                   />

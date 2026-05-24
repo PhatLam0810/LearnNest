@@ -306,8 +306,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               gap: 12,
               flexWrap: 'wrap',
             }}>
-            {lessonDetail?.categories?.map((item, index) => (
-              <View key={index}>
+            {lessonDetail?.categories?.map(item => (
+              <View key={item._id}>
                 <Text style={styles.chip}>{item.name}</Text>
               </View>
             ))}

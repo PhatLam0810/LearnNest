@@ -54,8 +54,8 @@ const ModalLessonOverview: React.FC<ModalLessonOverviewProps> = ({
         <View style={styles.descContainer}>
           <View style={{ flex: 3 }}>
             <Text>{data?.description}</Text>
-            {data?.learnedSkills.map((item, index) => (
-              <View key={index}>
+            {data?.learnedSkills.map(item => (
+              <View key={item}>
                 <CheckOutlined />
                 <Text>{item}</Text>
               </View>

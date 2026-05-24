@@ -31,7 +31,7 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
       form.setFieldsValue(initialValues);
       setSelectedLibraries(initialValues?.libraries);
     }
-  }, []);
+  }, [initialValues, form]);
 
   return (
     <Form
@@ -88,7 +88,7 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
                 return (
                   <DragLibraryItem
                     data={item}
-                    key={index}
+                    key={item._id}
                     onDelete={() => {
                       const newList = [...selectedLibraries].filter(
                         sItem => sItem._id !== item._id,

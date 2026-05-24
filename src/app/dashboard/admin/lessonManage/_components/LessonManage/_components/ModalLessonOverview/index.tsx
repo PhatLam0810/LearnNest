@@ -1,6 +1,6 @@
 import { useWindowSize } from '@hooks';
 import { Collapse, Modal } from 'antd';
-import React from 'react';
+
 import { ScrollView, Text, View } from 'react-native-web';
 import { LessonThumbnail } from '~mdDashboard/components';
 import { CheckOutlined } from '@ant-design/icons';

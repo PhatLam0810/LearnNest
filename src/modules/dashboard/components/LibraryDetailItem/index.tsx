@@ -531,7 +531,7 @@ const LibraryDetailItem = forwardRef<
               file={data.url}
               onLoadSuccess={handleDocumentLoadSuccess}>
               {Array.from({ length: numPages || 0 }, (_i, index) => (
-                <Page key={index} pageNumber={index + 1} />
+                <Page key={`page-${index}`} pageNumber={index + 1} />
               ))}
             </Document>
             <View style={styles.fullscreenButton}>
@@ -555,7 +555,7 @@ const LibraryDetailItem = forwardRef<
                 const isInvalid = invalidQuestions.includes(question._id);
                 return (
                   <View
-                    key={index}
+                    key={question._id}
                     style={{
                       ...styles.questionCard,
                       ...(isInvalid ? styles.questionCardInvalid : {}),

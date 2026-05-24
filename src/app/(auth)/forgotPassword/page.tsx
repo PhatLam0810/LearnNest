@@ -1,5 +1,4 @@
 'use client';
-import React from 'react';
 import { Card, Form, message } from 'antd';
 import { useRouter } from 'next/navigation';
 import { Text, View } from 'react-native-web';
