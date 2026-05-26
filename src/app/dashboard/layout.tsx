@@ -1,42 +1,19 @@
 'use client';
-import React, { useState } from 'react';
-import {
-  Avatar,
-  Badge,
-  Button,
-  Drawer,
-  Dropdown,
-  GetProp,
-  Grid,
-  Input,
-  Layout,
-  Menu,
-  MenuProps,
-  Space,
-} from 'antd';
+import React from 'react';
+import { GetProp, Grid, Layout, Menu, MenuProps } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
-import {
-  BellOutlined,
-  ControlOutlined,
-  FilterOutlined,
-  LogoutOutlined,
-  MenuOutlined,
-  SearchOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { LogoutOutlined } from '@ant-design/icons';
 import './styles.css';
-import { useAppDispatch, useAppSelector } from '@redux';
+import { useAppDispatch } from '@redux';
 import { authAction } from '~mdAuth/redux';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
+import { ScrollView, View } from 'react-native-web';
 import styles from './styles';
 import Icon from '@components/icons';
-import Image from 'next/image';
 import { LessonIcon } from '@/assets/svg';
-import LessonSearchBar from './lesson/_components/LessonSearchBar';
-import { LessonSearchProvider } from './lesson/lessonSearchContext';
-import { useResponsive } from '@/styles/responsive';
+import HeaderLayout from '@components/HeaderLayout';
+import { SearchProvider } from '@components/SearchContext';
 
-const { Sider, Content, Header } = Layout;
+const { Sider, Content } = Layout;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
 export default function DashboardLayout({
   children,
@@ -46,21 +23,11 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { useBreakpoint } = Grid;
-  const screens = useBreakpoint(); // detect breakpoint
+  const screens = useBreakpoint();
   const dispatch = useAppDispatch();
-  const { userProfile } =
-    useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const [open, setOpen] = useState(false);
-  const isAdmin = userProfile?.role?.level <= 2;
-
-  // Responsive hook
-  const { isMobile, isTablet } = useResponsive();
-
   const onClickItem = (item: string) => {
     router.replace(item);
-    setOpen(false);
   };
-  const isLessonPage = pathname.startsWith('/dashboard/lesson');
 
   const menuItems: MenuItem[] = [
     {
@@ -96,59 +63,6 @@ export default function DashboardLayout({
       ],
     },
   ];
-  const Logo = () => {
-    const logoStyle = {
-      ...styles.logo,
-      gap: isMobile ? 8 : 10,
-      paddingVertical: isMobile ? 8 : 0,
-      paddingHorizontal: isMobile ? 8 : 0,
-    };
-
-    const logoMarkStyle = {
-      ...styles.logoMark,
-      width: isMobile ? 36 : 65,
-      height: isMobile ? 36 : 65,
-      borderRadius: isMobile ? 8 : 12,
-    };
-
-    const logoMarkTextStyle = {
-      ...styles.logoMarkText,
-      fontSize: isMobile ? 14 : 16,
-    };
-
-    const logoTextStyle = {
-      ...styles.logoText,
-      fontSize: isMobile ? 14 : 16,
-      display: isMobile ? 'none' : 'flex', // Hide text on mobile
-    };
-
-    return (
-      <TouchableOpacity
-        onClick={() => {
-          router.push('/dashboard/home');
-          setOpen(false);
-        }}>
-        <View style={logoStyle}>
-          <View style={logoMarkStyle}>
-            <Image
-              src="/images/LogoVhu.png"
-              alt=""
-              width={460}
-              height={360}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'contain',
-                borderRadius: 16,
-              }}
-              priority
-            />
-          </View>
-          <Text style={logoTextStyle}>LearnNest</Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
 
   const sidebarContent = (
     <View style={styles.sider}>
@@ -183,147 +97,9 @@ export default function DashboardLayout({
     </View>
   );
 
-  const TopBar = () => {
-    // Responsive topbar styles
-    const topbarStyle = {
-      ...styles.topbar,
-      paddingHorizontal: isMobile ? 12 : isTablet ? 16 : 24,
-      minHeight: isMobile ? 56 : 64,
-    };
-
-    const topbarRowStyle = {
-      ...styles.topbarRow,
-      gap: isMobile ? 8 : isTablet ? 16 : 24,
-    };
-
-    const searchWrapStyle = {
-      ...styles.searchWrap,
-      maxWidth: isMobile ? '100%' : isTablet ? 400 : 540,
-    };
-
-    const searchInputStyle = {
-      ...styles.searchInput,
-      height: isMobile ? 36 : 40,
-      paddingHorizontal: isMobile ? 10 : 12,
-      fontSize: isMobile ? 14 : 16,
-    };
-
-    const actionsStyle = {
-      ...styles.actions,
-      gap: isMobile ? 8 : isTablet ? 12 : 16,
-    };
-
-    const iconBtnStyle = {
-      ...styles.iconBtn,
-      fontSize: isMobile ? 18 : 20,
-      padding: isMobile ? 4 : 8,
-    };
-
-    const avatarStyle = {
-      ...styles.avatar,
-      width: isMobile ? 32 : 40,
-      height: isMobile ? 32 : 40,
-    };
-
-    return (
-      <View style={topbarStyle}>
-        {!screens.md && (
-          <Button
-            type="text"
-            icon={<MenuOutlined style={{ fontSize: isMobile ? 18 : 20 }} />}
-            onClick={() => setOpen(true)}
-            style={{
-              ...styles.btnOpenDrawer,
-              padding: isMobile ? 4 : 8,
-            }}
-          />
-        )}
-        <View style={topbarRowStyle}>
-          <Logo />
-          <View style={{ flex: 1, minWidth: 0 }}>
-            {isLessonPage ? <LessonSearchBar /> : null}
-          </View>
-          <Space size={isMobile ? 8 : 12} style={actionsStyle}>
-            <Dropdown
-              trigger={['hover', 'click']}
-              menu={{
-                expandIcon: null,
-                items: [
-                  isAdmin
-                    ? {
-                        key: 'admin',
-                        label: 'Admin',
-                        icon: <ControlOutlined />,
-                        children: [
-                          {
-                            key: 'admin-user',
-                            label: 'User Manage',
-                            onClick: () =>
-                              router.push('/dashboard/admin/userManage'),
-                          },
-                          {
-                            key: 'admin-lesson',
-                            label: 'Lesson Manage',
-                            onClick: () =>
-                              router.push('/dashboard/admin/lessonManage'),
-                          },
-                        ],
-                      }
-                    : null,
-                  {
-                    key: 'profile',
-                    label: 'Settings',
-                    icon: <UserOutlined />,
-                    onClick: () => router.push('/dashboard/profile'),
-                  },
-                  {
-                    type: 'divider',
-                    key: 'divider-1',
-                  },
-                  {
-                    key: 'logout',
-                    label: 'Logout',
-                    icon: <LogoutOutlined />,
-                    onClick: () => dispatch(authAction.logout()),
-                  },
-                ].filter(Boolean) as MenuProps['items'],
-              }}>
-              <Avatar
-                src={userProfile?.avatar}
-                icon={<UserOutlined />}
-                style={avatarStyle}
-              />
-            </Dropdown>
-          </Space>
-        </View>
-      </View>
-    );
-  };
-
   const layout = (
     <Layout style={{ minHeight: '100vh', backgroundColor: '#fff' }}>
-      <Header
-        style={{
-          padding: 0,
-          background: '#fff',
-          position: 'sticky',
-          top: 0,
-          zIndex: 50,
-        }}>
-        <TopBar />
-      </Header>
-
-      {!screens.md && (
-        <Drawer
-          placement="left"
-          closable={false}
-          open={open}
-          onClose={() => setOpen(false)}
-          width={280}
-          styles={{ body: { padding: 0 } }}>
-          {sidebarContent}
-        </Drawer>
-      )}
+      <HeaderLayout />
 
       <Layout style={{ backgroundColor: '#f5f7fb' }}>
         {screens.md && (
@@ -340,9 +116,5 @@ export default function DashboardLayout({
     </Layout>
   );
 
-  if (isLessonPage) {
-    return <LessonSearchProvider>{layout}</LessonSearchProvider>;
-  }
-
-  return layout;
+  return <SearchProvider>{layout}</SearchProvider>;
 }

@@ -2,13 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Dropdown, Input } from 'antd';
 import { FilterOutlined, SearchOutlined } from '@ant-design/icons';
-import { View } from 'react-native-web';
-import styles from '../../styles';
-import { useLessonSearchContext } from '../lessonSearchContext';
 import { useResponsive } from '@/styles/responsive';
+import { useSearchContext } from '..';
 
-const LessonSearchBar: React.FC = () => {
-  const { setKeyword, sortBy, setSortBy } = useLessonSearchContext();
+const SearchBar: React.FC = () => {
+  const { setKeyword, sortBy, setSortBy } = useSearchContext();
   const [text, setText] = useState('');
   const { isMobile, isTablet } = useResponsive();
 
@@ -46,20 +44,9 @@ const LessonSearchBar: React.FC = () => {
   );
 
   // Match searchWrap style from layout.tsx
-  const searchWrapStyle = {
-    ...styles.searchWrap,
-    maxWidth: isMobile ? '100%' : isTablet ? 400 : 540,
-  };
-
-  const searchInputStyle = {
-    ...styles.searchInput,
-    height: isMobile ? 36 : 40,
-    paddingHorizontal: isMobile ? 10 : 12,
-    fontSize: isMobile ? 14 : 16,
-  };
 
   return (
-    <View style={searchWrapStyle}>
+    <div>
       <Input
         prefix={
           <SearchOutlined
@@ -76,10 +63,10 @@ const LessonSearchBar: React.FC = () => {
         value={text}
         onChange={e => setText(e.target.value)}
         onPressEnter={() => setKeyword(text.trim())}
-        style={searchInputStyle}
+        className="search-input"
       />
-    </View>
+    </div>
   );
 };
 
-export default LessonSearchBar;
+export default SearchBar;

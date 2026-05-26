@@ -1,18 +1,16 @@
 'use client';
 import React, { createContext, useContext, useMemo, useState } from 'react';
 
-type LessonSearchContextValue = {
+type SearchContextValue = {
   keyword: string;
   sortBy: 'asc' | 'desc';
   setKeyword: (v: string) => void;
   setSortBy: (v: 'asc' | 'desc') => void;
 };
 
-const LessonSearchContext = createContext<LessonSearchContextValue | null>(
-  null,
-);
+const SearchContext = createContext<SearchContextValue | null>(null);
 
-export const LessonSearchProvider: React.FC<{ children: React.ReactNode }> = ({
+export const SearchProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [keyword, setKeyword] = useState('');
@@ -29,18 +27,14 @@ export const LessonSearchProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   return (
-    <LessonSearchContext.Provider value={value}>
-      {children}
-    </LessonSearchContext.Provider>
+    <SearchContext.Provider value={value}>{children}</SearchContext.Provider>
   );
 };
 
-export const useLessonSearchContext = () => {
-  const ctx = useContext(LessonSearchContext);
+export const useSearchContext = () => {
+  const ctx = useContext(SearchContext);
   if (!ctx) {
-    throw new Error(
-      'useLessonSearchContext must be used within LessonSearchProvider',
-    );
+    throw new Error('useSearchContext must be used within SearchProvider');
   }
   return ctx;
 };

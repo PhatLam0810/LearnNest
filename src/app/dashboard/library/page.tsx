@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { LibraryItem } from './_components';
 import { FlatList, Image, Modal, View } from 'react-native-web';
 import styles from './styles';
@@ -8,16 +8,18 @@ import ReactPlayer from 'react-player';
 import { Document, Page } from 'react-pdf';
 import { Library } from '~mdDashboard/types';
 import { useResponsive } from '@/styles/responsive';
+import { useSearchContext } from '@components/SearchContext';
 
 const LibraryList = () => {
-  const { listItem, fetchData, currentData } = useAppPagination<Library>({
-    apiUrl: '/library/getAllLibrary',
-  });
+  const { listItem, fetchData, currentData, changeParams } =
+    useAppPagination<Library>({
+      apiUrl: '/library/getAllLibrary',
+    });
 
   // Responsive hook
   const { isMobile, isTablet } = useResponsive();
   const numColumns = isMobile ? 1 : isTablet ? 2 : 4;
-
+  const { keyword, sortBy } = useSearchContext();
   const [selectedItem, setSelectedItem] = useState<Library>();
   const [isVisibleModalVideo, setIsVisibleModalVideo] = useState(false);
   const layoutHeight = useRef(0);
@@ -28,11 +30,15 @@ const LibraryList = () => {
       ? currentData.totalPages * currentData.pageSize
       : undefined;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!expectedTotal) return;
     if (listItem.length >= expectedTotal) return;
     fetchData();
   }, [listItem.length, expectedTotal]);
+
+  useEffect(() => {
+    changeParams({ search: keyword, sortBy });
+  }, [keyword, sortBy]);
 
   const renderModalContent = () => {
     if (!selectedItem) return null;

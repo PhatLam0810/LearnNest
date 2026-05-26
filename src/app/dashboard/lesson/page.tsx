@@ -9,15 +9,14 @@ import { useAppDispatch, useAppSelector } from '@redux';
 import { useRouter } from 'next/navigation';
 import { UpdateLessonForm } from './_components';
 import { useEffect, useState } from 'react';
-import { useLessonSearchContext } from './lessonSearchContext';
 import { useResponsive } from '@/styles/responsive';
+import { useSearchContext } from '@components/SearchContext';
 
 const Page = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const { userProfile } =
-    useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const { keyword, sortBy } = useLessonSearchContext();
+
+  const { keyword, sortBy } = useSearchContext();
 
   // Responsive hook
   const { isMobile, isTablet } = useResponsive();
@@ -29,8 +28,6 @@ const Page = () => {
   });
   const [isVisible, setIsVisible] = useState(false);
   const [dataEdit, setDataEdit] = useState<any>();
-
-  const { data } = dashboardQuery.useGetAllCategoryQuery();
 
   useEffect(() => {
     changeParams({ search: keyword, sortBy });

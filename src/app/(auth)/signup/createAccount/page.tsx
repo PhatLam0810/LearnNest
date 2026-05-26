@@ -19,7 +19,6 @@ type FieldType = {
 const CreateAccountPage = () => {
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
-  const searchParams = useSearchParams();
   const { sendOtpInfo } = useAppSelector(state => state.authReducer);
   const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
