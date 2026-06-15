@@ -90,10 +90,51 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
       case 'text': {
         return (
           <Form.Item
-            label="Content"
             name="url"
-            rules={[{ required: true, message: 'Please enter the content' }]}>
-            <AppRichTextInput />
+            label="File "
+            required
+            rules={[
+              {
+                required: true,
+                message: 'Please upload a file ',
+              },
+            ]}>
+            <>
+              <Upload
+                maxCount={1}
+                fileList={fileUpload}
+                listType="picture-card"
+                action={api.defaults.baseURL + '/upload'}
+                onRemove={() => setFileUpload([])}
+                onChange={info => {
+                  if (info.file.status === 'uploading') {
+                    setFileUpload([
+                      {
+                        uid: info.file.uid,
+                        name: info.file.name,
+                        status: info.file.status,
+                        url: info.file.response?.data,
+                      },
+                    ]);
+                  }
+                  if (info.file.status === 'done') {
+                    setFileUpload([
+                      {
+                        uid: info.file.uid,
+                        name: info.file.name,
+                        status: info.file.status,
+                        url: info.file.response?.data,
+                      },
+                    ]);
+                    const responseUrl = info.file.response?.data;
+                    if (responseUrl) {
+                      setLink(responseUrl);
+                    }
+                  }
+                }}>
+                <Button type="text">Upload</Button>
+              </Upload>
+            </>
           </Form.Item>
         );
       }
@@ -176,16 +217,15 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
     }
   };
 
-  const handleGenerate = async (params: { link: string; count: number }) => {
-    const { link, count } = params;
+  const handleGenerate = async (params: { link: string }) => {
+    const { link } = params;
     setLoading(true);
     try {
-      const res = await generateQuestion({ url: link, count });
+      const res = await generateQuestion({ url: link });
       const parsedQuestions = JSON.parse(res.data);
       form.setFieldsValue({
         questionList: parsedQuestions,
       });
-      messageApi.success(`Generated ${count} questions using AI.`);
     } catch (error) {
       console.error('Error generating questions:', error);
       messageApi.error('An error occurred while generating questions.');
@@ -288,20 +328,13 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
           </Select>
         </Form.Item>
 
-        {libraryType !== 'Text' && renderInputContent()}
+        {renderInputContent()}
         <Space>
-          <InputNumber
-            min={1}
-            placeholder="Enter the question number"
-            value={count}
-            onChange={value => setCount(value)}
-          />
           <Button
             type="primary"
-            disabled={!count}
             loading={loading}
             onClick={() => {
-              handleGenerate({ link: link, count });
+              handleGenerate({ link: link });
             }}>
             Generate
           </Button>
