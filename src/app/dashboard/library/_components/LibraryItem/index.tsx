@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Library } from '~mdDashboard/types';
 import { getYouTubeThumbnail } from '@utils/youtube';
 import { useResponsive } from '@/styles/responsive';
+import { typeItem } from '@/constants';
 
 type LibraryItemProps = {
   data: Library;
@@ -22,9 +23,9 @@ const Thumbnail = ({ data }) => {
     if (data?.type === 'Youtube' || data.type === 'Short') {
       setSrc(getYouTubeThumbnail(data?.url));
     } else if (data?.type === 'Video') {
-      setSrc(data?.url);
-    } else if (data?.type === 'Image') {
-      setSrc(data?.url);
+      setSrc(typeItem['Video']);
+    } else if (data?.type === 'Text') {
+      setSrc(typeItem['Text']);
     } else {
       // For other types without image, show placeholder immediately
       setShowPlaceholder(true);
