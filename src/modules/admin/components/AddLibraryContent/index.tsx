@@ -129,6 +129,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                     const responseUrl = info.file.response?.data;
                     if (responseUrl) {
                       setLink(responseUrl);
+                      form.setFieldsValue({ url: responseUrl });
                     }
                   }
                 }}>
