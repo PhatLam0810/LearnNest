@@ -13,6 +13,7 @@ import {
 } from 'react-native-web';
 
 import styles from './styles';
+import { messageApi } from '@hooks';
 
 export default function Chatbox() {
   const [mounted, setMounted] = useState(false);
@@ -162,7 +163,12 @@ export default function Chatbox() {
         </View>
       ) : (
         <TouchableOpacity style={styles.fab}>
-          <View onClick={() => setOpen(true)}>
+          <View
+            onClick={() =>
+              messageApi.info(
+                'Tính năng đang được phát triển, vui lòng chờ đợi nhé!',
+              )
+            }>
             <Text style={styles.fabText}>💬 Chat với AI</Text>
           </View>
         </TouchableOpacity>

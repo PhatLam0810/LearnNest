@@ -44,18 +44,7 @@ const HeaderLayout: React.FC = ({}) => {
             key: 'admin',
             label: 'Admin',
             icon: <ControlOutlined />,
-            children: [
-              {
-                key: 'admin-user',
-                label: 'User Manage',
-                onClick: () => router.push('/dashboard/admin/userManage'),
-              },
-              {
-                key: 'admin-lesson',
-                label: 'Lesson Manage',
-                onClick: () => router.push('/dashboard/admin/lessonManage'),
-              },
-            ],
+            onClick: () => router.push('/dashboard/admin/'),
           },
         ]
       : []),

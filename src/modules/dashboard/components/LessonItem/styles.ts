@@ -10,13 +10,22 @@ const styles = StyleSheet.create({
   content: {
     padding: 12,
   },
+  cardThumbnail: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    overflow: 'hidden',
+    backgroundColor: 'gray',
+    position: 'relative',
+  },
   title: {
     color: '#212121',
     ...typography.subTitle1,
     marginBottom: 8,
     marginTop: 12,
-    lineHeight: 22,
-    minHeight: 44, // keep 2 lines height to align cards
   },
   desc: {
     color: '#8D8D8D',
@@ -25,7 +34,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 0.01,
     lineHeight: 20,
-    minHeight: 60, // keep 3 lines height to align cards
   },
   price: {
     ...typography.titleS,

@@ -26,10 +26,10 @@ const items: TabsProps['items'] = [
   },
 ];
 
-const Lesson: React.FC = () => (
+const LessonAdmin: React.FC = () => (
   <View style={styles.container}>
     <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
   </View>
 );
 
-export default Lesson;
+export default LessonAdmin;

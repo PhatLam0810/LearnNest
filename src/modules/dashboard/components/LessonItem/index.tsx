@@ -32,6 +32,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
     data || {};
   const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
   const [accessLesson, setAccessLesson] = useState(true);
+  console.log('dataSub', data);
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   // useEffect(() => {
@@ -66,18 +67,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
           </View>
         )}
 
-        <View
-          style={{
-            width: '100%',
-            aspectRatio: 16 / 9,
-            borderTopLeftRadius: 8,
-            borderTopRightRadius: 8,
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
-            overflow: 'hidden',
-            backgroundColor: 'gray',
-            position: 'relative',
-          }}>
+        <View style={styles.cardThumbnail}>
           <LessonThumbnail thumbnail={thumbnail} />
         </View>
 

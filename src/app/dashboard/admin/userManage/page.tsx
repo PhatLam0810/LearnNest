@@ -170,6 +170,7 @@ const UserManage = () => {
         columns={columns}
         dataSource={listItem}
         rowKey={record => record._id}
+        scroll={{ x: 'max-content' }}
         pagination={{
           current: currentData?.pageNum,
           pageSize: currentData?.pageSize,

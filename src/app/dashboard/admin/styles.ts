@@ -3,19 +3,13 @@ import { StyleSheet, typography } from '@styles';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 0,
-    backgroundColor: 'transparent',
-    borderRadius: 0,
-    gap: 16,
-    height: '90vh',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 8,
   },
   title: {
     ...typography.body2,
     fontWeight: '500',
-  },
-  sortColumn: {
-    gap: 4,
-    minWidth: 140,
   },
 });
 

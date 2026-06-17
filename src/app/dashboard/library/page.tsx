@@ -31,10 +31,8 @@ const LibraryList = () => {
       : undefined;
 
   useEffect(() => {
-    if (!expectedTotal) return;
-    if (listItem.length >= expectedTotal) return;
     fetchData();
-  }, [listItem.length, expectedTotal]);
+  }, []); // Chỉ gọi 1 lần khi load trang
 
   useEffect(() => {
     changeParams({ search: keyword, sortBy });
@@ -96,13 +94,9 @@ const LibraryList = () => {
   };
 
   // Responsive container styles
-  const containerStyle = {
-    ...styles.container,
-    padding: isMobile ? 12 : isTablet ? 16 : 20,
-  };
-
+  console.log(expectedTotal, lastFetchAt, layoutHeight.current);
   return (
-    <View style={containerStyle}>
+    <View style={styles.container}>
       <FlatList
         key={numColumns} // Force re-render when numColumns changes
         data={listItem}
@@ -112,6 +106,7 @@ const LibraryList = () => {
         contentContainerStyle={{
           gap: isMobile ? 12 : 16,
           paddingBottom: 48,
+          padding: 20,
           overflow: 'visible',
         }}
         columnWrapperStyle={
@@ -119,6 +114,10 @@ const LibraryList = () => {
         }
         onLayout={e => {
           layoutHeight.current = e.nativeEvent.layout.height;
+        }}
+        onEndReachedThreshold={0.5}
+        onEndReached={() => {
+          fetchData();
         }}
         onContentSizeChange={(w, h) => {
           contentHeight.current = h;

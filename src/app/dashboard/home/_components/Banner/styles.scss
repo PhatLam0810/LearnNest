@@ -1,0 +1,92 @@
+@use 'app/global.scss' as *;
+.f8-banner-carousel {
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+
+  .slick-slide {
+    position: relative;
+    height: 350px; // Chiều cao tổng thể
+  }
+
+  // Ảnh làm nền cho mỗi slide
+  .slide-background {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: right;
+    background: linear-gradient(to right, $color-vhu-primary, $vhu-light-blue);
+  }
+  // Nội dung đè lên ảnh
+  .slide-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #fff;
+
+    h1 {
+      color: #fff;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 16px;
+      max-width: 500px;
+      margin-bottom: 30px;
+    }
+
+    .btn-action {
+      width: fit-content;
+      background: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+      height: 48px;
+      padding: 0 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      &:hover {
+        background: $vhu-light-blue;
+        color: #000;
+        border-color: $vhu-light-blue;
+      }
+    }
+  }
+}
+@media (max-width: 768px) {
+  .f8-banner-carousel {
+    .slick-slide {
+      height: 250px; // Chiều cao tổng thể cho thiết bị di động
+    }
+
+    .slide-content {
+      padding: 20px;
+      background: linear-gradient(
+        to right,
+        $color-vhu-primary,
+        $vhu-light-blue
+      );
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+      p {
+        font-size: 14px;
+        max-width: 100%;
+        margin-bottom: 20px;
+      }
+      .btn-action {
+        height: 40px;
+        padding: 0 16px;
+        font-size: 14px;
+      }
+    }
+  }
+}

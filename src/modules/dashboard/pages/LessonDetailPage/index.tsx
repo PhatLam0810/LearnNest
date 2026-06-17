@@ -300,6 +300,109 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       {contextHolder}
       <View style={styles.pageWrapper}>
         <View style={{ marginTop: 12 }}>
+          {isMobile && (
+            <>
+              <View style={{ ...sideColumnStyle, gap: 16 }}>
+                <View
+                  style={{
+                    ...styles.thumbnailCard,
+                    minHeight: isMobile ? 200 : 260,
+                  }}>
+                  {!accessLesson && (
+                    <View style={styles.premium}>
+                      <DollarOutlined
+                        style={{
+                          color: '#FFF',
+                          fontSize: isMobile ? 20 : 24,
+                        }}
+                      />
+                    </View>
+                  )}
+                  <LessonThumbnail thumbnail={lessonDetail.thumbnail} />
+                </View>
+                {!accessLesson ? (
+                  <View>
+                    <button
+                      className="button lesson-pill-button"
+                      onClick={() => {
+                        setItemBuy(lessonDetail);
+                        setIsVisibleModalBuy(true);
+                        dispatch(authAction.setVerifyInfo(false));
+                      }}>
+                      <Icon name="liveTV" className="button-icon" />
+                      <span className="label">Buy Now</span>
+                    </button>
+                    <Text style={styles.totalLibrary}>
+                      Total Duration: {convertDurationToTime(totalDuration)}
+                    </Text>
+                    <Text style={styles.totalLibrary}>
+                      Total Libraries: {totalLibraries}
+                    </Text>
+                  </View>
+                ) : (
+                  <View>
+                    <button
+                      className="button lesson-pill-button"
+                      onClick={() => {
+                        const modules = lessonDetail.modules;
+                        const libraries = modules[0].libraries[0];
+                        if (modules && modules?.length > 0) {
+                          dispatch(
+                            dashboardAction.setSelectedModule(modules[0]),
+                          );
+                          dispatch(
+                            dashboardAction.setSelectedLibrary(libraries),
+                          );
+                          router.push('/dashboard/home/lesson/moduleDetail');
+                        } else {
+                          messageApi.open({
+                            type: 'warning',
+                            content:
+                              'Chưa có nội dung bài học vui lòng quay lại sau',
+                            duration: 5,
+                          });
+                        }
+                      }}>
+                      <Icon name="liveTV" className="button-icon" />
+                      <span className="label">Start lesson</span>
+                    </button>
+                    <Text style={styles.totalLibrary}>
+                      Total Duration: {convertDurationToTime(totalDuration)}
+                    </Text>
+                    <Text style={styles.totalLibrary}>
+                      Total Libraries: {totalLibraries}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <View
+                style={{
+                  ...styles.lessonContent,
+                  maxWidth: isMobile ? '100%' : '90%',
+                }}>
+                <Text
+                  style={{
+                    ...styles.lessonContentTitle,
+                    fontSize: isMobile ? 16 : 18,
+                  }}>
+                  Lesson Content
+                </Text>
+                <View style={{ gap: 12 }}>
+                  <Collapse
+                    bordered={false}
+                    expandIcon={({ isActive }) => (
+                      <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                    )}
+                    activeKey={activePanelKeys}
+                    onChange={keys =>
+                      setActivePanelKeys(Array.isArray(keys) ? keys : [keys])
+                    }
+                    items={getItems(panelStyle)}
+                  />
+                </View>
+              </View>
+            </>
+          )}
           <View
             style={{
               flexDirection: isMobile ? 'column' : 'row',
@@ -369,135 +472,142 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   )}
                 />
               </View>
-
-              {lessonDetail?.modules?.length > 0 && (
-                <View
-                  style={{
-                    ...styles.lessonContent,
-                    maxWidth: isMobile ? '100%' : '90%',
-                  }}>
-                  <Text
+              {!isMobile && (
+                <>
+                  <View
                     style={{
-                      ...styles.lessonContentTitle,
-                      fontSize: isMobile ? 16 : 18,
+                      ...styles.lessonContent,
+                      maxWidth: isMobile ? '100%' : '90%',
                     }}>
-                    Lesson Content
-                  </Text>
-                  <View style={{ gap: 12 }}>
-                    <Collapse
-                      bordered={false}
-                      expandIcon={({ isActive }) => (
-                        <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                      )}
-                      activeKey={activePanelKeys}
-                      onChange={keys =>
-                        setActivePanelKeys(Array.isArray(keys) ? keys : [keys])
-                      }
-                      items={getItems(panelStyle)}
-                    />
-                  </View>
-                </View>
-              )}
-
-              {lessonDetail?.relatedLessons?.length > 0 && (
-                <View
-                  style={{
-                    ...styles.lessonContent,
-                    maxWidth: isMobile ? '100%' : '90%',
-                  }}>
-                  <Text
-                    style={{
-                      ...styles.lessonContentTitle,
-                      fontSize: isMobile ? 16 : 18,
-                    }}>
-                    Related Lessons
-                  </Text>
-                  <FlatList
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    data={lessonDetail.relatedLessons}
-                    contentContainerStyle={{ gap: 8 }}
-                    renderItem={({ item }) => (
-                      <LessonItem
-                        data={item}
-                        onClick={() => {
-                          router.push(`/dashboard/home/lesson/${item._id}`);
-                        }}
+                    <Text
+                      style={{
+                        ...styles.lessonContentTitle,
+                        fontSize: isMobile ? 16 : 18,
+                      }}>
+                      Lesson Content
+                    </Text>
+                    <View style={{ gap: 12 }}>
+                      <Collapse
+                        bordered={false}
+                        expandIcon={({ isActive }) => (
+                          <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                        )}
+                        activeKey={activePanelKeys}
+                        onChange={keys =>
+                          setActivePanelKeys(
+                            Array.isArray(keys) ? keys : [keys],
+                          )
+                        }
+                        items={getItems(panelStyle)}
                       />
-                    )}
-                  />
-                </View>
+                    </View>
+                  </View>
+                </>
               )}
-            </View>
-            <View style={{ ...sideColumnStyle, gap: 16 }}>
+
               <View
                 style={{
-                  ...styles.thumbnailCard,
-                  minHeight: isMobile ? 200 : 260,
+                  ...styles.lessonContent,
+                  maxWidth: isMobile ? '100%' : '90%',
                 }}>
-                {!accessLesson && (
-                  <View style={styles.premium}>
-                    <DollarOutlined
-                      style={{
-                        color: '#FFF',
-                        fontSize: isMobile ? 20 : 24,
+                <Text
+                  style={{
+                    ...styles.lessonContentTitle,
+                    fontSize: isMobile ? 16 : 18,
+                  }}>
+                  Related Lessons
+                </Text>
+                <FlatList
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={lessonDetail.relatedLessons}
+                  contentContainerStyle={{ gap: 8 }}
+                  renderItem={({ item }) => (
+                    <LessonItem
+                      data={item}
+                      onClick={() => {
+                        router.push(`/dashboard/home/lesson/${item._id}`);
                       }}
                     />
+                  )}
+                />
+              </View>
+            </View>
+            {!isMobile && (
+              <View style={{ ...sideColumnStyle, gap: 16 }}>
+                <View
+                  style={{
+                    ...styles.thumbnailCard,
+                    minHeight: isMobile ? 200 : 260,
+                  }}>
+                  {!accessLesson && (
+                    <View style={styles.premium}>
+                      <DollarOutlined
+                        style={{
+                          color: '#FFF',
+                          fontSize: isMobile ? 20 : 24,
+                        }}
+                      />
+                    </View>
+                  )}
+                  <LessonThumbnail thumbnail={lessonDetail.thumbnail} />
+                </View>
+                {!accessLesson ? (
+                  <View>
+                    <button
+                      className="button lesson-pill-button"
+                      onClick={() => {
+                        setItemBuy(lessonDetail);
+                        setIsVisibleModalBuy(true);
+                        dispatch(authAction.setVerifyInfo(false));
+                      }}>
+                      <Icon name="liveTV" className="button-icon" />
+                      <span className="label">Buy Now</span>
+                    </button>
+                    <Text style={styles.totalLibrary}>
+                      Total Duration: {convertDurationToTime(totalDuration)}
+                    </Text>
+                    <Text style={styles.totalLibrary}>
+                      Total Libraries: {totalLibraries}
+                    </Text>
+                  </View>
+                ) : (
+                  <View>
+                    <button
+                      className="button lesson-pill-button"
+                      onClick={() => {
+                        const modules = lessonDetail.modules;
+                        const libraries = modules[0].libraries[0];
+                        if (modules && modules?.length > 0) {
+                          dispatch(
+                            dashboardAction.setSelectedModule(modules[0]),
+                          );
+                          dispatch(
+                            dashboardAction.setSelectedLibrary(libraries),
+                          );
+                          router.push('/dashboard/home/lesson/moduleDetail');
+                        } else {
+                          messageApi.open({
+                            type: 'warning',
+                            content:
+                              'Chưa có nội dung bài học vui lòng quay lại sau',
+                            duration: 5,
+                          });
+                        }
+                      }}>
+                      <Icon name="liveTV" className="button-icon" />
+                      <span className="label">Start lesson</span>
+                    </button>
+                    <Text style={styles.totalLibrary}>
+                      Total Duration: {convertDurationToTime(totalDuration)}
+                    </Text>
+                    <Text style={styles.totalLibrary}>
+                      Total Libraries: {totalLibraries}
+                    </Text>
                   </View>
                 )}
-                <LessonThumbnail thumbnail={lessonDetail.thumbnail} />
               </View>
-              {!accessLesson ? (
-                <View>
-                  <button
-                    className="button lesson-pill-button"
-                    onClick={() => {
-                      setItemBuy(lessonDetail);
-                      setIsVisibleModalBuy(true);
-                      dispatch(authAction.setVerifyInfo(false));
-                    }}>
-                    <Icon name="liveTV" className="button-icon" />
-                    <span className="label">Buy Now</span>
-                  </button>
-                  <Text style={styles.totalLibrary}>
-                    Total Duration: {convertDurationToTime(totalDuration)}
-                  </Text>
-                  <Text style={styles.totalLibrary}>
-                    Total Libraries: {totalLibraries}
-                  </Text>
-                </View>
-              ) : (
-                <View>
-                  <button
-                    className="button lesson-pill-button"
-                    onClick={() => {
-                      const modules = lessonDetail.modules;
-                      const libraries = modules[0].libraries[0];
-                      if (modules && modules?.length > 0) {
-                        dispatch(dashboardAction.setSelectedModule(modules[0]));
-                        dispatch(dashboardAction.setSelectedLibrary(libraries));
-                        router.push('/dashboard/home/lesson/moduleDetail');
-                      } else {
-                        messageApi.open({
-                          type: 'warning',
-                          content:
-                            'Chưa có nội dung bài học vui lòng quay lại sau',
-                          duration: 5,
-                        });
-                      }
-                    }}>
-                    <Icon name="liveTV" className="button-icon" />
-                    <span className="label">Start lesson</span>
-                  </button>
-                  <Text style={styles.totalLibrary}>
-                    Total Duration: {convertDurationToTime(totalDuration)}
-                  </Text>
-                  <Text style={styles.totalLibrary}>
-                    Total Libraries: {totalLibraries}
-                  </Text>
-                </View>
-              )}
-            </View>
+            )}
           </View>
         </View>
       </View>

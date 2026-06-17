@@ -4,7 +4,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     height: '100%',
-    scrollbarWidth: 'none',
     padding: 20,
     overflow: 'visible',
   },
@@ -21,7 +20,6 @@ const styles = StyleSheet.create({
   scrollView: { gap: 16 },
   section: {
     width: '100%',
-    maxWidth: 1200,
     alignSelf: 'center',
     gap: 12,
     overflow: 'visible',
@@ -38,7 +36,7 @@ const styles = StyleSheet.create({
   title: { ...typography.titleS },
   recommendGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
     columnGap: 16,
     rowGap: 20,
     width: '100%',

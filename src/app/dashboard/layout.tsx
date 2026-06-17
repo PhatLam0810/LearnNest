@@ -2,9 +2,14 @@
 import React from 'react';
 import { GetProp, Grid, Layout, Menu, MenuProps } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
-import { LogoutOutlined } from '@ant-design/icons';
+import {
+  ControlOutlined,
+  IdcardOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 import './styles.css';
-import { useAppDispatch } from '@redux';
+import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction } from '~mdAuth/redux';
 import { ScrollView, View } from 'react-native-web';
 import styles from './styles';
@@ -28,6 +33,9 @@ export default function DashboardLayout({
   const onClickItem = (item: string) => {
     router.replace(item);
   };
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const isAdmin = userProfile?.role?.level <= 2;
 
   const menuItems: MenuItem[] = [
     {
@@ -35,13 +43,36 @@ export default function DashboardLayout({
       label: 'OVERVIEW',
       type: 'group',
       children: [
-        { key: '/dashboard/home', label: 'Home', icon: <Icon name="home" /> },
-        { key: '/dashboard/lesson', label: 'Lesson', icon: <LessonIcon /> },
+        {
+          key: '/dashboard/home',
+          label: 'Trang Chủ',
+          icon: <Icon name="home" />,
+        },
+        { key: '/dashboard/lesson', label: 'Khóa Học', icon: <LessonIcon /> },
         {
           key: '/dashboard/library',
-          label: 'Library',
+          label: 'Thư Viện',
           icon: <Icon name="library" />,
         },
+        {
+          key: '/dashboard/lesson',
+          label: 'Tổng Quan',
+          icon: <IdcardOutlined />,
+        },
+        {
+          key: '/dashboard/profile',
+          label: 'Cài Đặt',
+          icon: <SettingOutlined />,
+        },
+        ...(isAdmin
+          ? [
+              {
+                key: '/dashboard/admin',
+                label: 'Admin',
+                icon: <ControlOutlined />,
+              },
+            ]
+          : []),
       ],
     },
   ];

@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Avatar, Button, Card, Form, Modal, Upload } from 'antd';
+import { Avatar, Button, Card, Form, Modal, Space, Upload } from 'antd';
 import { CameraOutlined, UserOutlined } from '@ant-design/icons';
 import styles from './styles';
 import { AppButton, AppInput, AppUploadToServer } from '@components';
@@ -22,6 +22,7 @@ const EditProfile = () => {
   const onCloseDelete = () => {
     setModalDelete(false);
   };
+  console.log(userProfile);
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>
@@ -60,6 +61,56 @@ const EditProfile = () => {
             >
               <AppInput placeholder="Username" style={{ width: '100%' }} />
             </Form.Item>
+            <Space
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}>
+              <Form.Item
+                label={<Text style={styles.labelText}>Full Name</Text>}
+                name="fullName"
+                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+                style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
+              >
+                <AppInput disabled style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item
+                label={<Text style={styles.labelText}>Email</Text>}
+                name="email"
+                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+                style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
+              >
+                <AppInput
+                  disabled
+                  placeholder="Email"
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Space>
+            <Space
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                width: '100%',
+              }}>
+              <Form.Item
+                label={<Text style={styles.labelText}>MSSV</Text>}
+                name="studentId"
+                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+                style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
+              >
+                <AppInput disabled style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item
+                label={<Text style={styles.labelText}>Số điện thoại</Text>}
+                name="phoneNumber"
+                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
+                style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
+              >
+                <AppInput style={{ width: '100%' }} />
+              </Form.Item>
+            </Space>
             <Form.Item
               label={<Text style={styles.labelText}>Bio Name</Text>}
               name="bio"

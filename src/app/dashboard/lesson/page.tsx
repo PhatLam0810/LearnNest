@@ -34,10 +34,6 @@ const Page = () => {
   }, [keyword, sortBy]);
 
   // Responsive container styles
-  const containerStyle = {
-    ...styles.container,
-    padding: isMobile ? 12 : isTablet ? 16 : 20,
-  };
 
   // Responsive lesson item styles
   const lessonItemStyle = {
@@ -46,7 +42,7 @@ const Page = () => {
   };
 
   return (
-    <View style={containerStyle}>
+    <View style={styles.container}>
       <FlatList
         key={numColumns} // Force re-render when numColumns changes
         data={listItem}
@@ -56,6 +52,7 @@ const Page = () => {
         contentContainerStyle={{
           gap: isMobile ? 12 : 16,
           paddingBottom: 48,
+          padding: 20,
           overflow: 'visible',
         }}
         columnWrapperStyle={
