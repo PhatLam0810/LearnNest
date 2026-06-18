@@ -1,5 +1,5 @@
 'use client';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Table,
   Button,
@@ -19,6 +19,7 @@ import {
   LessonLearner,
 } from '~mdAdmin/redux/RTKQuery/type';
 import './styles.scss';
+import { useAppPagination } from '@hooks/pagination';
 
 type LessonWithStatus = LessonLearnersSummary & {
   key: string;
@@ -29,7 +30,7 @@ type LearnerTableData = LessonLearner & {
 };
 
 const LessonLearnersOverview = () => {
-  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   // Query summary data
@@ -37,11 +38,17 @@ const LessonLearnersOverview = () => {
     adminQuery.useGetLessonLearnersSummaryQuery();
 
   // Query learners for selected lesson
-  const { data: learnersData, isLoading: learnersLoading } =
-    adminQuery.useGetLessonLearnersQuery(selectedLessonId!, {
-      skip: !selectedLessonId,
-    });
 
+  useEffect(() => {
+    if (selectedLessonId) {
+      fetchData();
+    }
+  }, [selectedLessonId]);
+
+  const { listItem, currentData, fetchData, refresh, search } =
+    useAppPagination<LessonLearner>({
+      apiUrl: `admin/lessons/${selectedLessonId}/learners`,
+    });
   // `admin/lessons/${lessonId}/learners`
   // Transform lesson summary to table format
   const lessonTableData: LessonWithStatus[] = useMemo(
@@ -54,15 +61,7 @@ const LessonLearnersOverview = () => {
   );
 
   // Transform learner data to table format
-  const learnerTableData: LearnerTableData[] = useMemo(
-    () =>
-      learnersData?.data?.items?.map((learner, idx) => ({
-        ...learner,
-        key: `${learner.userId || 'learner'}-${idx}`,
-      })) || [],
-    [learnersData],
-  );
-  console.log('learnerTableData', learnerTableData);
+
   // Lesson Summary Columns
   const lessonColumns: ColumnsType<LessonWithStatus> = [
     {
@@ -95,7 +94,7 @@ const LessonLearnersOverview = () => {
   ];
 
   // Learner Columns
-  const learnerColumns: ColumnsType<LearnerTableData> = [
+  const learnerColumns: ColumnsType<LessonLearner> = [
     {
       title: 'Họ và Tên',
       dataIndex: 'fullName',
@@ -141,8 +140,10 @@ const LessonLearnersOverview = () => {
     },
   ];
 
-  const handleLessonSelect = (record: LessonWithStatus) => {
+  const handleLessonSelect = async (record: LessonWithStatus) => {
+    console.log('Selected Lesson:', record);
     setSelectedLessonId(record._id);
+
     setIsModalVisible(true);
   };
 
@@ -216,48 +217,36 @@ const LessonLearnersOverview = () => {
 
       {/* Learners Modal */}
       <Modal
-        title={`Danh Sách Người Học: ${learnersData?.lessonTitle || ''}`}
+        title={`Danh Sách Người Học `}
         open={isModalVisible}
         onCancel={handleModalClose}
         width="90%"
-        bodyStyle={{ maxHeight: '70vh', overflowY: 'auto' }}
         footer={[
           <Button key="close" onClick={handleModalClose}>
             Đóng
           </Button>,
         ]}>
-        <Spin spinning={learnersLoading}>
-          {learnersData ? (
-            <>
-              <div className="lesson-learners-overview__modal-stats">
-                <Space>
-                  <Statistic
-                    title="Tổng Người Học"
-                    value={learnersData.totalLearners}
-                    size="small"
-                  />
-                  <Statistic
-                    title="Đã Hoàn Thành"
-                    value={
-                      learnerTableData.filter(l => l.status === 'Đạt').length
-                    }
-                    size="small"
-                  />
-                </Space>
-              </div>
-              <Table
-                columns={learnerColumns}
-                dataSource={learnerTableData}
-                rowKey="key"
-                pagination={{ pageSize: 20 }}
-                size="small"
-                locale={{
-                  emptyText: <Empty description="Không có người học" />,
-                }}
+        <>
+          <div className="lesson-learners-overview__modal-stats">
+            <Space>
+              <Statistic title="Tổng Người Học" value={listItem.length} />
+              <Statistic
+                title="Đã Hoàn Thành"
+                value={listItem.filter(l => l.status === 'Đạt').length}
               />
-            </>
-          ) : null}
-        </Spin>
+            </Space>
+          </div>
+          <Table
+            columns={learnerColumns}
+            dataSource={listItem}
+            rowKey="key"
+            pagination={{ pageSize: 20 }}
+            size="small"
+            locale={{
+              emptyText: <Empty description="Không có người học" />,
+            }}
+          />
+        </>
       </Modal>
     </div>
   );
