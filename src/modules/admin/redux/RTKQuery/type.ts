@@ -91,19 +91,27 @@ export interface LessonLearnersSummaryResponse {
 }
 
 export interface LessonLearner {
-  userId: string;
-  fullName: string;
-  email: string;
-  studentId: string;
-  class: string;
-  major: string;
-  isCompleted: boolean;
-  completedAt?: string;
+  userId?: string;
+  fullName?: string;
+  email?: string;
+  studentId?: string;
+  class?: string;
+  major?: string;
+  status: string;
+  completedAt?: string | null;
+}
+
+export interface LessonLearnersData {
+  items: LessonLearner[];
+  totalRecords: number;
+  pageNum: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export interface LessonLearnersResponse {
   lessonId: string;
   lessonTitle: string;
   totalLearners: number;
-  learners: LessonLearner[];
+  data: LessonLearnersData;
 }

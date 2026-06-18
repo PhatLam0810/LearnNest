@@ -42,6 +42,7 @@ const LessonLearnersOverview = () => {
       skip: !selectedLessonId,
     });
 
+  // `admin/lessons/${lessonId}/learners`
   // Transform lesson summary to table format
   const lessonTableData: LessonWithStatus[] = useMemo(
     () =>
@@ -55,13 +56,13 @@ const LessonLearnersOverview = () => {
   // Transform learner data to table format
   const learnerTableData: LearnerTableData[] = useMemo(
     () =>
-      learnersData?.learners?.map((learner, idx) => ({
+      learnersData?.data?.items?.map((learner, idx) => ({
         ...learner,
-        key: `${learner.userId}-${idx}`,
+        key: `${learner.userId || 'learner'}-${idx}`,
       })) || [],
     [learnersData],
   );
-
+  console.log('learnerTableData', learnerTableData);
   // Lesson Summary Columns
   const lessonColumns: ColumnsType<LessonWithStatus> = [
     {
@@ -127,14 +128,14 @@ const LessonLearnersOverview = () => {
     },
     {
       title: 'Hoàn Thành',
-      dataIndex: 'isCompleted',
-      key: 'isCompleted',
+      dataIndex: 'status',
+      key: 'status',
       width: '15%',
       align: 'center',
-      render: (value: boolean) => (
+      render: (value: string) => (
         <Badge
-          status={value ? 'success' : 'processing'}
-          text={value ? 'Đạt' : 'Chưa Đạt'}
+          status={value === 'Đạt' ? 'success' : 'processing'}
+          text={value}
         />
       ),
     },
@@ -237,7 +238,9 @@ const LessonLearnersOverview = () => {
                   />
                   <Statistic
                     title="Đã Hoàn Thành"
-                    value={learnerTableData.filter(l => l.isCompleted).length}
+                    value={
+                      learnerTableData.filter(l => l.status === 'Đạt').length
+                    }
                     size="small"
                   />
                 </Space>

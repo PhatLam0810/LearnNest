@@ -86,6 +86,14 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    accessLesson: builder.mutation<any, { userId: string; lessonId: string }>({
+      query: params => ({
+        url: '/lesson/access',
+        method: 'POST',
+        body: params,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });

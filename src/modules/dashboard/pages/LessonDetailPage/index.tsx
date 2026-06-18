@@ -41,6 +41,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const [isVisibleModalSuccess, setIsVisibleModalSuccess] = useState(false);
   const [itemBuy, setItemBuy] = useState(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
+  const [triggerAccessLesson] = dashboardQuery.useAccessLessonMutation();
   const { data: dataSub, refetch } = authQuery.useGetSubscriptionsQuery({});
   const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
   const totalLibraries = lessonDetail?.modules?.reduce((total, item) => {
@@ -185,6 +186,47 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       dispatch(dashboardAction.setSelectedModule(item));
       dispatch(dashboardAction.setSelectedLibrary(subItem));
       router.push('/dashboard/home/lesson/moduleDetail');
+    }
+  };
+
+  const handleStartLesson = async () => {
+    if (!lessonDetail?._id || !userProfile?._id) {
+      messageApi.open({
+        type: 'warning',
+        content: 'Không có thông tin bài học hoặc người dùng.',
+      });
+      return;
+    }
+
+    dispatch(authAction.setIsShowLoading(true));
+    try {
+      await triggerAccessLesson({
+        userId: userProfile._id,
+        lessonId: lessonDetail._id,
+      }).unwrap();
+
+      const modules = lessonDetail.modules;
+      const libraries = modules?.[0]?.libraries?.[0];
+
+      if (modules && modules.length > 0 && libraries) {
+        dispatch(dashboardAction.setSelectedModule(modules[0]));
+        dispatch(dashboardAction.setSelectedLibrary(libraries));
+        router.push('/dashboard/home/lesson/moduleDetail');
+      } else {
+        messageApi.open({
+          type: 'warning',
+          content: 'Chưa có nội dung bài học vui lòng quay lại sau',
+          duration: 5,
+        });
+      }
+    } catch (error) {
+      messageApi.open({
+        type: 'error',
+        content: 'Lỗi khi gọi API bắt đầu học. Vui lòng thử lại.',
+        duration: 5,
+      });
+    } finally {
+      dispatch(authAction.setIsShowLoading(false));
     }
   };
 
@@ -343,26 +385,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   <View>
                     <button
                       className="button lesson-pill-button"
-                      onClick={() => {
-                        const modules = lessonDetail.modules;
-                        const libraries = modules[0].libraries[0];
-                        if (modules && modules?.length > 0) {
-                          dispatch(
-                            dashboardAction.setSelectedModule(modules[0]),
-                          );
-                          dispatch(
-                            dashboardAction.setSelectedLibrary(libraries),
-                          );
-                          router.push('/dashboard/home/lesson/moduleDetail');
-                        } else {
-                          messageApi.open({
-                            type: 'warning',
-                            content:
-                              'Chưa có nội dung bài học vui lòng quay lại sau',
-                            duration: 5,
-                          });
-                        }
-                      }}>
+                      onClick={handleStartLesson}>
                       <Icon name="liveTV" className="button-icon" />
                       <span className="label">Start lesson</span>
                     </button>
@@ -575,26 +598,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   <View>
                     <button
                       className="button lesson-pill-button"
-                      onClick={() => {
-                        const modules = lessonDetail.modules;
-                        const libraries = modules[0].libraries[0];
-                        if (modules && modules?.length > 0) {
-                          dispatch(
-                            dashboardAction.setSelectedModule(modules[0]),
-                          );
-                          dispatch(
-                            dashboardAction.setSelectedLibrary(libraries),
-                          );
-                          router.push('/dashboard/home/lesson/moduleDetail');
-                        } else {
-                          messageApi.open({
-                            type: 'warning',
-                            content:
-                              'Chưa có nội dung bài học vui lòng quay lại sau',
-                            duration: 5,
-                          });
-                        }
-                      }}>
+                      onClick={handleStartLesson}>
                       <Icon name="liveTV" className="button-icon" />
                       <span className="label">Start lesson</span>
                     </button>
