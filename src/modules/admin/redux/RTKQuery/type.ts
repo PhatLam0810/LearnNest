@@ -77,3 +77,33 @@ export interface SendImportEmailsResponse {
     error: string | null;
   }>;
 }
+
+// Lesson Learners Types
+export interface LessonLearnersSummary {
+  _id: string;
+  title: string;
+  totalLearners: number;
+  completionRate: number;
+}
+
+export interface LessonLearnersSummaryResponse {
+  data: LessonLearnersSummary[];
+}
+
+export interface LessonLearner {
+  userId: string;
+  fullName: string;
+  email: string;
+  studentId: string;
+  class: string;
+  major: string;
+  isCompleted: boolean;
+  completedAt?: string;
+}
+
+export interface LessonLearnersResponse {
+  lessonId: string;
+  lessonTitle: string;
+  totalLearners: number;
+  learners: LessonLearner[];
+}

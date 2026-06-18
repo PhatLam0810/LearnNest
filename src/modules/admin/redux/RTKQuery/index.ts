@@ -9,6 +9,8 @@ import {
   ImportUserPreviewRequest,
   ImportUsersRequest,
   ImportUsersResponse,
+  LessonLearnersResponse,
+  LessonLearnersSummaryResponse,
   SendImportEmailsRequest,
   SendImportEmailsResponse,
   SetRoleParams,
@@ -193,6 +195,25 @@ export const adminQuery = baseQuery.injectEndpoints({
         body,
       }),
       transformResponse: (res: AxiosResponse<SendImportEmailsResponse>) =>
+        res.data,
+    }),
+    getLessonLearnersSummary: builder.query<
+      LessonLearnersSummaryResponse,
+      void
+    >({
+      query: () => ({
+        url: 'admin/lessons/learners/summary',
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<LessonLearnersSummaryResponse>) =>
+        res.data,
+    }),
+    getLessonLearners: builder.query<LessonLearnersResponse, string>({
+      query: lessonId => ({
+        url: `admin/lessons/${lessonId}/learners`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<LessonLearnersResponse>) =>
         res.data,
     }),
   }),

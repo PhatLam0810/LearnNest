@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import UserManage from './userManage/page';
 import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
+import LessonLearnersOverview from './lessonLearnersOverview';
 
 const items: TabsProps['items'] = [
   {
@@ -18,18 +19,18 @@ const items: TabsProps['items'] = [
   },
   {
     key: '2',
-    label: 'Import User',
+    label: 'Tạo Người Dùng',
     children: <ImportUserManage />,
   },
-  // {
-  //   key: '2',
-  //   label: 'Transaction History',
-  //   children: <TransactionHistory />,
-  // },
   {
     key: '3',
     label: 'Tạo Khóa Học',
     children: <LessonAdmin />,
+  },
+  {
+    key: '4',
+    label: 'Tổng Quan Người Học',
+    children: <LessonLearnersOverview />,
   },
 ];
 
