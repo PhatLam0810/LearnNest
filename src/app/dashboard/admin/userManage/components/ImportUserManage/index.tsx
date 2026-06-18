@@ -176,7 +176,7 @@ const ImportUserManage = () => {
         return row;
       });
 
-      setPreviewRows(updatedRows);
+      // setPreviewRows(updatedRows);
       setImportResult(response);
       setSendResult(null);
       messageApi.success(
