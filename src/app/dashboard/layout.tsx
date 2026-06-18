@@ -46,16 +46,35 @@ export default function DashboardLayout({
         {
           key: '/dashboard/home',
           label: 'Trang Chủ',
-          icon: <Icon name="home" />,
-        },
-        { key: '/dashboard/lesson', label: 'Khóa Học', icon: <LessonIcon /> },
-        {
-          key: '/dashboard/library',
-          label: 'Thư Viện',
-          icon: <Icon name="library" />,
+
+          icon: (
+            <Icon
+              name="home"
+              color={pathname === '/dashboard/home' ? 'white' : 'black'}
+            />
+          ),
         },
         {
           key: '/dashboard/lesson',
+          label: 'Khóa Học',
+          icon: (
+            <LessonIcon
+              color={pathname === '/dashboard/lesson' ? 'white' : 'black'}
+            />
+          ),
+        },
+        {
+          key: '/dashboard/library',
+          label: 'Thư Viện',
+          icon: (
+            <Icon
+              name="library"
+              color={pathname === '/dashboard/library' ? 'white' : 'black'}
+            />
+          ),
+        },
+        {
+          key: '/dashboard/',
           label: 'Tổng Quan',
           icon: <IdcardOutlined />,
         },

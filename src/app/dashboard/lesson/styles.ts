@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   lessonItem: {
     width: '100%',
-    maxWidth: '24%',
+    maxWidth: '25%',
     minWidth: 0,
   },
   title: {

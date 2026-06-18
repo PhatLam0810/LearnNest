@@ -25,11 +25,11 @@ export const LessonIcon = props => (
     fill="none"
     {...props}>
     <path
-      stroke="#202020"
+      stroke={`${props.color}`}
       d="m14.447 10.033-.267 3.334c-.1 1.02-.18 1.8-1.986 1.8H3.806c-1.807 0-1.887-.78-1.987-1.8l-.266-3.334a2.02 2.02 0 0 1 .433-1.46L2 8.56c.367-.447.92-.727 1.54-.727h8.92a1.976 1.976 0 0 1 1.54.734c.327.393.507.906.447 1.466Z"
     />
     <path
-      stroke="#202020"
+      stroke={`${props.color}`}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeMiterlimit={10}

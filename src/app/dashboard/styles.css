@@ -35,16 +35,10 @@
   font-size: 20px;
 }
 .ant-menu-light .ant-menu-item-selected {
-  background-color: #eef2f5 !important;
-  color: #111827 !important;
-  border-radius: 14px;
 }
 .ant-menu-light .ant-menu-item-selected .ant-menu-title-content {
-  color: #111827 !important;
 }
 .ant-menu-light .ant-menu-item:hover {
-  background-color: #f3f4f6 !important;
-  color: #111827 !important;
 }
 .ant-menu {
   background: transparent;

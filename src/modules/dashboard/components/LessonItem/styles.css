@@ -3,15 +3,10 @@
 }
 
 .lesson-card {
-  overflow: visible;
-  overflow-y: visible;
-  overflow-x: visible;
+  overflow: hidden;
 }
 
 .lesson-card .ant-card-body {
-  overflow: visible;
-  overflow-y: visible;
-  overflow-x: visible;
 }
 
 .lesson-card.ant-card-hoverable:hover {

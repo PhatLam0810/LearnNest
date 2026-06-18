@@ -13,6 +13,7 @@ import {
   Form,
   InputNumber,
   Input,
+  App,
 } from 'antd';
 import { messageApi, useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
@@ -21,56 +22,34 @@ import { UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useAppSelector } from '@redux';
 import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
+import { authQuery } from '~mdAuth/redux/RTKQuery';
+import { userInfo } from 'os';
 const UserManage = () => {
   const { listItem, currentData, refresh } = useAppPagination<UserItem>({
     apiUrl: 'user/getListUser',
   });
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const [getUserInfoById, { data: userInfo }] =
-    adminQuery.useGetUserInfoByIdMutation();
-
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-
-  useEffect(() => {
-    if (userInfo) {
-      setIsModalOpen(true);
-    }
-  }, [userInfo]);
+  const { modal } = App.useApp();
   const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
   const [createUserForm] = Form.useForm<CreateUserParams>();
+  const [isModalDeleteUser, setModalDeleteUser] = useState(false);
+  const [infoUser, setInfoUser] = useState<UserItem>(null);
+  const [deleteAccount] = authQuery.useDeleteAccountMutation();
 
-  const [setAdminRole, { isLoading: isLoadingSetRole }] =
-    adminQuery.useSetAdminRoleMutation();
-  const [deleteAdminRole, { isLoading: isLoadingDeleteRole }] =
-    adminQuery.useDeleteAdminRoleMutation();
   const [createUser, { isLoading: isLoadingCreateUser }] =
     adminQuery.useCreateUserMutation();
   const [messageApi, contextHolder] = message.useMessage();
 
-  const handleSetAdminRole = async (userId: string, role: number) => {
+  const handleDeleteUser = async (_id: string) => {
     try {
-      await setAdminRole({
-        userId,
-        role,
+      await deleteAccount({
+        Userid: _id,
       });
+      messageApi.success('Xóa tài khoản thành công');
       refresh();
-      messageApi.success('Cập nhật role thành công');
     } catch (error) {
-      messageApi.error('Cập nhật role thất bại');
-    }
-  };
-
-  const handleDeleteAdminRole = async (_id: string, roleId: string) => {
-    try {
-      await deleteAdminRole({
-        _id,
-        roleId,
-      });
-      refresh();
-      messageApi.success('Cập nhật role thành công');
-    } catch (error) {
-      messageApi.error('Cập nhật role thất bại');
+      messageApi.error('Xóa tài khoản thất bại');
     }
   };
   const handleCreateUser = async (value: CreateUserParams) => {
@@ -85,35 +64,12 @@ const UserManage = () => {
   };
   const columns: TableProps<UserItem>['columns'] = [
     {
-      title: 'Avatar',
-      dataIndex: 'avatar',
-      key: 'avatar',
-      render: (value: string) => (
-        <Avatar
-          src={value}
-          size={48}
-          icon={<UserOutlined />}
-          style={{
-            borderWidth: 1,
-            borderColor: '#000',
-            backgroundColor: 'var(--color-vhu-primary)',
-          }}
-        />
-      ),
-    },
-    {
-      title: 'Role',
-      dataIndex: 'role',
-      key: 'role',
-      render: (record: any) => <Text>{record ? record?.name : 'User'}</Text>,
-    },
-    {
-      title: 'Full Name',
+      title: 'Họ và tên',
       dataIndex: 'fullName',
       key: 'fullName',
     },
     {
-      title: 'Student ID ',
+      title: 'Mã sinh viên',
       dataIndex: 'studentId',
       key: 'studentId',
     },
@@ -123,39 +79,45 @@ const UserManage = () => {
       key: 'email',
     },
     {
-      title: 'Date Created',
+      title: 'Lớp',
+      dataIndex: 'class',
+      key: 'class',
+    },
+    {
+      title: 'Khoa',
+      dataIndex: 'faculty',
+      key: 'faculty',
+    },
+    {
+      title: 'Ngành',
+      dataIndex: 'major',
+      key: 'major',
+    },
+    {
+      title: 'Số Điện Thoại',
+      dataIndex: 'phoneNumber',
+      key: 'phoneNumber',
+    },
+    {
+      title: 'Ngày tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
       render: (value: string) => (
         <Text>{dayjs(value).format('DD/MM/YYYY')}</Text>
       ),
     },
-
     {
       key: 'action',
       render: (record: UserItem) => (
         <Space>
-          {record.role?.level === 1 ? null : (
-            <View>
-              {record.role?.level ? (
-                <Button
-                  danger
-                  loading={isLoadingDeleteRole}
-                  onClick={() =>
-                    handleDeleteAdminRole(record._id, record.role._id)
-                  }>
-                  Remove Admin
-                </Button>
-              ) : (
-                <Button
-                  type="primary"
-                  loading={isLoadingSetRole}
-                  onClick={() => handleSetAdminRole(record._id, 2)}>
-                  Set Admin
-                </Button>
-              )}
-            </View>
-          )}
+          <Button
+            danger
+            onClick={() => {
+              setInfoUser(record);
+              setModalDeleteUser(true);
+            }}>
+            Xóa Tài khoản
+          </Button>
         </Space>
       ),
     },
@@ -179,42 +141,7 @@ const UserManage = () => {
       />
 
       {/* Modal hiện thông tin user */}
-      <Modal
-        title="User Info"
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        footer={null}>
-        {userInfo && (
-          <Space direction="vertical" size="middle">
-            <Avatar
-              src={userInfo?.avatar}
-              size={100}
-              icon={<UserOutlined />}
-              style={{
-                borderWidth: 1,
-                borderColor: '#000',
-                backgroundColor: 'var(--color-vhu-primary)',
-              }}
-            />
 
-            <Text>
-              <b>ID:</b> {userInfo._id}
-            </Text>
-            <Text>
-              <b>Username:</b> {userInfo.username}
-            </Text>
-            <Text>
-              <b>Full Name:</b> {userInfo.fullName}
-            </Text>
-            <Text>
-              <b>Student ID:</b> {userInfo.studentId}
-            </Text>
-            <Text>
-              <b>Email:</b> {userInfo.email}
-            </Text>
-          </Space>
-        )}
-      </Modal>
       <Modal
         title="Add User Account"
         open={isModalCreateUserOpen}
@@ -268,6 +195,48 @@ const UserManage = () => {
             <Input />
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="Xác nhận xóa tài khoản"
+        open={isModalDeleteUser}
+        onCancel={() => setModalDeleteUser(false)}
+        // Thay footer={null} bằng các nút hành động
+        footer={[
+          <Button key="cancel" onClick={() => setModalDeleteUser(false)}>
+            Hủy
+          </Button>,
+          <Button
+            key="delete"
+            danger
+            type="primary"
+            onClick={async () => {
+              await handleDeleteUser(infoUser._id);
+              setModalDeleteUser(false);
+            }}>
+            Xóa tài khoản
+          </Button>,
+        ]}>
+        <div style={{ textAlign: 'center' }}>
+          <p>Bạn có chắc chắn muốn xóa người dùng sau không?</p>
+          <Space
+            direction="vertical"
+            size="small"
+            style={{ width: '100%', alignItems: 'center' }}>
+            <div style={{ textAlign: 'left', marginTop: '10px' }}>
+              <Text>
+                <b>Họ tên:</b> {infoUser?.fullName}
+              </Text>
+              <br />
+              <Text>
+                <b>MSSV:</b> {infoUser?.studentId}
+              </Text>
+              <br />
+              <Text>
+                <b>Email:</b> {infoUser?.email}
+              </Text>
+            </div>
+          </Space>
+        </div>
       </Modal>
     </View>
   );

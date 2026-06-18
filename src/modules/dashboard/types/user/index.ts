@@ -10,6 +10,11 @@ export interface UserItem {
   updatedAt: string;
   __v: number;
   fullName?: string;
+  studentId?: string;
+  class?: string;
+  faculty?: string;
+  major?: string;
+  phoneNumber?: string;
   bio?: string;
 }
 

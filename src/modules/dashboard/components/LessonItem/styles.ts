@@ -6,6 +6,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
     padding: 0,
     backgroundColor: '#F9F9F9',
+    borderRadius: 16,
   },
   content: {
     padding: 12,
@@ -13,8 +14,8 @@ const styles = StyleSheet.create({
   cardThumbnail: {
     width: '100%',
     aspectRatio: 16 / 9,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     overflow: 'hidden',

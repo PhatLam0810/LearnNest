@@ -51,6 +51,7 @@ const Banner: React.FC<BannerProps> = ({ onButtonClick }) => {
           />
 
           <div className="slide-content">
+            <div className="slick-slide-overlay"></div>
             <h1>{slide.title}</h1>
             <p>{slide.description}</p>
             <Button

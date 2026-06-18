@@ -9,6 +9,17 @@
     position: relative;
     height: 350px; // Chiều cao tổng thể
   }
+  .slick-slide-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0),
+      rgba(0, 0, 0, 0.5)
+    );
+    transition: all 0.3s ease;
+    clip-path: polygon(0 0, 65% 0, 45% 100%, 0 100%);
+  }
 
   // Ảnh làm nền cho mỗi slide
   .slide-background {
@@ -23,24 +34,25 @@
     position: absolute;
     top: 0;
     left: 0;
+    padding: 40px;
     width: 100%;
     height: 100%;
-    padding: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     color: #fff;
-
     h1 {
       color: #fff;
       font-size: 32px;
       font-weight: 700;
       margin-bottom: 20px;
+      z-index: 1;
     }
     p {
       font-size: 16px;
       max-width: 500px;
       margin-bottom: 30px;
+      z-index: 1;
     }
 
     .btn-action {
