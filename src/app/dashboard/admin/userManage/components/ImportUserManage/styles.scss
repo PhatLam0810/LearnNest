@@ -1,0 +1,57 @@
+.import-user-manage {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(5, 15, 40, 0.08);
+  width: 100%;
+}
+
+.import-user-manage__header {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.import-user-manage__field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.import-user-manage__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.import-user-manage__summary {
+  padding: 12px 0;
+}
+
+.import-user-manage__alert {
+  margin-bottom: 12px;
+}
+
+.import-user-manage__table {
+  width: 100%;
+}
+
+.import-user-manage__row-error {
+  background: #fff2f0;
+}
+
+.import-user-manage__input--error .ant-input {
+  border-color: #ff4d4f;
+}
+
+.import-user-manage__result-card {
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  background: #fafafa;
+}

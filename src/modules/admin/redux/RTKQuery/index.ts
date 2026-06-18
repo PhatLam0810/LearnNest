@@ -2,7 +2,17 @@ import { baseQuery } from '@redux/RTKQuery';
 import { AxiosResponse } from 'axios';
 import { LibraryType } from '~mdDashboard/redux/RTKQuery/types';
 import { Category } from '~mdDashboard/redux/saga/type';
-import { CreateUserParams, DeleteAdminRoleParams, SetRoleParams } from './type';
+import {
+  CreateUserParams,
+  DeleteAdminRoleParams,
+  ImportUserItem,
+  ImportUserPreviewRequest,
+  ImportUsersRequest,
+  ImportUsersResponse,
+  SendImportEmailsRequest,
+  SendImportEmailsResponse,
+  SetRoleParams,
+} from './type';
 
 export const adminQuery = baseQuery.injectEndpoints({
   endpoints: builder => ({
@@ -153,6 +163,37 @@ export const adminQuery = baseQuery.injectEndpoints({
         body: params,
       }),
       transformResponse: (res: any) => res.data,
+    }),
+    previewImportUsers: builder.mutation<
+      ImportUserItem[],
+      ImportUserPreviewRequest
+    >({
+      query: body => ({
+        url: 'admin/users/import/preview',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<ImportUserItem[]>) => res.data,
+    }),
+    importUsersBulk: builder.mutation<ImportUsersResponse, ImportUsersRequest>({
+      query: body => ({
+        url: 'admin/users/import/bulk',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<ImportUsersResponse>) => res.data,
+    }),
+    sendImportEmails: builder.mutation<
+      SendImportEmailsResponse,
+      SendImportEmailsRequest
+    >({
+      query: body => ({
+        url: 'admin/users/import/send-emails',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<SendImportEmailsResponse>) =>
+        res.data,
     }),
   }),
   overrideExisting: true,

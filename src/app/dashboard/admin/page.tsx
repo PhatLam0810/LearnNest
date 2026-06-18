@@ -7,7 +7,7 @@ import styles from './styles';
 import './styles.scss';
 import { useRouter, useSearchParams } from 'next/navigation';
 import UserManage from './userManage/page';
-import Lesson from './lessonManage/page';
+import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
 
 const items: TabsProps['items'] = [
@@ -15,6 +15,11 @@ const items: TabsProps['items'] = [
     key: '1',
     label: 'Quản Trị Người Dùng',
     children: <UserManage />,
+  },
+  {
+    key: '2',
+    label: 'Import User',
+    children: <ImportUserManage />,
   },
   // {
   //   key: '2',

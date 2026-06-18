@@ -14,6 +14,7 @@ import {
   InputNumber,
   Input,
   App,
+  Card,
 } from 'antd';
 import { messageApi, useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
@@ -25,9 +26,11 @@ import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
 import { authQuery } from '~mdAuth/redux/RTKQuery';
 import { userInfo } from 'os';
 const UserManage = () => {
-  const { listItem, currentData, refresh } = useAppPagination<UserItem>({
-    apiUrl: 'user/getListUser',
-  });
+  const { listItem, currentData, refresh, search } = useAppPagination<UserItem>(
+    {
+      apiUrl: 'user/getListUser',
+    },
+  );
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const { modal } = App.useApp();
@@ -36,7 +39,7 @@ const UserManage = () => {
   const [isModalDeleteUser, setModalDeleteUser] = useState(false);
   const [infoUser, setInfoUser] = useState<UserItem>(null);
   const [deleteAccount] = authQuery.useDeleteAccountMutation();
-
+  const { Search } = Input;
   const [createUser, { isLoading: isLoadingCreateUser }] =
     adminQuery.useCreateUserMutation();
   const [messageApi, contextHolder] = message.useMessage();
@@ -125,9 +128,44 @@ const UserManage = () => {
   return (
     <View style={styles.container}>
       {contextHolder}
-      <Button type="primary" onClick={() => setIsModalCreateUserOpen(true)}>
-        Add User Account
-      </Button>
+      <Card
+        style={{
+          width: 280,
+          padding: 24,
+          borderRadius: 16,
+          marginBottom: 16,
+          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.08)',
+        }}>
+        <Text
+          style={{
+            display: 'block',
+            fontSize: 14,
+            color: '#6b7280',
+            marginBottom: 8,
+          }}>
+          Tổng số học viên
+        </Text>
+        <Text style={{ fontSize: 36, fontWeight: 700, color: '#111827' }}>
+          {listItem.length}
+        </Text>
+      </Card>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+        }}>
+        <Search
+          placeholder="Input search text"
+          onSearch={search}
+          style={{ width: '100%' }}
+        />
+        <Button type="primary" onClick={() => setIsModalCreateUserOpen(true)}>
+          Add User Account
+        </Button>
+      </View>
       <Table
         columns={columns}
         dataSource={listItem}
