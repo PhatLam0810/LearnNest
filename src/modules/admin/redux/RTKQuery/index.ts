@@ -216,6 +216,14 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<LessonLearnersResponse>) =>
         res.data,
     }),
+    exportLearners: builder.mutation<Blob, { learners: any[] }>({
+      query: body => ({
+        url: 'admin/export-learners',
+        method: 'POST',
+        body,
+        responseHandler: response => response.blob(),
+      }),
+    }),
   }),
   overrideExisting: true,
 });

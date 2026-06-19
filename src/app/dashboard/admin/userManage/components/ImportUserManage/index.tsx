@@ -176,7 +176,6 @@ const ImportUserManage = () => {
         return row;
       });
 
-      // setPreviewRows(updatedRows);
       setImportResult(response);
       setSendResult(null);
       messageApi.success(
@@ -319,7 +318,7 @@ const ImportUserManage = () => {
       {contextHolder}
       <div className="import-user-manage__header">
         <div className="import-user-manage__field">
-          <Text strong>URL file Excel</Text>
+          <Text strong>Tải lên file Excel</Text>
           <Upload
             maxCount={1}
             listType="picture-card"

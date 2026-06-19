@@ -10,6 +10,7 @@ import {
   Space,
   Statistic,
   Card,
+  Input,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { View, Text } from 'react-native-web';
@@ -20,6 +21,20 @@ import {
 } from '~mdAdmin/redux/RTKQuery/type';
 import './styles.scss';
 import { useAppPagination } from '@hooks/pagination';
+import { message } from 'antd';
+import axios from 'axios';
+import { useAppSelector } from '@redux';
+
+const downloadFile = (blob: Blob, fileName: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', fileName);
+  document.body.appendChild(link);
+  link.click();
+  link.parentNode?.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
 
 type LessonWithStatus = LessonLearnersSummary & {
   key: string;
@@ -31,8 +46,12 @@ type LearnerTableData = LessonLearner & {
 
 const LessonLearnersOverview = () => {
   const [selectedLessonId, setSelectedLessonId] = useState<any>(null);
+  const [selectedLessonTitle, setSelectedLessonTitle] = useState<string>('');
   const [isModalVisible, setIsModalVisible] = useState(false);
-
+  const [isExporting, setIsExporting] = useState(false);
+  const { Search } = Input;
+  const { accessToken } =
+    useAppSelector(state => state.authReducer.tokenInfo || {}) || {};
   // Query summary data
   const { data: summaryData, isLoading: summaryLoading } =
     adminQuery.useGetLessonLearnersSummaryQuery();
@@ -45,7 +64,7 @@ const LessonLearnersOverview = () => {
     }
   }, [selectedLessonId]);
 
-  const { listItem, currentData, fetchData, refresh, search } =
+  const { listItem, fetchData, refresh, search } =
     useAppPagination<LessonLearner>({
       apiUrl: `admin/lessons/${selectedLessonId}/learners`,
     });
@@ -143,8 +162,43 @@ const LessonLearnersOverview = () => {
   const handleLessonSelect = async (record: LessonWithStatus) => {
     console.log('Selected Lesson:', record);
     setSelectedLessonId(record._id);
-
+    setSelectedLessonTitle(record.title);
     setIsModalVisible(true);
+  };
+
+  const handleExportExcel = async () => {
+    if (!listItem || listItem.length === 0) {
+      message.warning('Không có dữ liệu để xuất');
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const response = await axios.post(
+        `${baseURL}/admin/export-learners`,
+        { learners: listItem },
+        {
+          responseType: 'blob',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      // Tạo link download
+      const blob = response.data;
+      const timestamp = new Date().toISOString().slice(0, 10);
+      const fileName = `${selectedLessonTitle}_${timestamp}.xlsx`;
+      downloadFile(blob, fileName);
+
+      message.success('Tải file thành công!');
+    } catch (error) {
+      console.error('Lỗi export:', error);
+      message.error('Lỗi khi tải file. Vui lòng thử lại.');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleModalClose = () => {
@@ -217,11 +271,18 @@ const LessonLearnersOverview = () => {
 
       {/* Learners Modal */}
       <Modal
-        title={`Danh Sách Người Học `}
+        title={`Danh Sách Người Học: ${selectedLessonTitle}`}
         open={isModalVisible}
         onCancel={handleModalClose}
         width="90%"
         footer={[
+          <Button
+            key="export"
+            type="primary"
+            loading={isExporting}
+            onClick={handleExportExcel}>
+            Tải Excel
+          </Button>,
           <Button key="close" onClick={handleModalClose}>
             Đóng
           </Button>,
@@ -236,12 +297,16 @@ const LessonLearnersOverview = () => {
               />
             </Space>
           </div>
+          <Search
+            placeholder="Input search text"
+            onSearch={search}
+            style={{ width: '100%' }}
+          />
           <Table
             columns={learnerColumns}
             dataSource={listItem}
             rowKey="key"
-            pagination={{ pageSize: 20 }}
-            size="small"
+            pagination={{ pageSize: 10 }}
             locale={{
               emptyText: <Empty description="Không có người học" />,
             }}
