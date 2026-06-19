@@ -1,4 +1,4 @@
-import { dmSans, inter, StyleSheet, typography } from '@styles';
+import { lexend, inter, StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Shadow
   },
   moduleItemTitle: {
-    fontFamily: dmSans.style.fontFamily,
+    fontFamily: lexend.style.fontFamily,
     fontWeight: '400',
     fontSize: 16,
     letterSpacing: 0.01,
@@ -172,6 +172,80 @@ const styles = StyleSheet.create({
   layoutTitle: {
     ...typography.titleM,
     fontSize: 28,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  // Inline style consolidations
+  contentGap8Margin8: {
+    gap: 8,
+    marginTop: 8,
+  },
+  libraryItemPadding: {
+    paddingRight: 7,
+    paddingLeft: 7,
+    flex: 1,
+  },
+  errorText: {
+    color: 'red',
+  },
+  centeredFlex: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fullWidthFlex: {
+    width: '100%',
+    flex: 1,
+  },
+  libraryGap: {
+    gap: 12,
+  },
+  modalContent: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textAlign: 'center',
+  },
+  resultCard: {
+    border: '1px solid #f0f0f0',
+    borderRadius: '8px',
+    padding: '16px',
+    marginBottom: '16px',
+    backgroundColor: '#fafafa',
+    width: '90%',
+  },
+  row: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    marginBottom: '8px',
+  },
+  // Style cho trạng thái thành công
+  statusBoxSuccess: {
+    padding: '16px',
+    borderRadius: '8px',
+    marginBottom: '16px',
+    fontWeight: 500,
+    backgroundColor: '#f6ffed',
+    color: '#389e0d',
+    width: '90%',
+  },
+  // Style cho trạng thái thất bại
+  statusBoxFail: {
+    padding: '16px',
+    borderRadius: '8px',
+    marginBottom: '16px',
+    fontWeight: 500,
+    backgroundColor: '#fff1f0',
+    color: '#cf1322',
+    width: '90%',
+  },
+  scoreSuccess: {
+    color: '#0958d9',
+    fontWeight: 'bold',
+  },
+  scoreFail: {
+    color: '#cf1322',
+    fontWeight: 'bold',
   },
 });
 

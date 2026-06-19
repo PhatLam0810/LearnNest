@@ -1,4 +1,4 @@
-import { dmSans, inter, StyleSheet, typography } from '@styles';
+import { lexend, inter, StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Shadow
   },
   moduleItemTitle: {
-    fontFamily: dmSans.style.fontFamily,
+    fontFamily: lexend.style.fontFamily,
     fontWeight: '400',
     fontSize: 16,
     letterSpacing: 0.01,

@@ -10,8 +10,12 @@
 .ant-tabs-content-holder {
   display: flex;
 }
+.ant-tabs-tab-btn {
+  font-family: $font-lexend;
+}
 .ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
   color: $color-vhu-primary;
+  font-family: $font-lexend;
 }
 .ant-tabs .ant-tabs-ink-bar {
   background: $color-vhu-primary;

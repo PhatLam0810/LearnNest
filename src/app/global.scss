@@ -1,111 +1,198 @@
-$font-prompt: 'Prompt', sans-serif;
-$font-dm-sans: 'DM Sans', sans-serif;
-$font-inter: 'Inter', sans-serif;
+@font-face {
+  font-family: 'Ground Zero';
+  src: url('/fonts/Ground-Zero.ttf') format('truetype');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
 
-$primary-red: #ef405c;
+@font-face {
+  font-family: 'Lexend';
+  src: url('/fonts/Lexend-VariableFont_wght.ttf') format('truetype');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+$font-ground-zero: 'Ground Zero', sans-serif;
+$font-lexend: 'Lexend', sans-serif;
+
 $color-vhu-primary: #1d418a;
 $vhu-light-blue: #88c1e9;
+$color-text-dark: #111827;
+$color-text-secondary: #1f2937;
+$color-body: #4b5563;
+$color-label: #6b7280;
+$color-background: #f8fafc;
+$color-surface: #ffffff;
+
+$space-xxl: 32px;
+$space-xl: 24px;
+$space-lg: 20px;
+$space-md: 16px;
+$space-sm: 12px;
+$space-xs: 8px;
 
 @mixin titleM {
-  font-family: $font-prompt;
-  font-weight: 500;
-  font-size: 22.78px;
-  letter-spacing: 0.01em;
+  font-family: $font-lexend;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 40px;
+  color: $color-text-dark;
 }
 
 @mixin titleS {
-  font-family: $font-prompt;
-  font-weight: 400;
-  font-size: 20.25px;
-  letter-spacing: 0.01em;
+  font-family: $font-lexend;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 30px;
+  color: $color-text-secondary;
 }
 
 @mixin titleSM {
-  font-family: $font-prompt;
-  font-weight: 400;
-  font-size: 14px;
-  letter-spacing: 0.01em;
+  font-family: $font-lexend;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 24px;
+  color: $color-text-dark;
 }
-
 @mixin subTitle1 {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 500;
   font-size: 16.4px;
   letter-spacing: 0.005em;
 }
 
 @mixin subTitle2 {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 500;
   font-size: 14px;
 }
-
 @mixin body1 {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 400;
-  font-size: 16px;
-  letter-spacing: 0.01em;
+  font-size: 15px;
+  line-height: 24px;
+  color: $color-body;
 }
 
 @mixin body2 {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 18px;
+  color: $color-label;
 }
 
+@mixin button {
+  font-family: $font-lexend;
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 22px;
+  color: #ffffff;
+}
+
+@mixin buttonSmall {
+  font-family: $font-lexend;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 22px;
+  color: $color-text-dark;
+}
 @mixin caption {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 400;
   font-size: 12px;
   letter-spacing: 0.01em;
 }
 
 @mixin button {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 500;
   font-size: 16px;
   letter-spacing: 0.01em;
 }
 
 @mixin buttonSmall {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 1.2px;
 }
 
 @mixin titleMMobile {
-  font-family: $font-prompt;
+  font-family: $font-lexend;
   font-weight: 500;
   font-size: 18px;
   letter-spacing: 0.01em;
 }
 
 @mixin body1Mobile {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 400;
   font-size: 14px;
   letter-spacing: 0.01em;
 }
 
 @mixin body2Mobile {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 400;
   font-size: 12px;
 }
 
 @mixin buttonMobile {
-  font-family: $font-dm-sans;
+  font-family: $font-lexend;
   font-weight: 500;
   font-size: 14px;
   letter-spacing: 0.01em;
+}
+@mixin responsive-text {
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
 }
 
 .title-m {
   @include titleM;
 }
+:root {
+  --space-xxl: #{$space-xxl};
+  --space-xl: #{$space-xl};
+  --space-lg: #{$space-lg};
+  --space-md: #{$space-md};
+  --space-sm: #{$space-sm};
+  --space-xs: #{$space-xs};
+  --color-primary: #{$color-vhu-primary};
+  --color-primary-light: #{$vhu-light-blue};
+  --color-text-dark: #{$color-text-dark};
+  --color-text-secondary: #{$color-text-secondary};
+  --color-body: #{$color-body};
+  --color-label: #{$color-label};
+  --color-surface: #{$color-surface};
+  --color-background: #{$color-background};
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: $font-lexend;
+  background-color: $color-background;
+  color: $color-text-dark;
+}
+
+body {
+  font-smoothing: antialiased;
+}
+
+.page-title {
+  @include titleM;
+  margin-bottom: $space-lg;
+}
 .title-s {
   @include titleS;
+  margin-bottom: $space-md;
 }
 .title-sm {
   @include titleSM;
@@ -128,6 +215,40 @@ $vhu-light-blue: #88c1e9;
 .button {
   @include button;
 }
+
+.btn-primary {
+  @include button;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $space-sm $space-lg;
+  border-radius: 12px;
+  background-color: $color-vhu-primary;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: $vhu-light-blue;
+  }
+}
+
+.card-surface {
+  background-color: $color-surface;
+  border-radius: 20px;
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
+  padding: $space-lg;
+}
+
+.responsive-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $space-lg;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
 .button-small {
   @include buttonSmall;
 }
@@ -145,4 +266,19 @@ $vhu-light-blue: #88c1e9;
 }
 .hide-default-radio .ant-radio {
   display: none;
+}
+.ant-table-cell {
+  font-family: $font-lexend;
+}
+.ant-btn-variant-solid {
+  font-family: $font-lexend;
+}
+span {
+  font-family: $font-lexend;
+}
+div {
+  font-family: $font-lexend;
+}
+.ant-statistic-title {
+  font-family: $font-lexend;
 }

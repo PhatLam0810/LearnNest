@@ -85,16 +85,16 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={{ flex: 1 }}>
+      <View style={styles.flex1}>
         <Form
-          style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+          style={styles.containerColumn}
           form={form}
           layout="vertical"
           onFinish={onFinish}
           initialValues={{ categories: [] }}>
-          <ScrollView style={{ flex: 1, scrollbarWidth: 'none' }}>
-            <View style={{ flexDirection: 'row', gap: 12 }}>
-              <View style={{ flex: 4 }}>
+          <ScrollView style={styles.scrollView}>
+            <View style={styles.rowLayout}>
+              <View style={styles.flex4}>
                 <Form.Item
                   style={styles.formItemTitle}
                   label="Lesson Name"
@@ -159,7 +159,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                           step={0.0001}
                           value={initialValues?.price || 0}
                           placeholder="Enter price"
-                          style={{ width: '100%' }}
+                          style={styles.fullWidth}
                         />
                       </Form.Item>
                     </Col>
@@ -172,11 +172,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                   name="learnedSkills">
                   <Form.List name="learnedSkills">
                     {(fields, { add, remove }) => (
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                        }}>
+                      <div style={styles.columnContainer}>
                         {fields.map(({ key, name, ...restField }) => {
                           return (
                             <Form.Item
@@ -207,7 +203,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                   </Form.List>
                 </Form.Item>
               </View>
-              <View style={{ flex: 1.5 }}>
+              <View style={styles.flex1_5}>
                 <Form.Item
                   style={styles.formItemTitle}
                   label="Thumbnail"
@@ -283,7 +279,7 @@ export default CreateLessonForm;
 
 const SkillItem = ({ value, onChange, remove }: any) => {
   return (
-    <div style={{ display: 'flex', gap: 8 }}>
+    <div style={styles.buttonGap}>
       <Input.TextArea
         placeholder="Skill learned"
         value={value}

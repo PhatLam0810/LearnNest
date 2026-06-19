@@ -16,8 +16,8 @@ type LessonItemData = {
   _id: string;
   isPremium: boolean;
   price: number;
-  totalLibraries: number;
-  totalLearners: number;
+  totalLibraries?: number;
+  totalLearners?: number;
 };
 
 type LessonItemProps = {
@@ -68,10 +68,10 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
       styles={{ body: { display: 'flex', height: '100%' } }}
       hoverable
       style={Object.assign({}, styles.container, style)}>
-      <View style={{ flex: 1 }} onClick={onClick}>
+      <View style={styles.inner} onClick={onClick}>
         {!accessLesson && (
           <View style={styles.premium}>
-            <DollarOutlined style={{ color: '#FFF', fontSize: 24 }} />
+            <DollarOutlined style={styles.premiumIcon} />
           </View>
         )}
 

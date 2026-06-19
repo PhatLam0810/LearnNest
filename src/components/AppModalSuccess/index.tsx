@@ -40,13 +40,13 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
       onCancel={onCloseModalAdd}
       closable={false}
       footer={null}>
-      <View style={{ flex: 1, alignItems: 'center', gap: 16 }}>
+      <View style={styles.containerFlex}>
         {lessonPurchaseData?.status === 'success' ? (
           <>
             <Icon name="success" className="button-icon" />
-            <View style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
+            <View style={styles.centerAlignGap8}>
               <Text style={styles.titleText}>Buy Lesson Successfully</Text>
-              <Text style={[styles.subTitle, { color: '#47B881' }]}>
+              <Text style={[styles.subTitle, styles.successText]}>
                 - {lessonPurchaseData?.amount} {lessonPurchaseData?.currency}
               </Text>
             </View>
@@ -56,26 +56,19 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
             <Icon
               name="error"
               className="button-icon"
-              style={{ width: 64, height: 64, fontSize: 24 }}
+              style={styles.iconSize64}
             />
 
-            <View style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
+            <View style={styles.centerAlignGap8}>
               <Text style={styles.titleText}>Buy Lesson Failed</Text>
-              <Text style={[styles.subTitle, { color: '#f95f5b' }]}>
+              <Text style={[styles.subTitle, styles.errorText]}>
                 - {lessonPurchaseData?.amount} {lessonPurchaseData?.currency}
               </Text>
             </View>
           </>
         )}
 
-        <View
-          style={{
-            width: '100%',
-            gap: 8,
-            borderRadius: 16,
-            backgroundColor: '#F8F8F8',
-            padding: 16,
-          }}>
+        <View style={styles.transactionBox}>
           <View style={styles.row}>
             <Text style={styles.rowTitle}>Transaction ID</Text>
             <Text style={styles.rowSubTitle} numberOfLines={1}>

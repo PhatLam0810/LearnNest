@@ -1,9 +1,9 @@
-import React, { CSSProperties, useRef } from 'react';
+import React, { CSSProperties, useRef, useState } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { Collapse, CollapseProps, Modal } from 'antd';
+import { Button, Collapse, CollapseProps, Modal } from 'antd';
 import { convertDurationToTime } from '@utils';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { FaceDetection } from '~mdAuth/components';
@@ -24,7 +24,13 @@ const ModuleDetailPage = () => {
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [modal, contextHolder] = Modal.useModal();
   const { isMobile, isTablet } = useResponsive();
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [resultData, setResultData] = useState({
+    correctCount: 0,
+    totalQuestions: 0,
+    score: 0,
+    isPass: false,
+  });
   const isAdmin = userProfile?.role?.level <= 2;
 
   const hasAccess = item => {
@@ -44,7 +50,7 @@ const ModuleDetailPage = () => {
         </div>
       ),
       children: (
-        <View style={{ gap: 8, marginTop: 8 }}>
+        <View style={styles.contentGap8Margin8}>
           {item.libraries.map((subItem, subIndex) => {
             return (
               <TouchableOpacity
@@ -64,7 +70,7 @@ const ModuleDetailPage = () => {
                     },
                   ]}>
                   <PlayCircleOutlined />
-                  <View style={{ paddingVertical: 7, flex: 1 }}>
+                  <View style={styles.libraryItemPadding}>
                     <Text
                       numberOfLines={1}
                       style={[
@@ -121,30 +127,13 @@ const ModuleDetailPage = () => {
     dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
     dispatch(dashboardAction.setSelectedLibrary(nextLibrary));
   };
+  const handleClose = () => {
+    setIsModalOpen(false);
+    if (resultData.isPass) onWatchFinish();
+  };
   const showModal = (correctCount, totalQuestions, score, isPass) => {
-    modal.info({
-      title: 'Result',
-      content: (
-        <div>
-          <p>
-            ✅ Correct answers: {correctCount}/{totalQuestions}
-          </p>
-          <p>
-            🏆 Score: <strong>{score}</strong> / 10
-          </p>
-          {!isPass && (
-            <p style={{ color: 'red' }}>
-              ❌ You have failed the exam. Please try again.
-            </p>
-          )}
-        </div>
-      ),
-      onOk: () => {
-        if (isPass) {
-          onWatchFinish(); // Call callback when passed
-        }
-      },
-    });
+    setResultData({ correctCount, totalQuestions, score, isPass });
+    setIsModalOpen(true);
   };
 
   const handleSubmit = (selectedAnswers: any) => {
@@ -178,14 +167,13 @@ const ModuleDetailPage = () => {
     });
     showModal(correctCount, totalQuestions, score, isPass);
   };
-
   const handlePauseVideo = () => {
     // libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
   };
 
   if (!selectedLibrary) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={styles.centeredFlex}>
         <Text>No library selected</Text>
       </View>
     );
@@ -240,7 +228,7 @@ const ModuleDetailPage = () => {
           {selectedLibrary?.type === 'Text' ? (
             <View style={videoStickyStyle}>
               <View style={styles.layoutTitleContainer}>
-                <View style={{ width: '100%', flex: 1 }}>
+                <View style={styles.fullWidthFlex}>
                   <Text style={styles.layoutTitle}>
                     {selectedLibrary?.title}
                   </Text>
@@ -261,7 +249,7 @@ const ModuleDetailPage = () => {
                 onWatchFinish={onWatchFinish}
               />
               <View style={styles.layoutTitleContainer}>
-                <View style={{ width: '100%', flex: 1 }}>
+                <View style={styles.fullWidthFlex}>
                   <Text style={styles.layoutTitle}>
                     {selectedLibrary?.title}
                   </Text>
@@ -280,12 +268,12 @@ const ModuleDetailPage = () => {
               {/* <FaceDetection onPauseVideo={handlePauseVideo} /> */}
             </View>
             <View style={styles.lessonContentHeader}>
-              <Text style={styles.lessonContentTitle}>Lesson Content</Text>
+              <Text style={styles.lessonContentTitle}>Nội dụng bài học</Text>
             </View>
             <ScrollView
               style={lessonScrollStyle}
               contentContainerStyle={lessonScrollContentStyle}>
-              <View style={{ gap: 12 }}>
+              <View style={styles.libraryGap}>
                 <Collapse
                   bordered={false}
                   defaultActiveKey={[0]}
@@ -299,6 +287,57 @@ const ModuleDetailPage = () => {
           </View>
         )}
       </View>
+      <Modal
+        title="Kết quả bài thi"
+        open={isModalOpen}
+        onCancel={handleClose}
+        centered
+        footer={null} // Tắt footer mặc định để custom nút bấm
+        width={600}
+        height={600}>
+        <div style={styles.modalContent}>
+          <div style={styles.resultCard}>
+            <div style={styles.row}>
+              <span>Số câu trả lời đúng:</span>
+              <strong>
+                {resultData.correctCount}/{resultData.totalQuestions}
+              </strong>
+            </div>
+            <div style={styles.row}>
+              <span>Điểm số:</span>
+              <strong
+                style={
+                  resultData.isPass ? styles.scoreSuccess : styles.scoreFail
+                }>
+                {resultData.score} / 10
+              </strong>
+            </div>
+          </div>
+
+          <div
+            style={
+              resultData.isPass ? styles.statusBoxSuccess : styles.statusBoxFail
+            }>
+            {resultData.isPass
+              ? 'Chúc mừng! Bạn đã vượt qua bài thi này thành công.'
+              : 'Bạn chưa vượt qua bài thi này. Vui lòng thử lại.'}
+          </div>
+
+          {/* Custom Buttons */}
+          <Button
+            type="primary"
+            block
+            size="large"
+            style={{ backgroundColor: '#002766', marginBottom: '8px' }}
+            onClick={handleClose}>
+            {resultData.isPass ? 'Tiếp tục bài học' : 'Làm lại bài thi'}
+          </Button>
+
+          <Button block size="large" onClick={() => setIsModalOpen(false)}>
+            Đóng
+          </Button>
+        </div>
+      </Modal>
     </View>
   );
 };

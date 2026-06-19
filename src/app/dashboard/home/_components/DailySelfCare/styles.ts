@@ -27,8 +27,7 @@ const styles = StyleSheet.create({
   button: {
     alignSelf: 'flex-start',
     backgroundColor: 'white',
-    paddingHorizontal: 16,
-    paddingVertical: 7,
+    padding: 16,
     borderRadius: 8,
   },
   buttonTitle: {

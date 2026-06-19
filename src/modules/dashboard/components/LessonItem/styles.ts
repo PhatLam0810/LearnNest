@@ -1,4 +1,4 @@
-import { dmSans, StyleSheet, typography } from '@styles';
+import { lexend, StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
@@ -22,6 +22,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'gray',
     position: 'relative',
   },
+  inner: {
+    flex: 1,
+  },
+  premiumIcon: {
+    color: '#FFF',
+    fontSize: 24,
+  },
   title: {
     color: '#212121',
     ...typography.subTitle1,
@@ -30,7 +37,7 @@ const styles = StyleSheet.create({
   },
   desc: {
     color: '#8D8D8D',
-    fontFamily: dmSans.style.fontFamily,
+    fontFamily: lexend.style.fontFamily,
     fontWeight: '400',
     fontSize: 14,
     letterSpacing: 0.01,

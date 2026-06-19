@@ -1,4 +1,4 @@
-import { dmSans, inter, StyleSheet, typography } from '@styles';
+import { lexend, inter, StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
@@ -7,7 +7,6 @@ const styles = StyleSheet.create({
     paddingRight: 20,
   },
   pageWrapper: {
-    paddingBottom: 200,
     gap: 16,
   },
   header: {
@@ -119,9 +118,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   lessonContent: {
-    marginTop: 16,
-    paddingTop: 24,
-    paddingBottom: 24,
     gap: 12,
   },
   lessonContentTitle: {
@@ -144,7 +140,7 @@ const styles = StyleSheet.create({
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Shadow
   },
   moduleItemTitle: {
-    fontFamily: dmSans.style.fontFamily,
+    fontFamily: lexend.style.fontFamily,
     fontWeight: '400',
     fontSize: 16,
     letterSpacing: 0.01,
@@ -153,6 +149,28 @@ const styles = StyleSheet.create({
   moduleItemTime: {
     ...typography.body2,
     color: '#8D8D8D',
+  },
+  // Inline style consolidations
+  marginTop12: {
+    marginTop: 12,
+  },
+  sideColumnGap: {
+    gap: 16,
+  },
+  contentGap8Margin8: {
+    gap: 8,
+    marginTop: 8,
+  },
+  rowGap10: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  paddingBottom10: {
+    paddingBottom: 10,
+  },
+  premiumIcon: {
+    color: '#FFF',
+    // fontSize: isMobile ? 20 : 24, // Handled dynamically
   },
 });
 

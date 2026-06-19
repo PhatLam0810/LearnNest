@@ -27,6 +27,7 @@ import {
   ArrowRightOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
+import styles from './styles';
 
 const { Text } = Typography;
 
@@ -232,15 +233,12 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
           key={item._id}
           actions={[
             <Tooltip key="time" title={formatDate(item.watchedAt)}>
-              <Text type="secondary" style={{ fontSize: 12 }}>
+              <Text type="secondary" style={styles.secondaryText12}>
                 <CalendarOutlined /> {formatDate(item.watchedAt)}
               </Text>
             </Tooltip>,
           ]}
-          style={{
-            padding: '12px 0',
-            borderBottom: '1px solid #f0f0f0',
-          }}>
+          style={styles.listItemStyle}>
           <List.Item.Meta
             avatar={
               <Avatar
@@ -248,56 +246,42 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
                 icon={!item.avatar && <UserOutlined />}
                 style={{
                   backgroundColor: isCurrentUser ? '#1890ff' : '#f56a00',
-                  width: 40,
-                  height: 40,
-                  fontSize: 16,
+                  ...styles.avatarStyle,
                 }}>
                 {!item.avatar && initials}
               </Avatar>
             }
             title={
               <Space size={4}>
-                <Text strong style={{ fontSize: 14 }}>
+                <Text strong style={styles.strongText14}>
                   {displayName}
                 </Text>
                 {isCurrentUser && (
                   <Tag
                     color="blue"
-                    icon={<UserOutlined style={{ fontSize: 10 }} />}
-                    style={{
-                      fontSize: 11,
-                      padding: '0 6px',
-                      height: 20,
-                      lineHeight: '20px',
-                      margin: 0,
-                    }}>
+                    icon={<UserOutlined style={styles.icon10} />}
+                    style={styles.tagYouStyle}>
                     You
                   </Tag>
                 )}
                 {item.completed && (
                   <Tag
                     color="success"
-                    icon={<CheckCircleOutlined style={{ fontSize: 10 }} />}
-                    style={{
-                      fontSize: 11,
-                      padding: '0 6px',
-                      height: 20,
-                      lineHeight: '20px',
-                      margin: 0,
-                    }}>
+                    icon={<CheckCircleOutlined style={styles.icon10} />}
+                    style={styles.tagCompletedStyle}>
                     Completed
                   </Tag>
                 )}
               </Space>
             }
             description={
-              <Space direction="vertical" size={4} style={{ width: '100%' }}>
+              <Space direction="vertical" size={4} style={styles.spaceVertical}>
                 <Row
                   justify="space-between"
                   align="middle"
-                  style={{ marginBottom: 4 }}>
+                  style={styles.statisticLabel}>
                   <Col>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
+                    <Text type="secondary" style={styles.secondaryText12}>
                       <PlayCircleOutlined /> {item.progress || 0}%
                     </Text>
                   </Col>
@@ -309,7 +293,7 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
                   showInfo={false}
                 />
                 {item.email && (
-                  <Text type="secondary" style={{ fontSize: 11, marginTop: 4 }}>
+                  <Text type="secondary" style={styles.secondaryText11}>
                     {item.email}
                   </Text>
                 )}
@@ -335,25 +319,18 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
     const hasNext = pagination.pageNum < pagination.totalPages;
 
     return (
-      <Row
-        justify="center"
-        align="middle"
-        style={{
-          marginTop: 20,
-          paddingTop: 16,
-          borderTop: '1px solid #f0f0f0',
-        }}>
+      <Row justify="center" align="middle" style={styles.paginationRow}>
         <Col>
           <Button
             icon={<ArrowLeftOutlined />}
             disabled={!hasPrev}
             onClick={handlePrevPage}
             size="small"
-            style={{ width: 32, height: 32 }}
+            style={styles.avatarSize32}
           />
         </Col>
-        <Col style={{ margin: '0 12px' }}>
-          <Text style={{ fontSize: 12, minWidth: 80, textAlign: 'center' }}>
+        <Col style={styles.columnMargin12}>
+          <Text style={styles.text12Center}>
             {pagination.pageNum} / {pagination.totalPages}
           </Text>
         </Col>
@@ -363,7 +340,7 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
             disabled={!hasNext}
             onClick={handleNextPage}
             size="small"
-            style={{ width: 32, height: 32 }}
+            style={styles.avatarSize32}
           />
         </Col>
       </Row>
@@ -372,20 +349,18 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
 
   return (
     <Spin spinning={loading} tip="Loading...">
-      <Space direction="vertical" style={{ width: '100%', padding: '0 8px' }}>
+      <Space direction="vertical" style={styles.spaceVerticalPadding}>
         <Row
           justify="space-between"
           align="middle"
-          style={{ marginBottom: 16 }}>
+          style={styles.statisticLabel}>
           <Col>
-            <Text strong style={{ fontSize: 16 }}>
+            <Text strong style={styles.text16Bold}>
               👥 Viewers: {subLessonTitle}
             </Text>
           </Col>
           <Col>
-            <Tag
-              color="blue"
-              style={{ fontSize: 12, padding: '2px 8px', margin: 0 }}>
+            <Tag color="blue" style={styles.smallText12}>
               {watchers.length} users
               {pagination.total > 0}
             </Tag>
@@ -396,7 +371,7 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
             description="No viewers yet"
-            style={{ padding: '40px 0' }}
+            style={styles.emptyPadding}
           />
         ) : (
           <>

@@ -35,7 +35,8 @@ const HeaderLayout: React.FC = ({}) => {
   );
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const isHomePage = pathname.startsWith('/dashboard/home');
+  const isLessonPage = pathname.startsWith('/dashboard/lesson');
+  const isLibraryPage = pathname.startsWith('/dashboard/library');
   const isAdmin = userProfile?.role?.level <= 2;
   const menuItemsUser: MenuItem[] = [
     ...(isAdmin
@@ -99,7 +100,9 @@ const HeaderLayout: React.FC = ({}) => {
 
             {/* SEARCH */}
           </div>
-          <div className="header-search">{!isHomePage && <SearchBar />}</div>
+          <div className="header-search">
+            {isLessonPage || (isLibraryPage && <SearchBar />)}
+          </div>
 
           {/* RIGHT */}
           <Space size={16}>

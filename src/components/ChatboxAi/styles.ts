@@ -93,7 +93,8 @@ export default StyleSheet.create({
     textAlign: 'center',
     backgroundColor: 'var(--color-vhu-primary)',
     color: 'white',
-    paddingVertical: 8,
+    paddingRight: 8,
+    padLdingLeft: 8,
     borderRadius: 8,
     fontWeight: 'bold',
     fontSize: 14,
@@ -119,8 +120,7 @@ export default StyleSheet.create({
   },
   sendBtn: {
     backgroundColor: 'var(--color-vhu-primary)',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    padding: 16,
     borderTopRightRadius: 6,
     borderBottomRightRadius: 6,
     justifyContent: 'center',
@@ -130,8 +130,7 @@ export default StyleSheet.create({
   },
   fab: {
     backgroundColor: 'var(--color-vhu-primary)',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    padding: 16,
     borderRadius: 9999,
     shadowColor: '#000',
     shadowOpacity: 0.15,
@@ -141,5 +140,16 @@ export default StyleSheet.create({
   fabText: {
     color: 'white',
     fontSize: 14,
+  },
+  // Inline style consolidations
+  messageGap: {
+    gap: 8,
+  },
+  fullSize: {
+    width: '100%',
+    height: '100%',
+  },
+  flex1: {
+    flex: 1,
   },
 });

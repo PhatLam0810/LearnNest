@@ -20,6 +20,7 @@ import {
   LessonLearner,
 } from '~mdAdmin/redux/RTKQuery/type';
 import './styles.scss';
+import styles from './styles';
 import { useAppPagination } from '@hooks/pagination';
 import { message } from 'antd';
 import axios from 'axios';
@@ -50,12 +51,11 @@ const LessonLearnersOverview = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const { Search } = Input;
-  const { accessToken } =
-    useAppSelector(state => state.authReducer.tokenInfo || {}) || {};
+
   // Query summary data
   const { data: summaryData, isLoading: summaryLoading } =
     adminQuery.useGetLessonLearnersSummaryQuery();
-
+  const [exportLearner] = adminQuery.useExportLearnersMutation();
   // Query learners for selected lesson
 
   useEffect(() => {
@@ -96,10 +96,7 @@ const LessonLearnersOverview = () => {
       width: '25%',
       align: 'center',
       render: (value: number) => (
-        <Badge
-          count={value}
-          style={{ backgroundColor: '#52c41a', fontSize: '14px' }}
-        />
+        <Badge count={value} style={styles.badgeSuccessStyle} />
       ),
     },
     {
@@ -175,16 +172,7 @@ const LessonLearnersOverview = () => {
     setIsExporting(true);
     try {
       const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const response = await axios.post(
-        `${baseURL}/admin/export-learners`,
-        { learners: listItem },
-        {
-          responseType: 'blob',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
+      const response = await exportLearner({ learners: listItem });
 
       // Tạo link download
       const blob = response.data;
@@ -300,7 +288,7 @@ const LessonLearnersOverview = () => {
           <Search
             placeholder="Input search text"
             onSearch={search}
-            style={{ width: '100%' }}
+            style={styles.searchInput}
           />
           <Table
             columns={learnerColumns}

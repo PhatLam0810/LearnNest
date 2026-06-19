@@ -30,8 +30,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+    paddingRight: 12,
+    paddingLeft: 12,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   logoMark: {
     width: 44,
@@ -52,7 +54,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   topbar: {
-    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 24,
     backgroundColor: '#ffffff',
     color: '#1a1a1a',
     position: 'sticky',
@@ -81,7 +84,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     border: '1px solid #e5e7eb',
     height: 40,
-    paddingHorizontal: 12,
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   actions: {
     display: 'flex',

@@ -1,5 +1,5 @@
 /* header.css */
-
+@use 'app/global.scss' as *;
 .app-header {
   position: sticky;
   top: 0;
@@ -55,8 +55,9 @@
 .header-logo-text {
   font-size: 20px;
   font-weight: 700;
-  color: #111;
+  color: $color-vhu-primary;
   white-space: nowrap;
+  font-family: $font-lexend;
 }
 
 .header-search {
@@ -71,6 +72,7 @@
 
 .header-avatar {
   cursor: pointer;
+  background: $color-vhu-primary;
 }
 
 .drawer-header {
@@ -89,6 +91,7 @@
 
 .drawer-title {
   font-size: 18px;
+  color: $color-vhu-primary;
   font-weight: 700;
 }
 

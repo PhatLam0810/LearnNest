@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     minWidth: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: '#111827',
+    backgroundColor: '#1d418a',
     color: '#ffffff',
     display: 'flex',
     alignItems: 'center',
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
 
   answerOptionSelected: {
-    border: '1px solid #1677ff',
+    border: '1px solid #1d418a',
     backgroundColor: '#e6f4ff',
     boxShadow: '0 6px 18px rgba(22,119,255,0.12)',
   },
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
 
   answerLetterBoxSelected: {
-    backgroundColor: '#1677ff',
+    backgroundColor: '#1d418a',
     color: '#ffffff',
   },
 
@@ -301,11 +301,26 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     paddingRight: 30,
     borderRadius: 14,
-    backgroundColor: '#1677ff',
+    backgroundColor: '#1d418a',
     border: 'none',
     fontWeight: '600',
     fontSize: 14,
     boxShadow: '0 10px 25px rgba(22,119,255,0.25)',
+  },
+
+  // YouTube Player Container
+  youtubeWrapper: {
+    position: 'relative',
+    width: '100%',
+    paddingTop: '56.25%', // 16:9 aspect ratio
+  },
+
+  youtubePlayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
   },
 });
 

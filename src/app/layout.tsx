@@ -14,6 +14,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import Chatbox from '@components/ChatboxAi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MessageProvider from '@components/MessageProvider';
+import styles from './layoutStyles';
 
 const queryClient = new QueryClient();
 
@@ -34,22 +35,12 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body style={{ margin: 0, padding: 0, overflow: 'auto' }}>
+      <body>
         <Provider store={store}>
           <QueryClientProvider client={queryClient}>
             <PersistGate persistor={persistor}>
               <MessageProvider />
-              <View
-                style={{
-                  flex: 1,
-                  width: '100%',
-                  minHeight: '100vh',
-                  backgroundColor: '#F9F9F9',
-                  overflowX: 'hidden',
-                  overflowY: 'auto',
-                }}>
-                {children}
-              </View>
+              <View style={styles.appShell}>{children}</View>
               <Authentication />
               <Chatbox />
               <LoadingScreen />

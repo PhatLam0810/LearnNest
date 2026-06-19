@@ -41,7 +41,8 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 5,
     borderWidth: 1,
-    paddingHorizontal: 10,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   buttonContainer: {
     display: 'flex',

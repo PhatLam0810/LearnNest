@@ -7,6 +7,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
   },
+  headerWrapper: {
+    marginBottom: 12,
+  },
+  pageTitle: {
+    margin: 0,
+    ...typography.titleM,
+  },
   title: {
     ...typography.body2,
     fontWeight: '500',

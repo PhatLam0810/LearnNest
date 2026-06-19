@@ -46,6 +46,42 @@ const styles = StyleSheet.create({
   draggableList: {
     paddingTop: 12,
   },
+  flex1: {
+    flex: 1,
+  },
+  flex4: {
+    flex: 4,
+  },
+  flex1_5: {
+    flex: 1.5,
+  },
+  containerColumn: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+  },
+  scrollView: {
+    flex: 1,
+    scrollbarWidth: 'none',
+  },
+  rowLayout: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  fullWidth: {
+    width: '100%',
+  },
+  buttonGap: {
+    display: 'flex',
+    gap: 8,
+  },
+  dropAreaLabel: {
+    marginTop: 12,
+  },
+  columnContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
 });
 
 export default styles;

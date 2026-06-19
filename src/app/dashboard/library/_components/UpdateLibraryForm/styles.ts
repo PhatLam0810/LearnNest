@@ -1,4 +1,4 @@
-import { dmSans, StyleSheet, typography } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {},

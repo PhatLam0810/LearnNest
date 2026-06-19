@@ -420,6 +420,7 @@ const LibraryDetailItem = forwardRef<
 
     // Nếu hợp lệ
     setInvalidQuestions([]); // clear
+    setSelectedAnswers({});
     onClickSubmit(selectedAnswers);
   };
 
@@ -476,12 +477,7 @@ const LibraryDetailItem = forwardRef<
                 }}
               />
             ) : (
-              <View
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  paddingTop: '56.25%',
-                }}>
+              <View style={styles.youtubeWrapper}>
                 <YouTube
                   videoId={getYoutubeId(data.url)}
                   opts={{
@@ -489,13 +485,7 @@ const LibraryDetailItem = forwardRef<
                     height: '100%',
                     playerVars: { controls: 1, autoplay: 0 },
                   }}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                  }}
+                  style={styles.youtubePlayer}
                   onReady={(event: any) => (playerRef.current = event.target)}
                   onPlay={() => {
                     if (playerRef.current) {
@@ -542,14 +532,6 @@ const LibraryDetailItem = forwardRef<
       case 'Text':
         return (
           <ScrollView style={styles.quizContainer}>
-            {/* HEADER */}
-            <View style={styles.quizHeader}>
-              <div style={styles.quizTitle}>Lesson Assessment</div>
-              <div style={styles.quizDescription}>
-                Complete all questions before submitting your answers.
-              </div>
-            </View>
-            {/* QUESTIONS */}
             <View style={styles.quizContent}>
               {shuffledQuestions.map((question: any, index: number) => {
                 const isInvalid = invalidQuestions.includes(question._id);
@@ -640,7 +622,7 @@ const LibraryDetailItem = forwardRef<
                 type="primary"
                 onClick={handleSubmit}
                 style={styles.submitQuizButton}>
-                Submit Answers
+                Xác nhận
               </Button>
             </View>
           </ScrollView>
@@ -676,10 +658,7 @@ const LibraryDetailItem = forwardRef<
           {/* HEADER */}
           <div style={styles.modalHeader}>
             <div style={styles.modalTitle}>
-              Question {visibleQuestion?.question}
-            </div>
-            <div style={styles.modalSubTitle}>
-              Choose the correct answer to continue learning
+              Câu hỏi {visibleQuestion?.question}
             </div>
           </div>
 
@@ -711,7 +690,7 @@ const LibraryDetailItem = forwardRef<
               disabled={!selectedAnswer}
               onClick={handleClose}
               style={styles.submitButton}>
-              Submit Answer
+              Xác nhận
             </Button>
           </div>
         </div>

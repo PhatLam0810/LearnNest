@@ -242,7 +242,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         </div>
       ),
       children: (
-        <View style={{ gap: 8, marginTop: 8 }}>
+        <View style={styles.contentGap8Margin8}>
           {item.libraries.map((subItem, subIndex) => (
             <TouchableOpacity
               key={subIndex}
@@ -269,7 +269,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   ]}
                   onClick={() => handleLibraryClick(subItem, item)}>
                   {/* LEFT AREA: TITLE + TIME */}
-                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <View style={styles.rowGap10}>
                     <PlayCircleOutlined />
                     <View>
                       <Text style={styles.moduleItemTitle}>
@@ -341,10 +341,10 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     <View style={containerStyle}>
       {contextHolder}
       <View style={styles.pageWrapper}>
-        <View style={{ marginTop: 12 }}>
+        <View style={styles.marginTop12}>
           {isMobile && (
             <>
-              <View style={{ ...sideColumnStyle, gap: 16 }}>
+              <View style={{ ...sideColumnStyle, ...styles.sideColumnGap }}>
                 <View
                   style={{
                     ...styles.thumbnailCard,
@@ -354,7 +354,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     <View style={styles.premium}>
                       <DollarOutlined
                         style={{
-                          color: '#FFF',
+                          ...styles.premiumIcon,
                           fontSize: isMobile ? 20 : 24,
                         }}
                       />
@@ -408,9 +408,9 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     ...styles.lessonContentTitle,
                     fontSize: isMobile ? 16 : 18,
                   }}>
-                  Lesson Content
+                  Nội dung khóa học
                 </Text>
-                <View style={{ gap: 12 }}>
+                <View style={styles.lessonContent}>
                   <Collapse
                     bordered={false}
                     expandIcon={({ isActive }) => (
@@ -456,13 +456,13 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                 }}>
                 {lessonDetail?.description}
               </Text>
-              <View style={{ paddingBottom: 10 }}>
+              <View style={styles.paddingBottom10}>
                 <Text
                   style={{
                     ...styles.whatLearnTitle,
                     fontSize: isMobile ? 16 : 18,
                   }}>
-                  What you&apos;ll learn:
+                  Kỹ năng đạt được:
                 </Text>
                 <FlatList
                   data={lessonDetail?.learnedSkills}
@@ -507,9 +507,9 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                         ...styles.lessonContentTitle,
                         fontSize: isMobile ? 16 : 18,
                       }}>
-                      Lesson Content
+                      Nội dung khóa học
                     </Text>
-                    <View style={{ gap: 12 }}>
+                    <View style={styles.lessonContent}>
                       <Collapse
                         bordered={false}
                         expandIcon={({ isActive }) => (
@@ -529,7 +529,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               )}
             </View>
             {!isMobile && (
-              <View style={{ ...sideColumnStyle, gap: 16 }}>
+              <View style={{ ...sideColumnStyle, ...styles.sideColumnGap }}>
                 <View
                   style={{
                     ...styles.thumbnailCard,
@@ -539,7 +539,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     <View style={styles.premium}>
                       <DollarOutlined
                         style={{
-                          color: '#FFF',
+                          ...styles.premiumIcon,
                           fontSize: isMobile ? 20 : 24,
                         }}
                       />

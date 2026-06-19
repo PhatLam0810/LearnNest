@@ -93,7 +93,7 @@ export default function Chatbox() {
 
           <ScrollView
             style={styles.chatArea}
-            contentContainerStyle={{ gap: 8 }}>
+            contentContainerStyle={styles.messageGap}>
             {chat.map((msg, idx) => (
               <View
                 key={idx}
@@ -116,11 +116,11 @@ export default function Chatbox() {
                   <View style={styles.thumbnailWrapper}>
                     <Image
                       source={{ uri: lessonInfo.thumbnail || '/fallback.jpg' }}
-                      style={{ width: '100%', height: '100%' }}
+                      style={styles.fullSize}
                       resizeMode="cover"
                     />
                   </View>
-                  <View style={{ flex: 1 }}>
+                  <View style={styles.flex1}>
                     <Text style={styles.lessonTitle}>{lessonInfo.title}</Text>
                     <Text style={styles.lessonPrice}>
                       {lessonInfo.isPremium

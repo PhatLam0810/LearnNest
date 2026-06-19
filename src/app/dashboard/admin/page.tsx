@@ -40,8 +40,8 @@ const AdminPage: React.FC = () => {
   const tab = searchParams.get('tab') || '1'; // Lấy `tab` từ URL, mặc định là '1'
   return (
     <View style={styles.container}>
-      <View style={{ marginBottom: 12 }}>
-        <h1 style={{ margin: 0 }}>Quản Trị Hệ Thống</h1>
+      <View style={styles.headerWrapper}>
+        <h1 style={styles.pageTitle}>Quản Trị Hệ Thống</h1>
       </View>
       <Tabs defaultActiveKey={tab} items={items} />
     </View>
