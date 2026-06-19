@@ -1,25 +1,27 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Card } from 'antd';
-import { ClockCircleOutlined, DollarOutlined } from '@ant-design/icons';
+import { BookOutlined, DollarOutlined, TeamOutlined } from '@ant-design/icons';
 import './styles.css';
-import dayjs from 'dayjs';
 import styles from './styles';
 import { Text, View } from 'react-native-web';
 import LessonThumbnail from '../LessonThumbnail';
 import { authQuery } from '~mdAuth/redux';
 import { useAppSelector } from '@redux';
 
+type LessonItemData = {
+  thumbnail: string;
+  title: string;
+  description: string;
+  _id: string;
+  isPremium: boolean;
+  price: number;
+  totalLibraries: number;
+  totalLearners: number;
+};
+
 type LessonItemProps = {
-  data: {
-    thumbnail: string;
-    createdAt: string;
-    title: string;
-    description: string;
-    _id: string;
-    isPremium: boolean;
-    price: number;
-  };
+  data: LessonItemData;
   onClick: () => void;
   onEditClick?: (data: any) => void;
   refresh?: () => void;
@@ -28,11 +30,17 @@ type LessonItemProps = {
 };
 
 const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
-  const { thumbnail, createdAt, title, description, isPremium, price, _id } =
-    data || {};
+  const {
+    thumbnail,
+    title,
+    description,
+    isPremium,
+    price,
+    totalLibraries,
+    totalLearners,
+  } = data || {};
   const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
   const [accessLesson, setAccessLesson] = useState(true);
-  console.log('dataSub', data);
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   // useEffect(() => {
@@ -84,17 +92,15 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
             </Text>
           )}
 
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: 4,
-              marginTop: 8,
-              alignItems: 'center',
-            }}>
-            <ClockCircleOutlined style={styles.time} />
-            <Text style={styles.time}>
-              {dayjs(createdAt).format('MM/DD/YYYY HH:mm')}
-            </Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statItem}>
+              <BookOutlined style={styles.statIcon} />
+              <Text style={styles.statValue}>{totalLibraries}</Text>
+            </View>
+            <View style={styles.statItem}>
+              <TeamOutlined style={styles.statIcon} />
+              <Text style={styles.statValue}>{totalLearners}</Text>
+            </View>
           </View>
         </View>
       </View>

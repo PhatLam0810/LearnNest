@@ -527,34 +527,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   </View>
                 </>
               )}
-
-              <View
-                style={{
-                  ...styles.lessonContent,
-                  maxWidth: isMobile ? '100%' : '90%',
-                }}>
-                <Text
-                  style={{
-                    ...styles.lessonContentTitle,
-                    fontSize: isMobile ? 16 : 18,
-                  }}>
-                  Related Lessons
-                </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={lessonDetail.relatedLessons}
-                  contentContainerStyle={{ gap: 8 }}
-                  renderItem={({ item }) => (
-                    <LessonItem
-                      data={item}
-                      onClick={() => {
-                        router.push(`/dashboard/home/lesson/${item._id}`);
-                      }}
-                    />
-                  )}
-                />
-              </View>
             </View>
             {!isMobile && (
               <View style={{ ...sideColumnStyle, gap: 16 }}>

@@ -40,7 +40,27 @@ const styles = StyleSheet.create({
     ...typography.titleS,
     color: '#f05123',
   },
-  time: {
+  statsRow: {
+    flexDirection: 'row',
+    marginTop: 12,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  statItem: {
+    gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statIcon: {
+    fontSize: 16,
+    color: '#1d418a',
+  },
+  statValue: {
+    ...typography.subTitle1,
+    color: '#000',
+    marginBottom: 2,
+  },
+  statLabel: {
     ...typography.body2,
     fontSize: 12,
     color: '#8D8D8D',
