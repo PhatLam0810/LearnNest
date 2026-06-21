@@ -64,7 +64,7 @@ const LessonLearnersOverview = () => {
     }
   }, [selectedLessonId]);
 
-  const { listItem, fetchData, refresh, search } =
+  const { listItem, fetchData, refresh, search, currentData } =
     useAppPagination<LessonLearner>({
       apiUrl: `admin/lessons/${selectedLessonId}/learners`,
     });
@@ -245,7 +245,14 @@ const LessonLearnersOverview = () => {
             columns={lessonColumns}
             dataSource={lessonTableData}
             rowKey="key"
-            pagination={{ pageSize: 10 }}
+            onChange={res => {
+              fetchData({ pageNum: res.current });
+            }}
+            pagination={{
+              current: currentData?.pageNum,
+              pageSize: currentData?.pageSize,
+              total: currentData?.totalRecords,
+            }}
             onRow={record => ({
               onClick: () => handleLessonSelect(record),
               className: 'lesson-learners-overview__table-row-clickable',
@@ -294,7 +301,14 @@ const LessonLearnersOverview = () => {
             columns={learnerColumns}
             dataSource={listItem}
             rowKey="key"
-            pagination={{ pageSize: 10 }}
+            onChange={res => {
+              fetchData({ pageNum: res.current });
+            }}
+            pagination={{
+              current: currentData?.pageNum,
+              pageSize: currentData?.pageSize,
+              total: currentData?.totalRecords,
+            }}
             locale={{
               emptyText: <Empty description="Không có người học" />,
             }}

@@ -26,11 +26,10 @@ import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
 import { authQuery } from '~mdAuth/redux/RTKQuery';
 import { userInfo } from 'os';
 const UserManage = () => {
-  const { listItem, currentData, refresh, search } = useAppPagination<UserItem>(
-    {
+  const { listItem, currentData, refresh, search, fetchData } =
+    useAppPagination<UserItem>({
       apiUrl: 'user/getListUser',
-    },
-  );
+    });
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const { modal } = App.useApp();
@@ -43,7 +42,7 @@ const UserManage = () => {
   const [createUser, { isLoading: isLoadingCreateUser }] =
     adminQuery.useCreateUserMutation();
   const [messageApi, contextHolder] = message.useMessage();
-
+  console.log('listItem', listItem, 'currentData', currentData);
   const handleDeleteUser = async (_id: string) => {
     try {
       await deleteAccount({
@@ -146,7 +145,7 @@ const UserManage = () => {
           Tổng số học viên
         </Text>
         <Text style={{ fontSize: 36, fontWeight: 700, color: '#111827' }}>
-          {listItem.length}
+          {currentData?.totalRecords}
         </Text>
       </Card>
       <View
@@ -171,6 +170,9 @@ const UserManage = () => {
         dataSource={listItem}
         rowKey={record => record._id}
         scroll={{ x: 'max-content' }}
+        onChange={res => {
+          fetchData({ pageNum: res.current });
+        }}
         pagination={{
           current: currentData?.pageNum,
           pageSize: currentData?.pageSize,
