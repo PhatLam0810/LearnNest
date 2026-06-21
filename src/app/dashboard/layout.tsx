@@ -74,7 +74,7 @@ export default function DashboardLayout({
           ),
         },
         {
-          key: '/dashboard/',
+          key: '/dashboard/my-courses',
           label: 'Tổng Quan',
           icon: <IdcardOutlined />,
         },
