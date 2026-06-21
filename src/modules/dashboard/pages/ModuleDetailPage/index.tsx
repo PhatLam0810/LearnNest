@@ -1,5 +1,13 @@
-import React, { CSSProperties, useRef, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native-web';
+'use client';
+
+import React, { CSSProperties, useRef, useEffect, useState } from 'react';
+import {
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from 'react-native-web';
 import styles from './styles';
 import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
@@ -11,8 +19,15 @@ import { useResponsive } from '@/styles/responsive';
 import LibraryDetailItem, {
   LibraryDetailItemHandle,
 } from '~mdDashboard/components/LibraryDetailItem';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const ModuleDetailPage = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const lessonId = searchParams.get('lessonId') || '';
+  const subLessonId = searchParams.get('subLessonId') || '';
+
   const { lessonDetail, selectedLibrary } = useAppSelector(
     state => state.dashboardReducer,
   );
@@ -31,6 +46,71 @@ const ModuleDetailPage = () => {
     score: 0,
     isPass: false,
   });
+
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (!lessonId) return;
+
+    const loadCourseData = async () => {
+      try {
+        setIsLoadingData(true);
+        await dispatch(dashboardAction.getLessonDetail({ id: lessonId }));
+      } catch (error) {
+        console.error('Lỗi khi đồng bộ chi tiết khóa học từ URL:', error);
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    loadCourseData();
+  }, [lessonId, dispatch]);
+
+  useEffect(() => {
+    if (
+      isLoadingData ||
+      !lessonDetail?.modules ||
+      lessonDetail.modules.length === 0
+    )
+      return;
+
+    const allLibraries = lessonDetail.modules.flatMap(
+      module => module.libraries || [],
+    );
+    if (allLibraries.length === 0) return;
+
+    let targetLibrary = null;
+
+    if (
+      subLessonId &&
+      subLessonId !== 'first-lesson' &&
+      subLessonId !== 'undefined'
+    ) {
+      targetLibrary = allLibraries.find(lib => lib._id === subLessonId);
+    }
+
+    if (!targetLibrary) {
+      targetLibrary = allLibraries[0];
+    }
+
+    if (targetLibrary && selectedLibrary?._id !== targetLibrary._id) {
+      dispatch(dashboardAction.setSelectedLibrary(targetLibrary));
+    }
+  }, [
+    lessonDetail,
+    subLessonId,
+    isLoadingData,
+    selectedLibrary?._id,
+    dispatch,
+  ]);
+
+  const handleSelectLibrary = (subItem: any) => {
+    dispatch(dashboardAction.setSelectedLibrary(subItem));
+    router.push(
+      `/dashboard/home/lesson/moduleDetail?lessonId=${lessonId}&subLessonId=${subItem._id}`,
+    );
+  };
+
   const isAdmin = userProfile?.role?.level <= 2;
 
   const hasAccess = item => {
@@ -59,8 +139,7 @@ const ModuleDetailPage = () => {
                 <View
                   onClick={() => {
                     if (!hasAccess(subItem)) return;
-
-                    dispatch(dashboardAction.setSelectedLibrary(subItem));
+                    handleSelectLibrary(subItem);
                   }}
                   style={[
                     styles.buttonModule,
@@ -124,8 +203,12 @@ const ModuleDetailPage = () => {
       libraryId: nextLibrary?._id,
       userId: userProfile?._id,
     });
-    dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
-    dispatch(dashboardAction.setSelectedLibrary(nextLibrary));
+
+    await dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
+
+    if (nextLibrary) {
+      handleSelectLibrary(nextLibrary);
+    }
   };
   const handleClose = () => {
     setIsModalOpen(false);
@@ -171,10 +254,30 @@ const ModuleDetailPage = () => {
     // libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
   };
 
+  // Màn hình chờ bọc lót trong quá trình hoán đổi dữ liệu API giữa các khóa học
+  if (isLoadingData && !selectedLibrary) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
+          height: '80vh',
+        }}>
+        <ActivityIndicator size="large" color="var(--color-vhu-primary)" />
+        <Text style={{ color: '#8c8c8c' }}>Đang tải nội dung khóa học...</Text>
+      </View>
+    );
+  }
+
+  // Nếu đã load xong mà rỗng thật sự, hiển thị thông báo an toàn thay vì block trắng menu
   if (!selectedLibrary) {
     return (
-      <View style={styles.centeredFlex}>
-        <Text>No library selected</Text>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#999' }}>
+          Không tìm thấy dữ liệu bài học yêu cầu
+        </Text>
       </View>
     );
   }
@@ -237,6 +340,7 @@ const ModuleDetailPage = () => {
               <LibraryDetailItem
                 ref={libraryRef}
                 data={selectedLibrary}
+                lessonId={lessonDetail?._id}
                 onWatchFinish={onWatchFinish}
                 onClickSubmit={handleSubmit}
               />
@@ -246,6 +350,7 @@ const ModuleDetailPage = () => {
               <LibraryDetailItem
                 ref={libraryRef}
                 data={selectedLibrary}
+                lessonId={lessonDetail?._id}
                 onWatchFinish={onWatchFinish}
               />
               <View style={styles.layoutTitleContainer}>

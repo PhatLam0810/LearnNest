@@ -19,6 +19,7 @@ import { useAppSelector } from '@redux';
 
 type LibraryDetailItemProps = {
   data: Library;
+  lessonId?: string;
   onWatchFinish?: () => void;
   onPauseVideo?: () => void;
   onClickSubmit?: (answerList: any) => void;
@@ -29,7 +30,7 @@ export interface LibraryDetailItemHandle {
 const LibraryDetailItem = forwardRef<
   LibraryDetailItemHandle,
   LibraryDetailItemProps
->(({ data, onWatchFinish, onClickSubmit }, ref) => {
+>(({ data, lessonId, onWatchFinish, onClickSubmit }, ref) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -51,7 +52,7 @@ const LibraryDetailItem = forwardRef<
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:9999';
 
-  const useVideoTracking = (subLessonId: string) => {
+  const useVideoTracking = (subLessonId: string, lessonId?: string) => {
     const [isTracking, setIsTracking] = useState(false);
     const trackingIntervalRef = useRef<any | null>(null);
     const lastSentAtRef = useRef<number>(0);
@@ -109,6 +110,10 @@ const LibraryDetailItem = forwardRef<
           lastPosition: Math.floor(currentPos),
           totalWatchedTime: Math.floor(totalWatchedTimeRef.current || 0),
         };
+
+        if (lessonId) {
+          payload.lessonId = lessonId;
+        }
 
         const url = `${API_BASE_URL}/lesson/video/track`;
         await axios.post(url, payload, { timeout: 4000 });
@@ -242,7 +247,7 @@ const LibraryDetailItem = forwardRef<
     pauseTracking,
     resumeTracking,
     handleVideoEnd,
-  } = useVideoTracking(data._id);
+  } = useVideoTracking(data._id, lessonId);
 
   const getYoutubeId = (url: string) => {
     const match = url.match(/(?:[?&]v=|youtu\.be\/|embed\/)([^&]+)/);
