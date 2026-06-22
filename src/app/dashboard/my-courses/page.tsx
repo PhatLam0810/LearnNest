@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@redux';
 import { useMyCourses } from '@/hooks/useMyCourses';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
+import { Progress } from 'antd'; // Hỗ trợ hiển thị thanh tiến trình
 import './styles.scss';
 
 export interface MyCourseItem {
@@ -52,11 +53,25 @@ const CourseItem: React.FC<CourseItemProps> = React.memo(
           <h3 className="course-title">
             {course?.lessonName || course?.name || 'Khóa học đang cập nhật...'}
           </h3>
-          <span className="course-time">
+
+          <span
+            className="course-time"
+            style={{ display: 'block', marginBottom: '4px' }}>
             {course?.lastStudiedAt
               ? `Học cách đây ${typeof formatRelativeTime === 'function' ? formatRelativeTime(course.lastStudiedAt) : 'gần đây'}`
               : 'Chưa bắt đầu học'}
           </span>
+
+          <div
+            className="course-item-progress"
+            style={{ marginTop: '6px', maxWidth: '85%' }}>
+            <Progress
+              percent={Math.round(course?.progress || 0)}
+              size="small"
+              status="active"
+              strokeColor="var(--color-vhu-primary)"
+            />
+          </div>
         </div>
 
         <div

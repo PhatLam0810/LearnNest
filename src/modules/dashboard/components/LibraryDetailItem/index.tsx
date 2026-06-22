@@ -8,11 +8,16 @@ import React, {
 } from 'react';
 import { ScrollView, View } from 'react-native-web';
 import { Document, Page } from 'react-pdf';
-import { FullscreenOutlined } from '@ant-design/icons';
+import {
+  FullscreenOutlined,
+  PlayCircleOutlined,
+  ReloadOutlined,
+  InfoCircleOutlined,
+} from '@ant-design/icons';
 import { Library } from '~mdDashboard/types';
 import styles from './styles';
 import YouTube from 'react-youtube';
-import { Button, Modal, Radio } from 'antd';
+import { Button, Modal, Radio, Spin } from 'antd'; // Thêm Spin
 import axios from 'axios';
 import { messageApi } from '@hooks';
 import { useAppSelector } from '@redux';
@@ -27,6 +32,7 @@ type LibraryDetailItemProps = {
 export interface LibraryDetailItemHandle {
   pauseAll: () => void;
 }
+
 const LibraryDetailItem = forwardRef<
   LibraryDetailItemHandle,
   LibraryDetailItemProps
@@ -48,9 +54,19 @@ const LibraryDetailItem = forwardRef<
   const [invalidQuestions, setInvalidQuestions] = useState<string[]>([]);
   const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
   const [modal, contextHolder] = Modal.useModal();
+  const [pendingSeek, setPendingSeek] = useState<number | null>(null);
+  const [isConfirmingResume, setIsConfirmingResume] = useState(false);
+
+  // State quản lý hiệu ứng chuyển giao giữa các khóa học
+  const [isSwitchingContext, setIsSwitchingContext] = useState(false);
+  const activeModalRef = useRef<any>(null);
 
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:9999';
+  const userProfile = useAppSelector(
+    (state: any) => state.authReducer?.tokenInfo?.userProfile,
+  );
+  const userId = userProfile?._id;
 
   const useVideoTracking = (subLessonId: string, lessonId?: string) => {
     const [isTracking, setIsTracking] = useState(false);
@@ -61,11 +77,6 @@ const LibraryDetailItem = forwardRef<
     const totalWatchedTimeRef = useRef<number>(0);
     const lastPlayStateRef = useRef<'playing' | 'paused'>('paused');
     const videoPlayingRef = useRef<boolean>(false);
-
-    const userProfile = useAppSelector(
-      (state: any) => state.authReducer?.tokenInfo?.userProfile,
-    );
-    const userId = userProfile?._id;
 
     const flushTracking = async (opts?: {
       force?: boolean;
@@ -260,7 +271,7 @@ const LibraryDetailItem = forwardRef<
   );
   useEffect(() => {
     const interval = setInterval(() => {
-      if (playerRef.current) {
+      if (playerRef.current && !isSwitchingContext) {
         const currentTime = Math.floor(playerRef.current.getCurrentTime());
         const duration = playerRef.current.getDuration();
         const percentWatched = (maxWatched / duration) * 100;
@@ -292,11 +303,18 @@ const LibraryDetailItem = forwardRef<
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastPlayed, data, shownQuestionIds, maxWatched, onWatchFinish]);
+  }, [
+    lastPlayed,
+    data,
+    shownQuestionIds,
+    maxWatched,
+    onWatchFinish,
+    isSwitchingContext,
+  ]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (videoRef.current) {
+      if (videoRef.current && !isSwitchingContext) {
         const currentTime = Math.floor(videoRef.current.currentTime);
         const duration = videoRef.current.duration;
         const percentWatched = (maxWatched / duration) * 100;
@@ -346,6 +364,7 @@ const LibraryDetailItem = forwardRef<
     videoStatus,
     maxWatched,
     onWatchFinish,
+    isSwitchingContext,
   ]);
 
   useImperativeHandle(ref, () => ({
@@ -444,14 +463,219 @@ const LibraryDetailItem = forwardRef<
     }
   }, [data]);
 
+  // XỬ LÝ LÕI: Tạm dừng video và bật loading overlay khi đổi lessonId
+  useEffect(() => {
+    let isCurrentRequest = true;
+
+    // ÉP DỪNG VIDEO NGAY LẬP TỨC KHI THAY ĐỔI URL (Khóa học)
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+    if (
+      playerRef.current &&
+      typeof playerRef.current.pauseVideo === 'function'
+    ) {
+      playerRef.current.pauseVideo();
+    }
+    pauseTracking();
+
+    const fetchProgress = async () => {
+      if (
+        !userId ||
+        !data?._id ||
+        (data.type !== 'Video' && data.type !== 'Youtube')
+      )
+        return;
+
+      try {
+        setIsSwitchingContext(true); // Bật màn hình mờ chuyển giao
+
+        const res = await axios.get(
+          `${API_BASE_URL}/lesson/user/${userId}/sublesson/${data._id}/progress`,
+          {
+            params: {
+              lessonId: lessonId,
+            },
+          },
+        );
+
+        if (!isCurrentRequest) return;
+
+        const info = res.data?.data || res.data;
+
+        if (info && info.lastPosition > 5 && !info.completed) {
+          const mins = Math.floor(info.lastPosition / 60);
+          const secs = Math.floor(info.lastPosition % 60);
+          const timeText =
+            mins > 0 ? `${mins} phút ${secs} giây` : `${secs} giây`;
+
+          if (activeModalRef.current) {
+            activeModalRef.current.destroy();
+          }
+          setIsConfirmingResume(true);
+          const modalInstance = modal.confirm({
+            icon: null,
+            width: 420,
+            title: (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontSize: '18px',
+                }}>
+                <InfoCircleOutlined style={{ color: '#1677ff' }} />
+                <span>Tiếp tục bài học?</span>
+              </div>
+            ),
+            content: (
+              <div
+                style={{
+                  marginTop: '12px',
+                  fontSize: '15px',
+                  color: '#4b5563',
+                  lineHeight: '1.6',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}>
+                Bạn đã dừng lại ở:{' '}
+                <span
+                  style={{
+                    fontWeight: '600',
+                    color: '#0958d9',
+                    backgroundColor: '#e6f4ff',
+                    padding: '2px 10px',
+                    borderRadius: '100px',
+                    border: '1px solid #91caff',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    marginLeft: '4px',
+                    verticalAlign: 'baseline',
+                  }}>
+                  <PlayCircleOutlined /> {timeText}
+                </span>
+              </div>
+            ),
+            okText: 'Tiếp tục xem',
+            cancelText: 'Xem lại từ đầu',
+            okButtonProps: {
+              type: 'primary',
+              icon: <PlayCircleOutlined />,
+              style: {
+                borderRadius: '6px',
+                fontWeight: '500',
+                padding: '0 20px',
+              },
+            },
+            cancelButtonProps: {
+              icon: <ReloadOutlined />,
+              style: {
+                borderRadius: '6px',
+                fontWeight: '500',
+                padding: '0 20px',
+              },
+            },
+            footer: (_, { OkBtn, CancelBtn }) => (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: '12px',
+                  marginTop: '24px',
+                }}>
+                <CancelBtn />
+                <OkBtn />
+              </div>
+            ),
+            centered: true,
+            maskClosable: false,
+            onOk: () => {
+              setIsConfirmingResume(false);
+              activeModalRef.current = null;
+              setMaxWatched(info.watchedSeconds || info.lastPosition);
+              setLastPlayed(info.lastPosition);
+
+              if (data.type === 'Video' && videoRef.current) {
+                videoRef.current.currentTime = info.lastPosition;
+                videoRef.current.play();
+              } else if (data.type === 'Youtube' && playerRef.current) {
+                playerRef.current.seekTo(info.lastPosition);
+                playerRef.current.playVideo();
+              } else {
+                setPendingSeek(info.lastPosition);
+              }
+            },
+            onCancel: () => {
+              setIsConfirmingResume(false);
+              activeModalRef.current = null;
+              setMaxWatched(0);
+              setLastPlayed(0);
+              setPendingSeek(null);
+              if (data.type === 'Video' && videoRef.current) {
+                videoRef.current.currentTime = 0;
+                videoRef.current.play();
+              } else if (data.type === 'Youtube' && playerRef.current) {
+                playerRef.current.seekTo(0);
+                playerRef.current.playVideo();
+              }
+            },
+          });
+
+          activeModalRef.current = modalInstance;
+        }
+      } catch (err) {
+        console.error('Lỗi khi lấy tiến độ video:', err);
+      } finally {
+        if (isCurrentRequest) {
+          // Delay nhỏ để tránh giật hình khi API phản hồi quá nhanh
+          setTimeout(() => setIsSwitchingContext(false), 500);
+        }
+      }
+    };
+
+    fetchProgress();
+
+    return () => {
+      isCurrentRequest = false;
+      if (activeModalRef.current) {
+        activeModalRef.current.destroy();
+        activeModalRef.current = null;
+      }
+    };
+  }, [data?._id, userId, lessonId, modal]);
+
   const renderMedia = () => {
     if (!data?.type) return null;
+
+    const OverlayLoading = () =>
+      isSwitchingContext || isConfirmingResume ? (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#000', // Đen hoàn toàn thay vì rgba trong suốt
+            zIndex: 10,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            color: 'white',
+          }}>
+          {isSwitchingContext && <Spin size="large" />}
+        </div>
+      ) : null;
 
     switch (data.type) {
       case 'Video':
       case 'Youtube':
         return (
-          <View style={styles.mediaContainer}>
+          <View style={{ ...styles.mediaContainer, position: 'relative' }}>
+            <OverlayLoading />
             {data.url.includes('https://storage.googleapis.com') ? (
               <video
                 ref={videoRef}
@@ -461,6 +685,12 @@ const LibraryDetailItem = forwardRef<
                 autoPlay={false}
                 controls
                 controlsList="nodownload noseek"
+                onLoadedMetadata={() => {
+                  if (videoRef.current && pendingSeek !== null) {
+                    videoRef.current.currentTime = pendingSeek;
+                    setPendingSeek(null);
+                  }
+                }}
                 onPlay={() => {
                   if (videoRef.current && videoRef.current.duration) {
                     resumeTracking(
@@ -491,7 +721,13 @@ const LibraryDetailItem = forwardRef<
                     playerVars: { controls: 1, autoplay: 0 },
                   }}
                   style={styles.youtubePlayer}
-                  onReady={(event: any) => (playerRef.current = event.target)}
+                  onReady={(event: any) => {
+                    playerRef.current = event.target;
+                    if (pendingSeek !== null) {
+                      event.target.seekTo(pendingSeek);
+                      setPendingSeek(null);
+                    }
+                  }}
                   onPlay={() => {
                     if (playerRef.current) {
                       const duration = playerRef.current.getDuration();
