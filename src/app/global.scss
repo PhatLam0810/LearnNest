@@ -273,11 +273,24 @@ body {
 .ant-btn-variant-solid {
   font-family: $font-lexend;
 }
+.ant-form-item-label {
+  font-family: $font-lexend;
+}
+.ant-form-item {
+  margin-bottom: 16px;
+}
 span {
   font-family: $font-lexend;
 }
 div {
   font-family: $font-lexend;
+}
+
+p {
+  display: block;
+  margin-bottom: 16;
+  font-family: $font-lexend;
+  unicode-bidi: isolate;
 }
 .ant-statistic-title {
   font-family: $font-lexend;

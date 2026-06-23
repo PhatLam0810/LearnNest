@@ -13,7 +13,6 @@ import {
   Input,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { View, Text } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
 import {
   LessonLearnersSummary,
@@ -23,8 +22,6 @@ import './styles.scss';
 import styles from './styles';
 import { useAppPagination } from '@hooks/pagination';
 import { message } from 'antd';
-import axios from 'axios';
-import { useAppSelector } from '@redux';
 
 const downloadFile = (blob: Blob, fileName: string) => {
   const url = window.URL.createObjectURL(blob);
@@ -46,8 +43,8 @@ type LearnerTableData = LessonLearner & {
 };
 
 const LessonLearnersOverview = () => {
-  const [selectedLessonId, setSelectedLessonId] = useState<any>(null);
-  const [selectedLessonTitle, setSelectedLessonTitle] = useState<string>('');
+  const [selectedLessonOverview, setSelectedLessonOverview] =
+    useState<LessonLearnersSummary>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const { Search } = Input;
@@ -59,14 +56,14 @@ const LessonLearnersOverview = () => {
   // Query learners for selected lesson
 
   useEffect(() => {
-    if (selectedLessonId) {
+    if (selectedLessonOverview) {
       fetchData();
     }
-  }, [selectedLessonId]);
+  }, [selectedLessonOverview]);
 
   const { listItem, fetchData, refresh, search, currentData } =
     useAppPagination<LessonLearner>({
-      apiUrl: `admin/lessons/${selectedLessonId}/learners`,
+      apiUrl: `admin/lessons/${selectedLessonOverview?._id}/learners`,
     });
   // `admin/lessons/${lessonId}/learners`
   // Transform lesson summary to table format
@@ -156,10 +153,8 @@ const LessonLearnersOverview = () => {
     },
   ];
 
-  const handleLessonSelect = async (record: LessonWithStatus) => {
-    console.log('Selected Lesson:', record);
-    setSelectedLessonId(record._id);
-    setSelectedLessonTitle(record.title);
+  const handleLessonSelect = async (record: LessonLearnersSummary) => {
+    setSelectedLessonOverview(record);
     setIsModalVisible(true);
   };
 
@@ -177,7 +172,7 @@ const LessonLearnersOverview = () => {
       // Tạo link download
       const blob = response.data;
       const timestamp = new Date().toISOString().slice(0, 10);
-      const fileName = `${selectedLessonTitle}_${timestamp}.xlsx`;
+      const fileName = `${selectedLessonOverview?.title}_${timestamp}.xlsx`;
       downloadFile(blob, fileName);
 
       message.success('Tải file thành công!');
@@ -191,9 +186,8 @@ const LessonLearnersOverview = () => {
 
   const handleModalClose = () => {
     setIsModalVisible(false);
-    setSelectedLessonId(null);
+    setSelectedLessonOverview(null);
   };
-
   return (
     <div className="lesson-learners-overview">
       {/* Summary Stats */}
@@ -209,10 +203,7 @@ const LessonLearnersOverview = () => {
           <Card className="lesson-learners-overview__stat-card">
             <Statistic
               title="Tổng Người Học (Toàn Bộ)"
-              value={lessonTableData.reduce(
-                (sum, l) => sum + l.totalLearners,
-                0,
-              )}
+              value={selectedLessonOverview?.totalLearners}
               prefix="👥"
             />
           </Card>
@@ -266,7 +257,7 @@ const LessonLearnersOverview = () => {
 
       {/* Learners Modal */}
       <Modal
-        title={`Danh Sách Người Học: ${selectedLessonTitle}`}
+        title={`Danh Sách Người Học: ${selectedLessonOverview?.title}`}
         open={isModalVisible}
         onCancel={handleModalClose}
         width="90%"
@@ -285,7 +276,10 @@ const LessonLearnersOverview = () => {
         <>
           <div className="lesson-learners-overview__modal-stats">
             <Space>
-              <Statistic title="Tổng Người Học" value={listItem.length} />
+              <Statistic
+                title="Tổng Người Học"
+                value={selectedLessonOverview?.totalLearners}
+              />
               <Statistic
                 title="Đã Hoàn Thành"
                 value={listItem.filter(l => l.status === 'Đạt').length}

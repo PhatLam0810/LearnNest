@@ -23,6 +23,7 @@ import { messageApi } from '@hooks';
 import { AppUploadImageCrop, DraggableList } from '@components';
 import { Lesson } from '~mdDashboard/redux/saga/type';
 import { getYouTubeThumbnail } from '@utils/youtube';
+import { convertDurationToTime } from '@utils/time';
 
 type CreateLessonFormProps = {
   initialValues?: Lesson;
@@ -42,29 +43,46 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isVisibleModalSelect, setIsVisibleModalSelect] = useState(false);
 
+  const { totalLibraries, totalDuration } = listSelected.reduce(
+    (acc, item) => {
+      const libArray = Array.isArray(item.libraries) ? item.libraries : [];
+      acc.totalLibraries += libArray.length;
+
+      const durationSumInLibraries = libArray.reduce((sum, lib) => {
+        return sum + (Number(lib.duration) || 0);
+      }, 0);
+
+      acc.totalDuration += durationSumInLibraries;
+
+      return acc;
+    },
+    { totalLibraries: 0, totalDuration: 0 },
+  );
+
   const onFinish = (values: CreateLessonFrom) => {
     const lessonData = {
       ...values,
       modules: listSelected.map(item => item._id),
-      durations: listSelected.reduce(
-        (cur, prev) => cur + (prev.durations || 0),
-        0,
-      ),
     };
-    onFormFinish
-      ? onFormFinish(lessonData)
-      : addLesson(lessonData)
-          .unwrap()
-          .then(res => {
-            messageApi.success('Add new lesson successfully!');
-            form.resetFields();
-            onDone && onDone(res);
-            setListSelected([]);
-            setIsLoading(false);
-          })
-          .catch(() => {
-            messageApi.error('Add new lesson failed!');
-          });
+    if (onFormFinish) {
+      onFormFinish(lessonData);
+      setIsLoading(false);
+    } else {
+      addLesson(lessonData)
+        .unwrap()
+        .then(res => {
+          messageApi.success('Add new lesson successfully!');
+          form.resetFields();
+          setListSelected([]);
+          if (onDone) onDone(res);
+        })
+        .catch(() => {
+          messageApi.error('Add new lesson failed!');
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
   };
   useEffect(() => {
     if (initialValues) {
@@ -79,14 +97,20 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
     }
   }, [initialValues]);
 
-  const onChange = (checked: boolean) => {
-    setIsPremium(checked);
-  };
+  useEffect(() => {
+    if (totalDuration || totalLibraries) {
+      form.setFieldsValue({
+        ...initialValues,
+        totalLibraries: totalLibraries,
+        totalDuration: totalDuration,
+      });
+    }
+  }, [totalLibraries, totalDuration]);
 
   return (
     <View style={styles.container}>
       <View style={styles.flex1}>
-        <Form
+        <Form<CreateLessonFrom>
           style={styles.containerColumn}
           form={form}
           layout="vertical"
@@ -124,13 +148,26 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                   />
                 </Form.Item>
 
-                <Row align="middle" gutter={16}>
+                <Row align="middle" style={{ marginBottom: 16 }}>
                   {/* Switch */}
-                  <Col>
-                    <Form.Item label="Premium Lesson" name="isPremium">
+                  {/* <Form.Item label="Premium Lesson" name="isPremium">
                       <Switch onChange={onChange} />
-                    </Form.Item>
-                  </Col>
+                    </Form.Item> */}
+                  <Form.Item
+                    label="Total Libraries"
+                    name="totalLibraries"
+                    style={{ marginBottom: 0 }}>
+                    <span className="ant-form-text">{totalLibraries}</span>
+                  </Form.Item>
+
+                  <Form.Item
+                    label="Total Duration"
+                    name="totalDuration"
+                    style={{ marginBottom: 0 }}>
+                    <span className="ant-form-text">
+                      {convertDurationToTime(totalDuration)}
+                    </span>
+                  </Form.Item>
 
                   {/* Input price chỉ hiển thị khi bật switch */}
                   {isPremium && (
@@ -154,7 +191,6 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                           },
                         ]}>
                         <InputNumber
-                          addonAfter="ETH"
                           min={0.0001}
                           step={0.0001}
                           value={initialValues?.price || 0}
@@ -230,7 +266,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               </View>
             </View>
 
-            <h4>Select module</h4>
+            <h4 style={{ marginBottom: 16 }}>Select module</h4>
 
             <Button onClick={() => setIsVisibleModalSelect(true)}>
               <Text>Add Module</Text>

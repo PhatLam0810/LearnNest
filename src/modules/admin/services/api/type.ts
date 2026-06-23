@@ -35,6 +35,8 @@ export interface UpdateLessonParams {
   categories: string[];
   modules: string[];
   learnedSkills: string[];
+  totalLibraries: number;
+  totalDuration: number;
 }
 
 export interface UpdateSubLessonParams {

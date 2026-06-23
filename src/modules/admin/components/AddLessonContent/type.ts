@@ -4,6 +4,8 @@ export interface CreateLessonFrom {
   categories: any[];
   thumbnail: string;
   learnedSkills: any[];
+  totalLibraries: number;
+  totalDuration: number;
 }
 export interface CreateModuleFrom {
   items: { title: string; description: string }[];

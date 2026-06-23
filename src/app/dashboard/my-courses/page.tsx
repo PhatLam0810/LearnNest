@@ -7,6 +7,7 @@ import { useAppSelector } from '@redux';
 import { useMyCourses } from '@/hooks/useMyCourses';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
 import './styles.scss';
+import { Progress } from 'antd';
 
 export interface MyCourseItem {
   lessonId: string;
@@ -30,7 +31,7 @@ const CourseItem: React.FC<CourseItemProps> = React.memo(
       if (!course?.lessonId) return;
       const subLessonId = course?.lastSubLessonId || 'first-lesson';
       onNavigate(
-        `/dashboard/home/lesson/moduleDetail?lessonId=${course.lessonId}&subLessonId=${subLessonId}`,
+        `/dashboard/home/lesson/moduleDetail?lessonId=${course.lessonId}`,
       );
     };
 
@@ -52,20 +53,25 @@ const CourseItem: React.FC<CourseItemProps> = React.memo(
           <h3 className="course-title">
             {course?.lessonName || course?.name || 'Khóa học đang cập nhật...'}
           </h3>
-          <span className="course-time">
+
+          <span
+            className="course-time"
+            style={{ display: 'block', marginBottom: '4px' }}>
             {course?.lastStudiedAt
               ? `Học cách đây ${typeof formatRelativeTime === 'function' ? formatRelativeTime(course.lastStudiedAt) : 'gần đây'}`
               : 'Chưa bắt đầu học'}
           </span>
-        </div>
 
-        <div
-          className="course-list-item__action"
-          onClick={e => {
-            e.stopPropagation();
-          }}
-          title="Tùy chọn">
-          <EllipsisOutlined />
+          <div
+            className="course-item-progress"
+            style={{ marginTop: '6px', width: '100%' }}>
+            <Progress
+              percent={Math.round(course?.progress)}
+              size="small"
+              status="active"
+              strokeColor="green"
+            />
+          </div>
         </div>
       </div>
     );

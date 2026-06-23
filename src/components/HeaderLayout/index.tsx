@@ -164,7 +164,7 @@ const HeaderLayout: React.FC = ({}) => {
             {/* SEARCH */}
           </div>
           <div className="header-search">
-            {isLessonPage || (isLibraryPage && <SearchBar />)}
+            {(isLessonPage || isLibraryPage) && <SearchBar />}
           </div>
 
           {/* RIGHT */}

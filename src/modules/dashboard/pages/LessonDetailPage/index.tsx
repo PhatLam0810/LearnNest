@@ -44,18 +44,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const [triggerAccessLesson] = dashboardQuery.useAccessLessonMutation();
   const { data: dataSub, refetch } = authQuery.useGetSubscriptionsQuery({});
   const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
-  const totalLibraries = lessonDetail?.modules?.reduce((total, item) => {
-    return total + (item.libraries?.length || 0);
-  }, 0);
-  const totalDuration = lessonDetail?.modules?.reduce((total, module) => {
-    return (
-      total +
-      (module.libraries?.reduce(
-        (libTotal, library) => libTotal + (library.duration || 0),
-        0,
-      ) || 0)
-    );
-  }, 0);
 
   // Responsive hook
   const { isMobile, isTablet, isDesktop } = useResponsive();
@@ -259,20 +247,13 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   { flex: 1 },
                 ]}>
                 <View
-                  style={[
-                    styles.buttonModule,
-                    {
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    },
-                  ]}
+                  style={styles.buttonModule}
                   onClick={() => handleLibraryClick(subItem, item)}>
                   {/* LEFT AREA: TITLE + TIME */}
                   <View style={styles.rowGap10}>
                     <PlayCircleOutlined />
-                    <View>
-                      <Text style={styles.moduleItemTitle}>
+                    <View style={styles.moduleItemContainer}>
+                      <Text numberOfLines={2} style={styles.moduleItemTitle}>
                         {subItem.title}
                       </Text>
                       <Text style={styles.moduleItemTime}>
@@ -280,8 +261,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       </Text>
                     </View>
                   </View>
-
-                  {/* RIGHT AREA: WATCHERS BUTTON */}
                   {userProfile?.role?.level <= 2 && subItem.type !== 'Text' && (
                     <AppVideoWatchersButton
                       subLessonId={subItem._id}
@@ -375,10 +354,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <span className="label">Buy Now</span>
                     </button>
                     <Text style={styles.totalLibrary}>
-                      Total Duration: {convertDurationToTime(totalDuration)}
+                      Total Duration:
+                      {convertDurationToTime(lessonDetail.totalDuration)}
                     </Text>
                     <Text style={styles.totalLibrary}>
-                      Total Libraries: {totalLibraries}
+                      Total Libraries: {lessonDetail.totalLibraries}
                     </Text>
                   </View>
                 ) : (
@@ -390,10 +370,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <span className="label">Start lesson</span>
                     </button>
                     <Text style={styles.totalLibrary}>
-                      Total Duration: {convertDurationToTime(totalDuration)}
+                      Total Duration:{' '}
+                      {convertDurationToTime(lessonDetail.totalDuration)}
                     </Text>
                     <Text style={styles.totalLibrary}>
-                      Total Libraries: {totalLibraries}
+                      Total Libraries: {lessonDetail.totalLibraries}
                     </Text>
                   </View>
                 )}
@@ -426,22 +407,10 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               </View>
             </>
           )}
-          <View
-            style={{
-              flexDirection: isMobile ? 'column' : 'row',
-              gap: 12,
-              flexWrap: 'wrap',
-            }}>
-            {lessonDetail?.categories?.map(item => (
-              <View key={item._id}>
-                <Text style={styles.chip}>{item.name}</Text>
-              </View>
-            ))}
-          </View>
           <Text
             style={{
               ...styles.title,
-              fontSize: isMobile ? 18 : isTablet ? 20 : 22.78,
+              fontSize: isMobile ? 18 : isTablet ? 24 : 32,
             }}>
             {lessonDetail?.title.trim()}
           </Text>
@@ -452,7 +421,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   ...styles.description,
                   maxWidth: isMobile ? '100%' : '90%',
                   marginTop: 12,
-                  fontSize: isMobile ? 14 : 16,
+                  fontSize: isMobile ? 16 : 18,
                 }}>
                 {lessonDetail?.description}
               </Text>
@@ -460,7 +429,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                 <Text
                   style={{
                     ...styles.whatLearnTitle,
-                    fontSize: isMobile ? 16 : 18,
+                    fontSize: isMobile ? 18 : 24,
                   }}>
                   Kỹ năng đạt được:
                 </Text>
@@ -505,7 +474,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     <Text
                       style={{
                         ...styles.lessonContentTitle,
-                        fontSize: isMobile ? 16 : 18,
+                        fontSize: isMobile ? 16 : 24,
                       }}>
                       Nội dung khóa học
                     </Text>
@@ -560,10 +529,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <span className="label">Buy Now</span>
                     </button>
                     <Text style={styles.totalLibrary}>
-                      Total Duration: {convertDurationToTime(totalDuration)}
+                      Total Duration:{' '}
+                      {convertDurationToTime(lessonDetail.totalDuration)}
                     </Text>
                     <Text style={styles.totalLibrary}>
-                      Total Libraries: {totalLibraries}
+                      Total Libraries: {lessonDetail.totalLibraries}
                     </Text>
                   </View>
                 ) : (
@@ -575,10 +545,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <span className="label">Start lesson</span>
                     </button>
                     <Text style={styles.totalLibrary}>
-                      Total Duration: {convertDurationToTime(totalDuration)}
+                      Total Duration:{' '}
+                      {convertDurationToTime(lessonDetail.totalDuration)}
                     </Text>
                     <Text style={styles.totalLibrary}>
-                      Total Libraries: {totalLibraries}
+                      Total Libraries: {lessonDetail.totalLibraries}
                     </Text>
                   </View>
                 )}

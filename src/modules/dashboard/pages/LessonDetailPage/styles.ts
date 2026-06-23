@@ -34,9 +34,8 @@ const styles = StyleSheet.create({
     color: '#212121',
   },
   title: {
-    fontFamily: inter.style.fontFamily,
+    ...typography.titleM,
     fontWeight: '600',
-    fontSize: 22.78,
     letterSpacing: 0.01,
     color: '#000',
   },
@@ -69,12 +68,12 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   whatLearnTitle: {
-    ...typography.subTitle1,
+    ...typography.titleS,
     fontWeight: '600',
     color: '#000',
   },
   learnedSkillText: {
-    ...typography.subTitle2,
+    ...typography.subTitle1,
     margin: 0,
     fontWeight: '400',
     color: '#000',
@@ -121,7 +120,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   lessonContentTitle: {
-    ...typography.subTitle1,
+    ...typography.titleM,
+    fontSize: 32,
     fontWeight: '600',
     color: '#000',
   },
@@ -130,14 +130,16 @@ const styles = StyleSheet.create({
   },
   buttonModule: {
     flexDirection: 'row',
-    paddingLeft: 16,
-    paddingRight: 16,
-    borderRadius: 8,
-    paddingTop: 8,
-    paddingBottom: 8,
+    padding: 16,
+    borderRadius: 16,
     backgroundColor: 'white',
-    gap: 16,
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Shadow
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  moduleItemContainer: {
+    width: '100%',
   },
   moduleItemTitle: {
     fontFamily: lexend.style.fontFamily,
@@ -164,6 +166,7 @@ const styles = StyleSheet.create({
   rowGap10: {
     flexDirection: 'row',
     gap: 10,
+    width: '100%',
   },
   paddingBottom10: {
     paddingBottom: 10,

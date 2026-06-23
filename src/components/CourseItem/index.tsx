@@ -1,11 +1,10 @@
 // CourseItem.tsx
 'use client';
-
 import React from 'react';
 import { Progress } from 'antd';
-import { useRouter } from 'next/navigation';
 import { MyCourseItem } from '@/hooks/useMyCourses';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
+import './styles.scss';
 
 interface CourseItemProps {
   course: MyCourseItem;
@@ -51,12 +50,12 @@ export const CourseItem: React.FC<CourseItemProps> = React.memo(
           <span className="course-time">
             Học cách đây{' '}
             {typeof formatRelativeTime === 'function'
-              ? formatRelativeTime(course?.lastStudiedAt || '')
+              ? formatRelativeTime(course?.lastStudiedAt)
               : 'gần đây'}
           </span>
           <div className="course-progress-bar">
             <Progress
-              percent={course.progress || 0}
+              percent={course?.progress}
               size="small"
               status="active"
               strokeColor="#ff512f"
