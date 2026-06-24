@@ -49,3 +49,15 @@ export interface LibraryType {
   };
   __v: number;
 }
+export interface LessonProgressResponse {
+  lastPosition: number;
+  progress: number;
+  completed: boolean;
+  duration: number;
+  subLessonId?: string;
+}
+export interface GetLessonProgressParams {
+  userId: string;
+  subLessonId: string;
+  lessonId?: string;
+}

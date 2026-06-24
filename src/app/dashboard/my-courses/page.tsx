@@ -31,7 +31,7 @@ const CourseItem: React.FC<CourseItemProps> = React.memo(
       if (!course?.lessonId) return;
       const subLessonId = course?.lastSubLessonId || 'first-lesson';
       onNavigate(
-        `/dashboard/home/lesson/moduleDetail?lessonId=${course.lessonId}`,
+        `/dashboard/home/lesson/moduleDetail?lessonId=${course.lessonId}&subLessonId=${subLessonId}`,
       );
     };
 

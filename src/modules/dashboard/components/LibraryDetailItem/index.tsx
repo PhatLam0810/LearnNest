@@ -12,10 +12,12 @@ import { FullscreenOutlined } from '@ant-design/icons';
 import { Library } from '~mdDashboard/types';
 import styles from './styles';
 import YouTube from 'react-youtube';
-import { Button, Modal, Radio } from 'antd';
+import { Button, Modal, Radio, Spin } from 'antd';
 import axios from 'axios';
 import { messageApi } from '@hooks';
 import { useAppSelector } from '@redux';
+import { useGetLessonProgressQuery } from '~mdDashboard/redux';
+import ResumeLessonModal from '@components/ResumeLessonModal';
 
 type LibraryDetailItemProps = {
   data: Library;
@@ -48,9 +50,37 @@ const LibraryDetailItem = forwardRef<
   const [invalidQuestions, setInvalidQuestions] = useState<string[]>([]);
   const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
   const [modal, contextHolder] = Modal.useModal();
+  const [pendingSeek, setPendingSeek] = useState<number | null>(null);
+  const [resumeInfo, setResumeInfo] = useState<any>(null);
+  const [isConfirmingResume, setIsConfirmingResume] = useState(false);
+  const [isSwitchingContext, setIsSwitchingContext] = useState(false);
+  const activeModalRef = useRef<any>(null);
 
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:9999';
+  const userProfile = useAppSelector(
+    (state: any) => state.authReducer?.tokenInfo?.userProfile,
+  );
+  const userId = userProfile?._id;
+
+  const {
+    currentData: progressRes,
+    isFetching,
+    isLoading,
+  } = useGetLessonProgressQuery(
+    {
+      userId: userId ?? '',
+      subLessonId: data?._id ?? '',
+      lessonId: lessonId,
+    },
+    {
+      skip:
+        !userId ||
+        !data?._id ||
+        (data.type !== 'Video' && data.type !== 'Youtube'),
+      refetchOnMountOrArgChange: true,
+    },
+  );
 
   const useVideoTracking = (subLessonId: string, lessonId?: string) => {
     const [isTracking, setIsTracking] = useState(false);
@@ -61,11 +91,6 @@ const LibraryDetailItem = forwardRef<
     const totalWatchedTimeRef = useRef<number>(0);
     const lastPlayStateRef = useRef<'playing' | 'paused'>('paused');
     const videoPlayingRef = useRef<boolean>(false);
-
-    const userProfile = useAppSelector(
-      (state: any) => state.authReducer?.tokenInfo?.userProfile,
-    );
-    const userId = userProfile?._id;
 
     const flushTracking = async (opts?: {
       force?: boolean;
@@ -346,6 +371,7 @@ const LibraryDetailItem = forwardRef<
     videoStatus,
     maxWatched,
     onWatchFinish,
+    isSwitchingContext,
   ]);
 
   useImperativeHandle(ref, () => ({
@@ -355,11 +381,19 @@ const LibraryDetailItem = forwardRef<
         pauseTracking();
       }
       if (playerRef.current) {
-        playerRef.current.pauseVideo();
-        pauseTracking();
+        try {
+          if (
+            typeof playerRef.current.pauseVideo === 'function' &&
+            playerRef.current.getIframe()
+          ) {
+            playerRef.current.pauseVideo();
+            pauseTracking();
+          }
+        } catch (e) {}
       }
     },
   }));
+
   const handleClose = () => {
     if (!visibleQuestion || selectedAnswer === null) return;
     const isCorrect = selectedAnswer === visibleQuestion.correctAnswer;
@@ -426,7 +460,45 @@ const LibraryDetailItem = forwardRef<
     // Nếu hợp lệ
     setInvalidQuestions([]); // clear
     setSelectedAnswers({});
-    onClickSubmit(selectedAnswers);
+    if (onClickSubmit) {
+      onClickSubmit(selectedAnswers);
+    }
+  };
+
+  const handleResumeLesson = () => {
+    setIsConfirmingResume(false);
+    setIsSwitchingContext(false);
+
+    if (resumeInfo) {
+      setMaxWatched(resumeInfo.watchedSeconds || resumeInfo.lastPosition);
+      setLastPlayed(resumeInfo.lastPosition);
+
+      if (data.type === 'Video' && videoRef.current) {
+        videoRef.current.currentTime = resumeInfo.lastPosition;
+        videoRef.current.play();
+      } else if (data.type === 'Youtube' && playerRef.current) {
+        playerRef.current.seekTo(resumeInfo.lastPosition);
+        playerRef.current.playVideo();
+      } else {
+        setPendingSeek(resumeInfo.lastPosition);
+      }
+    }
+  };
+
+  const handleRestartLesson = () => {
+    setIsConfirmingResume(false);
+    setMaxWatched(0);
+    setLastPlayed(0);
+    setPendingSeek(null);
+    setIsSwitchingContext(false);
+
+    if (data.type === 'Video' && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
+    } else if (data.type === 'Youtube' && playerRef.current) {
+      playerRef.current.seekTo(0);
+      playerRef.current.playVideo();
+    }
   };
 
   const shuffleArray = (array: any[]) => {
@@ -443,17 +515,108 @@ const LibraryDetailItem = forwardRef<
       setShuffledQuestions(shuffled);
     }
   }, [data]);
+  useEffect(() => {
+    if (!data?._id) return;
 
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+
+    if (playerRef.current) {
+      try {
+        if (
+          typeof playerRef.current.pauseVideo === 'function' &&
+          playerRef.current.getIframe()
+        ) {
+          playerRef.current.pauseVideo();
+        }
+      } catch (e) {
+        console.warn('Failed to pause stale YouTube player:', e);
+      }
+      playerRef.current = null;
+    }
+
+    pauseTracking();
+
+    setLastPlayed(0);
+    setMaxWatched(0);
+    setVisibleQuestion(null);
+    setShownQuestionIds([]);
+    setSelectedAnswer(null);
+    setSelectedAnswers({});
+    setInvalidQuestions([]);
+    setPendingSeek(null);
+
+    if (data.type === 'Video' || data.type === 'Youtube') {
+      setIsSwitchingContext(true);
+    }
+
+    setIsConfirmingResume(false);
+    setResumeInfo(null);
+
+    return () => {
+      if (activeModalRef.current) {
+        activeModalRef.current.destroy();
+        activeModalRef.current = null;
+      }
+    };
+  }, [data?._id, lessonId]);
+
+  useEffect(() => {
+    if (isFetching || !data?._id) {
+      setIsConfirmingResume(false);
+      return;
+    }
+
+    if (progressRes) {
+      if (progressRes.subLessonId && progressRes.subLessonId !== data._id) {
+        return;
+      }
+
+      if (progressRes.lastPosition > 5 && !progressRes.completed) {
+        setResumeInfo(progressRes);
+        setIsConfirmingResume(true);
+      } else {
+        setIsConfirmingResume(false);
+        setTimeout(() => setIsSwitchingContext(false), 300);
+      }
+    } else {
+      setIsConfirmingResume(false);
+      setIsSwitchingContext(false);
+    }
+  }, [progressRes, isFetching, data?._id]);
   const renderMedia = () => {
     if (!data?.type) return null;
+
+    const OverlayLoading = () =>
+      isSwitchingContext || isConfirmingResume ? (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: '#000',
+            zIndex: 10,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            color: 'white',
+          }}>
+          {isSwitchingContext && <Spin size="large" />}
+        </div>
+      ) : null;
 
     switch (data.type) {
       case 'Video':
       case 'Youtube':
         return (
-          <View style={styles.mediaContainer}>
+          <View style={{ ...styles.mediaContainer, position: 'relative' }}>
+            <OverlayLoading />
             {data.url.includes('https://storage.googleapis.com') ? (
               <video
+                key={data._id}
                 ref={videoRef}
                 src={data.url}
                 width="100%"
@@ -461,6 +624,12 @@ const LibraryDetailItem = forwardRef<
                 autoPlay={false}
                 controls
                 controlsList="nodownload noseek"
+                onLoadedMetadata={() => {
+                  if (videoRef.current && pendingSeek !== null) {
+                    videoRef.current.currentTime = pendingSeek;
+                    setPendingSeek(null);
+                  }
+                }}
                 onPlay={() => {
                   if (videoRef.current && videoRef.current.duration) {
                     resumeTracking(
@@ -484,6 +653,7 @@ const LibraryDetailItem = forwardRef<
             ) : (
               <View style={styles.youtubeWrapper}>
                 <YouTube
+                  key={data._id}
                   videoId={getYoutubeId(data.url)}
                   opts={{
                     width: '100%',
@@ -491,7 +661,13 @@ const LibraryDetailItem = forwardRef<
                     playerVars: { controls: 1, autoplay: 0 },
                   }}
                   style={styles.youtubePlayer}
-                  onReady={(event: any) => (playerRef.current = event.target)}
+                  onReady={(event: any) => {
+                    playerRef.current = event.target;
+                    if (pendingSeek !== null) {
+                      event.target.seekTo(pendingSeek);
+                      setPendingSeek(null);
+                    }
+                  }}
                   onPlay={() => {
                     if (playerRef.current) {
                       const duration = playerRef.current.getDuration();
@@ -547,7 +723,6 @@ const LibraryDetailItem = forwardRef<
                       ...styles.questionCard,
                       ...(isInvalid ? styles.questionCardInvalid : {}),
                     }}>
-                    {/* QUESTION */}
                     <div style={styles.questionTop}>
                       <div style={styles.questionNumber}>{index + 1}</div>
                       <div
@@ -558,7 +733,6 @@ const LibraryDetailItem = forwardRef<
                         {question.question}
                       </div>
                     </div>
-                    {/* ANSWERS */}
                     <Radio.Group
                       className="customQuizRadio"
                       onChange={e => {
@@ -573,7 +747,6 @@ const LibraryDetailItem = forwardRef<
                           if (prevInvalid.includes(questionId)) {
                             return prevInvalid.filter(id => id !== questionId);
                           }
-
                           return prevInvalid;
                         });
                       }}
@@ -581,7 +754,6 @@ const LibraryDetailItem = forwardRef<
                       style={styles.answerGroup}>
                       {question.answerList.map((ans: any, idx: number) => {
                         const optionLetter = String.fromCharCode(65 + idx);
-
                         const isSelected =
                           selectedAnswers[question._id] === optionLetter;
                         return (
@@ -608,7 +780,6 @@ const LibraryDetailItem = forwardRef<
                                   }}>
                                   {optionLetter}
                                 </div>
-
                                 <div style={styles.answerLabel}>{ans}</div>
                               </div>
                             </Radio>
@@ -700,6 +871,16 @@ const LibraryDetailItem = forwardRef<
           </div>
         </div>
       </Modal>
+      <ResumeLessonModal
+        open={
+          isConfirmingResume &&
+          !isFetching &&
+          (!progressRes?.subLessonId || progressRes.subLessonId === data?._id)
+        }
+        resumeInfo={resumeInfo}
+        onRestart={handleRestartLesson}
+        onResume={handleResumeLesson}
+      />
     </View>
   );
 });

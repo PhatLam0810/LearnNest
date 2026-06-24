@@ -1,5 +1,11 @@
 import { baseQuery } from '@redux/RTKQuery';
-import { Category, LessonRecommendRes, LibraryType } from './types';
+import {
+  Category,
+  GetLessonProgressParams,
+  LessonProgressResponse,
+  LessonRecommendRes,
+  LibraryType,
+} from './types';
 import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
 import { LessonDetailDataResponse } from '../saga/type';
@@ -9,6 +15,18 @@ export const dashboardQuery = baseQuery.injectEndpoints({
     getLessonRecommend: builder.query<LessonRecommendRes, void>({
       query: () => '/lesson/recommend',
       transformResponse: (res: AxiosResponse<LessonRecommendRes>) => res.data,
+    }),
+    getLessonProgress: builder.query<
+      LessonProgressResponse,
+      GetLessonProgressParams
+    >({
+      query: ({ userId, subLessonId, lessonId }) => ({
+        url: `/lesson/user/${userId}/sublesson/${subLessonId}/progress`,
+        method: 'GET',
+        params: { lessonId },
+      }),
+      transformResponse: (res: AxiosResponse<LessonProgressResponse>) =>
+        res.data,
     }),
     getLessonId: builder.mutation<LessonDetailDataResponse, any>({
       query: params => ({
@@ -34,6 +52,7 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<Library[]>) => res.data,
     }),
+
     getTodaySelfCare: builder.query<SelfCareItem, void>({
       query: () => 'user/getTodaySelfCare',
       transformResponse: (res: AxiosResponse<SelfCareItem>) => res.data,
@@ -108,3 +127,4 @@ export const dashboardQuery = baseQuery.injectEndpoints({
   }),
   overrideExisting: true,
 });
+export const { useGetLessonProgressQuery } = dashboardQuery;
