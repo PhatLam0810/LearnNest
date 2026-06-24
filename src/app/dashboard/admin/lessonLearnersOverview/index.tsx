@@ -65,8 +65,6 @@ const LessonLearnersOverview = () => {
     useAppPagination<LessonLearner>({
       apiUrl: `admin/lessons/${selectedLessonOverview?._id}/learners`,
     });
-  // `admin/lessons/${lessonId}/learners`
-  // Transform lesson summary to table format
   const lessonTableData: LessonWithStatus[] = useMemo(
     () =>
       summaryData?.data?.map(lesson => ({
@@ -203,7 +201,7 @@ const LessonLearnersOverview = () => {
           <Card className="lesson-learners-overview__stat-card">
             <Statistic
               title="Tổng Người Học (Toàn Bộ)"
-              value={selectedLessonOverview?.totalLearners}
+              value={currentData?.totalRecords}
               prefix="👥"
             />
           </Card>

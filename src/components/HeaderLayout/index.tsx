@@ -223,13 +223,29 @@ const HeaderLayout: React.FC = ({}) => {
           </Button>
           <Button
             block
-            icon={<BookOutlined />}
+            onClick={() => {
+              setOpen(false);
+              router.push('/dashboard/lesson');
+            }}>
+            Khóa Học
+          </Button>
+          <Button
+            block
+            onClick={() => {
+              setOpen(false);
+              router.push('/dashboard/library');
+            }}>
+            Thư Viện
+          </Button>
+          <Button
+            block
             onClick={() => {
               setOpen(false);
               router.push('/dashboard/my-courses');
             }}>
             Khóa học của tôi
           </Button>
+
           <Button
             block
             onClick={() => {

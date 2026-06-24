@@ -66,7 +66,7 @@ $space-xs: 8px;
 @mixin subTitle2 {
   font-family: $font-lexend;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
 }
 @mixin body1 {
   font-family: $font-lexend;
@@ -116,7 +116,7 @@ $space-xs: 8px;
 @mixin buttonSmall {
   font-family: $font-lexend;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 1.2px;
 }
 
@@ -130,7 +130,7 @@ $space-xs: 8px;
 @mixin body1Mobile {
   font-family: $font-lexend;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 0.01em;
 }
 
@@ -143,12 +143,12 @@ $space-xs: 8px;
 @mixin buttonMobile {
   font-family: $font-lexend;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 0.01em;
 }
 @mixin responsive-text {
   @media (max-width: 768px) {
-    font-size: 14px;
+    font-size: 16px;
   }
 }
 
@@ -279,8 +279,13 @@ body {
 .ant-form-item {
   margin-bottom: 16px;
 }
+.ant-menu-title-content {
+  font-family: $font-lexend;
+  font-size: 16px;
+}
 span {
   font-family: $font-lexend;
+  font-size: 16px;
 }
 div {
   font-family: $font-lexend;
@@ -289,6 +294,7 @@ div {
 p {
   display: block;
   margin-bottom: 16;
+  font-size: 16px;
   font-family: $font-lexend;
   unicode-bidi: isolate;
 }

@@ -42,6 +42,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const [itemBuy, setItemBuy] = useState(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [triggerAccessLesson] = dashboardQuery.useAccessLessonMutation();
+  const [checkRegistrationLesson] =
+    dashboardQuery.useCheckRegistrationLessonMutation();
   const { data: dataSub, refetch } = authQuery.useGetSubscriptionsQuery({});
   const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
 
@@ -57,40 +59,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   );
   const [selectedSubLessonTitle, setSelectedSubLessonTitle] =
     useState<string>('');
-
-  // Cách cũ của PhátPhát
-  //  useEffect(() => {
-  //     if (lessonDetail.isPremium) {
-  //       setAccessLesson(false);
-  //     }
-  //     if (userProfile?.role?.level <= 2) {
-  //       setAccessLesson(true);
-  //     }
-  //     if (
-  //       dataSub?.length > 0 &&
-  //       dataSub.some(sub => sub.lessonId === lessonDetail._id)
-  //     ) {
-  //       setAccessLesson(true);
-  //     }
-  //   }, [dataSub, lessonDetail.isPremium]);
-
-  //   useEffect(() => {
-  //     if (libraries) {
-  //       setLibraryCanPlay({
-  //         libraryId: libraries[0]?._id,
-  //         userId: userProfile?._id,
-  //       });
-  //       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
-  //     }
-  //   }, []);
-  //   useEffect(() => {
-  //     if (lessonPurchaseData) {
-  //       refetch();
-  //       setIsVisibleModalBuy(false);
-  //       setIsVisibleModalSuccess(true);
-  //       dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
-  //     }
-  //   }, [lessonPurchaseData]);
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -178,39 +146,30 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   };
 
   const handleStartLesson = async () => {
-    if (!lessonDetail?._id || !userProfile?._id) {
-      messageApi.open({
-        type: 'warning',
-        content: 'Không có thông tin bài học hoặc người dùng.',
-      });
-      return;
-    }
-
     dispatch(authAction.setIsShowLoading(true));
     try {
-      await triggerAccessLesson({
+      const result = await checkRegistrationLesson({
         userId: userProfile._id,
         lessonId: lessonDetail._id,
       }).unwrap();
 
+      if (!result.isRegisterLesson) {
+        await triggerAccessLesson({
+          userId: userProfile._id,
+          lessonId: lessonDetail._id,
+        });
+      }
+
       const modules = lessonDetail.modules;
       const libraries = modules?.[0]?.libraries?.[0];
 
-      if (modules && modules.length > 0 && libraries) {
-        dispatch(dashboardAction.setSelectedModule(modules[0]));
-        dispatch(dashboardAction.setSelectedLibrary(libraries));
-        router.push('/dashboard/home/lesson/moduleDetail');
-      } else {
-        messageApi.open({
-          type: 'warning',
-          content: 'Chưa có nội dung bài học vui lòng quay lại sau',
-          duration: 5,
-        });
-      }
+      dispatch(dashboardAction.setSelectedModule(modules[0]));
+      dispatch(dashboardAction.setSelectedLibrary(libraries));
+      router.push('/dashboard/home/lesson/moduleDetail');
     } catch (error) {
       messageApi.open({
         type: 'error',
-        content: 'Lỗi khi gọi API bắt đầu học. Vui lòng thử lại.',
+        content: 'Vui lòng thử lại.',
         duration: 5,
       });
     } finally {
