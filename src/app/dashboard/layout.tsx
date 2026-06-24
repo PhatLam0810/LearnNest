@@ -153,7 +153,11 @@ export default function DashboardLayout({
 
       <Layout style={{ backgroundColor: '#f5f7fb' }}>
         {screens.md && (
-          <Sider theme="light" collapsed={false} style={styles.antSider}>
+          <Sider
+            theme="light"
+            width={130}
+            collapsed={false}
+            style={styles.antSider}>
             {sidebarContent}
           </Sider>
         )}
