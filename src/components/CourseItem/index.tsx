@@ -58,7 +58,7 @@ export const CourseItem: React.FC<CourseItemProps> = React.memo(
               percent={course?.progress}
               size="small"
               status="active"
-              strokeColor="#ff512f"
+              strokeColor="green"
             />
           </div>
         </div>
