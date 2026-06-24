@@ -22,7 +22,6 @@ const EditProfile = () => {
   const onCloseDelete = () => {
     setModalDelete(false);
   };
-  console.log(userProfile);
   return (
     <Card style={styles.container}>
       <View style={{ flex: 1 }}>

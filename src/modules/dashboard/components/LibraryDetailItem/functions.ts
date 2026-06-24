@@ -25,7 +25,6 @@ export function convertToEmbedLink(shareLink: string) {
   if (match && match[1]) {
     const fileId = match[1];
     const link = `https://drive.google.com/uc?id=${fileId}`;
-    console.log(link);
     return link;
   } else {
     return shareLink;

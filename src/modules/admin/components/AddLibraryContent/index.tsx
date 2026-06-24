@@ -58,7 +58,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
-      console.log(initialValues);
       setLibraryType(initialValues.type);
       setDuration(initialValues.duration);
       setFileUpload([

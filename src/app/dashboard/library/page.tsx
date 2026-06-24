@@ -94,7 +94,6 @@ const LibraryList = () => {
   };
 
   // Responsive container styles
-  console.log(expectedTotal, lastFetchAt, layoutHeight.current);
   return (
     <View style={styles.container}>
       <FlatList

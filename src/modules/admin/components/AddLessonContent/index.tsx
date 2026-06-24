@@ -88,7 +88,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
     if (initialValues) {
       form.setFieldsValue({
         ...initialValues,
-        categories: initialValues.categories.map(item => item._id),
+        categories: initialValues.categories?.map(item => item._id),
         thumbnail: initialValues.thumbnail.includes('youtube.com/watch')
           ? getYouTubeThumbnail(initialValues.thumbnail)
           : initialValues.thumbnail,

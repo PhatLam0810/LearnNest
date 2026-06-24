@@ -42,7 +42,6 @@ const UserManage = () => {
   const [createUser, { isLoading: isLoadingCreateUser }] =
     adminQuery.useCreateUserMutation();
   const [messageApi, contextHolder] = message.useMessage();
-  console.log('listItem', listItem, 'currentData', currentData);
   const handleDeleteUser = async (_id: string) => {
     try {
       await deleteAccount({
