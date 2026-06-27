@@ -20,6 +20,7 @@ import LibraryDetailItem, {
   LibraryDetailItemHandle,
 } from '~mdDashboard/components/LibraryDetailItem';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { authAction } from '~mdAuth/redux';
 
 const ModuleDetailPage = () => {
   const router = useRouter();
@@ -35,11 +36,13 @@ const ModuleDetailPage = () => {
   const libraryRef = useRef<LibraryDetailItemHandle>(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
+  const [generateQuestion] = dashboardQuery.useGenerateQuestionMutation();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [modal, contextHolder] = Modal.useModal();
   const { isMobile, isTablet } = useResponsive();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [dataQuestion, setDataQuestion] = useState(null);
   const [resultData, setResultData] = useState({
     correctCount: 0,
     totalQuestions: 0,
@@ -48,7 +51,24 @@ const ModuleDetailPage = () => {
   });
 
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
+  const fetchQuestionData = async () => {
+    try {
+      dispatch(authAction.setIsShowLoading(true));
+      const res = await generateQuestion({ url: selectedLibrary?.url });
+      const parsedQuestions = JSON.parse(res.data);
+      setDataQuestion(parsedQuestions);
+    } catch (error) {
+      console.error('Lỗi khi tải dữ liệu câu hỏi:', error);
+    } finally {
+      dispatch(authAction.setIsShowLoading(false));
+    }
+  };
 
+  useEffect(() => {
+    if (selectedLibrary?.url && selectedLibrary?.type === 'Text') {
+      fetchQuestionData();
+    }
+  }, [selectedLibrary?.url]);
   useEffect(() => {
     if (!lessonId) return;
 
@@ -220,11 +240,11 @@ const ModuleDetailPage = () => {
   };
 
   const handleSubmit = (selectedAnswers: any) => {
-    const totalQuestions = selectedLibrary?.questionList?.length || 0;
+    const totalQuestions = dataQuestion?.length || 0;
     if (!totalQuestions) return;
     let correctCount = 0;
 
-    selectedLibrary?.questionList?.forEach(question => {
+    dataQuestion?.forEach(question => {
       const userAnswer = selectedAnswers[question._id]; // từ object người dùng chọn
       const correctAnswer = question.correctAnswer; // từ dữ liệu câu hỏi
 
@@ -340,6 +360,7 @@ const ModuleDetailPage = () => {
               <LibraryDetailItem
                 ref={libraryRef}
                 data={selectedLibrary}
+                dataQuestion={dataQuestion}
                 lessonId={lessonDetail?._id}
                 onWatchFinish={onWatchFinish}
                 onClickSubmit={handleSubmit}

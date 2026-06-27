@@ -21,6 +21,7 @@ import ResumeLessonModal from '@components/ResumeLessonModal';
 
 type LibraryDetailItemProps = {
   data: Library;
+  dataQuestion?: any;
   lessonId?: string;
   onWatchFinish?: () => void;
   onPauseVideo?: () => void;
@@ -32,7 +33,7 @@ export interface LibraryDetailItemHandle {
 const LibraryDetailItem = forwardRef<
   LibraryDetailItemHandle,
   LibraryDetailItemProps
->(({ data, lessonId, onWatchFinish, onClickSubmit }, ref) => {
+>(({ data, dataQuestion, lessonId, onWatchFinish, onClickSubmit }, ref) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -506,15 +507,15 @@ const LibraryDetailItem = forwardRef<
   };
 
   useEffect(() => {
-    if (data?.questionList?.length > 0) {
-      const questionsWithShuffledAnswers = data.questionList.map((q: any) => ({
+    if (dataQuestion?.length > 0) {
+      const questionsWithShuffledAnswers = dataQuestion.map((q: any) => ({
         ...q,
       }));
 
       const shuffled = shuffleArray(questionsWithShuffledAnswers);
       setShuffledQuestions(shuffled);
     }
-  }, [data]);
+  }, [dataQuestion]);
   useEffect(() => {
     if (!data?._id) return;
 
