@@ -87,18 +87,21 @@ export interface LessonLearnersSummary {
 }
 
 export interface LessonLearnersSummaryResponse {
-  data: LessonLearnersSummary[];
+  totalLearners: string;
+  totalRate: string;
+  items: LessonLearnersSummary[];
 }
 
 export interface LessonLearner {
-  userId?: string;
-  fullName?: string;
-  email?: string;
-  studentId?: string;
-  class?: string;
-  major?: string;
-  status: string;
-  completedAt?: string | null;
+  _id: string;
+  lessonId: string;
+  isCompleted: boolean;
+  firstAccessAt: string;
+  fullName: string;
+  email: string;
+  studentId: string;
+  class: string;
+  major: string;
 }
 
 export interface LessonLearnersData {

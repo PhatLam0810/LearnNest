@@ -38,19 +38,10 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   const [form] = Form.useForm();
 
   const [addLibrary] = adminQuery.useAddLibraryMutation();
-  const [addNewTag] = adminQuery.useAddNewTagMutation();
   const [generateQuestion] = dashboardQuery.useGenerateQuestionMutation();
-  const {
-    listItem: listTag,
-    search,
-    refresh,
-  } = useAppPagination<any>({
-    apiUrl: 'tag/getAll',
-  });
   const [libraryType, setLibraryType] = useState('');
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
   const [duration, setDuration] = useState<number>(0);
-  const [newTag, setNewTag] = useState('');
   const [count, setCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState('');
@@ -270,47 +261,6 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
           <Input.TextArea placeholder="Enter library description" />
         </Form.Item>
         <Form.Item name="duration" noStyle></Form.Item>
-        <Form.Item label="tags" name="tags">
-          <Select
-            placeholder="Select tags"
-            mode="multiple"
-            onSearch={search}
-            popupRender={menu => (
-              <>
-                {menu}
-                <Divider style={{ margin: '8px 0' }} />
-                <Space style={{ padding: '0 8px 4px' }}>
-                  <Input
-                    placeholder="Please enter item"
-                    value={newTag}
-                    onChange={e => {
-                      setNewTag(e.target.value);
-                    }}
-                  />
-                  <Button
-                    type="text"
-                    icon={<PlusOutlined />}
-                    onClick={() => {
-                      addNewTag({ name: newTag })
-                        .unwrap()
-                        .then(res => {
-                          refresh();
-                          setNewTag('');
-                        });
-                    }}>
-                    Add item
-                  </Button>
-                </Space>
-              </>
-            )}
-            getPopupContainer={triggerNode => triggerNode.parentNode}>
-            {listTag?.map(item => (
-              <Select.Option key={item._id} value={item._id}>
-                {item.name}
-              </Select.Option>
-            ))}
-          </Select>
-        </Form.Item>
 
         <Form.Item
           label="Resource Type"

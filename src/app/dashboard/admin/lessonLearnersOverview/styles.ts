@@ -2,6 +2,7 @@ import { StyleSheet } from '@styles';
 
 const styles = StyleSheet.create({
   searchInput: {
+    marginTop: 16,
     width: '100%',
   },
   badgeSuccessStyle: {

@@ -208,7 +208,7 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<LessonLearnersSummaryResponse>) =>
         res.data,
     }),
-    getLessonLearners: builder.query<LessonLearnersResponse, string>({
+    getLessonLearners: builder.mutation<LessonLearnersResponse, string>({
       query: lessonId => ({
         url: `admin/lessons/${lessonId}/learners`,
         method: 'POST',

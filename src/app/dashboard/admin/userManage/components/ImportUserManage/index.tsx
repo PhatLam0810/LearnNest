@@ -3,13 +3,16 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Button,
+  Divider,
   Input,
   message,
+  Select,
   Space,
   Table,
   Typography,
   Upload,
 } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { adminQuery } from '~mdAdmin/redux';
 import {
@@ -22,6 +25,7 @@ import {
 } from '~mdAdmin/redux/RTKQuery/type';
 import './styles.scss';
 import api from '@services/api';
+import { useAppPagination } from '@hooks';
 
 const { Text } = Typography;
 
@@ -78,7 +82,11 @@ const ImportUserManage = () => {
     adminQuery.useImportUsersBulkMutation();
   const [sendEmails, { isLoading: sendLoading }] =
     adminQuery.useSendImportEmailsMutation();
-
+  const [addNewTag] = adminQuery.useAddNewTagMutation();
+  const { listItem: listTag, refresh } = useAppPagination<any>({
+    apiUrl: 'tag/getAll',
+  });
+  const [newTag, setNewTag] = useState('');
   const hasPreviewData = previewRows.length > 0;
   const hasImportableRows = previewRows.some(row => !row.error);
   const createdAccounts = importResult?.accounts ?? [];
@@ -254,12 +262,17 @@ const ImportUserManage = () => {
         title: 'Lớp',
         dataIndex: 'class',
         key: 'class',
-        render: (value: string, record) => (
+        render: (value: string, record: any) => (
           <Input
-            value={value}
-            onChange={e =>
-              handleFieldChange(record.key, 'class', e.target.value)
-            }
+            value={value} // Lấy giá trị từ dữ liệu của dòng đó
+            onChange={e => {
+              // Hàm này cập nhật đúng 1 dòng khi người dùng sửa tay
+              const newValue = e.target.value;
+              const updatedRows = previewRows.map(row =>
+                row.key === record.key ? { ...row, class: newValue } : row,
+              );
+              setPreviewRows(updatedRows);
+            }}
           />
         ),
       },
@@ -289,30 +302,18 @@ const ImportUserManage = () => {
           />
         ),
       },
-      {
-        title: 'Trạng thái',
-        key: 'status',
-        render: (_, record) => {
-          if (record.status === 'created') {
-            return <Text type="success">Đã tạo</Text>;
-          }
-          if (record.status === 'failed') {
-            return <Text type="danger">Lỗi</Text>;
-          }
-          return <Text>Chưa tạo</Text>;
-        },
-      },
-      {
-        title: 'Lỗi',
-        key: 'error',
-        render: (_, record) => record.error || '-',
-      },
     ],
     [],
   );
 
   const invalidCount = previewRows.filter(row => !!row.error).length;
-
+  const handleClassSelect = (value: string) => {
+    const updatedRows = previewRows.map(row => ({
+      ...row,
+      class: value,
+    }));
+    setPreviewRows(updatedRows);
+  };
   return (
     <div className="import-user-manage">
       {contextHolder}
@@ -352,6 +353,48 @@ const ImportUserManage = () => {
 
       <div className="import-user-manage__actions">
         <Space wrap>
+          <Select
+            style={{ width: 300 }}
+            placeholder="Select tags"
+            onChange={(value: string) => {
+              handleClassSelect(value);
+            }}
+            popupRender={menu => (
+              <>
+                {menu}
+                <Divider style={{ margin: '8px 0' }} />
+                <Space style={{ padding: '0 8px 4px' }}>
+                  <Input
+                    placeholder="Nhập mã lớp học"
+                    value={newTag}
+                    onChange={e => {
+                      setNewTag(e.target.value);
+                    }}
+                    style={{ width: 140 }}
+                  />
+                  <Button
+                    type="text"
+                    icon={<PlusOutlined />}
+                    onClick={() => {
+                      addNewTag({ name: newTag })
+                        .unwrap()
+                        .then(res => {
+                          refresh();
+                          setNewTag('');
+                        });
+                    }}>
+                    Tạo
+                  </Button>
+                </Space>
+              </>
+            )}
+            getPopupContainer={triggerNode => triggerNode.parentNode}>
+            {listTag?.map(item => (
+              <Select.Option key={item._id} value={item.name}>
+                {item.name}
+              </Select.Option>
+            ))}
+          </Select>
           <Button
             type="primary"
             disabled={!hasPreviewData}

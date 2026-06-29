@@ -11,6 +11,8 @@ import {
   Statistic,
   Card,
   Input,
+  Select,
+  Divider,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { adminQuery } from '~mdAdmin/redux';
@@ -34,14 +36,6 @@ const downloadFile = (blob: Blob, fileName: string) => {
   window.URL.revokeObjectURL(url);
 };
 
-type LessonWithStatus = LessonLearnersSummary & {
-  key: string;
-};
-
-type LearnerTableData = LessonLearner & {
-  key: string;
-};
-
 const LessonLearnersOverview = () => {
   const [selectedLessonOverview, setSelectedLessonOverview] =
     useState<LessonLearnersSummary>(null);
@@ -58,26 +52,19 @@ const LessonLearnersOverview = () => {
   useEffect(() => {
     if (selectedLessonOverview) {
       fetchData();
+      refresh();
     }
   }, [selectedLessonOverview]);
-
-  const { listItem, fetchData, refresh, search, currentData } =
+  const { listItem: listTag, search: searchTag } = useAppPagination<any>({
+    apiUrl: 'tag/getAll',
+  });
+  const { listItem, fetchData, refresh, search, currentData, filter } =
     useAppPagination<LessonLearner>({
       apiUrl: `admin/lessons/${selectedLessonOverview?._id}/learners`,
+      isLazy: true,
     });
-  const lessonTableData: LessonWithStatus[] = useMemo(
-    () =>
-      summaryData?.data?.map(lesson => ({
-        ...lesson,
-        key: lesson._id,
-      })) || [],
-    [summaryData],
-  );
 
-  // Transform learner data to table format
-
-  // Lesson Summary Columns
-  const lessonColumns: ColumnsType<LessonWithStatus> = [
+  const lessonColumns: ColumnsType<LessonLearnersSummary> = [
     {
       title: 'Tên Khóa Học',
       dataIndex: 'title',
@@ -137,15 +124,16 @@ const LessonLearnersOverview = () => {
       width: '15%',
     },
     {
-      title: 'Hoàn Thành',
-      dataIndex: 'status',
-      key: 'status',
+      title: 'Trạng thái',
+      dataIndex: 'isCompleted', // Phải khớp với key trong dữ liệu
+      key: 'isCompleted',
       width: '15%',
       align: 'center',
-      render: (value: string) => (
+      render: (isCompleted: boolean) => (
         <Badge
-          status={value === 'Đạt' ? 'success' : 'processing'}
-          text={value}
+          status={isCompleted ? 'success' : 'error'}
+          style={{ color: isCompleted ? 'green' : 'red' }}
+          text={isCompleted ? 'Hoàn thành' : 'Chưa hoàn thành'}
         />
       ),
     },
@@ -164,7 +152,6 @@ const LessonLearnersOverview = () => {
 
     setIsExporting(true);
     try {
-      const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL;
       const response = await exportLearner({ learners: listItem });
 
       // Tạo link download
@@ -181,7 +168,6 @@ const LessonLearnersOverview = () => {
       setIsExporting(false);
     }
   };
-
   const handleModalClose = () => {
     setIsModalVisible(false);
     setSelectedLessonOverview(null);
@@ -194,30 +180,21 @@ const LessonLearnersOverview = () => {
           <Card className="lesson-learners-overview__stat-card">
             <Statistic
               title="Tổng Khóa Học"
-              value={lessonTableData.length}
+              value={summaryData?.items.length}
               prefix="📚"
             />
           </Card>
           <Card className="lesson-learners-overview__stat-card">
             <Statistic
               title="Tổng Người Học (Toàn Bộ)"
-              value={currentData?.totalRecords}
+              value={summaryData?.totalLearners}
               prefix="👥"
             />
           </Card>
           <Card className="lesson-learners-overview__stat-card">
             <Statistic
               title="Tỉ Lệ Hoàn Thành TB"
-              value={
-                lessonTableData.length > 0
-                  ? (
-                      lessonTableData.reduce(
-                        (sum, l) => sum + l.completionRate,
-                        0,
-                      ) / lessonTableData.length
-                    ).toFixed(1)
-                  : 0
-              }
+              value={summaryData?.totalRate}
               suffix="%"
               prefix="✓"
             />
@@ -232,15 +209,10 @@ const LessonLearnersOverview = () => {
           <Table
             className="lesson-learners-overview__table"
             columns={lessonColumns}
-            dataSource={lessonTableData}
+            dataSource={summaryData?.items}
             rowKey="key"
             onChange={res => {
               fetchData({ pageNum: res.current });
-            }}
-            pagination={{
-              current: currentData?.pageNum,
-              pageSize: currentData?.pageSize,
-              total: currentData?.totalRecords,
             }}
             onRow={record => ({
               onClick: () => handleLessonSelect(record),
@@ -273,19 +245,51 @@ const LessonLearnersOverview = () => {
         ]}>
         <>
           <div className="lesson-learners-overview__modal-stats">
-            <Space>
+            <Space size="large" style={{ marginBottom: 20, width: '100%' }}>
               <Statistic
                 title="Tổng Người Học"
-                value={selectedLessonOverview?.totalLearners}
+                value={currentData?.totalRecords}
               />
               <Statistic
                 title="Đã Hoàn Thành"
-                value={listItem.filter(l => l.status === 'Đạt').length}
+                value={currentData?.totalCompleted}
+                valueStyle={{ color: '#3f8600' }}
+              />
+              <Statistic
+                title="Tỉ Lệ Hoàn Thành"
+                value={`${currentData?.completionRate}%`}
+                valueStyle={{ color: '#3f8600' }}
+              />
+              <Statistic
+                title="Chưa Hoàn Thành"
+                value={currentData?.totalNotCompleted}
+                valueStyle={{ color: '#cf1322' }}
+              />
+              <Statistic
+                title="Tỉ Lệ Chưa Hoàn Thành"
+                value={`${currentData?.notCompletionRate}%`}
+                valueStyle={{ color: '#cf1322' }}
               />
             </Space>
           </div>
+          <Select
+            style={{ width: 200 }}
+            placeholder="Chọn mã lớp học"
+            allowClear
+            onChange={(value: string) => {
+              if (value) {
+                filter({ class: value });
+              }
+              filter(null);
+            }}>
+            {listTag?.map(item => (
+              <Select.Option key={item._id} value={item.name}>
+                {item.name}
+              </Select.Option>
+            ))}
+          </Select>
           <Search
-            placeholder="Input search text"
+            placeholder="Tìm kiếm"
             onSearch={search}
             style={styles.searchInput}
           />
@@ -298,8 +302,10 @@ const LessonLearnersOverview = () => {
             }}
             pagination={{
               current: currentData?.pageNum,
-              pageSize: currentData?.pageSize,
               total: currentData?.totalRecords,
+              pageSize: currentData?.pageSize,
+              showSizeChanger: false,
+              position: ['bottomCenter'],
             }}
             locale={{
               emptyText: <Empty description="Không có người học" />,
