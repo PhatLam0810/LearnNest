@@ -11,17 +11,17 @@ const onChange = (key: string) => {};
 const items: TabsProps['items'] = [
   {
     key: '1',
-    label: 'Lesson',
+    label: 'Khóa học',
     children: <LessonManage />,
   },
   {
     key: '2',
-    label: 'Module',
+    label: 'Phần học',
     children: <ModuleManage />,
   },
   {
     key: '4',
-    label: 'Library',
+    label: 'Bài học',
     children: <LibraryManage />,
   },
 ];

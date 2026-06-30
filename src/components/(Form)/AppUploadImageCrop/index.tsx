@@ -89,7 +89,7 @@ const ImageCropUpload: React.FC<ImageCropUploadProps> = ({
           showUploadList={false} // Không hiển thị danh sách file upload
         >
           <Button type="text" icon={<UploadOutlined />}>
-            Upload Image
+            Tải lên hình ảnh
           </Button>
         </Upload>
       )}

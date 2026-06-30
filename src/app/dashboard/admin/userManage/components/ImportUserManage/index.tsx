@@ -157,33 +157,6 @@ const ImportUserManage = () => {
       };
       const response = await importUsers(body).unwrap();
 
-      const updatedRows = validatedRows.map(row => {
-        const failedItem = response.failed.find(
-          item => item.email === row.email || item.studentId === row.studentId,
-        );
-        const successItem = response.successful.find(
-          item => item.email === row.email,
-        );
-
-        if (failedItem) {
-          return {
-            ...row,
-            status: 'failed',
-            error: failedItem.error,
-          };
-        }
-
-        if (successItem) {
-          return {
-            ...row,
-            status: 'created',
-            error: undefined,
-          };
-        }
-
-        return row;
-      });
-
       setImportResult(response);
       setSendResult(null);
       messageApi.success(
@@ -314,6 +287,7 @@ const ImportUserManage = () => {
     }));
     setPreviewRows(updatedRows);
   };
+
   return (
     <div className="import-user-manage">
       {contextHolder}
@@ -332,7 +306,7 @@ const ImportUserManage = () => {
                 }
               }
             }}>
-            <Button type="text">Upload</Button>
+            <Button type="text">Tải lên</Button>
           </Upload>
         </div>
         <Button type="primary" loading={previewLoading} onClick={handlePreview}>
@@ -355,7 +329,7 @@ const ImportUserManage = () => {
         <Space wrap>
           <Select
             style={{ width: 300 }}
-            placeholder="Select tags"
+            placeholder="Chọn mã lớp"
             onChange={(value: string) => {
               handleClassSelect(value);
             }}

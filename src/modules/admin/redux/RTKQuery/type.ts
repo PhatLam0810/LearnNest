@@ -17,7 +17,6 @@ export interface CreateUserParams {
   phone: number;
   fullName: string;
   studentId: string;
-  password: string;
 }
 
 export interface ImportUserItem {

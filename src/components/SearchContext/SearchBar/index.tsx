@@ -19,8 +19,8 @@ const SearchBar: React.FC = () => {
   }, [text]);
 
   const sortItems = [
-    { key: 'desc', label: 'Desc' },
-    { key: 'asc', label: 'Asc' },
+    { key: 'desc', label: 'Cũ nhất' },
+    { key: 'asc', label: 'Mới nhất' },
   ];
 
   const filterButton = (
@@ -57,7 +57,7 @@ const SearchBar: React.FC = () => {
           />
         }
         suffix={!isMobile ? filterButton : undefined}
-        placeholder={isMobile ? 'Search...' : 'Search lessons'}
+        placeholder={isMobile ? 'Tìm...' : 'Tìm khóa học'}
         allowClear
         size={isMobile ? 'middle' : 'large'}
         value={text}

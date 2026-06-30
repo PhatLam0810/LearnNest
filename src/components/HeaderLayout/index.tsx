@@ -115,14 +115,14 @@ const HeaderLayout: React.FC = ({}) => {
 
     {
       key: 'profile',
-      label: 'Settings',
+      label: 'Cài đặt',
       icon: <UserOutlined />,
       onClick: () => router.push('/dashboard/profile'),
     },
 
     {
       key: 'logout',
-      label: 'Logout',
+      label: 'Đăng xuất',
       icon: <LogoutOutlined />,
       onClick: () => dispatch(authAction.logout()),
     },
@@ -169,7 +169,7 @@ const HeaderLayout: React.FC = ({}) => {
 
           {/* RIGHT */}
           <Space size={16}>
-            {screens.sm && (
+            {screens.sm && !isAdmin && (
               <Dropdown
                 open={isCoursesDropdownOpen}
                 trigger={['click']}
@@ -219,7 +219,7 @@ const HeaderLayout: React.FC = ({}) => {
 
         <div className="drawer-content">
           <Button block onClick={() => router.push('/dashboard/home')}>
-            Home
+            Trang Chủ
           </Button>
           <Button
             block
@@ -237,22 +237,23 @@ const HeaderLayout: React.FC = ({}) => {
             }}>
             Thư Viện
           </Button>
-          <Button
-            block
-            onClick={() => {
-              setOpen(false);
-              router.push('/dashboard/my-courses');
-            }}>
-            Khóa học của tôi
-          </Button>
-
+          {!isAdmin && (
+            <Button
+              block
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/my-courses');
+              }}>
+              Khóa học của tôi
+            </Button>
+          )}
           <Button
             block
             onClick={() => {
               setOpen(false);
               router.push('/dashboard/profile');
             }}>
-            Profile
+            Cài Đặt
           </Button>
 
           {isAdmin && (
@@ -260,13 +261,13 @@ const HeaderLayout: React.FC = ({}) => {
               <Button
                 block
                 onClick={() => router.push('/dashboard/admin/userManage')}>
-                User Manage
+                Quản lí người học
               </Button>
 
               <Button
                 block
                 onClick={() => router.push('/dashboard/admin/lessonManage')}>
-                Lesson Manage
+                Quản lí khóa học
               </Button>
             </>
           )}

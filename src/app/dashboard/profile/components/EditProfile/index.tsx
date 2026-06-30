@@ -67,7 +67,7 @@ const EditProfile = () => {
                 width: '100%',
               }}>
               <Form.Item
-                label={<Text style={styles.labelText}>Full Name</Text>}
+                label={<Text style={styles.labelText}>Họ và Tên</Text>}
                 name="fullName"
                 labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
                 style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
@@ -94,7 +94,7 @@ const EditProfile = () => {
                 width: '100%',
               }}>
               <Form.Item
-                label={<Text style={styles.labelText}>MSSV</Text>}
+                label={<Text style={styles.labelText}>Mã số sinh viên</Text>}
                 name="studentId"
                 labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
                 style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
@@ -111,7 +111,7 @@ const EditProfile = () => {
               </Form.Item>
             </Space>
             <Form.Item
-              label={<Text style={styles.labelText}>Bio Name</Text>}
+              label={<Text style={styles.labelText}>Mô tả</Text>}
               name="bio"
               labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
               style={{ width: '100%', margin: 0 }} // Đảm bảo Form.Item full width
@@ -119,7 +119,8 @@ const EditProfile = () => {
               <AppInput
                 style={{ flex: 1, minHeight: '150px', width: '100%' }}
                 type="TextArea"
-                placeholder="Enter a bio (max 250 chars.)"
+                maxLength={250}
+                placeholder="Mô tả ngắn gọn"
               />
             </Form.Item>
             {/* <View style={styles.buttonDeleteContainer}>
@@ -134,7 +135,7 @@ const EditProfile = () => {
           </View>
           {/* Nút lưu */}
           <Button type="primary" htmlType="submit" style={styles.saveButton}>
-            Save Profile
+            Lưu cài đặt
           </Button>
         </Form>
       </View>

@@ -73,11 +73,15 @@ export default function DashboardLayout({
             />
           ),
         },
-        {
-          key: '/dashboard/my-courses',
-          label: 'Tổng Quan',
-          icon: <IdcardOutlined />,
-        },
+        ...(!isAdmin
+          ? [
+              {
+                key: '/dashboard/my-courses',
+                label: 'Tổng Quan',
+                icon: <IdcardOutlined />,
+              },
+            ]
+          : []),
         {
           key: '/dashboard/profile',
           label: 'Cài Đặt',
@@ -105,7 +109,7 @@ export default function DashboardLayout({
         {
           key: 'logout',
           icon: <LogoutOutlined />,
-          label: 'Logout',
+          label: 'Đăng xuất',
           onClick: () => {
             dispatch(authAction.logout());
           },

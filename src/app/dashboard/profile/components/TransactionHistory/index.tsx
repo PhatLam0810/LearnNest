@@ -103,7 +103,7 @@ const TransactionHistory = () => {
           justifyContent: 'space-between',
         }}>
         <Search
-          placeholder="Input search text"
+          placeholder="Tìm kiếm"
           onSearch={search}
           style={{ width: '50%' }}
         />

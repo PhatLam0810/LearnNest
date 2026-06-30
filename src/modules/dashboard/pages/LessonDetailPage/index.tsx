@@ -326,7 +326,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       className="button lesson-pill-button"
                       onClick={handleStartLesson}>
                       <Icon name="liveTV" className="button-icon" />
-                      <span className="label">Start lesson</span>
+                      <span className="label">Bắt đầu khóa học</span>
                     </button>
                     <Text style={styles.totalLibrary}>
                       Total Duration:{' '}
@@ -501,7 +501,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       className="button lesson-pill-button"
                       onClick={handleStartLesson}>
                       <Icon name="liveTV" className="button-icon" />
-                      <span className="label">Start lesson</span>
+                      <span className="label">Bắt đầu khóa học</span>
                     </button>
                     <Text style={styles.totalLibrary}>
                       Total Duration:{' '}

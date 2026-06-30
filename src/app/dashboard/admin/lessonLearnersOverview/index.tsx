@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   Button,
@@ -13,8 +13,10 @@ import {
   Input,
   Select,
   Divider,
+  Dropdown,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { FilterOutlined } from '@ant-design/icons';
 import { adminQuery } from '~mdAdmin/redux';
 import {
   LessonLearnersSummary,
@@ -41,6 +43,8 @@ const LessonLearnersOverview = () => {
     useState<LessonLearnersSummary>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [tempFilters, setTempFilters] = useState<any>();
+  const [open, setOpen] = useState(false);
   const { Search } = Input;
 
   // Query summary data
@@ -55,15 +59,22 @@ const LessonLearnersOverview = () => {
       refresh();
     }
   }, [selectedLessonOverview]);
-  const { listItem: listTag, search: searchTag } = useAppPagination<any>({
+  const { listItem: listTag } = useAppPagination<any>({
     apiUrl: 'tag/getAll',
   });
-  const { listItem, fetchData, refresh, search, currentData, filter } =
-    useAppPagination<LessonLearner>({
-      apiUrl: `admin/lessons/${selectedLessonOverview?._id}/learners`,
-      isLazy: true,
-    });
-
+  const {
+    listItem,
+    fetchData,
+    refresh,
+    search,
+    currentData,
+    filter,
+    changeParams,
+  } = useAppPagination<LessonLearner>({
+    apiUrl: `admin/lessons/${selectedLessonOverview?._id}/learners`,
+    isLazy: true,
+  });
+  console.log(currentData);
   const lessonColumns: ColumnsType<LessonLearnersSummary> = [
     {
       title: 'Tên Khóa Học',
@@ -97,13 +108,13 @@ const LessonLearnersOverview = () => {
       title: 'Họ và Tên',
       dataIndex: 'fullName',
       key: 'fullName',
-      width: '20%',
+      width: '15%',
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      width: '20%',
+      width: '15%',
     },
     {
       title: 'Mã Sinh Viên',
@@ -121,6 +132,12 @@ const LessonLearnersOverview = () => {
       title: 'Ngành',
       dataIndex: 'major',
       key: 'major',
+      width: '15%',
+    },
+    {
+      title: 'Khoa',
+      dataIndex: 'faculty',
+      key: 'faculty',
       width: '15%',
     },
     {
@@ -149,7 +166,7 @@ const LessonLearnersOverview = () => {
       message.warning('Không có dữ liệu để xuất');
       return;
     }
-
+    changeParams({ isFull: true });
     setIsExporting(true);
     try {
       const response = await exportLearner({ learners: listItem });
@@ -171,6 +188,81 @@ const LessonLearnersOverview = () => {
   const handleModalClose = () => {
     setIsModalVisible(false);
     setSelectedLessonOverview(null);
+  };
+
+  const FilterDropdown = ({ onFilterChange }) => {
+    const handleApply = () => {
+      onFilterChange(tempFilters);
+      setOpen(false);
+    };
+
+    const handleReset = () => {
+      setTempFilters({}); // Reset về object rỗng thay vì null
+      onFilterChange({});
+      setOpen(false);
+    };
+
+    const content = () => (
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          padding: 16,
+          background: '#fff',
+          borderRadius: 8,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          width: 250,
+        }}>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <div style={{ fontWeight: 'bold' }}>Bộ lọc tìm kiếm</div>
+
+          <Select
+            style={{ width: '100%' }}
+            placeholder="Chọn mã lớp học"
+            allowClear
+            value={tempFilters?.class}
+            onChange={val => setTempFilters(prev => ({ ...prev, class: val }))}>
+            {listTag?.map(item => (
+              <Select.Option key={item._id} value={item.name}>
+                {item.name}
+              </Select.Option>
+            ))}
+          </Select>
+          <Select
+            allowClear
+            placeholder="Trạng thái"
+            style={{ width: '100%' }}
+            value={tempFilters?.isCompleted}
+            onChange={val =>
+              setTempFilters(prev => ({ ...prev, isCompleted: val }))
+            }>
+            <Select.Option value={true}>Hoàn thành</Select.Option>
+            <Select.Option value={false}>Chưa hoàn thành</Select.Option>
+          </Select>
+
+          <Divider style={{ margin: '8px 0' }} />
+
+          <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+            <Button onClick={handleReset}>Thiết lập lại</Button>
+            <Button type="primary" onClick={handleApply}>
+              Áp dụng
+            </Button>
+          </Space>
+        </Space>
+      </div>
+    );
+
+    return (
+      <Dropdown
+        open={open}
+        trigger={['click']}
+        onOpenChange={setOpen}
+        popupRender={content}>
+        <Button icon={<FilterOutlined />}>Lọc</Button>
+      </Dropdown>
+    );
+  };
+  const handleFilterSubmit = filters => {
+    filter(filters);
   };
   return (
     <div className="lesson-learners-overview">
@@ -267,32 +359,19 @@ const LessonLearnersOverview = () => {
               />
               <Statistic
                 title="Tỉ Lệ Chưa Hoàn Thành"
-                value={`${currentData?.notCompletionRate}%`}
+                value={`${currentData?.notCompletionRate || 0}%`}
                 valueStyle={{ color: '#cf1322' }}
               />
             </Space>
           </div>
-          <Select
-            style={{ width: 200 }}
-            placeholder="Chọn mã lớp học"
-            allowClear
-            onChange={(value: string) => {
-              if (value) {
-                filter({ class: value });
-              }
-              filter(null);
-            }}>
-            {listTag?.map(item => (
-              <Select.Option key={item._id} value={item.name}>
-                {item.name}
-              </Select.Option>
-            ))}
-          </Select>
-          <Search
-            placeholder="Tìm kiếm"
-            onSearch={search}
-            style={styles.searchInput}
-          />
+          <div style={styles.searchInputContainer}>
+            <Search
+              placeholder="Tìm kiếm"
+              onSearch={search}
+              style={styles.searchInput}
+            />
+            <FilterDropdown onFilterChange={handleFilterSubmit} />
+          </div>
           <Table
             columns={learnerColumns}
             dataSource={listItem}

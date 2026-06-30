@@ -17,7 +17,7 @@ const ModalLessonOverview = ({ isVisible, setIsVisible, data }: any) => {
         <div>
           {m.libraries?.map((lib: any) => (
             <div key={lib._id} style={styles.libraryItem}>
-              <LibraryDetailItem data={lib} />
+              <div>{lib.title}</div>
             </div>
           ))}
         </div>

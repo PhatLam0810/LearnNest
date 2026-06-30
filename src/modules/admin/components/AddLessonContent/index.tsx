@@ -121,31 +121,28 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               <View style={styles.flex4}>
                 <Form.Item
                   style={styles.formItemTitle}
-                  label="Lesson Name"
+                  label="Tên khóa học"
                   name="title"
                   rules={[
                     {
                       required: true,
-                      message: 'Please input the lesson name!',
+                      message: 'Vui lòng nhập tên khóa học',
                     },
                   ]}>
-                  <Input placeholder="Enter lesson name" />
+                  <Input placeholder="Nhập tên khóa học" />
                 </Form.Item>
 
                 <Form.Item
                   style={styles.formItemTitle}
-                  label="Description"
+                  label="Mô tả"
                   name="description"
                   rules={[
                     {
                       required: true,
-                      message: 'Please input the description!',
+                      message: 'Vui lòng nhập mô tả',
                     },
                   ]}>
-                  <Input.TextArea
-                    rows={4}
-                    placeholder="Enter lesson description"
-                  />
+                  <Input.TextArea rows={4} placeholder="Nhập mô tả" />
                 </Form.Item>
 
                 <Row align="middle" style={{ marginBottom: 16 }}>
@@ -154,14 +151,14 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                       <Switch onChange={onChange} />
                     </Form.Item> */}
                   <Form.Item
-                    label="Total Libraries"
+                    label="Tổng bài học"
                     name="totalLibraries"
                     style={{ marginBottom: 0 }}>
                     <span className="ant-form-text">{totalLibraries}</span>
                   </Form.Item>
 
                   <Form.Item
-                    label="Total Duration"
+                    label="Thời lượng khóa học"
                     name="totalDuration"
                     style={{ marginBottom: 0 }}>
                     <span className="ant-form-text">
@@ -204,7 +201,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
                 <Form.Item
                   style={styles.formItemTitle}
-                  label="Skill learned"
+                  label="Kỹ năng đạt dược"
                   name="learnedSkills">
                   <Form.List name="learnedSkills">
                     {(fields, { add, remove }) => (
@@ -231,7 +228,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                             onClick={() => add()}
                             block
                             icon={<PlusOutlined />}>
-                            Add Row
+                            Thêm kỹ năng
                           </Button>
                         </Form.Item>
                       </div>
@@ -242,7 +239,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               <View style={styles.flex1_5}>
                 <Form.Item
                   style={styles.formItemTitle}
-                  label="Thumbnail"
+                  label="Hình nền"
                   name="thumbnail">
                   <AppUploadImageCrop
                     containerStyle={styles.uploadCrop}
@@ -266,10 +263,10 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
               </View>
             </View>
 
-            <h4 style={{ marginBottom: 16 }}>Select module</h4>
+            <h4 style={{ marginBottom: 16 }}>Chọn phần học </h4>
 
             <Button onClick={() => setIsVisibleModalSelect(true)}>
-              <Text>Add Module</Text>
+              <Text>Thêm phần học</Text>
             </Button>
             <DraggableList
               data={listSelected}
@@ -297,7 +294,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
             style={styles.btn}
             type="primary"
             htmlType="submit">
-            Done
+            Xác nhận
           </Button>
         </Form>
       </View>

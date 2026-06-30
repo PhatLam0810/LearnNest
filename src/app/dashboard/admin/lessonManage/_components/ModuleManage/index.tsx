@@ -33,20 +33,20 @@ const ModuleManage = () => {
   const [deleteItem] = adminQuery.useDeleteModuleMutation();
   const columns: TableProps<Module>['columns'] = [
     {
-      title: 'Title',
+      title: 'Tên phần học',
       dataIndex: 'title',
       key: 'title',
     },
     {
-      title: 'Total Library',
+      title: 'Tổng bài học',
       dataIndex: 'Library',
       key: 'Library',
       render: (_, record) => (
-        <p style={{ margin: 0 }}>Library: {record.libraries.length} </p>
+        <p style={{ margin: 0 }}> {record.libraries.length} bài học </p>
       ),
     },
     {
-      title: 'Action',
+      title: 'Hành động',
       key: 'action',
       render: (_, record) => (
         <Space size="middle" onClick={e => e.stopPropagation()}>
@@ -56,7 +56,7 @@ const ModuleManage = () => {
               setSelectedItem(record);
               setOpenDelete(true);
             }}>
-            <a style={styles.buttonText}> Delete</a>
+            <a style={styles.buttonText}> Xóa</a>
           </button>
           <button
             style={styles.button}
@@ -65,7 +65,7 @@ const ModuleManage = () => {
               setDataEdit(record);
               setIsVisibleModalUpdate(true);
             }}>
-            <a style={styles.buttonText}> Update</a>
+            <a style={styles.buttonText}> Cập nhật</a>
           </button>
         </Space>
       ),
@@ -104,7 +104,7 @@ const ModuleManage = () => {
           justifyContent: 'space-between',
         }}>
         <Search
-          placeholder="Input search text"
+          placeholder="Tìm kiếm"
           onSearch={search}
           style={{ width: '50%' }}
         />
@@ -113,7 +113,7 @@ const ModuleManage = () => {
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => setIsVisibleModalAdd(true)}>
-            Add Module
+            Tạo phần học
           </Button>
         </View>
       </View>
@@ -131,14 +131,6 @@ const ModuleManage = () => {
             pageSize: currentData?.pageSize,
             total: currentData?.totalRecords,
           }}
-          onRow={record => {
-            return {
-              onClick: () => {
-                setData(record);
-                setIsVisibleModalOverview(true);
-              },
-            };
-          }}
         />
       </View>
       <Modal
@@ -147,14 +139,14 @@ const ModuleManage = () => {
         footer={null}
         width={'80%'}
         centered
-        title={selectedItem ? selectedItem.title : 'Add Module'}>
+        title={selectedItem ? selectedItem.title : 'Thêm phần học'}>
         <ScrollView style={{ height: (width * 0.8 * 9) / 16 }}>
           <AddModuleContent onDone={onDone} />
         </ScrollView>
       </Modal>
 
       <Modal
-        title="Delete Module"
+        title="Xóa phần học"
         open={openDelete}
         onCancel={onCloseDelete}
         onOk={() => {
@@ -166,7 +158,7 @@ const ModuleManage = () => {
               onCloseDelete();
             });
         }}>
-        <Text>{`Delete Module: ${selectedItem?.title}`}</Text>
+        <Text>{`Xóa phần học: ${selectedItem?.title}`}</Text>
       </Modal>
       <ModalModuleOverview
         data={data}

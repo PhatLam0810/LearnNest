@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
 import {
@@ -7,32 +7,24 @@ import {
   Table,
   TableProps,
   Modal,
-  Avatar,
   message,
   Button,
   Form,
-  InputNumber,
   Input,
-  App,
   Card,
 } from 'antd';
-import { messageApi, useAppPagination } from '@hooks';
+import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
 import { adminQuery } from '~mdAdmin/redux';
-import { UserOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useAppSelector } from '@redux';
 import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
 import { authQuery } from '~mdAuth/redux/RTKQuery';
-import { userInfo } from 'os';
 const UserManage = () => {
   const { listItem, currentData, refresh, search, fetchData } =
     useAppPagination<UserItem>({
       apiUrl: 'user/getListUser',
     });
-  const { userProfile } =
-    useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const { modal } = App.useApp();
+
   const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
   const [createUserForm] = Form.useForm<CreateUserParams>();
   const [isModalDeleteUser, setModalDeleteUser] = useState(false);
@@ -41,6 +33,7 @@ const UserManage = () => {
   const { Search } = Input;
   const [createUser, { isLoading: isLoadingCreateUser }] =
     adminQuery.useCreateUserMutation();
+  const [sendEmails] = adminQuery.useSendImportEmailsMutation();
   const [messageApi, contextHolder] = message.useMessage();
   const handleDeleteUser = async (_id: string) => {
     try {
@@ -53,9 +46,13 @@ const UserManage = () => {
       messageApi.error('Xóa tài khoản thất bại');
     }
   };
-  const handleCreateUser = async (value: CreateUserParams) => {
+  const handleCreateUser = async (value: any) => {
     try {
-      await createUser(value).unwrap();
+      const res = await createUser(value).unwrap();
+      const payload: any = {
+        accounts: [res],
+      };
+      await sendEmails(payload).unwrap();
       refresh();
       setIsModalCreateUserOpen(false);
       messageApi.success('Tạo user thành công thành công');
@@ -156,12 +153,12 @@ const UserManage = () => {
           gap: 12,
         }}>
         <Search
-          placeholder="Input search text"
+          placeholder="Tìm kiếm"
           onSearch={search}
           style={{ width: '100%' }}
         />
         <Button type="primary" onClick={() => setIsModalCreateUserOpen(true)}>
-          Add User Account
+          Tạo tài khoản
         </Button>
       </View>
       <Table
@@ -182,14 +179,14 @@ const UserManage = () => {
       {/* Modal hiện thông tin user */}
 
       <Modal
-        title="Add User Account"
+        title=" Tạo tài khoản"
         open={isModalCreateUserOpen}
         onCancel={() => setIsModalCreateUserOpen(false)}
         onOk={() => handleCreateUser(createUserForm.getFieldsValue())}
         confirmLoading={isLoadingCreateUser}>
         <Form form={createUserForm} layout="vertical">
           <Form.Item
-            label="Full Name"
+            label="Họ và Tên"
             name="fullName"
             rules={[
               {
@@ -223,12 +220,34 @@ const UserManage = () => {
             <Input />
           </Form.Item>
           <Form.Item
-            label="Password"
-            name="password"
+            label="Mã lớp"
+            name="class"
             rules={[
               {
                 required: true,
-                message: 'Nhập password',
+                message: 'Nhập mã lớp',
+              },
+            ]}>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Ngành"
+            name="major"
+            rules={[
+              {
+                required: true,
+                message: 'Nhập ngành',
+              },
+            ]}>
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Khoa"
+            name="faculty"
+            rules={[
+              {
+                required: true,
+                message: 'Nhập khoa',
               },
             ]}>
             <Input />
@@ -239,7 +258,6 @@ const UserManage = () => {
         title="Xác nhận xóa tài khoản"
         open={isModalDeleteUser}
         onCancel={() => setModalDeleteUser(false)}
-        // Thay footer={null} bằng các nút hành động
         footer={[
           <Button key="cancel" onClick={() => setModalDeleteUser(false)}>
             Hủy

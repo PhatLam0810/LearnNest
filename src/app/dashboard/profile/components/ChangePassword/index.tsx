@@ -24,14 +24,14 @@ const ChangePassword = () => {
       const response = await changePassword(value);
 
       if (response.data) {
-        messageApi.success('Change Password Successfully');
+        messageApi.success('Đổi mật khẩu thành công');
         form.resetFields();
       } else {
-        messageApi.error('Password is not correct');
+        messageApi.error('Mật khẩu không đúng');
       }
     } catch (error) {
       console.error('Lỗi gửi OTP:', error); // In ra lỗi
-      messageApi.error('Password is not correct');
+      messageApi.error('Mật khẩu không đúng');
     } finally {
       dispatch(authAction.setIsShowLoading(false));
     }
@@ -49,45 +49,51 @@ const ChangePassword = () => {
           }}>
           <View style={styles.formItemLayout}>
             <Form.Item
-              label={<Text style={styles.labelText}>Old Password </Text>}
+              label={<Text style={styles.labelText}>Mật khẩu cũ </Text>}
               name={'password'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', margin: 0 }} // Đảm bảo Form.Item full width
-              rules={[{ required: true, message: 'OldPassword required' }]}>
-              <AppInput type="Password" placeholder="Old password" />
+              rules={[
+                { required: true, message: 'Vui lòng nhập mật khẩu cũ' },
+              ]}>
+              <AppInput type="Password" placeholder="Mật khẩu cũ" />
             </Form.Item>
 
             <Form.Item
-              label={<Text style={styles.labelText}>New Password </Text>}
+              label={<Text style={styles.labelText}>Mật khẩu mới </Text>}
               name={'newPassword'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', margin: 0 }} // Đảm bảo Form.Item full width
-              rules={[{ required: true, message: 'Password required' }]}>
-              <AppInput type="Password" placeholder="New password" />
+              rules={[
+                { required: true, message: 'Vui lòng nhập mật khẩu mới' },
+              ]}>
+              <AppInput type="Password" placeholder="Mật khẩu mới" />
             </Form.Item>
             <Form.Item
-              label={<Text style={styles.labelText}>Confirm Password </Text>}
+              label={<Text style={styles.labelText}>Xác nhận mật khẩu </Text>}
               name={'confirmPassword'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', margin: 0 }} // Đảm bảo Form.Item full width
               dependencies={['newPassword']}
               rules={[
-                { required: true, message: 'Confirm your password' },
+                { required: true, message: 'Vui lòng nhập mật khẩu mới' },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue('newPassword') === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error('Passwords do not match'));
+                    return Promise.reject(
+                      new Error('Mật khẩu không trùng nhau'),
+                    );
                   },
                 }),
               ]}>
-              <AppInput type="Password" placeholder="Confirm your password" />
+              <AppInput type="Password" placeholder="Mật khẩu mới" />
             </Form.Item>
           </View>
           {/* Nút lưu */}
           <Button type="primary" htmlType="submit" style={styles.saveButton}>
-            Change Password
+            Xác nhận
           </Button>
         </Form>
       </View>

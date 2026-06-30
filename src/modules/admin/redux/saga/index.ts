@@ -74,7 +74,7 @@ function* getCreateLibrarySaga(action: PayloadAction<CreateLibraryPayLoad>) {
       console.log(data.code);
     }
   } catch (error) {
-    messageApi?.error('Failed to add Library');
+    messageApi?.error('Failed to Thêm bài học');
   }
 }
 

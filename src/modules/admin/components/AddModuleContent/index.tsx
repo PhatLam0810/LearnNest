@@ -63,14 +63,12 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
       }}>
       <ScrollView>
         <Form.Item
-          label="Module Title"
+          label="Tên phần học"
           name="title"
-          rules={[
-            { required: true, message: 'Please enter the Module title' },
-          ]}>
-          <Input placeholder="Enter Module title" />
+          rules={[{ required: true, message: 'Vui lòng nhập tên phần học' }]}>
+          <Input placeholder="Tên phần học" />
         </Form.Item>
-        <Typography.Title level={5}>Manage</Typography.Title>
+        <Typography.Title level={5}>Sắp xếp</Typography.Title>
         <View>
           <Button
             style={{ alignSelf: 'flex-end', marginBottom: 12 }}
@@ -104,7 +102,7 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
       </ScrollView>
 
       <Button style={styles.button} htmlType="submit">
-        <Text style={styles.buttonText}> Save Module</Text>
+        <Text style={styles.buttonText}> Lưu phần học </Text>
       </Button>
 
       <ModalSelectLibrary

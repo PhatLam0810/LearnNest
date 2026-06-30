@@ -97,9 +97,9 @@ const HomeOverview = () => {
                     ...styles.title,
                     fontSize: isMobile ? 18 : 20,
                   }}>
-                  Just added
+                  Khóa Học
                 </Text>
-                <Tags title="New" backgroundColor="#0059C7" />
+                <Tags title="Mới" backgroundColor="#0059C7" />
               </View>
               <View style={recommendGridStyle}>
                 {(data?.recommend || []).map(item => (

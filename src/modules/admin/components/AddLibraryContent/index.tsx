@@ -123,7 +123,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                     }
                   }
                 }}>
-                <Button type="text">Upload</Button>
+                <Button type="text">Tải lên</Button>
               </Upload>
             </>
           </Form.Item>
@@ -199,7 +199,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                     }
                   }
                 }}>
-                <Button type="text">Upload</Button>
+                <Button type="text">Tải lên</Button>
               </Upload>
             </>
           </Form.Item>
@@ -249,21 +249,19 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
       }}>
       <ScrollView style={{ flex: 1 }}>
         <Form.Item
-          label="Library Name"
+          label="Tên bài học"
           name="title"
-          rules={[
-            { required: true, message: 'Please enter the library name' },
-          ]}>
-          <Input placeholder="Enter library name" />
+          rules={[{ required: true, message: 'Vui lòng nhập tên bài học' }]}>
+          <Input placeholder="Nhập tên bài họ" />
         </Form.Item>
 
-        <Form.Item label="Library Description" name="description">
-          <Input.TextArea placeholder="Enter library description" />
+        <Form.Item label="Mô tả bài học" name="description">
+          <Input.TextArea placeholder="Nhập mô tả bài học" />
         </Form.Item>
-        <Form.Item name="duration" noStyle></Form.Item>
+        <Form.Item name="Thời lượng" noStyle></Form.Item>
 
         <Form.Item
-          label="Resource Type"
+          label="Thể loại bài học"
           name="type"
           rules={[
             { required: true, message: 'Please select the library type' },
@@ -274,7 +272,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             getPopupContainer={triggerNode => triggerNode.parentNode}>
             <Select.Option value="Youtube">Link YouTube</Select.Option>
             <Select.Option value="Video">Video</Select.Option>
-            <Select.Option value="Text">Test</Select.Option>
+            <Select.Option value="Text">Bài tập</Select.Option>
           </Select>
         </Form.Item>
 
@@ -325,7 +323,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
       </ScrollView>
 
       <Button type="primary" htmlType="submit">
-        Add Library
+        Thêm bài học
       </Button>
     </Form>
   );

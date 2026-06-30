@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 const items: TabsProps['items'] = [
   {
     key: '1',
-    label: 'Profile',
+    label: 'Thông tin tài khoản',
     children: <EditProfile />,
   },
   // {
@@ -21,7 +21,7 @@ const items: TabsProps['items'] = [
   // },
   {
     key: '3',
-    label: 'Change Password ',
+    label: 'Đổi mật khẩu',
     children: <ChangePassword />,
   },
 ];
@@ -33,7 +33,7 @@ const ProfilePage: React.FC = () => {
   return (
     <View style={styles.container}>
       <View style={{ marginBottom: 12 }}>
-        <h1 style={{ margin: 0 }}>Profile</h1>
+        <h1 style={{ margin: 0 }}>Thông tin tài khoản</h1>
       </View>
       <Tabs
         aria-label="Profile settings tabs"

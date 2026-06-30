@@ -33,20 +33,20 @@ const LessonManage = () => {
 
   const columns: TableProps<Lesson>['columns'] = [
     {
-      title: 'Title',
+      title: 'Tên khóa học',
       dataIndex: 'title',
       key: 'title',
     },
     {
-      title: 'Total Module',
+      title: 'Tổng phần học',
       dataIndex: 'Module',
       key: 'Module',
       render: (_, record) => (
-        <p style={{ margin: 0 }}>Module: {record.modules.length} </p>
+        <p style={{ margin: 0 }}>Phần học: {record.modules.length} </p>
       ),
     },
     {
-      title: 'Action',
+      title: 'Hành động',
       key: 'action',
       render: (_, record) => (
         <Space size="middle" onClick={e => e.stopPropagation()}>
@@ -56,7 +56,7 @@ const LessonManage = () => {
               setSelectedItem(record);
               setOpenDelete(true);
             }}>
-            <a style={styles.buttonText}> Delete</a>
+            <a style={styles.buttonText}> Xóa</a>
           </button>
           <button
             style={styles.button}
@@ -65,7 +65,7 @@ const LessonManage = () => {
               setDataEdit(record);
               setIsVisibleModalUpdate(true);
             }}>
-            <a style={styles.buttonText}> Update</a>
+            <a style={styles.buttonText}> Cập nhật</a>
           </button>
         </Space>
       ),
@@ -101,7 +101,7 @@ const LessonManage = () => {
           justifyContent: 'space-between',
         }}>
         <Search
-          placeholder="Input search text"
+          placeholder="Tìm kiếm"
           onSearch={search}
           style={{ width: '50%' }}
         />
@@ -113,7 +113,7 @@ const LessonManage = () => {
               setIsVisibleModalAdd(true);
               setSelectedItem(null);
             }}>
-            Add Lesson
+            Tạo khóa học
           </Button>
         </View>
       </View>
@@ -147,7 +147,7 @@ const LessonManage = () => {
         footer={null}
         width={'80%'}
         centered
-        title={selectedItem ? selectedItem.title : 'Add Lesson'}>
+        title={selectedItem ? selectedItem.title : 'Thêm khóa học'}>
         <ScrollView
           style={{ height: (width * 0.8 * 9) / 16, scrollbarWidth: 'none' }}>
           <AddLessonContent initialValues={selectedItem} onDone={onDone} />
@@ -155,7 +155,7 @@ const LessonManage = () => {
       </Modal>
 
       <Modal
-        title="Delete Lesson"
+        title="Xóa khóa học"
         open={openDelete}
         onCancel={onCloseDelete}
         onOk={() => {
@@ -166,7 +166,7 @@ const LessonManage = () => {
               onCloseDelete();
             });
         }}>
-        <Text>{`Delete Lesson: ${selectedItem?.title}`}</Text>
+        <Text>{`Xóa khóa học: ${selectedItem?.title}`}</Text>
       </Modal>
 
       <ModalLessonOverview

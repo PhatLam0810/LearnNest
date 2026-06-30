@@ -160,7 +160,7 @@ export const adminQuery = baseQuery.injectEndpoints({
     }),
     createUser: builder.mutation({
       query: (params: CreateUserParams) => ({
-        url: `user/createUser/`,
+        url: `admin/createUser/`,
         method: 'POST',
         body: params,
       }),

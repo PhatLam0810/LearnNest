@@ -67,7 +67,7 @@ const LibraryManage = () => {
               setSelectedItem(record);
               setOpenDelete(true);
             }}>
-            <a style={styles.buttonText}> Delete</a>
+            <a style={styles.buttonText}> Xóa</a>
           </button>
           <button
             style={styles.button}
@@ -76,7 +76,7 @@ const LibraryManage = () => {
               setDataEdit(record);
               setIsVisibleModalUpdate(true);
             }}>
-            <a style={styles.buttonText}> Update</a>
+            <a style={styles.buttonText}> Cập nhật</a>
           </button>
         </Space>
       ),
@@ -104,7 +104,7 @@ const LibraryManage = () => {
   const items: MenuProps['items'] = [
     {
       key: '1',
-      label: <a onClick={() => setIsVisibleModalAdd(true)}>Add Library</a>,
+      label: <a onClick={() => setIsVisibleModalAdd(true)}>Thêm bài học</a>,
     },
   ];
   const onDone = () => {
@@ -123,7 +123,7 @@ const LibraryManage = () => {
           justifyContent: 'space-between',
         }}>
         <Search
-          placeholder="Input search text"
+          placeholder="Tìm kiếm"
           onSearch={search}
           style={{ width: '50%' }}
           allowClear
@@ -141,7 +141,7 @@ const LibraryManage = () => {
             flexDirection: 'row',
             gap: 8,
           }}>
-          <Text style={{ color: '#FFF' }}>Add Library</Text>
+          <Text style={{ color: '#FFF' }}>Thêm bài học</Text>
         </Button>
       </View>
       <View ref={divRef} style={{ flex: 1 }}>
@@ -171,12 +171,12 @@ const LibraryManage = () => {
         open={isVisibleModalAdd}
         onCancel={onCloseModalAdd}
         footer={null}
-        title="Add Library">
+        title="Thêm bài học">
         <AddLibraryContent initialValues={selectedItem} onDone={onDone} />
       </Modal>
 
       <Modal
-        title="Delete Library"
+        title="Xóa bài học "
         open={openDelete}
         onCancel={onCloseDelete}
         onOk={() => {
@@ -187,7 +187,7 @@ const LibraryManage = () => {
               onCloseDelete();
             });
         }}>
-        <Text>{`Delete Library: ${selectedItem?.title}`}</Text>
+        <Text>{`Xóa bài học: ${selectedItem?.title}`}</Text>
       </Modal>
 
       <Modal
