@@ -11,6 +11,8 @@ import {
   ImportUsersResponse,
   LessonLearnersResponse,
   LessonLearnersSummaryResponse,
+  PracticeClassListResponse,
+  PracticeClassUsersResponse,
   SendImportEmailsRequest,
   SendImportEmailsResponse,
   SetRoleParams,
@@ -214,6 +216,22 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
       }),
       transformResponse: (res: AxiosResponse<LessonLearnersResponse>) =>
+        res.data,
+    }),
+    getPracticeClasses: builder.query<PracticeClassListResponse, string>({
+      query: lessonId => ({
+        url: `admin/practice-classes/${lessonId}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<PracticeClassListResponse>) =>
+        res.data,
+    }),
+    getPracticeClassUsers: builder.query<PracticeClassUsersResponse, string>({
+      query: classId => ({
+        url: `admin/practice-classes/${classId}/users`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<PracticeClassUsersResponse>) =>
         res.data,
     }),
     exportLearners: builder.mutation<Blob, { learners: any[] }>({

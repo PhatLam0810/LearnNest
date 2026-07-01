@@ -103,6 +103,29 @@ export interface LessonLearner {
   major: string;
 }
 
+export interface PracticeClassItem {
+  _id: string;
+  className: string;
+  createdAt: string;
+  userCount: number;
+}
+
+export interface PracticeClassListResponse {
+  items: PracticeClassItem[];
+}
+
+export interface PracticeClassUserItem {
+  _id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  status?: string;
+}
+
+export interface PracticeClassUsersResponse {
+  items: PracticeClassUserItem[];
+}
+
 export interface LessonLearnersData {
   items: LessonLearner[];
   totalRecords: number;
