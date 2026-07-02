@@ -9,6 +9,9 @@ import {
   ImportUserPreviewRequest,
   ImportUsersRequest,
   ImportUsersResponse,
+  CreatePracticeClassPayload,
+  CreatePracticeClassResponse,
+  LessonLearnerPoolResponse,
   LessonLearnersResponse,
   LessonLearnersSummaryResponse,
   PracticeClassListResponse,
@@ -207,32 +210,78 @@ export const adminQuery = baseQuery.injectEndpoints({
         url: 'admin/lessons/learners/summary',
         method: 'GET',
       }),
-      transformResponse: (res: AxiosResponse<LessonLearnersSummaryResponse>) =>
-        res.data,
+      transformResponse: (res: any) => res?.data ?? res,
     }),
-    getLessonLearners: builder.mutation<LessonLearnersResponse, string>({
-      query: lessonId => ({
+    getLessonLearners: builder.mutation<
+      LessonLearnersResponse,
+      { lessonId: string; body?: any }
+    >({
+      query: ({ lessonId, body }) => ({
         url: `admin/lessons/${lessonId}/learners`,
         method: 'POST',
+        body,
       }),
-      transformResponse: (res: AxiosResponse<LessonLearnersResponse>) =>
-        res.data,
+      transformResponse: (res: any) => res?.data ?? res,
     }),
-    getPracticeClasses: builder.query<PracticeClassListResponse, string>({
-      query: lessonId => ({
+    getLessonLearnersPool: builder.query<
+      LessonLearnerPoolResponse,
+      {
+        lessonId: string;
+        search?: string;
+        class?: string;
+        major?: string;
+        faculty?: string;
+        pageNum?: number;
+        pageSize?: number;
+      }
+    >({
+      query: ({ lessonId, ...params }) => ({
+        url: `admin/lessons/${lessonId}/learners/pool`,
+        method: 'GET',
+        params,
+      }),
+      transformResponse: (res: any) => res?.data ?? res,
+    }),
+    createPracticeClass: builder.mutation<
+      CreatePracticeClassResponse,
+      { lessonId: string; body: CreatePracticeClassPayload }
+    >({
+      query: ({ lessonId, body }) => ({
+        url: `admin/lessons/${lessonId}/practice-classes`,
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: any) => res?.data ?? res,
+    }),
+    getPracticeClasses: builder.query<
+      PracticeClassListResponse,
+      { lessonId: string; search?: string; pageNum?: number; pageSize?: number }
+    >({
+      query: ({ lessonId, ...params }) => ({
         url: `admin/practice-classes/${lessonId}`,
         method: 'GET',
+        params,
       }),
-      transformResponse: (res: AxiosResponse<PracticeClassListResponse>) =>
-        res.data,
+      transformResponse: (res: any) => res?.data ?? res,
     }),
-    getPracticeClassUsers: builder.query<PracticeClassUsersResponse, string>({
-      query: classId => ({
+    getPracticeClassUsers: builder.query<
+      PracticeClassUsersResponse,
+      {
+        classId: string;
+        search?: string;
+        class?: string;
+        major?: string;
+        faculty?: string;
+        pageNum?: number;
+        pageSize?: number;
+      }
+    >({
+      query: ({ classId, ...params }) => ({
         url: `admin/practice-classes/${classId}/users`,
         method: 'GET',
+        params,
       }),
-      transformResponse: (res: AxiosResponse<PracticeClassUsersResponse>) =>
-        res.data,
+      transformResponse: (res: any) => res?.data ?? res,
     }),
     exportLearners: builder.mutation<Blob, { learners: any[] }>({
       query: body => ({

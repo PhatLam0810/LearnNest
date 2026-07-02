@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Space, Spin, Statistic, message } from 'antd';
 import { adminQuery } from '~mdAdmin/redux';
+import { useAppPagination } from '@hooks';
 import {
   LessonLearner,
   LessonLearnersSummary,
@@ -9,45 +10,35 @@ import {
   PracticeClassUserItem,
 } from '~mdAdmin/redux/RTKQuery/type';
 import './styles.scss';
-import { useAppPagination } from '@hooks/pagination';
-import LessonOverviewTable from './components/LessonOverviewTable';
-import LessonLearnersModal from './components/LessonLearnersModal';
-import PracticeClassOverview from './components/PracticeClassOverview';
-import PracticeClassUsersModal from './components/PracticeClassUsersModal';
-
-const downloadFile = (blob: Blob, fileName: string) => {
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', fileName);
-  document.body.appendChild(link);
-  link.click();
-  link.parentNode?.removeChild(link);
-  window.URL.revokeObjectURL(url);
-};
+import {
+  CreatePracticeClassModal,
+  LessonLearnersModal,
+  LessonOverviewTable,
+  PracticeClassOverview,
+  PracticeClassUsersModal,
+} from './components';
 
 const LessonLearnersOverview = () => {
   const [selectedLessonOverview, setSelectedLessonOverview] =
     useState<LessonLearnersSummary | null>(null);
   const [isLearnersModalVisible, setIsLearnersModalVisible] = useState(false);
   const [isPracticeModalVisible, setIsPracticeModalVisible] = useState(false);
+  const [isCreatePracticeModalVisible, setIsCreatePracticeModalVisible] =
+    useState(false);
   const [selectedPracticeClass, setSelectedPracticeClass] =
     useState<PracticeClassItem | null>(null);
-  const [practiceClasses, setPracticeClasses] = useState<PracticeClassItem[]>(
-    [],
-  );
-  const [practiceUsers, setPracticeUsers] = useState<PracticeClassUserItem[]>(
-    [],
-  );
-  const [practiceLoading, setPracticeLoading] = useState(false);
-  const [practiceUsersLoading, setPracticeUsersLoading] = useState(false);
-
   const { data: summaryData, isLoading: summaryLoading } =
     adminQuery.useGetLessonLearnersSummaryQuery();
+
+  const {
+    listItem: practiceData,
+    currentData: practiceCurrent,
+    refresh: refetchPracticeClasses,
+    fetchData: fetchPracticeClasses,
+  } = useAppPagination<any>({
+    apiUrl: `/admin/practice-classes`,
+  });
   const [exportLearners] = adminQuery.useExportLearnersMutation();
-  const [getPracticeClasses] = adminQuery.useLazyGetPracticeClassesQuery();
-  const [getPracticeClassUsers] =
-    adminQuery.useLazyGetPracticeClassUsersQuery();
 
   const handleLessonSelect = (record: LessonLearnersSummary) => {
     setSelectedLessonOverview(record);
@@ -59,6 +50,30 @@ const LessonLearnersOverview = () => {
     setSelectedLessonOverview(null);
   };
 
+  const handleSelectPracticeClass = async (record: PracticeClassItem) => {
+    setSelectedPracticeClass(record);
+    setIsPracticeModalVisible(true);
+  };
+
+  const handlePracticeModalClose = () => {
+    setIsPracticeModalVisible(false);
+    setSelectedPracticeClass(null);
+  };
+
+  const handlePracticeCreated = async () => {
+    setIsCreatePracticeModalVisible(true);
+  };
+
+  const downloadFile = (blob: Blob, fileName: string) => {
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
   const handleExportExcel = async (listItem: LessonLearner[]) => {
     if (!listItem.length) {
       message.warning('Không có dữ liệu để xuất');
@@ -77,37 +92,18 @@ const LessonLearnersOverview = () => {
     }
   };
 
-  const handleSelectPracticeClass = async (record: PracticeClassItem) => {
-    setSelectedPracticeClass(record);
-    setIsPracticeModalVisible(true);
-    setPracticeUsersLoading(true);
-
-    try {
-      const response = await getPracticeClassUsers(record._id);
-      const items = response?.data?.items || [];
-      setPracticeUsers(items);
-    } catch (error) {
-      console.error('Failed to load practice class users', error);
-      setPracticeUsers([]);
-    } finally {
-      setPracticeUsersLoading(false);
-    }
-  };
-
-  const handlePracticeModalClose = () => {
-    setIsPracticeModalVisible(false);
-    setSelectedPracticeClass(null);
-    setPracticeUsers([]);
-  };
-
-  const handlePracticeExport = async () => {
-    if (!practiceUsers.length) {
+  const handlePracticeExport = async (
+    practiceUsersList: PracticeClassUserItem[],
+  ) => {
+    if (!practiceUsersList.length) {
       message.warning('Không có dữ liệu người dùng để xuất');
       return;
     }
 
     try {
-      const blob = await exportLearners({ learners: practiceUsers }).unwrap();
+      const blob = await exportLearners({
+        learners: practiceUsersList,
+      }).unwrap();
       const timestamp = new Date().toISOString().slice(0, 10);
       const fileName = `${selectedPracticeClass?.className || 'practice-class'}_${timestamp}.xlsx`;
       downloadFile(blob, fileName);
@@ -163,22 +159,29 @@ const LessonLearnersOverview = () => {
         onClose={handleLearnersModalClose}
         selectedLessonOverview={selectedLessonOverview}
         onExport={handleExportExcel}
+        onCreatePracticeClass={handlePracticeCreated}
       />
 
       <div className="lesson-learners-overview__section">
+        <h2 className="lesson-learners-overview__title">
+          Tổng Quan Khóa Thực Hành
+        </h2>
         <PracticeClassOverview
-          dataSource={practiceClasses}
-          loading={practiceLoading}
+          dataSource={practiceData || []}
           onSelectClass={handleSelectPracticeClass}
         />
       </div>
+      <CreatePracticeClassModal
+        open={isCreatePracticeModalVisible}
+        onClose={() => setIsCreatePracticeModalVisible(false)}
+        lessonId={selectedLessonOverview?._id}
+        onCreated={handlePracticeCreated}
+      />
 
       <PracticeClassUsersModal
         open={isPracticeModalVisible}
         onClose={handlePracticeModalClose}
-        loading={practiceUsersLoading}
-        dataSource={practiceUsers}
-        total={practiceUsers.length}
+        selectedPracticeClassId={selectedPracticeClass?._id}
         onExport={handlePracticeExport}
       />
     </div>

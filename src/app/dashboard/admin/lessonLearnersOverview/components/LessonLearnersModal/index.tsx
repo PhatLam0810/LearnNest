@@ -15,7 +15,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { LessonLearner } from '~mdAdmin/redux/RTKQuery/type';
 import { FilterOutlined } from '@ant-design/icons';
-import styles from '../styles';
+import styles from '../../styles';
 import { useAppPagination } from '@hooks/pagination';
 
 type Props = {
@@ -23,6 +23,7 @@ type Props = {
   onClose: () => void;
   selectedLessonOverview: any;
   onExport: (listItem: LessonLearner[]) => void;
+  onCreatePracticeClass: (listItem: LessonLearner[]) => void;
 };
 
 const LessonLearnersModal: React.FC<Props> = ({
@@ -30,12 +31,14 @@ const LessonLearnersModal: React.FC<Props> = ({
   selectedLessonOverview,
   onClose,
   onExport,
+  onCreatePracticeClass,
 }) => {
   const { Search } = Input;
   const [tempFilters, setTempFilters] = useState<any>();
   const [openFilter, setOpenFilter] = useState(false);
-  const { listItem: listTag } = useAppPagination<any>({
+  const { listItem: listTag, fetchData: fetchTagData } = useAppPagination<any>({
     apiUrl: 'tag/getAll',
+    isLazy: false,
   });
   const {
     listItem,
@@ -191,6 +194,12 @@ const LessonLearnersModal: React.FC<Props> = ({
       footer={[
         <Button key="export" type="primary" onClick={() => onExport(listItem)}>
           Tải Excel
+        </Button>,
+        <Button
+          key="export"
+          type="primary"
+          onClick={() => onCreatePracticeClass(listItem)}>
+          Tạo Lớp Thực Hành
         </Button>,
         <Button key="close" onClick={onClose}>
           Đóng

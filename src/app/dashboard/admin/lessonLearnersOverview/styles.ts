@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     minWidth: 240,
   },
   badgeSuccessStyle: {
-    backgroundColor: '#52c41a',
+    backgroundColor: '#1677ff',
     fontSize: '14px',
   },
   modalContentWrap: {
@@ -74,7 +74,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     gap: 12,
-    marginTop: 8,
     backgroundColor: '#f8fafc',
     border: '1px solid #e2e8f0',
     borderRadius: 12,

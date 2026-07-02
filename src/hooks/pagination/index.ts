@@ -13,6 +13,7 @@ export interface PaginationParams {
   other?: any;
   userId?: string;
   postId?: string;
+  isFull?: boolean;
 }
 export const useAppPagination = <T>(props: {
   apiUrl: string;

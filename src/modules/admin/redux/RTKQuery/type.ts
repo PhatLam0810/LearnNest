@@ -82,12 +82,13 @@ export interface LessonLearnersSummary {
   _id: string;
   title: string;
   totalLearners: number;
+  completedLearners?: number;
   completionRate: number;
 }
 
 export interface LessonLearnersSummaryResponse {
-  totalLearners: string;
-  totalRate: string;
+  totalLearners: number;
+  totalRate: number;
   items: LessonLearnersSummary[];
 }
 
@@ -105,13 +106,23 @@ export interface LessonLearner {
 
 export interface PracticeClassItem {
   _id: string;
-  className: string;
-  createdAt: string;
-  userCount: number;
+  lessonId?: string;
+  batchName?: string;
+  practiceClassName?: string;
+  className?: string;
+  count?: number;
+  userCount?: number;
+  exportedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PracticeClassListResponse {
   items: PracticeClassItem[];
+  totalRecords?: number;
+  pageNum?: number;
+  pageSize?: number;
+  totalPages?: number;
 }
 
 export interface PracticeClassUserItem {
@@ -123,7 +134,60 @@ export interface PracticeClassUserItem {
 }
 
 export interface PracticeClassUsersResponse {
+  _id?: string;
+  lessonId?: string;
+  batchName?: string;
+  practiceClassName?: string;
+  count?: number;
+  exportedAt?: string;
+  userIds?: string[];
   items: PracticeClassUserItem[];
+  totalRecords?: number;
+  pageNum?: number;
+  pageSize?: number;
+  totalPages?: number;
+}
+
+export interface LessonLearnerPoolItem {
+  lessonId: string;
+  isCompleted: boolean;
+  completedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  _id: string;
+  fullName: string;
+  email: string;
+  studentId: string;
+  class: string;
+  major: string;
+  faculty: string;
+}
+
+export interface LessonLearnerPoolResponse {
+  lessonId: string;
+  totalAvailable: number;
+  items: LessonLearnerPoolItem[];
+  totalRecords: number;
+  pageNum: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface CreatePracticeClassPayload {
+  listUser: Array<string>;
+  class: string;
+  practiceClassName: string;
+}
+
+export interface CreatePracticeClassResponse {
+  _id: string;
+  lessonId: string;
+  batchName: string;
+  practiceClassName: string;
+  count: number;
+  exportedAt?: string;
+  userIds: string[];
+  users: LessonLearnerPoolItem[];
 }
 
 export interface LessonLearnersData {

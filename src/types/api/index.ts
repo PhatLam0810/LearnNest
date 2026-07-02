@@ -20,6 +20,7 @@ export type AppAxiosListRes<T> = AxiosResponse<
     pageNum: number;
     totalRecords: number;
     totalPages: number;
+    totalAvailable?: number;
     totalCompleted?: number;
     totalNotCompleted?: number;
     completionRate?: number;
