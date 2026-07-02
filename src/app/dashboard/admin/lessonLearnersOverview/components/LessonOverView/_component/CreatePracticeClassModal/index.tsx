@@ -79,7 +79,6 @@ const CreatePracticeClassModal: React.FC<Props> = ({
       message.error('Tạo practice class thất bại');
     }
   };
-  console.log(listItem, 'listItem');
   const columns: ColumnsType<LessonLearnerPoolItem> = [
     {
       title: (
@@ -212,7 +211,7 @@ const CreatePracticeClassModal: React.FC<Props> = ({
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
             <Button onClick={onClose}>Đóng</Button>
             <Button type="primary" htmlType="submit">
-              Tạo practice class
+              Tạo lớp thực hành
             </Button>
           </div>
         </Space>

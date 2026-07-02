@@ -60,7 +60,6 @@ const PracticeClassOverview: React.FC<Props> = ({
         rowKey="_id"
         loading={loading}
         size="middle"
-        pagination={false}
         onRow={record => ({
           onClick: () => onSelectClass(record),
           className: 'lesson-learners-overview__table-row-clickable',

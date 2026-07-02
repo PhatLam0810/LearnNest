@@ -200,6 +200,9 @@ const LessonLearnersModal: React.FC<Props> = ({
   const handleFilterSubmit = filters => {
     filter(filters);
   };
+
+  const isCanCreatePracticeClass = currentData?.totalCompleted > 30;
+
   return (
     <Modal
       title={`Danh Sách Người Học: ${selectedLessonOverview?.title}`}
@@ -213,6 +216,7 @@ const LessonLearnersModal: React.FC<Props> = ({
         <Button
           key="export"
           type="primary"
+          disabled={!isCanCreatePracticeClass}
           onClick={() => onCreatePracticeClass(listItem)}>
           Tạo Lớp Thực Hành
         </Button>,

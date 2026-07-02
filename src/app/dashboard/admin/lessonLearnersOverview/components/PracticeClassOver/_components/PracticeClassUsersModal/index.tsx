@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Modal, Table } from 'antd';
+import { Button, Modal, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './styles';
 import { useAppPagination } from '@hooks/pagination';
@@ -24,43 +24,48 @@ const PracticeClassUsersModal: React.FC<Props> = ({
   selectedPracticeClassId,
   onExport,
 }) => {
-  const {
-    listItem: practiceUsersList,
-    currentData: practiceUsersCurrent,
-    fetchData: fetchPracticeUsers,
-    refresh: refreshPracticeUsers,
-    search: searchPracticeUsers,
-  } = useAppPagination<PracticeClassUserItem>({
-    apiUrl: `admin/practice-classes/${selectedPracticeClassId}/users`,
-  });
+  const { listItem, currentData, fetchData, refresh, search } =
+    useAppPagination<PracticeClassUserItem>({
+      apiUrl: `admin/practice-classes/${selectedPracticeClassId}/users`,
+    });
 
   useEffect(() => {
     if (open && selectedPracticeClassId) {
-      fetchPracticeUsers();
-      refreshPracticeUsers();
+      fetchData();
+      refresh();
     }
   }, [open, selectedPracticeClassId]);
 
-  console.log('practiceUsersList', practiceUsersList);
   const learnerColumns: ColumnsType<PracticeClassUserItem> = [
     {
       title: 'Tên Người Dùng',
       dataIndex: 'fullName',
       key: 'fullName',
-      width: '35%',
+      width: '15%',
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      width: '35%',
+      width: '15%',
     },
     {
-      title: 'Trạng Thái',
-      dataIndex: 'status',
-      key: 'status',
-      width: '30%',
-      render: (value?: string) => value || 'Chưa cập nhật',
+      title: 'Mã Sinh Viên',
+      dataIndex: 'studentId',
+      key: 'studentId',
+      width: '15%',
+    },
+    {
+      title: 'Lớp',
+      dataIndex: 'class',
+      key: 'class',
+      width: '15%',
+    },
+    {
+      title: 'Khoa',
+      dataIndex: 'faculty',
+      key: 'faculty',
+      width: '15%',
     },
   ];
 
@@ -69,25 +74,37 @@ const PracticeClassUsersModal: React.FC<Props> = ({
       open={open}
       onCancel={onClose}
       title="Danh Sách Người Trong Lớp Thực Hành"
-      width={900}
+      width={'80%'}
       footer={null}>
       <div style={styles.modalContentWrap}>
         <div style={styles.modalToolbar}>
-          <div style={styles.modalSummaryText}>Tổng số: </div>
-          <button
-            type="button"
-            // onClick={() => onExport(dataSource)}
-            style={styles.exportButtonStyle}>
-            Xuất Excel
-          </button>
+          <div style={styles.modalSummaryText}>
+            Tổng số: {currentData?.totalRecords}
+          </div>
+          <Button
+            key="export"
+            type="primary"
+            onClick={() => onExport(listItem)}>
+            Tải Excel
+          </Button>
+          ,
         </div>
-        {/* <Table
+        <Table
           columns={learnerColumns}
-          dataSource={dataSource}
+          dataSource={listItem}
           rowKey="userId"
-          pagination={false}
+          onChange={res => {
+            fetchData({ pageNum: res.current });
+          }}
+          pagination={{
+            current: currentData?.pageNum,
+            total: currentData?.totalRecords,
+            pageSize: currentData?.pageSize,
+            showSizeChanger: false,
+            position: ['bottomCenter'],
+          }}
           locale={{ emptyText: 'Không có người dùng' }}
-        /> */}
+        />
       </div>
     </Modal>
   );
