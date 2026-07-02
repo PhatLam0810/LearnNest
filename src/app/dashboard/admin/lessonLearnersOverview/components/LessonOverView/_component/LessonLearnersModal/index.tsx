@@ -15,7 +15,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { LessonLearner } from '~mdAdmin/redux/RTKQuery/type';
 import { FilterOutlined } from '@ant-design/icons';
-import styles from '../../styles';
+import styles from './styles';
 import { useAppPagination } from '@hooks/pagination';
 
 type Props = {

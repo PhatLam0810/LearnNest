@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import styles from '../../styles';
+import styles from './styles';
 import { useAppPagination } from '@hooks/pagination';
 
 type PracticeClassUserItem = {

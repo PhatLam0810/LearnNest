@@ -2,7 +2,7 @@ import React from 'react';
 import { Badge, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { LessonLearnersSummary } from '~mdAdmin/redux/RTKQuery/type';
-import styles from '../../styles';
+import styles from './styles';
 
 type Props = {
   dataSource: LessonLearnersSummary[];

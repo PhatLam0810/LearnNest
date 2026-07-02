@@ -1,11 +1,8 @@
 import React from 'react';
 import { Badge, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import styles from '../../styles';
-import type {
-  PracticeClassItem,
-  PracticeClassListResponse,
-} from '~mdAdmin/redux/RTKQuery/type';
+import styles from './styles';
+import type { PracticeClassItem } from '~mdAdmin/redux/RTKQuery/type';
 import dayjs from 'dayjs';
 
 type Props = {
