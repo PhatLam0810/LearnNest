@@ -24,7 +24,7 @@ const lessonColumns: ColumnsType<LessonLearnersSummary> = [
     width: '25%',
     align: 'center',
     render: (value: number) => (
-      <Badge count={value} style={styles.badgeSuccessStyle} />
+      <Badge count={value || 0} style={styles.badgeSuccessStyle} />
     ),
   },
   {
