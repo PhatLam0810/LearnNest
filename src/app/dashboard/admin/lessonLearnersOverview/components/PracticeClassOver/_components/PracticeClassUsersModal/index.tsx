@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Modal, Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './styles';
@@ -32,9 +32,16 @@ const PracticeClassUsersModal: React.FC<Props> = ({
     search: searchPracticeUsers,
   } = useAppPagination<PracticeClassUserItem>({
     apiUrl: `admin/practice-classes/${selectedPracticeClassId}/users`,
-    isLazy: true,
   });
 
+  useEffect(() => {
+    if (open && selectedPracticeClassId) {
+      fetchPracticeUsers();
+      refreshPracticeUsers();
+    }
+  }, [open, selectedPracticeClassId]);
+
+  console.log('practiceUsersList', practiceUsersList);
   const learnerColumns: ColumnsType<PracticeClassUserItem> = [
     {
       title: 'Tên Người Dùng',

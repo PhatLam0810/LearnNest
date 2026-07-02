@@ -58,7 +58,6 @@ const LessonLearnersModal: React.FC<Props> = ({
       refresh();
     }
   }, [selectedLessonOverview]);
-
   const learnerColumns: ColumnsType<LessonLearner> = [
     {
       title: 'Họ và Tên',
@@ -85,16 +84,24 @@ const LessonLearnersModal: React.FC<Props> = ({
       width: '15%',
     },
     {
-      title: 'Ngành',
-      dataIndex: 'major',
-      key: 'major',
-      width: '15%',
-    },
-    {
       title: 'Khoa',
       dataIndex: 'faculty',
       key: 'faculty',
       width: '15%',
+    },
+    {
+      title: 'Lớp thực thành',
+      dataIndex: 'isSelected', // Phải khớp với key trong dữ liệu
+      key: 'isSelected',
+      width: '15%',
+      align: 'center',
+      render: (isSelected: boolean) => (
+        <Badge
+          status={isSelected ? 'success' : 'error'}
+          style={{ color: isSelected ? 'green' : 'red' }}
+          text={isSelected ? 'Đã tham gia' : 'Chưa tham gia'}
+        />
+      ),
     },
     {
       title: 'Trạng thái',
@@ -135,7 +142,6 @@ const LessonLearnersModal: React.FC<Props> = ({
         }}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <div style={{ fontWeight: 'bold' }}>Bộ lọc tìm kiếm</div>
-
           <Select
             style={{ width: '100%' }}
             placeholder="Chọn mã lớp học"
@@ -150,18 +156,27 @@ const LessonLearnersModal: React.FC<Props> = ({
           </Select>
           <Select
             allowClear
+            placeholder="Trạng thái lớp thực hành"
+            style={{ width: '100%' }}
+            value={tempFilters?.isSelected} // Dùng thuộc tính riêng
+            onChange={val =>
+              setTempFilters(prev => ({ ...prev, isSelected: val }))
+            }>
+            <Select.Option value={true}>Đã tham gia</Select.Option>
+            <Select.Option value={false}>Chưa tham gia</Select.Option>
+          </Select>
+          <Select
+            allowClear
             placeholder="Trạng thái"
             style={{ width: '100%' }}
-            value={tempFilters?.isCompleted}
+            value={tempFilters?.isCompleted} // Dùng thuộc tính riêng
             onChange={val =>
               setTempFilters(prev => ({ ...prev, isCompleted: val }))
             }>
             <Select.Option value={true}>Hoàn thành</Select.Option>
             <Select.Option value={false}>Chưa hoàn thành</Select.Option>
           </Select>
-
           <Divider style={{ margin: '8px 0' }} />
-
           <Space style={{ width: '100%', justifyContent: 'space-between' }}>
             <Button onClick={handleReset}>Thiết lập lại</Button>
             <Button type="primary" onClick={handleApply}>
