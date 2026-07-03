@@ -11,7 +11,7 @@ import {
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { adminQuery } from '~mdAdmin/redux';
-import { messageApi, useAppPagination } from '@hooks';
+import { useAppPagination } from '@hooks';
 import {
   CreatePracticeClassResponse,
   LessonLearnerPoolItem,
@@ -34,6 +34,7 @@ const CreatePracticeClassModal: React.FC<Props> = ({
   const [selectedUsers, setSelectedUsers] = useState<LessonLearnerPoolItem[]>(
     [],
   );
+  const [messageApi, contextHolder] = message.useMessage();
   const [createdPracticeClass, setCreatedPracticeClass] =
     useState<CreatePracticeClassResponse | null>(null);
   const [searchText, setSearchText] = useState('');
@@ -71,7 +72,8 @@ const CreatePracticeClassModal: React.FC<Props> = ({
       }).unwrap();
 
       setCreatedPracticeClass(response);
-      message.success('Tạo practice class thành công');
+      onClose();
+      messageApi.success('Tạo practice class thành công');
       form.resetFields();
       onCreated();
     } catch (error) {
@@ -137,6 +139,7 @@ const CreatePracticeClassModal: React.FC<Props> = ({
       title="Tạo Practice Class"
       width={'80%'}
       footer={null}>
+      {contextHolder}
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <Form.Item
