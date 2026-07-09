@@ -28,8 +28,8 @@ const AppVideoWatchersButton: React.FC<AppVideoWatchersButtonProps> = ({
         disabled={disabled}
         style={{
           color: disabled ? '#ccc' : '#1890ff',
-          border: '1px solid #d9d9d9',
-          borderRadius: 4,
+          position: 'absolute',
+          right: 16,
         }}
       />
     </Tooltip>
