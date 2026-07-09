@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     fontSize: 16,
     letterSpacing: 0.01,
-    color: '#212121',
   },
   moduleItemTime: {
     ...typography.body2,
