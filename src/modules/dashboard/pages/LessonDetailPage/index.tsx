@@ -184,7 +184,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         <div style={styles.moduleContentHeader}>
           <p style={styles.learnedSkillText}>{item.title}</p>
           <p style={styles.learnedSkillText}>
-            Total Libraries: {item.libraries.length}
+            Tổng số bài học: {item.libraries.length}
           </p>
         </div>
       ),
@@ -313,11 +313,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <span className="label">Buy Now</span>
                     </button>
                     <Text style={styles.totalLibrary}>
-                      Total Duration:
+                      Tổng thời lượng:
                       {convertDurationToTime(lessonDetail.totalDuration)}
                     </Text>
                     <Text style={styles.totalLibrary}>
-                      Total Libraries: {lessonDetail.totalLibraries}
+                      Tổng bài học: {lessonDetail.totalLibraries}
                     </Text>
                   </View>
                 ) : (
