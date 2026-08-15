@@ -49,7 +49,6 @@ const styles = StyleSheet.create({
     ...typography.body1,
   },
 
-  // Responsive
   pageWrapper: {
     display: 'flex',
     justifyContent: 'center',

@@ -24,7 +24,6 @@ const ResultTestHistoryPage = () => {
   const [height, setHeight] = useState(0);
   const searchParams = useSearchParams();
   const libraryId = searchParams.get('libraryId');
-  // 🔥 FETCH API bằng hook chung của bạn
   const { listItem, currentData, fetchData, search } =
     useAppPagination<ResultItem>({
       apiUrl: `lesson/library/resultTest/${libraryId}`,

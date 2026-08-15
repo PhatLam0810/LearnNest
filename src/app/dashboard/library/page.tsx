@@ -16,7 +16,6 @@ const LibraryList = () => {
       apiUrl: '/library/getAllLibrary',
     });
 
-  // Responsive hook
   const { isMobile, isTablet } = useResponsive();
   const numColumns = isMobile ? 1 : isTablet ? 2 : 4;
   const { keyword, sortBy } = useSearchContext();
@@ -93,7 +92,6 @@ const LibraryList = () => {
     }
   };
 
-  // Responsive container styles
   return (
     <View style={styles.container}>
       <FlatList

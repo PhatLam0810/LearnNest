@@ -1,4 +1,3 @@
-// useMyCourses.ts
 import { useState, useCallback, useEffect } from 'react';
 import { message } from 'antd';
 import dayjs from 'dayjs';

@@ -31,8 +31,6 @@ function* getCreateLessonsSaga(action: PayloadAction<CreateLessonPayLoad>) {
       if (callback) {
         callback();
       }
-    } else {
-      console.log(data.code);
     }
   } catch (error) {
     messageApi?.error('Failed to add Lesson');
@@ -50,8 +48,6 @@ function* getCreateModuleSaga(action: PayloadAction<CreateModulePayLoad>) {
         callback();
       }
       messageApi?.success('Module added successfully!');
-    } else {
-      console.log(data.code);
     }
   } catch (error) {
     messageApi?.error('Failed to add Module');
@@ -70,8 +66,6 @@ function* getCreateLibrarySaga(action: PayloadAction<CreateLibraryPayLoad>) {
         callback();
       }
       messageApi?.success('Library added successfully!');
-    } else {
-      console.log(data.code);
     }
   } catch (error) {
     messageApi?.error('Failed to Thêm bài học');
@@ -90,8 +84,6 @@ function* updateLibrarySaga(action: PayloadAction<UpdateLibraryPayLoad>) {
         callback();
       }
       messageApi?.success('Library update successfully!');
-    } else {
-      console.log(data.code);
     }
   } catch (error) {
     messageApi?.error('Failed to update Library');
@@ -110,8 +102,6 @@ function* updateLessonSaga(action: PayloadAction<UpdateLessonPayLoad>) {
         callback();
       }
       messageApi?.success('Lesson update successfully!');
-    } else {
-      console.log(data.code);
     }
   } catch (error) {
     messageApi?.error('Failed to update Lesson');
@@ -130,8 +120,6 @@ function* updateModuleSaga(action: PayloadAction<UpdateModulePayLoad>) {
         callback();
       }
       messageApi?.success('Module update successfully!');
-    } else {
-      console.log(data.code);
     }
   } catch (error) {
     messageApi?.error('Failed to update Module');

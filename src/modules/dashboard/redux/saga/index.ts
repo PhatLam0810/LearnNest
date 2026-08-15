@@ -13,11 +13,9 @@ function* getLessonDetailSaga(action: PayloadAction<{ id: string }>) {
     );
     if (status === 200) {
       yield put(dashboardAction.setLessonDetail(data.data));
-    } else {
-      console.log(data.code);
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
+    // ignored intentionally for the page-level error handling flow
   }
 }
 
@@ -29,11 +27,9 @@ function* getSubLessonDetailSaga(action: PayloadAction<{ id: string }>) {
     );
     if (status === 200) {
       yield put(dashboardAction.setSubLessonDetail({ ...data }));
-    } else {
-      console.log(data.code);
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
+    // ignored intentionally for the page-level error handling flow
   }
 }
 

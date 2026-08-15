@@ -34,7 +34,6 @@ function* loginSaga(action: PayloadAction<LoginPayload>) {
       messageApi.error('Incorrect account or password.');
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
     messageApi?.destroy();
     messageApi.error('Incorrect account or password.');
   }
@@ -48,11 +47,9 @@ function* loginOauthSaga(action: PayloadAction<LoginOauthPayload>) {
     );
     if (status === 200) {
       yield put(authAction.setTokenInfo(data.data));
-    } else {
-      console.log(data.code);
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
+    // ignored intentionally; the caller handles the UI state
   }
 }
 
@@ -64,30 +61,25 @@ function* updateCurrentInfoSaga(action: PayloadAction<UserProfile>) {
     );
     if (status === 200) {
       yield put(authAction.setCurrentUserInfo(data.data));
-    } else {
-      console.log(data.code);
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
+    // ignored intentionally; the caller handles the UI state
   }
 }
 
 function* changePasswordSaga(action: PayloadAction<any>) {
   try {
-    console.log(action.payload);
     const { status, data }: AppAxiosRes<UserProfile> = yield call(
       authApi.changePasswordApi,
       action.payload,
     );
     if (status === 200) {
-      // yield put(authAction.setCurrentUserInfo(data.data));
       messageApi.success('Change Password Successfully');
     } else {
       messageApi.error('Password is not correct ');
-      console.log(data.code);
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
+    // ignored intentionally; the caller handles the UI state
   }
 }
 
@@ -99,12 +91,9 @@ function* verifyOtpSaga(action: PayloadAction<{ email: string; otp: number }>) {
     );
     if (status === 201) {
       yield put(authAction.setVerifyInfo(true));
-    } else {
-      console.log(data.code);
     }
   } catch (e: any) {
     messageApi.error('Otp is not correct');
-    console.log('getLessonDetailSaga', e.message);
   }
 }
 
@@ -116,11 +105,9 @@ function* lessonPurchaseSaga(action: PayloadAction<LessonPurchase>) {
     );
     if (status === 201) {
       yield put(authAction.lessonPurchaseData(data));
-    } else {
-      console.log(data.code);
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
+    // ignored intentionally; the caller handles the UI state
   }
 }
 
@@ -132,11 +119,9 @@ function* viewDetailTransactionSaga(action: PayloadAction<{ id: string }>) {
     );
     if (status === 201) {
       yield put(authAction.lessonPurchaseData(data.data));
-    } else {
-      console.log(data.code);
     }
   } catch (e: any) {
-    console.log('getLessonDetailSaga', e.message);
+    // ignored intentionally; the caller handles the UI state
   }
 }
 
@@ -145,7 +130,6 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
   try {
     const { params, callback } = action.payload;
 
-    // Gọi API xác thực OTP
     let otpResponse: AppAxiosRes<any> | null = null;
     try {
       otpResponse = yield call(authApi.verifyOtpApi, {
@@ -153,9 +137,8 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
         otp: params.otp,
       });
     } catch (e: any) {
-      console.error('OTP Verification Error:', e);
       messageApi.error(e.response.data.message);
-      return; // Dừng saga nếu OTP verification thất bại
+      return;
     }
 
     if (!otpResponse || otpResponse.status !== 201) {
@@ -163,7 +146,6 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
       return;
     }
 
-    // Gọi API đăng ký
     let signUpResponse: AppAxiosRes<signUpApiRes> | null = null;
     try {
       signUpResponse = yield call(authApi.signUpApi, {
@@ -172,9 +154,8 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
       });
     } catch (e: any) {
       messageApi?.destroy();
-      console.error('SignUp Error:', e);
       messageApi.error(e?.response?.data?.message);
-      return; // Dừng saga nếu đăng ký thất bại
+      return;
     }
 
     if (!signUpResponse || signUpResponse.status !== 201) {
@@ -182,14 +163,12 @@ function* signUpSaga(action: PayloadAction<SignUpPayload>) {
       return;
     }
 
-    // Nếu cả hai API thành công, tiếp tục đăng nhập
     messageApi?.destroy();
     messageApi.success('SignUp successfully!');
     yield put(authAction.setSignUpInfo(signUpResponse.data.data));
     callback();
   } catch (e: any) {
     messageApi?.destroy();
-    console.error('signUpSaga error:', e);
     messageApi.error('Email already exists');
   }
 }

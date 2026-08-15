@@ -327,7 +327,6 @@ const LibraryDetailItem = forwardRef<
         const duration = videoRef.current.duration;
         const percentWatched = (maxWatched / duration) * 100;
 
-        // Chặn tua quá 5 giây so với maxWatched
         const matchedQuestion = data.questionList?.find(
           (q: any) =>
             q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
@@ -350,7 +349,6 @@ const LibraryDetailItem = forwardRef<
           updateProgress(currentTime, duration);
         }
 
-        // Nếu đã xem trên 99% thì gọi onWatchFinish
         if (percentWatched >= 99) {
           handleVideoEnd(duration);
           onWatchFinish?.();
@@ -401,7 +399,6 @@ const LibraryDetailItem = forwardRef<
     const player = playerRef.current;
     const video = videoRef.current;
     if (isCorrect) {
-      // ✅ Đúng → cho chạy tiếp, không hiện lại
       player?.playVideo?.();
       video?.play?.();
       setShownQuestionIds(prev => [...prev, visibleQuestion._id]);
@@ -419,7 +416,6 @@ const LibraryDetailItem = forwardRef<
         resumeTracking(video.currentTime, video.duration);
       }
     } else {
-      // ❌ Sai → ẩn Modal + tua về → cho phép hiện lại
       const appearTime = visibleQuestion.appearTime;
 
       player?.pauseVideo?.();
@@ -432,7 +428,7 @@ const LibraryDetailItem = forwardRef<
 
       setShownQuestionIds(prev =>
         prev.filter(id => id !== visibleQuestion._id),
-      ); // ❌ Xóa khỏi list đã hiện
+      );
       setVisibleQuestion(null);
       setSelectedAnswer(null);
     }
@@ -458,8 +454,7 @@ const LibraryDetailItem = forwardRef<
       return;
     }
 
-    // Nếu hợp lệ
-    setInvalidQuestions([]); // clear
+    setInvalidQuestions([]);
     setSelectedAnswers({});
     if (onClickSubmit) {
       onClickSubmit(selectedAnswers);

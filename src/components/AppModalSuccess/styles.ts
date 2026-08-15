@@ -47,7 +47,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'var(--color-vhu-primary)',
     color: '#FFF',
   },
-  // Inline style consolidations
   containerFlex: {
     flex: 1,
     alignItems: 'center',

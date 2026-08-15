@@ -51,7 +51,6 @@ const styles = StyleSheet.create({
     color: 'var(--color-vhu-primary)',
     cursor: 'pointer',
   },
-  // -------- Responsive container --------
   containerDesktop: {
     flex: 1,
     width: '100%',

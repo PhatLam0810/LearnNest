@@ -28,7 +28,6 @@ export const useWindowSize = () => {
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    // Hàm update kích thước cửa sổ
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
@@ -36,15 +35,11 @@ export const useWindowSize = () => {
       });
     };
 
-    // Lắng nghe sự kiện resize khi cửa sổ thay đổi kích thước
     window.addEventListener('resize', handleResize);
-
-    // Gọi hàm một lần khi component mount
     handleResize();
 
-    // Dọn dẹp khi component unmount
     return () => window.removeEventListener('resize', handleResize);
-  }, []); // Chỉ chạy lần đầu tiên khi mount
+  }, []);
 
   return windowSize;
 };

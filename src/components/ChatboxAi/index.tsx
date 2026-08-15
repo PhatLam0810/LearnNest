@@ -33,7 +33,6 @@ export default function Chatbox() {
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const router = useRouter();
 
-  // Ensure component only renders on client to avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -74,7 +73,6 @@ export default function Chatbox() {
     }
   };
 
-  // Prevent hydration mismatch by only rendering after mount
   if (!mounted || !userProfile) return null;
 
   return (

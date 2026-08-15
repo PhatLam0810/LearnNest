@@ -19,7 +19,6 @@ const Thumbnail = ({ data }) => {
   const [showPlaceholder, setShowPlaceholder] = useState(false);
 
   useEffect(() => {
-    // Try to load actual image first
     if (data?.type === 'Youtube' || data.type === 'Short') {
       setSrc(getYouTubeThumbnail(data?.url));
     } else if (data?.type === 'Video') {
@@ -27,17 +26,14 @@ const Thumbnail = ({ data }) => {
     } else if (data?.type === 'Text') {
       setSrc(typeItem['Text']);
     } else {
-      // For other types without image, show placeholder immediately
       setShowPlaceholder(true);
     }
   }, [data]);
 
   const handleImageError = () => {
-    // When image fails to load, show placeholder with title (no icon fallback)
     setShowPlaceholder(true);
   };
 
-  // Show title text when image fails to load or no image source
   if (showPlaceholder || !src) {
     return (
       <View style={styles.placeholder}>
@@ -62,7 +58,6 @@ const Thumbnail = ({ data }) => {
 const LibraryItem: React.FC<LibraryItemProps> = ({ data, onClick, style }) => {
   const { isMobile, isTablet } = useResponsive();
 
-  // Responsive container styles
   const containerStyle = {
     ...styles.container,
     ...style,
@@ -72,17 +67,14 @@ const LibraryItem: React.FC<LibraryItemProps> = ({ data, onClick, style }) => {
     borderRadius: isMobile ? 8 : 12,
   };
 
-  // Responsive image styles
   const imageStyle = {
     ...styles.image,
     borderTopLeftRadius: isMobile ? 8 : 12,
     borderTopRightRadius: isMobile ? 8 : 12,
   };
 
-  // Responsive content padding
   const contentPadding = isMobile ? 10 : 12;
 
-  // Responsive title styles
   const titleStyle = {
     ...styles.title,
     fontSize: isMobile ? 14 : 16,
@@ -92,7 +84,6 @@ const LibraryItem: React.FC<LibraryItemProps> = ({ data, onClick, style }) => {
     minHeight: isMobile ? 20 : 22,
   };
 
-  // Responsive desc styles
   const descStyle = {
     ...styles.desc,
     fontSize: isMobile ? 12 : 14,

@@ -141,7 +141,6 @@ export default StyleSheet.create({
     color: 'white',
     fontSize: 14,
   },
-  // Inline style consolidations
   messageGap: {
     gap: 8,
   },

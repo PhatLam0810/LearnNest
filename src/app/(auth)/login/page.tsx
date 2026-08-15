@@ -141,9 +141,8 @@ const LoginPage = () => {
                     </Text>
                   }
                   name={'password'}
-                  // initialValue={'Lamphat@081020'} // Giả sử bạn muốn đặt một giá trị mặc định
-                  labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-                  style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
+                  labelCol={{ span: 24 }}
+                  style={{ width: '100%', marginBottom: 16 }}
                   rules={[{ required: true, message: 'Password error' }]}>
                   <AppInput
                     type="Password"

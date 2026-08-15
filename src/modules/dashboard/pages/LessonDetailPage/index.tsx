@@ -23,7 +23,7 @@ import {
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
 import { Collapse, CollapseProps, message, Modal } from 'antd';
-import { authAction, authQuery } from '~mdAuth/redux';
+import { authAction } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
 import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/AppVideoWatchersButton';
 import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
@@ -36,7 +36,6 @@ interface LessonDetailPageProps {
 const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  // const { lessonDetail } = useAppSelector(state => state.dashboardReducer);
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
@@ -44,17 +43,15 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const { data: lessonDetail, isLoading } = dashboardQuery.useGetLessonIdQuery({
     id: id,
   });
-  const [isVisibleModalBuy, setIsVisibleModalBuy] = useState(false);
   const [isVisibleModalSuccess, setIsVisibleModalSuccess] = useState(false);
-  const [itemBuy, setItemBuy] = useState(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [triggerAccessLesson] = dashboardQuery.useAccessLessonMutation();
   const [checkRegistrationLesson] =
     dashboardQuery.useCheckRegistrationLessonMutation();
-  const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
+  const lessonLibraries =
+    lessonDetail?.modules?.flatMap(module => module.libraries ?? []) ?? [];
 
-  // Responsive hook
-  const { isMobile, isTablet, isDesktop } = useResponsive();
+  const { isMobile, isTablet } = useResponsive();
   const numColumns = isMobile ? 1 : 2;
 
   const [accessLesson, setAccessLesson] = useState(true);
@@ -71,50 +68,34 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     useState<string>('');
 
   useEffect(() => {
-    if (!lessonDetail) return;
+    if (!lessonDetail || lessonDetail.modules.length === 0) return;
 
-    // if (lessonDetail.isPremium) {
-    // if (!dataSub || !userProfile?._id) return;
-    // const hasPurchased = dataSub.some(
-    //   sub =>
-    //     sub.userId === userProfile._id &&
-    //     sub.lessonId === lessonDetail._id &&
-    //     sub.status === 'success',
-    // );
-
-    // if (hasPurchased) {
-    //   setAccessLesson(true);
-    // } else {
-    //   setAccessLesson(false);
-    // }
-    // }
-    // if (userProfile?.role?.level <= 2) setAccessLesson(true);
-
-    if (lessonDetail?.modules?.length > 0) {
-      const firstLibrary = lessonDetail.modules[0].libraries[0];
-      if (firstLibrary) {
-        setLibraryCanPlay({
-          libraryId: firstLibrary._id,
-          userId: userProfile?._id,
-        });
-      }
+    const firstLibrary = lessonDetail.modules[0].libraries?.[0];
+    if (firstLibrary) {
+      setLibraryCanPlay({
+        libraryId: firstLibrary._id,
+        userId: userProfile?._id,
+      });
     }
-  }, [lessonDetail]);
+  }, [lessonDetail, setLibraryCanPlay, userProfile?._id]);
 
   useEffect(() => {
     if (lessonPurchaseData) {
-      setIsVisibleModalBuy(false);
       setIsVisibleModalSuccess(true);
     }
   }, [lessonPurchaseData]);
 
-  const handleLibraryClick = async (subItem, item) => {
+  const hasAccessToLibrary = (library: any) => {
+    if (!library) return false;
+    return (
+      userProfile?.role?.level <= 2 ||
+      library?.usersCanPlay?.some(user => user._id === userProfile?._id)
+    );
+  };
+
+  const handleLibraryClick = async (subItem: any, item: any) => {
     if (!accessLesson) return;
 
-    const canPlay = subItem?.usersCanPlay?.some(
-      id => id._id === userProfile?._id,
-    );
-    // 🔥 Nếu role <= 2 thì đi sang trang xem lịch sử kết quả
     if (userProfile?.role?.level <= 2 && subItem.type === 'Text') {
       router.push(
         `/dashboard/home/lesson/resultHistory?libraryId=${subItem?._id}`,
@@ -122,8 +103,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       return;
     }
 
-    // 🔥 Logic cũ: user được phép xem bài học
-    if (canPlay || userProfile?.role?.level <= 2) {
+    if (hasAccessToLibrary(subItem)) {
       dispatch(dashboardAction.setSelectedModule(item));
       dispatch(dashboardAction.setSelectedLibrary(subItem));
       router.push(
@@ -178,53 +158,51 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       ),
       children: (
         <View style={styles.contentGap8Margin8}>
-          {item.libraries.map((subItem, subIndex) => (
-            <TouchableOpacity
-              key={subIndex}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
+          {item.libraries.map((subItem, subIndex) => {
+            const isDisabled = !hasAccessToLibrary(subItem);
+            return (
               <TouchableOpacity
-                style={[
-                  !subItem?.usersCanPlay?.some(
-                    id => id._id === userProfile?._id,
-                  ) && styles.disabledButton,
-                  { flex: 1 },
-                ]}>
-                <View
-                  style={styles.buttonModule}
-                  onClick={() => handleLibraryClick(subItem, item)}>
-                  {/* LEFT AREA: TITLE + TIME */}
-                  <View style={styles.rowGap10}>
-                    <PlayCircleOutlined />
-                    <View style={styles.moduleItemContainer}>
-                      <Text numberOfLines={2} style={styles.moduleItemTitle}>
-                        {subItem.title}
-                      </Text>
-                      <Text style={styles.moduleItemTime}>
-                        {subItem.type !== 'Text'
-                          ? convertDurationToTime(subItem.duration)
-                          : 'Trắc nghiệm'}
-                      </Text>
+                key={subIndex}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <TouchableOpacity
+                  style={[isDisabled && styles.disabledButton, { flex: 1 }]}>
+                  <View
+                    style={styles.buttonModule}
+                    onClick={() => handleLibraryClick(subItem, item)}>
+                    <View style={styles.rowGap10}>
+                      <PlayCircleOutlined />
+                      <View style={styles.moduleItemContainer}>
+                        <Text numberOfLines={2} style={styles.moduleItemTitle}>
+                          {subItem.title}
+                        </Text>
+                        <Text style={styles.moduleItemTime}>
+                          {subItem.type !== 'Text'
+                            ? convertDurationToTime(subItem.duration)
+                            : 'Trắc nghiệm'}
+                        </Text>
+                      </View>
                     </View>
+                    {userProfile?.role?.level <= 2 &&
+                      subItem.type !== 'Text' && (
+                        <AppVideoWatchersButton
+                          subLessonId={subItem._id}
+                          subLessonTitle={subItem.title}
+                          onClick={e => {
+                            e.stopPropagation();
+                            setSelectedSubLessonId(subItem._id);
+                            setSelectedSubLessonTitle(subItem.title);
+                            setWatcherModalVisible(true);
+                          }}
+                        />
+                      )}
                   </View>
-                  {userProfile?.role?.level <= 2 && subItem.type !== 'Text' && (
-                    <AppVideoWatchersButton
-                      subLessonId={subItem._id}
-                      subLessonTitle={subItem.title}
-                      onClick={e => {
-                        e.stopPropagation();
-                        setSelectedSubLessonId(subItem._id);
-                        setSelectedSubLessonTitle(subItem.title);
-                        setWatcherModalVisible(true);
-                      }}
-                    />
-                  )}
-                </View>
+                </TouchableOpacity>
               </TouchableOpacity>
-            </TouchableOpacity>
-          ))}
+            );
+          })}
         </View>
       ),
       style: panelStyle,
@@ -235,27 +213,23 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     borderRadius: '#f5f5f5',
     border: 'none',
   };
-  // Responsive container styles
   const containerStyle = {
     ...styles.container,
     paddingLeft: isMobile ? 12 : isTablet ? 16 : 20,
     paddingRight: isMobile ? 12 : isTablet ? 16 : 20,
   };
 
-  // Responsive content row styles
   const contentRowStyle = {
     ...styles.contentRow,
     flexDirection: (isMobile ? 'column' : 'row') as 'row' | 'column',
     gap: isMobile ? 16 : isTablet ? 20 : 24,
   };
 
-  // Responsive main column styles
   const mainColumnStyle = {
     ...styles.mainColumn,
     maxWidth: isMobile ? '100%' : '90%',
   };
 
-  // Responsive side column styles
   const sideColumnStyle = {
     ...styles.sideColumn,
     minWidth: isMobile ? '100%' : isTablet ? 280 : 340,
@@ -308,8 +282,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     <button
                       className="button lesson-pill-button"
                       onClick={() => {
-                        setItemBuy(lessonDetail);
-                        setIsVisibleModalBuy(true);
                         dispatch(authAction.setVerifyInfo(false));
                       }}>
                       <Icon name="liveTV" className="button-icon" />
@@ -484,8 +456,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     <button
                       className="button lesson-pill-button"
                       onClick={() => {
-                        setItemBuy(lessonDetail);
-                        setIsVisibleModalBuy(true);
                         dispatch(authAction.setVerifyInfo(false));
                       }}>
                       <Icon name="liveTV" className="button-icon" />
@@ -536,12 +506,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         />
       </Modal>
 
-      {/* <AppModalPayPal
-        isVisibleModalBuy={isVisibleModalBuy}
-        setIsVisibleModalBuy={setIsVisibleModalBuy}
-        data={lessonDetail}
-        accessLesson={accessLesson}
-      /> */}
       <AppModalSuccess
         isVisibleModalSuccess={isVisibleModalSuccess}
         setIsVisibleModalSuccess={setIsVisibleModalSuccess}

@@ -52,7 +52,6 @@ const SignUpPage = () => {
     }
   };
 
-  // 🔹 Responsive detect
   const { isMobile, isTablet } = useResponsive();
   const containerStyle = isMobile
     ? styles.containerMobile

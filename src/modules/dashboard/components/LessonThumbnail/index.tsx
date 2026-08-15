@@ -20,7 +20,6 @@ const LessonThumbnail: React.FC<LessonThumbnailProps> = ({
       : thumbnail
     : '/images/ImageVideo.webp';
 
-  // Nếu có width/height thì dùng fixed dimensions, không thì dùng fill (responsive)
   if (width && height) {
     return (
       <Image

@@ -5,7 +5,7 @@ import { StyleSheet } from '../styleSheet';
 export const lexend = Lexend({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin'],
-  variable: '--font-lexend', // Quan trọng để dùng trong CSS
+  variable: '--font-lexend',
 });
 
 export const inter = Inter({
@@ -73,7 +73,6 @@ export const typography = StyleSheet.create({
     letterSpacing: 1.2,
   },
 
-  // Reponsive Typography
   titleMMobile: {
     fontFamily: lexend.style.fontFamily,
     fontWeight: '500',

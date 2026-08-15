@@ -46,13 +46,10 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
     };
 
     const runFaceMesh = async () => {
-      console.log('🚀 Đang khởi tạo TensorFlow backend...');
       await tf.setBackend('webgl');
       await tf.ready();
 
-      console.log('📦 Đang tải model FaceMesh...');
       model = await facemesh.load();
-      console.log('✅ Model FaceMesh đã sẵn sàng.');
 
       const detect = async () => {
         if (!isMounted || !videoRef.current || !canvasRef.current || !model)
@@ -67,11 +64,8 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
         ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
         if (predictions.length > 0) {
           const keypoints = predictions[0].scaledMesh;
-          offFaceCountRef.current = 0; // reset khi phát hiện lại khuôn mặt
+          offFaceCountRef.current = 0;
 
-          // 🎯 Vẽ landmark lên khuôn mặt
-
-          // 🔍 Tính hướng đầu (yaw/pitch)
           const leftCheek = keypoints[234];
           const rightCheek = keypoints[454];
 
@@ -91,7 +85,6 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
             dispatch(dashboardAction.setVideoStatus(true));
           }
         } else {
-          // Không phát hiện khuôn mặt
           offFaceCountRef.current += 1;
           if (offFaceCountRef.current >= 10) {
             setShowWarning(true);
@@ -111,7 +104,6 @@ const FaceDetection: React.FC<FaceDetectionProps> = ({ onPauseVideo }) => {
       isMounted = false;
       if (animationFrameId) cancelAnimationFrame(animationFrameId);
       model = null;
-      console.log('🛑 Dừng detection loop.');
     };
   }, [router]);
 

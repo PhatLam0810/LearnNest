@@ -2,7 +2,6 @@ import React from 'react';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
 import Icon from '@components/icons';
-// import Star from './a.svg';
 
 type TagsProps = {
   title: string;

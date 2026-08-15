@@ -33,7 +33,6 @@ const CreateAccountPage = () => {
     }
   }, [sendOtpInfo]);
 
-  // 🔹 Responsive detect
   const { isMobile, isTablet } = useResponsive();
 
   const containerStyle = isMobile

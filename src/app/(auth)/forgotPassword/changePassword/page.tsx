@@ -32,7 +32,6 @@ const ChangePasswordPage = () => {
     }
   }, [sendOtpInfo]);
 
-  // 🔹 Responsive detect
   const { isMobile, isTablet } = useResponsive();
 
   const containerStyle = isMobile
@@ -163,48 +162,3 @@ const ChangePasswordPage = () => {
 };
 
 export default ChangePasswordPage;
-
-//  <Form.Item<FieldType>
-//           label={
-//             <Text style={styles.labelText}>
-//               <Text style={{ color: 'red' }}>*</Text> Password
-//             </Text>
-//           }
-//           name={'password'}
-//           labelCol={{ span: 24 }}
-//           style={{ width: '100%', marginBottom: 0 }}
-//           rules={[{ required: true, message: 'Password required' }]}>
-//           <AppInput
-//             type="Password"
-//             placeholder="Enter your password"
-//             style={{ width: '100%' }}
-//           />
-//         </Form.Item>
-
-//         <Form.Item<FieldType>
-//           label={
-//             <Text style={styles.labelText}>
-//               <Text style={{ color: 'red' }}>*</Text> Confirm Password
-//             </Text>
-//           }
-//           name={'confirmPassword'}
-//           dependencies={['password']}
-//           labelCol={{ span: 24 }}
-//           style={{ width: '100%', marginBottom: 16 }}
-//           rules={[
-//             { required: true, message: 'Confirm your password' },
-//             ({ getFieldValue }) => ({
-//               validator(_, value) {
-//                 if (!value || getFieldValue('password') === value) {
-//                   return Promise.resolve();
-//                 }
-//                 return Promise.reject(new Error('Passwords do not match'));
-//               },
-//             }),
-//           ]}>
-//           <AppInput
-//             type="Password"
-//             placeholder="Confirm your password"
-//             style={{ width: '100%' }}
-//           />
-//         </Form.Item>

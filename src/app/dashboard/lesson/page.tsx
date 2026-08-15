@@ -18,7 +18,6 @@ const Page = () => {
 
   const { keyword, sortBy } = useSearchContext();
 
-  // Responsive hook
   const { isMobile, isTablet } = useResponsive();
   const numColumns = isMobile ? 1 : isTablet ? 2 : 4;
 
@@ -33,9 +32,6 @@ const Page = () => {
     changeParams({ search: keyword, sortBy });
   }, [keyword, sortBy]);
 
-  // Responsive container styles
-
-  // Responsive lesson item styles
   const lessonItemStyle = {
     ...styles.lessonItem,
     maxWidth: isMobile ? '100%' : isTablet ? '48%' : '24%',

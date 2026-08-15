@@ -1,4 +1,3 @@
-// CourseItem.tsx
 'use client';
 import React from 'react';
 import { Progress } from 'antd';
@@ -19,7 +18,6 @@ export const CourseItem: React.FC<CourseItemProps> = React.memo(
       const currentSubLessonId = course?.lastSubLessonId || 'first-lesson';
 
       if (!currentLessonId) {
-        console.error('Không tìm thấy lessonId cho khóa học này');
         return;
       }
 

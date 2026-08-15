@@ -14,11 +14,6 @@ const items: TabsProps['items'] = [
     label: 'Thông tin tài khoản',
     children: <EditProfile />,
   },
-  // {
-  //   key: '2',
-  //   label: 'Transaction History',
-  //   children: <TransactionHistory />,
-  // },
   {
     key: '3',
     label: 'Đổi mật khẩu',

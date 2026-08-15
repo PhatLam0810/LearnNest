@@ -14,7 +14,6 @@ import { useAppDispatch, useAppSelector } from '@redux';
 import { Button, Collapse, CollapseProps, Modal } from 'antd';
 import { convertDurationToTime } from '@utils';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
-import { FaceDetection } from '~mdAuth/components';
 import { useResponsive } from '@/styles/responsive';
 import LibraryDetailItem, {
   LibraryDetailItemHandle,
@@ -41,10 +40,10 @@ const ModuleDetailPage = () => {
   const [generateQuestion] = dashboardQuery.useGenerateQuestionMutation();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const [modal, contextHolder] = Modal.useModal();
+  const [, contextHolder] = Modal.useModal();
   const { isMobile, isTablet } = useResponsive();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [dataQuestion, setDataQuestion] = useState(null);
+  const [dataQuestion, setDataQuestion] = useState<any[]>([]);
   const [resultData, setResultData] = useState({
     correctCount: 0,
     totalQuestions: 0,
@@ -118,11 +117,9 @@ const ModuleDetailPage = () => {
 
   const isAdmin = userProfile?.role?.level <= 2;
 
-  const hasAccess = item => {
-    return (
-      isAdmin || item?.usersCanPlay?.some(user => user._id === userProfile?._id)
-    );
-  };
+  const hasAccess = (item: any) =>
+    isAdmin || item?.usersCanPlay?.some(user => user._id === userProfile?._id);
+
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index,
@@ -137,18 +134,21 @@ const ModuleDetailPage = () => {
       children: (
         <View style={styles.contentGap8Margin8}>
           {item.libraries.map((subItem, subIndex) => {
+            const isDisabled = !hasAccess(subItem);
+            const isSelected = selectedLibrary?._id === subItem._id;
+
             return (
               <TouchableOpacity
                 key={subIndex}
-                style={[!hasAccess(subItem) && styles.disabledButton]}>
+                style={[isDisabled && styles.disabledButton]}>
                 <View
                   onClick={() => {
-                    if (!hasAccess(subItem)) return;
+                    if (isDisabled) return;
                     handleSelectLibrary(subItem);
                   }}
                   style={[
                     styles.buttonModule,
-                    selectedLibrary?._id === subItem._id && {
+                    isSelected && {
                       backgroundColor: 'var(--color-vhu-primary)',
                       color: '#FFF',
                     },
@@ -159,7 +159,7 @@ const ModuleDetailPage = () => {
                       numberOfLines={1}
                       style={[
                         styles.moduleItemTitle,
-                        selectedLibrary?._id === subItem._id && {
+                        isSelected && {
                           color: '#FFF',
                         },
                       ]}>
@@ -168,7 +168,7 @@ const ModuleDetailPage = () => {
                     <Text
                       style={[
                         styles.moduleItemTime,
-                        selectedLibrary?._id === subItem._id && {
+                        isSelected && {
                           color: '#FFF',
                         },
                       ]}>
@@ -221,47 +221,51 @@ const ModuleDetailPage = () => {
     setIsModalOpen(false);
     if (resultData.isPass) onWatchFinish();
   };
-  const showModal = (correctCount, totalQuestions, score, isPass) => {
+
+  const showModal = (
+    correctCount: number,
+    totalQuestions: number,
+    score: number,
+    isPass: boolean,
+  ) => {
     setResultData({ correctCount, totalQuestions, score, isPass });
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (selectedAnswers: any) => {
-    const totalQuestions = dataQuestion?.length || 0;
-    if (!totalQuestions) return;
+  const handleSubmit = (selectedAnswers: Record<string, string>) => {
+    const totalQuestions = dataQuestion.length;
+    if (!totalQuestions || !selectedLibrary) return;
+
     let correctCount = 0;
 
-    dataQuestion?.forEach(question => {
-      const userAnswer = selectedAnswers[question._id]; // từ object người dùng chọn
-      const correctAnswer = question.correctAnswer; // từ dữ liệu câu hỏi
+    dataQuestion.forEach(question => {
+      const userAnswer = selectedAnswers[question._id];
+      const correctAnswer = question.correctAnswer;
 
       if (userAnswer === correctAnswer) {
-        correctCount++;
+        correctCount += 1;
       }
     });
 
-    const score = ((correctCount / totalQuestions) * 10).toFixed(2); // giữ 2 số lẻ
-
-    // Hiển thị kết quả trong modal
+    const score = Number(((correctCount / totalQuestions) * 10).toFixed(2));
     const isPass = correctCount >= (2 / 3) * totalQuestions;
 
     submitResultTest({
       userId: userProfile?._id,
       libraryId: selectedLibrary._id,
-      score: Number(score),
+      score,
       name: selectedLibrary.title,
       userName: userProfile?.fullName,
       isPass,
-      totalQuestions: totalQuestions,
-      correctCount: correctCount,
+      totalQuestions,
+      correctCount,
     });
     showModal(correctCount, totalQuestions, score, isPass);
   };
   const handlePauseVideo = () => {
-    libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
+    libraryRef.current?.pauseAll();
   };
 
-  // Màn hình chờ bọc lót trong quá trình hoán đổi dữ liệu API giữa các khóa học
   if (isLoadingData && !selectedLibrary) {
     return (
       <View
@@ -278,7 +282,6 @@ const ModuleDetailPage = () => {
     );
   }
 
-  // Nếu đã load xong mà rỗng thật sự, hiển thị thông báo an toàn thay vì block trắng menu
   if (!selectedLibrary) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>

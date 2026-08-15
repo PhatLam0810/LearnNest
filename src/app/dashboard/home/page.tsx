@@ -42,16 +42,13 @@ const HomeOverview = () => {
     }
   }, [isLoading]);
 
-  // Responsive hook
   const { isMobile, isTablet } = useResponsive();
 
-  // Responsive container styles
   const containerStyle = {
     ...styles.container,
     padding: isMobile ? 12 : isTablet ? 16 : 20,
   };
 
-  // Responsive grid styles
   const recommendGridStyle = {
     ...styles.recommendGrid,
     gridTemplateColumns: isMobile
@@ -63,7 +60,6 @@ const HomeOverview = () => {
     rowGap: isMobile ? 16 : 20,
   };
 
-  // Định nghĩa cách ánh xạ (Mapping)
   const COURSE_MAPPING: Record<string, string> = {
     'MOS WORD': 'MOS WORD',
     'Học React': 'Học React',

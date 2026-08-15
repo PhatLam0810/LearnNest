@@ -55,7 +55,6 @@ const HeaderLayout: React.FC = ({}) => {
   const { myCourses, loadingCourses, fetchMyCourses, formatRelativeTime } =
     useMyCourses(userId);
 
-  // Hàm điều hướng: ép đóng menu trước khi chuyển trang
   const handleNavigate = useCallback(
     (url: string) => {
       setIsCoursesDropdownOpen(false);

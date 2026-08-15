@@ -176,7 +176,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 16,
   },
-  // Inline style consolidations
   contentGap8Margin8: {
     gap: 8,
     marginTop: 8,
@@ -220,7 +219,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: '8px',
   },
-  // Style cho trạng thái thành công
   statusBoxSuccess: {
     padding: '16px',
     borderRadius: '8px',
@@ -230,7 +228,6 @@ const styles = StyleSheet.create({
     color: '#389e0d',
     width: '90%',
   },
-  // Style cho trạng thái thất bại
   statusBoxFail: {
     padding: '16px',
     borderRadius: '8px',
