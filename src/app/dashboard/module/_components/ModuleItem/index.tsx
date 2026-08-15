@@ -22,7 +22,7 @@ const ModuleItem: React.FC<ModuleItemProps> = ({
         onClick={onClick}
         title={data.title}>
         <div key="Library" className="title">
-          Total Libraries: {data.libraries.length}
+          Tổng số bài học: {data.libraries.length}
         </div>
       </Card>
     </>

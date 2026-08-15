@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   sideColumn: {
-    width: '34%',
+    width: '40%',
     minWidth: 340,
     maxWidth: 440,
     gap: 16,
@@ -141,7 +141,6 @@ const styles = StyleSheet.create({
   },
   lessonScroll: {
     width: '100%',
-    maxHeight: 'calc(100vh - 420px)', // fit with camera + spacing to avoid page scroll
     backgroundColor: '#fff',
     borderRadius: 12,
     paddingRight: 16,
@@ -151,6 +150,8 @@ const styles = StyleSheet.create({
     overflowY: 'auto',
   },
   lessonScrollContent: {
+    flex: 1,
+    height: '100%',
     paddingBottom: 16,
     gap: 12,
   },

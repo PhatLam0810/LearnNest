@@ -33,14 +33,13 @@ const ResultTestHistoryPage = () => {
 
   const columns: TableProps<ResultItem>['columns'] = [
     {
-      title: 'User Name',
+      title: 'Họ và tên',
       dataIndex: 'name',
       key: 'name',
       render: (_, r) => <Text style={{ fontSize: 14 }}>{r.userName}</Text>,
     },
     {
-      title: 'Correct Answers',
-      dataIndex: 'correctCount',
+      title: 'Số câu đúng',
       key: 'correctCount',
       render: (_, r) => (
         <Text>
@@ -49,7 +48,7 @@ const ResultTestHistoryPage = () => {
       ),
     },
     {
-      title: 'Score',
+      title: 'Điểm',
       dataIndex: 'score',
       key: 'score',
       render: (_, r) => (
@@ -59,7 +58,7 @@ const ResultTestHistoryPage = () => {
       ),
     },
     {
-      title: 'Result',
+      title: 'Kết quả',
       key: 'result',
       render: (_, r) => (
         <Text style={{ color: r.isPass ? '#47B881' : '#f95f5b' }}>
@@ -68,7 +67,7 @@ const ResultTestHistoryPage = () => {
       ),
     },
     {
-      title: 'Date Started',
+      title: 'Ngày làm',
       key: 'createdAt',
       render: (_, r) => (
         <Text>{dayjs(r.createdAt).format('HH:mm DD/MM/YYYY')}</Text>
@@ -92,7 +91,7 @@ const ResultTestHistoryPage = () => {
           marginBottom: 16,
         }}>
         <Search
-          placeholder="Search by user name"
+          placeholder="Tìm kiếm theo tên người dùng"
           onSearch={search}
           style={{ width: '50%' }}
         />

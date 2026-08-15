@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
     ...typography.body1,
     color: '#8D8D8D',
     paddingBottom: 12,
+    whiteSpace: 'normal',
   },
   contentRow: {
     flexDirection: 'row',
@@ -76,7 +77,6 @@ const styles = StyleSheet.create({
     ...typography.subTitle1,
     margin: 0,
     fontWeight: '400',
-    color: '#000',
   },
   moduleContentHeader: {
     display: 'flex',

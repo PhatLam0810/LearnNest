@@ -38,7 +38,6 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const [form] = Form.useForm();
   const [addLesson] = adminQuery.useAddLessonMutation();
   const [isPremium, setIsPremium] = useState(initialValues?.isPremium);
-
   const [listSelected, setListSelected] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isVisibleModalSelect, setIsVisibleModalSelect] = useState(false);
@@ -92,6 +91,10 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
         thumbnail: initialValues.thumbnail.includes('youtube.com/watch')
           ? getYouTubeThumbnail(initialValues.thumbnail)
           : initialValues.thumbnail,
+      });
+      form.setFieldsValue({
+        totalLibraries: initialValues.totalLibraries,
+        totalDuration: initialValues.totalDuration,
       });
       setListSelected(initialValues.modules);
     }
@@ -162,7 +165,9 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                     name="totalDuration"
                     style={{ marginBottom: 0 }}>
                     <span className="ant-form-text">
-                      {convertDurationToTime(totalDuration)}
+                      {convertDurationToTime(
+                        totalDuration || initialValues.totalDuration,
+                      )}
                     </span>
                   </Form.Item>
 
@@ -218,7 +223,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                                   message: 'skill is required',
                                 },
                               ]}>
-                              <SkillItem remove={remove} />
+                              <SkillItem name={name} remove={remove} />
                             </Form.Item>
                           );
                         })}
@@ -310,7 +315,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 
 export default CreateLessonForm;
 
-const SkillItem = ({ value, onChange, remove }: any) => {
+const SkillItem = ({ value, onChange, remove, name }: any) => {
   return (
     <div style={styles.buttonGap}>
       <Input.TextArea

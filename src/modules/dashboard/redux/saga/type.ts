@@ -32,6 +32,9 @@ export interface LessonDetailDataResponse {
   relatedLessons: RelatedLesson[];
   isPremium: boolean;
   price: number;
+  totalDuration: number;
+  totalLibraries: number;
+  totalLearner: number;
 }
 
 export interface Category {

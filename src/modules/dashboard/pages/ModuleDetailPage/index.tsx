@@ -28,10 +28,12 @@ const ModuleDetailPage = () => {
 
   const lessonId = searchParams.get('lessonId') || '';
   const subLessonId = searchParams.get('subLessonId') || '';
+  const { data: lessonDetail, isLoading: isLoadingData } =
+    dashboardQuery.useGetLessonIdQuery({
+      id: lessonId,
+    });
 
-  const { lessonDetail, selectedLibrary } = useAppSelector(
-    state => state.dashboardReducer,
-  );
+  const { selectedLibrary } = useAppSelector(state => state.dashboardReducer);
   const dispatch = useAppDispatch();
   const libraryRef = useRef<LibraryDetailItemHandle>(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
@@ -50,7 +52,6 @@ const ModuleDetailPage = () => {
     isPass: false,
   });
 
-  const [isLoadingData, setIsLoadingData] = useState<boolean>(true);
   const fetchQuestionData = async () => {
     try {
       dispatch(authAction.setIsShowLoading(true));
@@ -69,22 +70,6 @@ const ModuleDetailPage = () => {
       fetchQuestionData();
     }
   }, [selectedLibrary?.url]);
-  useEffect(() => {
-    if (!lessonId) return;
-
-    const loadCourseData = async () => {
-      try {
-        setIsLoadingData(true);
-        await dispatch(dashboardAction.getLessonDetail({ id: lessonId }));
-      } catch (error) {
-        console.error('Lỗi khi đồng bộ chi tiết khóa học từ URL:', error);
-      } finally {
-        setIsLoadingData(false);
-      }
-    };
-
-    loadCourseData();
-  }, [lessonId, dispatch]);
 
   useEffect(() => {
     if (
@@ -145,7 +130,7 @@ const ModuleDetailPage = () => {
         <div style={styles.moduleContentHeader}>
           <p style={styles.learnedSkillText}>{item.title}</p>
           <p style={styles.learnedSkillText}>
-            Total Libraries: {item.libraries.length}
+            Tổng số bài học: {item.libraries.length}
           </p>
         </div>
       ),
@@ -187,7 +172,9 @@ const ModuleDetailPage = () => {
                           color: '#FFF',
                         },
                       ]}>
-                      {convertDurationToTime(subItem.duration)}
+                      {subItem.type !== 'Text'
+                        ? convertDurationToTime(subItem.duration)
+                        : 'Trắc nghiệm'}
                     </Text>
                   </View>
                 </View>
@@ -271,7 +258,7 @@ const ModuleDetailPage = () => {
     showModal(correctCount, totalQuestions, score, isPass);
   };
   const handlePauseVideo = () => {
-    // libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
+    libraryRef.current?.pauseAll(); // 👈 Gọi pauseAll() bên trong LibraryDetailItem
   };
 
   // Màn hình chờ bọc lót trong quá trình hoán đổi dữ liệu API giữa các khóa học

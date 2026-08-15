@@ -13,7 +13,13 @@ import Icon from '@components/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { LessonItem, LessonThumbnail } from '~mdDashboard/components';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native-web';
+import {
+  ActivityIndicator,
+  FlatList,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native-web';
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
 import { Collapse, CollapseProps, message, Modal } from 'antd';
@@ -35,8 +41,9 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
   const [messageApi, contextHolder] = message.useMessage();
-  const [lessonDetail, setLessonDetail] = useState<any>(null);
-  const [getLessonId] = dashboardQuery.useGetLessonIdMutation();
+  const { data: lessonDetail, isLoading } = dashboardQuery.useGetLessonIdQuery({
+    id: id,
+  });
   const [isVisibleModalBuy, setIsVisibleModalBuy] = useState(false);
   const [isVisibleModalSuccess, setIsVisibleModalSuccess] = useState(false);
   const [itemBuy, setItemBuy] = useState(null);
@@ -44,7 +51,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const [triggerAccessLesson] = dashboardQuery.useAccessLessonMutation();
   const [checkRegistrationLesson] =
     dashboardQuery.useCheckRegistrationLessonMutation();
-  const { data: dataSub, refetch } = authQuery.useGetSubscriptionsQuery({});
   const libraries = lessonDetail?.modules?.flatMap(module => module.libraries);
 
   // Responsive hook
@@ -52,33 +58,17 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const numColumns = isMobile ? 1 : 2;
 
   const [accessLesson, setAccessLesson] = useState(true);
-  const [activePanelKeys, setActivePanelKeys] = useState<string[]>([]);
+  const [activePanelKeys, setActivePanelKeys] = useState<string[]>([
+    '0',
+    '1',
+    '2',
+  ]);
   const [watcherModalVisible, setWatcherModalVisible] = useState(false);
   const [selectedSubLessonId, setSelectedSubLessonId] = useState<string | null>(
     null,
   );
   const [selectedSubLessonTitle, setSelectedSubLessonTitle] =
     useState<string>('');
-
-  useEffect(() => {
-    const fetchLesson = async () => {
-      dispatch(authAction.setIsShowLoading(true));
-
-      try {
-        const res = await getLessonId({ id });
-        if (res.data) {
-          setLessonDetail(res.data);
-        } else {
-          messageApi.error('khong tim thay bai hochoc');
-        }
-      } catch (err) {
-        messageApi.error('loi api');
-      } finally {
-        dispatch(authAction.setIsShowLoading(false));
-      }
-    };
-    if (id) fetchLesson();
-  }, [id]);
 
   useEffect(() => {
     if (!lessonDetail) return;
@@ -109,19 +99,14 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         });
       }
     }
-  }, [lessonDetail, dataSub]);
+  }, [lessonDetail]);
 
   useEffect(() => {
     if (lessonPurchaseData) {
-      refetch();
       setIsVisibleModalBuy(false);
       setIsVisibleModalSuccess(true);
     }
   }, [lessonPurchaseData]);
-
-  if (!lessonDetail) {
-    return;
-  }
 
   const handleLibraryClick = async (subItem, item) => {
     if (!accessLesson) return;
@@ -141,7 +126,9 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     if (canPlay || userProfile?.role?.level <= 2) {
       dispatch(dashboardAction.setSelectedModule(item));
       dispatch(dashboardAction.setSelectedLibrary(subItem));
-      router.push('/dashboard/home/lesson/moduleDetail');
+      router.push(
+        `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail?._id}`,
+      );
     }
   };
 
@@ -165,7 +152,9 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
 
       dispatch(dashboardAction.setSelectedModule(modules[0]));
       dispatch(dashboardAction.setSelectedLibrary(libraries));
-      router.push('/dashboard/home/lesson/moduleDetail');
+      router.push(
+        `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail?._id}`,
+      );
     } catch (error) {
       messageApi.open({
         type: 'error',
@@ -176,7 +165,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       dispatch(authAction.setIsShowLoading(false));
     }
   };
-
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
     lessonDetail?.modules?.map((item, index) => ({
       key: index.toString(),
@@ -202,7 +190,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   !subItem?.usersCanPlay?.some(
                     id => id._id === userProfile?._id,
                   ) && styles.disabledButton,
-                  !accessLesson && styles.disabledButton,
                   { flex: 1 },
                 ]}>
                 <View
@@ -216,7 +203,9 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                         {subItem.title}
                       </Text>
                       <Text style={styles.moduleItemTime}>
-                        {convertDurationToTime(subItem.duration)}
+                        {subItem.type !== 'Text'
+                          ? convertDurationToTime(subItem.duration)
+                          : 'Trắc nghiệm'}
                       </Text>
                     </View>
                   </View>
@@ -274,7 +263,21 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     position: (isMobile ? 'relative' : 'sticky') as 'relative' | 'sticky',
     top: isMobile ? 0 : 8,
   };
-
+  if (isLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 12,
+          height: '80vh',
+        }}>
+        <ActivityIndicator size="large" color="var(--color-vhu-primary)" />
+        <Text style={{ color: '#8c8c8c' }}>Đang tải nội dung khóa học...</Text>
+      </View>
+    );
+  }
   return (
     <View style={containerStyle}>
       {contextHolder}
@@ -329,11 +332,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <span className="label">Bắt đầu khóa học</span>
                     </button>
                     <Text style={styles.totalLibrary}>
-                      Total Duration:{' '}
+                      Tổng thời lượng:{' '}
                       {convertDurationToTime(lessonDetail.totalDuration)}
                     </Text>
                     <Text style={styles.totalLibrary}>
-                      Total Libraries: {lessonDetail.totalLibraries}
+                      Tổng số bài học: {lessonDetail.totalLibraries}
                     </Text>
                   </View>
                 )}
@@ -356,6 +359,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     expandIcon={({ isActive }) => (
                       <CaretRightOutlined rotate={isActive ? 90 : 0} />
                     )}
+                    accordion={true}
                     activeKey={activePanelKeys}
                     onChange={keys =>
                       setActivePanelKeys(Array.isArray(keys) ? keys : [keys])
@@ -488,11 +492,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <span className="label">Buy Now</span>
                     </button>
                     <Text style={styles.totalLibrary}>
-                      Total Duration:{' '}
+                      Tổng thời lượng:{' '}
                       {convertDurationToTime(lessonDetail.totalDuration)}
                     </Text>
                     <Text style={styles.totalLibrary}>
-                      Total Libraries: {lessonDetail.totalLibraries}
+                      Tổng số bài học: {lessonDetail.totalLibraries}
                     </Text>
                   </View>
                 ) : (
@@ -504,11 +508,11 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <span className="label">Bắt đầu khóa học</span>
                     </button>
                     <Text style={styles.totalLibrary}>
-                      Total Duration:{' '}
+                      Tổng thời lượng:{' '}
                       {convertDurationToTime(lessonDetail.totalDuration)}
                     </Text>
                     <Text style={styles.totalLibrary}>
-                      Total Libraries: {lessonDetail.totalLibraries}
+                      Tổng số bài học: {lessonDetail.totalLibraries}
                     </Text>
                   </View>
                 )}

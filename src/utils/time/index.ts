@@ -15,7 +15,7 @@ export const convertDurationToTime = (
       : `${formattedMinutes}m`;
   } else {
     return hours > 0
-      ? `${hours} hours ${formattedMinutes} minutes`
-      : `${formattedMinutes} minutes`;
+      ? `${hours} giờ ${formattedMinutes} phút`
+      : `${formattedMinutes} phút`;
   }
 };

@@ -17,7 +17,7 @@ const HomeOverview = () => {
   const dispatch = useAppDispatch();
 
   const { data, isLoading } = dashboardQuery.useGetLessonRecommendQuery();
-  const [getLessonId] = dashboardQuery.useGetLessonIdMutation();
+  const [getLessonId] = dashboardQuery.useGetLessonByIdMutation();
   const onClickLesson = async (id: string) => {
     try {
       dispatch(authAction.setIsShowLoading(true));

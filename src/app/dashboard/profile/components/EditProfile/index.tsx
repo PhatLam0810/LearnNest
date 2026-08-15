@@ -50,7 +50,7 @@ const EditProfile = () => {
               </AppUploadToServer>
             </Form.Item>
             <View>
-              <Text style={styles.labelText}>{userProfile.fullName}</Text>
+              <Text style={styles.labelText}>{userProfile?.fullName}</Text>
             </View>
             <Form.Item
               label={<Text style={styles.labelText}>User Name</Text>}
@@ -144,7 +144,7 @@ const EditProfile = () => {
         open={modelDelete}
         onCancel={onCloseDelete}
         onOk={() => {
-          deleteAccount({ Userid: userProfile._id })
+          deleteAccount({ Userid: userProfile?._id })
             .unwrap()
             .then(res => {
               router.replace('/login');

@@ -28,7 +28,15 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<LessonProgressResponse>) =>
         res.data,
     }),
-    getLessonId: builder.mutation<LessonDetailDataResponse, any>({
+    getLessonId: builder.query<LessonDetailDataResponse, any>({
+      query: params => ({
+        url: `/lesson/${params.id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<LessonDetailDataResponse>) =>
+        res.data,
+    }),
+    getLessonById: builder.mutation<LessonDetailDataResponse, any>({
       query: params => ({
         url: `/lesson/${params.id}`,
         method: 'GET',
