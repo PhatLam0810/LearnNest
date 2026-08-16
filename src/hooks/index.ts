@@ -15,8 +15,6 @@ export const useMessage = () => {
     messageApi = api;
   }, [api]);
 
-  // Return null context during SSR to avoid hydration issues
-  // This prevents the hook from being called during SSR
   if (!mounted) {
     return null;
   }

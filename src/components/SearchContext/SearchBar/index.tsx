@@ -43,8 +43,6 @@ const SearchBar: React.FC = () => {
     </Dropdown>
   );
 
-  // Match searchWrap style from layout.tsx
-
   return (
     <div>
       <Input

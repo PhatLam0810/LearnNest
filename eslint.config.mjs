@@ -11,16 +11,26 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+  {
+    ignores: ['.next/**', 'node_modules/**', 'coverage/**', 'public/**'],
+  },
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
   {
     plugins: { prettier },
     rules: {
-      'prettier/prettier': 'error',
-      'react/react-in-jsx-scope': 'off', // Tắt quy tắc không cần thiết với React 17+
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      'prettier/prettier': ['error', { endOfLine: 'auto' }],
+      'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
+      '@typescript-eslint/no-explicit-any': 'warn',
       'jsx-a11y/alt-text': 'off',
-      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
 ];

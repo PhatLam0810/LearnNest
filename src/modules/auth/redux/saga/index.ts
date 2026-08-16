@@ -48,9 +48,7 @@ function* loginOauthSaga(action: PayloadAction<LoginOauthPayload>) {
     if (status === 200) {
       yield put(authAction.setTokenInfo(data.data));
     }
-  } catch (e: any) {
-    // ignored intentionally; the caller handles the UI state
-  }
+  } catch (e: any) {}
 }
 
 function* updateCurrentInfoSaga(action: PayloadAction<UserProfile>) {
@@ -62,9 +60,7 @@ function* updateCurrentInfoSaga(action: PayloadAction<UserProfile>) {
     if (status === 200) {
       yield put(authAction.setCurrentUserInfo(data.data));
     }
-  } catch (e: any) {
-    // ignored intentionally; the caller handles the UI state
-  }
+  } catch (e: any) {}
 }
 
 function* changePasswordSaga(action: PayloadAction<any>) {
@@ -106,9 +102,7 @@ function* lessonPurchaseSaga(action: PayloadAction<LessonPurchase>) {
     if (status === 201) {
       yield put(authAction.lessonPurchaseData(data));
     }
-  } catch (e: any) {
-    // ignored intentionally; the caller handles the UI state
-  }
+  } catch (e: any) {}
 }
 
 function* viewDetailTransactionSaga(action: PayloadAction<{ id: string }>) {
