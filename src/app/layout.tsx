@@ -15,6 +15,7 @@ import Chatbox from '@components/ChatboxAi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MessageProvider from '@components/MessageProvider';
 import styles from './layoutStyles';
+import { Analytics } from '@vercel/analytics/next';
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ export default function RootLayout({
             </PersistGate>
           </QueryClientProvider>
         </Provider>
+        <Analytics />
       </body>
     </html>
   );
