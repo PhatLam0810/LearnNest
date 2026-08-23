@@ -113,6 +113,16 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   };
 
   const handleStartLesson = async () => {
+    if (!userProfile?._id || !lessonDetail?._id) {
+      messageApi.open({
+        type: 'error',
+        content:
+          'Không xác định được người dùng hoặc bài học, vui lòng tải lại trang.',
+        duration: 5,
+      });
+      return;
+    }
+
     dispatch(authAction.setIsShowLoading(true));
     try {
       const result = await checkRegistrationLesson({
@@ -127,15 +137,26 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         });
       }
 
-      const modules = lessonDetail.modules;
-      const libraries = modules?.[0]?.libraries?.[0];
+      const modules = lessonDetail.modules || [];
+      const firstModule = modules[0];
+      const firstLibrary = firstModule?.libraries?.[0];
 
-      dispatch(dashboardAction.setSelectedModule(modules[0]));
-      dispatch(dashboardAction.setSelectedLibrary(libraries));
+      if (!firstModule || !firstLibrary) {
+        messageApi.open({
+          type: 'error',
+          content: 'Khóa học này hiện chưa có nội dung.',
+          duration: 5,
+        });
+        return;
+      }
+
+      dispatch(dashboardAction.setSelectedModule(firstModule));
+      dispatch(dashboardAction.setSelectedLibrary(firstLibrary));
       router.push(
-        `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail?._id}`,
+        `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail._id}`,
       );
     } catch (error) {
+      console.error('handleStartLesson error:', error);
       messageApi.open({
         type: 'error',
         content: 'Vui lòng thử lại.',
