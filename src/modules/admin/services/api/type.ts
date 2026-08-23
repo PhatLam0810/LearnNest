@@ -65,6 +65,13 @@ export interface CreateModuleParams {
   modules: { title: string; description: string }[];
 }
 
+export interface CreateFeedbackParams {
+  fullName: string;
+  email: string;
+  content: string;
+  images: string[];
+}
+
 export interface CreateSubModuleParams {
   moduleId: string;
   subLessons: {

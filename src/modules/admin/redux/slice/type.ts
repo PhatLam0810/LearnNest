@@ -1,5 +1,6 @@
 import { PayLoadCallBack } from '@/types';
 import {
+  CreateFeedbackParams,
   CreateLessonParams,
   CreateLibraryParams,
   CreateModuleParams,
@@ -31,3 +32,4 @@ export type CreateLibraryPayLoad = PayLoadCallBack<CreateLibraryParams>;
 export type UpdateLibraryPayLoad = PayLoadCallBack<UpdateLibraryParams>;
 export type UpdateLessonPayLoad = PayLoadCallBack<UpdateLessonParams>;
 export type UpdateModulePayLoad = PayLoadCallBack<UpdateModuleParams>;
+export type CreateFeedbackPayLoad = PayLoadCallBack<CreateFeedbackParams>;

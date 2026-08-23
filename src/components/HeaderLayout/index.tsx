@@ -268,6 +268,12 @@ const HeaderLayout: React.FC = ({}) => {
                 onClick={() => router.push('/dashboard/admin/lessonManage')}>
                 Quản lí khóa học
               </Button>
+
+              <Button
+                block
+                onClick={() => router.push('/dashboard/admin/feedbackManage')}>
+                Phản hồi người dùng
+              </Button>
             </>
           )}
 

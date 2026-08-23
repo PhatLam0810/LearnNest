@@ -11,7 +11,12 @@ import '../styles/variables.css';
 import './styles.css';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import Chatbox from '@components/ChatboxAi';
+// Replaced by FeedbackWidget below — chat-with-AI was never actually wired
+// up (the button just showed a "coming soon" toast), so this slot now hosts
+// the feedback-submission feature instead. Kept commented, not deleted, in
+// case this needs to be revisited later.
+// import Chatbox from '@components/ChatboxAi';
+import FeedbackWidget from '@components/FeedbackWidget';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MessageProvider from '@components/MessageProvider';
 import styles from './layoutStyles';
@@ -43,7 +48,8 @@ export default function RootLayout({
               <MessageProvider />
               <View style={styles.appShell}>{children}</View>
               <Authentication />
-              <Chatbox />
+              {/* <Chatbox /> */}
+              <FeedbackWidget />
               <LoadingScreen />
             </PersistGate>
           </QueryClientProvider>

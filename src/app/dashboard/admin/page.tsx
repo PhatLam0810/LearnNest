@@ -10,6 +10,7 @@ import UserManage from './userManage/page';
 import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
 import LessonLearnersOverview from './lessonLearnersOverview';
+import FeedbackManage from './feedbackManage/page';
 
 const items: TabsProps['items'] = [
   {
@@ -31,6 +32,11 @@ const items: TabsProps['items'] = [
     key: '4',
     label: 'Tổng Quan Người Học',
     children: <LessonLearnersOverview />,
+  },
+  {
+    key: '5',
+    label: 'Phản Hồi Người Dùng',
+    children: <FeedbackManage />,
   },
 ];
 

@@ -1,5 +1,6 @@
 import api from '@services/api';
 import {
+  CreateFeedbackParams,
   CreateLessonParams,
   CreateLibraryParams,
   CreateModuleParams,
@@ -25,3 +26,6 @@ export const updateLessonApi = (params: UpdateLessonParams) =>
 
 export const updateModuleApi = (params: UpdateModuleParams) =>
   api.put(`/lesson/updateModule`, params);
+
+export const createFeedbackApi = (params: CreateFeedbackParams) =>
+  api.post(`/feedback`, params);

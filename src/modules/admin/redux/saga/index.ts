@@ -9,6 +9,7 @@ import {
   CreateModuleDataResponse,
 } from './type';
 import {
+  CreateFeedbackPayLoad,
   CreateLessonPayLoad,
   CreateLibraryPayLoad,
   CreateModulePayLoad,
@@ -126,6 +127,24 @@ function* updateModuleSaga(action: PayloadAction<UpdateModulePayLoad>) {
   }
 }
 
+function* submitFeedbackSaga(action: PayloadAction<CreateFeedbackPayLoad>) {
+  try {
+    const { params, callback } = action.payload;
+    const { status }: AppAxiosRes<any> = yield call(
+      adminApi.createFeedbackApi,
+      params,
+    );
+    if (status === 200 || status === 201) {
+      messageApi?.success('Gửi phản hồi thành công, cảm ơn bạn!');
+      if (callback) {
+        callback();
+      }
+    }
+  } catch (error) {
+    messageApi?.error('Gửi phản hồi thất bại, vui lòng thử lại.');
+  }
+}
+
 export function* adminSaga() {
   yield takeLatest(adminAction.getCreateLessons, getCreateLessonsSaga);
   yield takeLatest(adminAction.getCreateModule, getCreateModuleSaga);
@@ -133,4 +152,5 @@ export function* adminSaga() {
   yield takeLatest(adminAction.updateLibrary, updateLibrarySaga);
   yield takeLatest(adminAction.updateLesson, updateLessonSaga);
   yield takeLatest(adminAction.updateModule, updateModuleSaga);
+  yield takeLatest(adminAction.submitFeedback, submitFeedbackSaga);
 }

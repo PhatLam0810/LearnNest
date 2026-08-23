@@ -3,6 +3,7 @@ import { persistReducer } from 'redux-persist';
 import { storage } from '@redux/storage';
 import {
   AdminInitialState,
+  CreateFeedbackPayLoad,
   CreateLessonPayLoad,
   CreateLibraryPayLoad,
   CreateModulePayLoad,
@@ -57,6 +58,7 @@ export const adminSlice = createSlice({
     updateLibrary: (_s, _a: PayloadAction<UpdateLibraryPayLoad>) => {},
     updateLesson: (_s, _a: PayloadAction<UpdateLessonPayLoad>) => {},
     updateModule: (_s, _a: PayloadAction<UpdateModulePayLoad>) => {},
+    submitFeedback: (_s, _a: PayloadAction<CreateFeedbackPayLoad>) => {},
   },
 });
 
