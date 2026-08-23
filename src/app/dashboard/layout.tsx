@@ -6,6 +6,7 @@ import {
   ControlOutlined,
   IdcardOutlined,
   LogoutOutlined,
+  RocketOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
 import './styles.css';
@@ -79,6 +80,11 @@ export default function DashboardLayout({
                 key: '/dashboard/my-courses',
                 label: 'Tổng Quan',
                 icon: <IdcardOutlined />,
+              },
+              {
+                key: '/dashboard/my-roadmap',
+                label: 'Lộ Trình AI',
+                icon: <RocketOutlined />,
               },
             ]
           : []),

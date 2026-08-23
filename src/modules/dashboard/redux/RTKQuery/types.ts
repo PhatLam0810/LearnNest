@@ -61,3 +61,27 @@ export interface GetLessonProgressParams {
   subLessonId: string;
   lessonId?: string;
 }
+
+export interface RoadmapStep {
+  lessonName: string;
+  action: string;
+  suggestedDeadline?: string;
+}
+
+export interface AnalyzedCourse {
+  lessonId: string;
+  lessonName: string;
+  progress: number;
+  daysSinceLastWatched: number;
+}
+
+export interface LearningInsight {
+  _id: string;
+  generatedAt: string;
+  coursesAnalyzed: AnalyzedCourse[];
+  summary: string;
+  roadmap: RoadmapStep[];
+  reminderSubject: string;
+  reminderBody: string;
+  emailSent: boolean;
+}

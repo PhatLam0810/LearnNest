@@ -2,6 +2,7 @@ import { baseQuery } from '@redux/RTKQuery';
 import {
   Category,
   GetLessonProgressParams,
+  LearningInsight,
   LessonProgressResponse,
   LessonRecommendRes,
   LibraryType,
@@ -132,7 +133,11 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    getMyRoadmap: builder.query<LearningInsight[], string>({
+      query: userId => `/ai-coach/history/${userId}`,
+    }),
   }),
   overrideExisting: true,
 });
-export const { useGetLessonProgressQuery } = dashboardQuery;
+export const { useGetLessonProgressQuery, useGetMyRoadmapQuery } =
+  dashboardQuery;

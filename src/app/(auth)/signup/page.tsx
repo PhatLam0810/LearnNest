@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import { Card, Form, message } from 'antd';
 import { Text, View } from 'react-native-web';
 import Link from 'next/link';
@@ -23,8 +24,11 @@ const SignUpPage = () => {
   const dispatch = useAppDispatch();
   const [sendOtp] = authQuery.useSendOtpMutation();
   const [messageApi, contextHolder] = message.useMessage();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   const handleLoginOauth = async () => {
+    if (isGoogleLoading) return;
+    setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -33,6 +37,8 @@ const SignUpPage = () => {
       dispatch(authAction.loginOAuth({ token }));
     } catch (error) {
       console.error('Login Error:', error);
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -114,7 +120,7 @@ const SignUpPage = () => {
             </View>
 
             <View style={styles.btnContainer}>
-              <AppButton onClick={handleLoginOauth}>
+              <AppButton onClick={handleLoginOauth} disabled={isGoogleLoading}>
                 <Icon name="google" />
                 Đăng nhập bằng Google
               </AppButton>

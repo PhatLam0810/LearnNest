@@ -1,0 +1,82 @@
+.my-roadmap-page {
+  padding: 24px;
+  background: #fff;
+}
+
+.my-roadmap-heading {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #292929;
+  letter-spacing: -0.3px;
+}
+
+.my-roadmap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.roadmap-card {
+  padding: 20px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  background: #fff;
+
+  &--latest {
+    border-color: #1f7a45;
+    background: #f6fbf8;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  &__date {
+    font-size: 13px;
+    color: #757575;
+  }
+
+  &__summary {
+    font-size: 15px;
+    color: #333;
+    margin: 0 0 12px 0;
+    line-height: 1.6;
+  }
+
+  &__steps {
+    margin: 0 0 12px 0;
+    padding-left: 20px;
+    font-size: 14px;
+    color: #444;
+
+    li {
+      margin-bottom: 6px;
+    }
+  }
+
+  &__deadline {
+    color: #999;
+  }
+
+  &__reminder {
+    font-size: 14px;
+    color: #1f6e68;
+    margin: 0;
+    font-style: italic;
+  }
+}
+
+.roadmap-empty-state {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #757575;
+  font-size: 16px;
+  text-align: center;
+  padding: 24px;
+}

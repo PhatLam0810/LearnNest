@@ -26,7 +26,10 @@ const LoginPage = () => {
   const dispatch = useAppDispatch();
   const { signUpInfo } = useAppSelector(state => state.authReducer);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const handleLoginOauth = async () => {
+    if (isGoogleLoading) return;
+    setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(auth, provider);
@@ -36,6 +39,8 @@ const LoginPage = () => {
       router.push('/dashboard/home');
     } catch (error) {
       console.error('Login Error:', error);
+    } finally {
+      setIsGoogleLoading(false);
     }
   };
 
@@ -179,6 +184,7 @@ const LoginPage = () => {
                 <AppButton
                   aria-label="Đăng nhập bằng Google"
                   onClick={handleLoginOauth}
+                  disabled={isGoogleLoading}
                   style={styles.googleButton}>
                   <Icon name="google" />
                   Đăng nhập bằng Google
