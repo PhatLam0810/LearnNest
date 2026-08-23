@@ -1,60 +1,38 @@
-'use client';
-import { persistor, store } from '@redux';
-import React from 'react';
-import { View } from 'react-native-web';
-import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
-import { Authentication } from '~mdAuth/components';
-import { pdfjs } from 'react-pdf';
-import LoadingScreen from '~mdAuth/components/Loading';
+import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import '../styles/variables.css';
 import './styles.css';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-// Replaced by FeedbackWidget below — chat-with-AI was never actually wired
-// up (the button just showed a "coming soon" toast), so this slot now hosts
-// the feedback-submission feature instead. Kept commented, not deleted, in
-// case this needs to be revisited later.
-// import Chatbox from '@components/ChatboxAi';
-import FeedbackWidget from '@components/FeedbackWidget';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import MessageProvider from '@components/MessageProvider';
-import styles from './layoutStyles';
-import { Analytics } from '@vercel/analytics/next';
+import RootLayoutClient from './RootLayoutClient';
 
-const queryClient = new QueryClient();
+const SITE_URL = 'https://learnestvhu.com';
+const SITE_NAME = 'LearnNest';
+const SITE_DESCRIPTION =
+  'LearnNest - nền tảng học tập trực tuyến giúp bạn học nhanh, luyện tập hiệu quả và theo dõi tiến độ học tập mọi lúc, mọi nơi.';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: `${SITE_NAME} - Nền tảng học tập trực tuyến`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    title: `${SITE_NAME} - Nền tảng học tập trực tuyến`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    type: 'website',
+  },
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  dayjs.extend(relativeTime);
-
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body>
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <PersistGate persistor={persistor}>
-              <MessageProvider />
-              <View style={styles.appShell}>{children}</View>
-              <Authentication />
-              {/* <Chatbox /> */}
-              <FeedbackWidget />
-              <LoadingScreen />
-            </PersistGate>
-          </QueryClientProvider>
-        </Provider>
-        <Analytics />
+        <RootLayoutClient>{children}</RootLayoutClient>
       </body>
     </html>
   );

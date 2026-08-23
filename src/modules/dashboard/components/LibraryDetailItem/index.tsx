@@ -13,7 +13,7 @@ import { Library } from '~mdDashboard/types';
 import styles from './styles';
 import YouTube from 'react-youtube';
 import { Button, Modal, Radio, Spin } from 'antd';
-import axios from 'axios';
+import api from '@/services/api';
 import { messageApi } from '@hooks';
 import { useAppSelector } from '@redux';
 import { useGetLessonProgressQuery } from '~mdDashboard/redux';
@@ -58,8 +58,6 @@ const LibraryDetailItem = forwardRef<
   const [isSwitchingContext, setIsSwitchingContext] = useState(false);
   const activeModalRef = useRef<any>(null);
 
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:9999';
   const userProfile = useAppSelector(
     (state: any) => state.authReducer?.tokenInfo?.userProfile,
   );
@@ -88,6 +86,7 @@ const LibraryDetailItem = forwardRef<
     const [isTracking, setIsTracking] = useState(false);
     const trackingIntervalRef = useRef<any | null>(null);
     const lastSentAtRef = useRef<number>(0);
+    const lastSentPositionRef = useRef<number>(0);
     const lastPositionRef = useRef<number>(0);
     const maxWatchedRef = useRef<number>(0);
     const totalWatchedTimeRef = useRef<number>(0);
@@ -142,8 +141,7 @@ const LibraryDetailItem = forwardRef<
           payload.lessonId = lessonId;
         }
 
-        const url = `${API_BASE_URL}/lesson/video/track`;
-        await axios.post(url, payload, { timeout: 4000 });
+        await api.post('/lesson/video/track', payload, { timeout: 4000 });
         lastSentAtRef.current = now;
 
         const delta = Math.max(
@@ -202,9 +200,9 @@ const LibraryDetailItem = forwardRef<
       if (!isTracking || !videoPlayingRef.current) return;
 
       maxWatchedRef.current = Math.max(maxWatchedRef.current, currentTime);
-      lastPositionRef.current = currentTime;
 
-      if (Math.abs(currentTime - lastSentAtRef.current) >= 1) {
+      if (Math.abs(currentTime - lastSentPositionRef.current) >= 1) {
+        lastSentPositionRef.current = currentTime;
         flushTracking({
           currentTime,
           duration,
@@ -594,6 +592,15 @@ const LibraryDetailItem = forwardRef<
       setIsSwitchingContext(false);
     }
   }, [progressRes, isFetching, data?._id]);
+
+  // Safety net: if the progress request hangs/never resolves (seen on some
+  // browsers, e.g. Cốc Cốc blocking the request), the black loading overlay
+  // above the video would otherwise stay stuck forever while audio keeps playing.
+  useEffect(() => {
+    if (!isSwitchingContext) return;
+    const timeout = setTimeout(() => setIsSwitchingContext(false), 5000);
+    return () => clearTimeout(timeout);
+  }, [isSwitchingContext, data?._id]);
   const renderMedia = () => {
     if (!data?.type) return null;
 
@@ -630,6 +637,7 @@ const LibraryDetailItem = forwardRef<
                 src={data.url}
                 width="100%"
                 height="100%"
+                style={{ transform: 'translateZ(0)', willChange: 'transform' }}
                 autoPlay={false}
                 controls
                 controlsList="nodownload noseek"

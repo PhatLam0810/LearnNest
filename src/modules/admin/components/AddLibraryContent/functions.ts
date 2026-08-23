@@ -1,3 +1,5 @@
+import api from '@services/api';
+
 export const getVideoDuration = (url: string) => {
   return new Promise<number>((resolve, reject) => {
     const video = document.createElement('video');
@@ -14,33 +16,21 @@ export const getVideoDuration = (url: string) => {
   });
 };
 
+// Duration lookup goes through the backend (GET /library/youtube-duration/:videoId)
+// instead of calling the YouTube API directly from the browser — the API key
+// used to be shipped to the client via NEXT_PUBLIC_API_YOUTUBE_KEY, exposing
+// it in the bundle. The backend now holds the key server-side only.
 export const getYouTubeVideoDuration = async (url: string): Promise<number> => {
   try {
     const match = url.match(
       /(?:youtu\.be\/|youtube\.com\/(?:.*v=|.*\/|.*embed\/|v\/))([\w-]+)/,
     );
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?id=${match[1]}&part=contentDetails&key=${process.env.NEXT_PUBLIC_API_YOUTUBE_KEY}`,
-    );
-    const data = await response.json();
+    if (!match) return 0;
 
-    if (data.items.length === 0) {
-      throw new Error('Video not found');
-    }
-
-    const durationISO = data.items[0].contentDetails.duration;
-    return parseYouTubeDuration(durationISO);
+    const res = await api.get(`/library/youtube-duration/${match[1]}`);
+    return res.data?.data?.seconds ?? 0;
   } catch (error) {
     console.error('Error fetching video duration:', error);
     return 0;
   }
-};
-
-// Hàm chuyển đổi duration từ ISO 8601 (VD: "PT5M30S") sang giây
-const parseYouTubeDuration = (duration: string): number => {
-  const match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/);
-  const hours = match?.[1] ? parseInt(match[1]) : 0;
-  const minutes = match?.[2] ? parseInt(match[2]) : 0;
-  const seconds = match?.[3] ? parseInt(match[3]) : 0;
-  return hours * 3600 + minutes * 60 + seconds;
 };

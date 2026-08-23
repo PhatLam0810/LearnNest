@@ -3,6 +3,7 @@ import { message } from 'antd';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi';
+import api from '@/services/api';
 
 dayjs.extend(relativeTime);
 dayjs.locale('vi');
@@ -16,9 +17,6 @@ export interface MyCourseItem {
   lastSubLessonId: string;
 }
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:9999';
-
 export const useMyCourses = (userId: string | null) => {
   const [myCourses, setMyCourses] = useState<MyCourseItem[]>([]);
   const [loadingCourses, setLoadingCourses] = useState<boolean>(false);
@@ -27,19 +25,8 @@ export const useMyCourses = (userId: string | null) => {
     if (!userId) return;
     setLoadingCourses(true);
     try {
-      const response = await fetch(
-        `${BACKEND_URL}/lesson/user/${userId}/my-courses`,
-        {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const response = await api.get(`/lesson/user/${userId}/my-courses`);
+      const data = response.data;
       setMyCourses(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách khóa học của tôi:', error);

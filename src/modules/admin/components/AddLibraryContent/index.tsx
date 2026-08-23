@@ -10,9 +10,10 @@ import {
   TimePickerProps,
   Upload,
 } from 'antd';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { adminQuery } from '../../redux';
 import { messageApi, useAppPagination } from '@hooks';
+import { useUploadProgress } from '@hooks/useUploadProgress';
 import api from '@services/api';
 import { Library } from '~mdDashboard/types';
 import { ScrollView, View } from 'react-native-web';
@@ -46,6 +47,98 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState('');
   const [fileUpload, setFileUpload] = useState<any[]>([]);
+  const [uploadElapsed, setUploadElapsed] = useState(0);
+  const uploadTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const {
+    percent: uploadPercent,
+    stage: uploadStage,
+    startNewUpload,
+    getUploadId,
+  } = useUploadProgress();
+
+  const startUploadTimer = () => {
+    if (uploadTimerRef.current) return;
+    setUploadElapsed(0);
+    uploadTimerRef.current = setInterval(() => {
+      setUploadElapsed(prev => prev + 1);
+    }, 1000);
+  };
+
+  const stopUploadTimer = () => {
+    if (uploadTimerRef.current) {
+      clearInterval(uploadTimerRef.current);
+      uploadTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => stopUploadTimer, []);
+
+  const formatElapsed = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  };
+
+  const handleBeforeUpload = () => {
+    startNewUpload();
+    return true;
+  };
+
+  const renderUploadStatus = () => {
+    if (fileUpload[0]?.status !== 'uploading') return null;
+    const stageText =
+      uploadStage === 'transcoding' && uploadPercent !== null
+        ? `Đang xử lý video... ${uploadPercent}%`
+        : uploadStage === 'uploading'
+          ? 'Đang lưu lên máy chủ...'
+          : `Đang tải lên... ${formatElapsed(uploadElapsed)}`;
+    return (
+      <div style={{ marginTop: 8, color: '#888', fontSize: 13 }}>
+        {stageText} — video lớn có thể mất vài phút, vui lòng không tải lại
+        trang.
+      </div>
+    );
+  };
+
+  const handleUploadChange = (
+    info: any,
+    onDoneExtra?: (url: string) => void,
+  ) => {
+    if (info.file.status === 'uploading') {
+      startUploadTimer();
+      setFileUpload([
+        {
+          uid: info.file.uid,
+          name: info.file.name,
+          status: info.file.status,
+          url: info.file.response?.data,
+        },
+      ]);
+    }
+    if (info.file.status === 'done') {
+      stopUploadTimer();
+      setFileUpload([
+        {
+          uid: info.file.uid,
+          name: info.file.name,
+          status: info.file.status,
+          url: info.file.response?.data,
+        },
+      ]);
+      const responseUrl = info.file.response?.data;
+      if (responseUrl) {
+        setLink(responseUrl);
+        form.setFieldsValue({ url: responseUrl });
+        onDoneExtra?.(responseUrl);
+      }
+    }
+    if (info.file.status === 'error') {
+      stopUploadTimer();
+    }
+  };
+
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
@@ -95,36 +188,13 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 fileList={fileUpload}
                 listType="picture-card"
                 action={api.defaults.baseURL + '/upload'}
+                data={() => ({ uploadId: getUploadId() })}
+                beforeUpload={handleBeforeUpload}
                 onRemove={() => setFileUpload([])}
-                onChange={info => {
-                  if (info.file.status === 'uploading') {
-                    setFileUpload([
-                      {
-                        uid: info.file.uid,
-                        name: info.file.name,
-                        status: info.file.status,
-                        url: info.file.response?.data,
-                      },
-                    ]);
-                  }
-                  if (info.file.status === 'done') {
-                    setFileUpload([
-                      {
-                        uid: info.file.uid,
-                        name: info.file.name,
-                        status: info.file.status,
-                        url: info.file.response?.data,
-                      },
-                    ]);
-                    const responseUrl = info.file.response?.data;
-                    if (responseUrl) {
-                      setLink(responseUrl);
-                      form.setFieldsValue({ url: responseUrl });
-                    }
-                  }
-                }}>
+                onChange={info => handleUploadChange(info)}>
                 <Button type="text">Tải lên</Button>
               </Upload>
+              {renderUploadStatus()}
             </>
           </Form.Item>
         );
@@ -165,42 +235,22 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 fileList={fileUpload}
                 listType="picture-card"
                 action={api.defaults.baseURL + '/upload'}
+                data={() => ({ uploadId: getUploadId() })}
+                beforeUpload={handleBeforeUpload}
                 onRemove={() => setFileUpload([])}
-                onChange={info => {
-                  if (info.file.status === 'uploading') {
-                    setFileUpload([
-                      {
-                        uid: info.file.uid,
-                        name: info.file.name,
-                        status: info.file.status,
-                        url: info.file.response?.data,
-                      },
-                    ]);
-                  }
-                  if (info.file.status === 'done') {
-                    setFileUpload([
-                      {
-                        uid: info.file.uid,
-                        name: info.file.name,
-                        status: info.file.status,
-                        url: info.file.response?.data,
-                      },
-                    ]);
-                    const responseUrl = info.file.response?.data;
-                    if (responseUrl) {
-                      form.setFieldsValue({ url: responseUrl });
-                      setLink(responseUrl);
-                      getVideoDuration(responseUrl)
-                        .then(duration => {
-                          form.setFieldsValue({ duration: duration });
-                          setDuration(Math.floor(duration));
-                        })
-                        .catch(error => console.error(error));
-                    }
-                  }
-                }}>
+                onChange={info =>
+                  handleUploadChange(info, responseUrl => {
+                    getVideoDuration(responseUrl)
+                      .then(duration => {
+                        form.setFieldsValue({ duration: duration });
+                        setDuration(Math.floor(duration));
+                      })
+                      .catch(error => console.error(error));
+                  })
+                }>
                 <Button type="text">Tải lên</Button>
               </Upload>
+              {renderUploadStatus()}
             </>
           </Form.Item>
         );
