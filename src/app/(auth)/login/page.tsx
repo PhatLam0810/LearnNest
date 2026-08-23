@@ -83,7 +83,8 @@ const LoginPage = () => {
               priority
             />
             <Text style={styles.heroSlogan}>
-              Learn smarter, grow faster — Personalize your learning journey.
+              Học thông minh hơn, tiến bộ nhanh hơn — Cá nhân hóa hành trình học
+              tập của bạn.
             </Text>
           </View>
         )}
@@ -95,10 +96,10 @@ const LoginPage = () => {
             <View style={styles.subContainer}>
               <Text
                 style={isMobile ? typography.titleMMobile : typography.titleM}>
-                Sign In
+                Đăng nhập
               </Text>
               <Text style={styles.subDescription}>
-                Sign into your account - accessall of your lessons now.
+                Đăng nhập vào tài khoản của bạn — truy cập toàn bộ bài học ngay.
               </Text>
             </View>
             <View style={{ overflow: 'hidden' }}>
@@ -128,25 +129,27 @@ const LoginPage = () => {
                   name={'email'}
                   labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
                   style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
-                  rules={[{ required: true, message: 'Email required' }]}>
+                  rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
                   <AppInput
-                    placeholder="Enter your email"
+                    placeholder="Nhập email của bạn"
                     style={{ width: '100%' }}
                   />
                 </Form.Item>
                 <Form.Item<FieldType>
                   label={
                     <Text style={styles.labelText}>
-                      <Text style={{ color: 'red' }}>*</Text> Password
+                      <Text style={{ color: 'red' }}>*</Text> Mật khẩu
                     </Text>
                   }
                   name={'password'}
                   labelCol={{ span: 24 }}
                   style={{ width: '100%', marginBottom: 16 }}
-                  rules={[{ required: true, message: 'Password error' }]}>
+                  rules={[
+                    { required: true, message: 'Vui lòng nhập mật khẩu' },
+                  ]}>
                   <AppInput
                     type="Password"
-                    placeholder="Enter your password"
+                    placeholder="Nhập mật khẩu của bạn"
                     style={{ width: '100%' }}
                   />
                 </Form.Item>
@@ -154,7 +157,7 @@ const LoginPage = () => {
                   <Text
                     style={styles.forgotTitle}
                     onPress={() => router.push('/forgotPassword')}>
-                    Forgot Password?
+                    Quên mật khẩu?
                   </Text>
                 </View>
                 <Form.Item<FieldType> shouldUpdate style={{ marginBottom: 12 }}>
@@ -163,28 +166,28 @@ const LoginPage = () => {
                     return (
                       <AppButton
                         type="primary"
-                        aria-label="Sign in to your account"
+                        aria-label="Đăng nhập vào tài khoản của bạn"
                         style={styles.primaryButton}
                         disabled={!email || !password}
                         htmlType="submit">
-                        Sign In
+                        Đăng nhập
                       </AppButton>
                     );
                   }}
                 </Form.Item>
 
                 <AppButton
-                  aria-label="Sign in with Google"
+                  aria-label="Đăng nhập bằng Google"
                   onClick={handleLoginOauth}
                   style={styles.googleButton}>
                   <Icon name="google" />
-                  Sign in with Google
+                  Đăng nhập bằng Google
                 </AppButton>
               </Form>
             </View>
             <View style={styles.footer}>
-              <Text>Don’t have an account? </Text>
-              <Link href={`/signup`}>Sign Up</Link>
+              <Text>Chưa có tài khoản? </Text>
+              <Link href={`/signup`}>Đăng ký</Link>
             </View>
           </View>
         </Card>

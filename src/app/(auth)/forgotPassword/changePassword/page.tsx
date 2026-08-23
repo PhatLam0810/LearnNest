@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Card, Form, message } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
@@ -26,7 +27,7 @@ const ChangePasswordPage = () => {
     if (sendOtpInfo) {
       messageApi.open({
         type: 'success',
-        content: `Otp code has been send to your ${sendOtpInfo.email}`,
+        content: `Mã OTP đã được gửi đến ${sendOtpInfo.email}`,
         duration: 5,
       });
     }
@@ -47,10 +48,10 @@ const ChangePasswordPage = () => {
       newPassword: values.newPassword,
     }).then(res => {
       if (res.data) {
-        messageApi.success('Reset password successfully');
+        messageApi.success('Đặt lại mật khẩu thành công');
         router.push('/login');
       } else {
-        messageApi.error('Reset password failed');
+        messageApi.error('Đặt lại mật khẩu thất bại');
       }
     });
   };
@@ -60,17 +61,26 @@ const ChangePasswordPage = () => {
       <Card style={containerStyle}>
         {contextHolder}
         <View>
+          <AppButton
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            style={{ paddingLeft: 0, marginBottom: 8 }}
+            onClick={() => router.push('/forgotPassword')}>
+            Quay lại
+          </AppButton>
           <View style={styles.subContainer}>
             <Text
               style={isMobile ? typography.titleMMobile : typography.titleM}>
-              Reset your password
+              Đặt lại mật khẩu
             </Text>
             <Text style={isMobile ? typography.body2Mobile : typography.body2}>
-              In the next step, we’ll learn about your interests and skills.
+              Ở bước tiếp theo, chúng tôi sẽ tìm hiểu về sở thích và kỹ năng của
+              bạn.
             </Text>
             <Text style={styles.description}>
-              Enter the OTP code we just sent to your email{' '}
-              <Text style={styles.email}>{sendOtpInfo?.email}</Text> to verify.
+              Nhập mã OTP chúng tôi vừa gửi đến email{' '}
+              <Text style={styles.email}>{sendOtpInfo?.email}</Text> để xác
+              minh.
             </Text>
           </View>
           <Form<resetPasswordType>
@@ -84,31 +94,28 @@ const ChangePasswordPage = () => {
             <Form.Item<resetPasswordType>
               label={
                 <Text style={styles.labelText}>
-                  <Text style={{ color: 'red' }}>*</Text> Otp
+                  <Text style={{ color: 'red' }}>*</Text> OTP
                 </Text>
               }
               name={'otp'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 0 }}
-              rules={[{ required: true, message: 'Otp required' }]}>
-              <AppInput
-                placeholder="Enter Otp code"
-                style={{ width: '100%' }}
-              />
+              rules={[{ required: true, message: 'Vui lòng nhập mã OTP' }]}>
+              <AppInput placeholder="Nhập mã OTP" style={{ width: '100%' }} />
             </Form.Item>
             <Form.Item<resetPasswordType>
               label={
                 <Text style={styles.labelText}>
-                  <Text style={{ color: 'red' }}>*</Text> Password
+                  <Text style={{ color: 'red' }}>*</Text> Mật khẩu
                 </Text>
               }
               name={'newPassword'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 0 }}
-              rules={[{ required: true, message: 'Password required' }]}>
+              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}>
               <AppInput
                 type="Password"
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu của bạn"
                 style={{ width: '100%' }}
               />
             </Form.Item>
@@ -116,7 +123,7 @@ const ChangePasswordPage = () => {
             <Form.Item<resetPasswordType>
               label={
                 <Text style={styles.labelText}>
-                  <Text style={{ color: 'red' }}>*</Text> Confirm Password
+                  <Text style={{ color: 'red' }}>*</Text> Xác nhận mật khẩu
                 </Text>
               }
               name={'confirmPassword'}
@@ -124,19 +131,21 @@ const ChangePasswordPage = () => {
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 16 }}
               rules={[
-                { required: true, message: 'Confirm your password' },
+                { required: true, message: 'Vui lòng xác nhận mật khẩu' },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue('newPassword') === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error('Passwords do not match'));
+                    return Promise.reject(
+                      new Error('Mật khẩu xác nhận không khớp'),
+                    );
                   },
                 }),
               ]}>
               <AppInput
                 type="Password"
-                placeholder="Confirm your password"
+                placeholder="Xác nhận mật khẩu của bạn"
                 style={{ width: '100%' }}
               />
             </Form.Item>
@@ -149,7 +158,7 @@ const ChangePasswordPage = () => {
                     type="primary"
                     disabled={!otp || !newPassword || !confirmPassword}
                     htmlType="submit">
-                    Reset Password
+                    Đặt lại mật khẩu
                   </AppButton>
                 );
               }}

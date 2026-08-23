@@ -67,10 +67,10 @@ const SignUpPage = () => {
           <View style={styles.subContainer}>
             <Text
               style={isMobile ? typography.titleMMobile : typography.titleM}>
-              Sign Up
+              Đăng ký
             </Text>
             <Text style={isMobile ? typography.body2Mobile : typography.body2}>
-              Access thousands of free lessons today.
+              Truy cập hàng nghìn bài học miễn phí ngay hôm nay.
             </Text>
           </View>
 
@@ -89,9 +89,9 @@ const SignUpPage = () => {
               name={'email'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 16 }}
-              rules={[{ required: true, message: 'Email required' }]}>
+              rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
               <AppInput
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 style={{ width: '100%' }}
               />
             </Form.Item>
@@ -101,7 +101,7 @@ const SignUpPage = () => {
                 const { email } = getFieldsValue();
                 return (
                   <AppButton type="primary" disabled={!email} htmlType="submit">
-                    Continue with Email
+                    Tiếp tục với Email
                   </AppButton>
                 );
               }}
@@ -109,21 +109,21 @@ const SignUpPage = () => {
 
             <View style={styles.driverContainer}>
               <View style={styles.driver}></View>
-              <Text style={styles.driverText}>or</Text>
+              <Text style={styles.driverText}>hoặc</Text>
               <View style={styles.driver}></View>
             </View>
 
             <View style={styles.btnContainer}>
               <AppButton onClick={handleLoginOauth}>
                 <Icon name="google" />
-                Sign in with Google
+                Đăng nhập bằng Google
               </AppButton>
             </View>
           </Form>
 
           <View style={styles.footer}>
-            <Text>Already have an account? </Text>
-            <Link href={`/login`}>Sign In</Link>
+            <Text>Đã có tài khoản? </Text>
+            <Link href={`/login`}>Đăng nhập</Link>
           </View>
         </View>
       </Card>

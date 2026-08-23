@@ -27,7 +27,7 @@ const CreateAccountPage = () => {
     if (sendOtpInfo) {
       messageApi.open({
         type: 'success',
-        content: `Otp code has been send to your ${sendOtpInfo.email}`,
+        content: `Mã OTP đã được gửi đến ${sendOtpInfo.email}`,
         duration: 5,
       });
     }
@@ -49,14 +49,16 @@ const CreateAccountPage = () => {
           <View style={styles.subContainer}>
             <Text
               style={isMobile ? typography.titleMMobile : typography.titleM}>
-              Create your account
+              Tạo tài khoản của bạn
             </Text>
             <Text style={isMobile ? typography.body2Mobile : typography.body2}>
-              In the next step, we’ll learn about your interests and skills.
+              Ở bước tiếp theo, chúng tôi sẽ tìm hiểu về sở thích và kỹ năng của
+              bạn.
             </Text>
             <Text style={styles.description}>
-              Enter the OTP code we just sent to your email{' '}
-              <Text style={styles.email}>{sendOtpInfo?.email}</Text> to verify.
+              Nhập mã OTP chúng tôi vừa gửi đến email{' '}
+              <Text style={styles.email}>{sendOtpInfo?.email}</Text> để xác
+              minh.
             </Text>
           </View>
 
@@ -82,32 +84,29 @@ const CreateAccountPage = () => {
             <Form.Item<FieldType>
               label={
                 <Text style={styles.labelText}>
-                  <Text style={{ color: 'red' }}>*</Text> Otp
+                  <Text style={{ color: 'red' }}>*</Text> OTP
                 </Text>
               }
               name={'otp'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 0 }}
-              rules={[{ required: true, message: 'Otp required' }]}>
-              <AppInput
-                placeholder="Enter Otp code"
-                style={{ width: '100%' }}
-              />
+              rules={[{ required: true, message: 'Vui lòng nhập mã OTP' }]}>
+              <AppInput placeholder="Nhập mã OTP" style={{ width: '100%' }} />
             </Form.Item>
 
             <Form.Item<FieldType>
               label={
                 <Text style={styles.labelText}>
-                  <Text style={{ color: 'red' }}>*</Text> Password
+                  <Text style={{ color: 'red' }}>*</Text> Mật khẩu
                 </Text>
               }
               name={'password'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 0 }}
-              rules={[{ required: true, message: 'Password required' }]}>
+              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}>
               <AppInput
                 type="Password"
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu của bạn"
                 style={{ width: '100%' }}
               />
             </Form.Item>
@@ -115,7 +114,7 @@ const CreateAccountPage = () => {
             <Form.Item<FieldType>
               label={
                 <Text style={styles.labelText}>
-                  <Text style={{ color: 'red' }}>*</Text> Confirm Password
+                  <Text style={{ color: 'red' }}>*</Text> Xác nhận mật khẩu
                 </Text>
               }
               name={'confirmPassword'}
@@ -123,19 +122,21 @@ const CreateAccountPage = () => {
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 16 }}
               rules={[
-                { required: true, message: 'Confirm your password' },
+                { required: true, message: 'Vui lòng xác nhận mật khẩu' },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
                     if (!value || getFieldValue('password') === value) {
                       return Promise.resolve();
                     }
-                    return Promise.reject(new Error('Passwords do not match'));
+                    return Promise.reject(
+                      new Error('Mật khẩu xác nhận không khớp'),
+                    );
                   },
                 }),
               ]}>
               <AppInput
                 type="Password"
-                placeholder="Confirm your password"
+                placeholder="Xác nhận mật khẩu của bạn"
                 style={{ width: '100%' }}
               />
             </Form.Item>
@@ -148,7 +149,7 @@ const CreateAccountPage = () => {
                     type="primary"
                     disabled={!otp || !password || !confirmPassword}
                     htmlType="submit">
-                    Sign Up
+                    Đăng ký
                   </AppButton>
                 );
               }}

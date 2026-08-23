@@ -54,8 +54,21 @@ const styles = StyleSheet.create({
   moduleContentHeader: {
     display: 'flex',
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
+  },
+  moduleTitleText: {
+    ...typography.subTitle1,
+    margin: 0,
+    flex: 1,
+    minWidth: 0,
+  },
+  moduleCountText: {
+    ...typography.subTitle1,
+    margin: 0,
+    flexShrink: 0,
   },
   skillLearnedItem: {
     ...typography.body2,

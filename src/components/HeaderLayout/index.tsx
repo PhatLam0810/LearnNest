@@ -272,7 +272,7 @@ const HeaderLayout: React.FC = ({}) => {
           )}
 
           <Button danger block onClick={() => dispatch(authAction.logout())}>
-            Logout
+            Đăng xuất
           </Button>
         </div>
       </Drawer>

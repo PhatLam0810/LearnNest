@@ -40,6 +40,7 @@ const LibraryDetailItem = forwardRef<
   };
   const playerRef = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const correctingSkipRef = useRef(false);
   const [lastPlayed, setLastPlayed] = useState(0);
   const [maxWatched, setMaxWatched] = useState(0);
   const [visibleQuestion, setVisibleQuestion] = useState<any>(null);
@@ -301,10 +302,22 @@ const LibraryDetailItem = forwardRef<
         }
 
         if (currentTime > maxWatched + 5) {
-          warning();
-          playerRef.current.pauseVideo();
-          playerRef.current.seekTo(lastPlayed);
-          pauseTracking();
+          if (!correctingSkipRef.current) {
+            correctingSkipRef.current = true;
+            warning();
+            playerRef.current.pauseVideo();
+            // allowSeekAhead=true so YouTube fetches the target position
+            // instead of silently freezing when it isn't buffered yet.
+            playerRef.current.seekTo(lastPlayed, true);
+            pauseTracking();
+            // Give the player time to actually complete the seek before
+            // re-checking — otherwise the still-stale currentTime on the
+            // next tick re-triggers this block and re-issues pause/seek,
+            // which is what produced the "stuck loading" symptom.
+            setTimeout(() => {
+              correctingSkipRef.current = false;
+            }, 2000);
+          }
         } else {
           setLastPlayed(currentTime);
           setMaxWatched(prevMax => Math.max(prevMax, currentTime));
@@ -419,7 +432,7 @@ const LibraryDetailItem = forwardRef<
       const appearTime = visibleQuestion.appearTime;
 
       player?.pauseVideo?.();
-      player?.seekTo?.(Math.max(0, maxWatched - 5));
+      player?.seekTo?.(Math.max(0, maxWatched - 5), true);
 
       if (video) {
         video.pause();
@@ -436,9 +449,9 @@ const LibraryDetailItem = forwardRef<
 
   const warning = () => {
     modal.warning({
-      title: 'Warning',
+      title: 'Cảnh báo',
       content:
-        'You are learning faster than usual, please avoid skipping too much while studying!',
+        'Bạn đang học nhanh hơn bình thường, vui lòng tránh bỏ qua quá nhiều khi học!',
       centered: true,
     });
   };
@@ -473,7 +486,7 @@ const LibraryDetailItem = forwardRef<
         videoRef.current.currentTime = resumeInfo.lastPosition;
         videoRef.current.play();
       } else if (data.type === 'Youtube' && playerRef.current) {
-        playerRef.current.seekTo(resumeInfo.lastPosition);
+        playerRef.current.seekTo(resumeInfo.lastPosition, true);
         playerRef.current.playVideo();
       } else {
         setPendingSeek(resumeInfo.lastPosition);
@@ -492,7 +505,7 @@ const LibraryDetailItem = forwardRef<
       videoRef.current.currentTime = 0;
       videoRef.current.play();
     } else if (data.type === 'Youtube' && playerRef.current) {
-      playerRef.current.seekTo(0);
+      playerRef.current.seekTo(0, true);
       playerRef.current.playVideo();
     }
   };
@@ -660,7 +673,7 @@ const LibraryDetailItem = forwardRef<
                   onReady={(event: any) => {
                     playerRef.current = event.target;
                     if (pendingSeek !== null) {
-                      event.target.seekTo(pendingSeek);
+                      event.target.seekTo(pendingSeek, true);
                       setPendingSeek(null);
                     }
                   }}

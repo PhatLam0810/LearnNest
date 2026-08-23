@@ -1,5 +1,6 @@
 'use client';
 import { Card, Form, message } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import { Text, View } from 'react-native-web';
 import { AppButton, AppInput } from '@components';
@@ -30,7 +31,7 @@ const ForgotPasswordPage = () => {
       }
     } catch (error: any) {
       console.error('Lỗi gửi OTP:', error);
-      messageApi.error(error.message || 'Failed to send OTP.');
+      messageApi.error(error.message || 'Gửi OTP thất bại.');
     } finally {
       dispatch(authAction.setIsShowLoading(false));
     }
@@ -48,14 +49,21 @@ const ForgotPasswordPage = () => {
       <Card style={containerStyle}>
         {contextHolder}
         <View>
+          <AppButton
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            style={{ paddingLeft: 0, marginBottom: 8 }}
+            onClick={() => router.push('/login')}>
+            Quay lại đăng nhập
+          </AppButton>
           <View style={styles.subContainer}>
             <Text
               style={isMobile ? typography.titleMMobile : typography.titleM}>
-              Forgot Password
+              Quên mật khẩu
             </Text>
             <Text style={isMobile ? typography.body2Mobile : typography.body2}>
-              Enter your email address and we will send you a otp to reset your
-              password
+              Nhập địa chỉ email của bạn, chúng tôi sẽ gửi mã OTP để đặt lại mật
+              khẩu
             </Text>
           </View>
 
@@ -74,9 +82,9 @@ const ForgotPasswordPage = () => {
               name={'email'}
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 16 }}
-              rules={[{ required: true, message: 'Email required' }]}>
+              rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
               <AppInput
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 style={{ width: '100%' }}
               />
             </Form.Item>
@@ -86,7 +94,7 @@ const ForgotPasswordPage = () => {
                 const { email } = getFieldsValue();
                 return (
                   <AppButton type="primary" disabled={!email} htmlType="submit">
-                    Go to verification
+                    Tiếp tục xác minh
                   </AppButton>
                 );
               }}

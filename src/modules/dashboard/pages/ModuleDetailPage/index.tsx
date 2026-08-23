@@ -125,8 +125,10 @@ const ModuleDetailPage = () => {
       key: index,
       label: (
         <div style={styles.moduleContentHeader}>
-          <p style={styles.learnedSkillText}>{item.title}</p>
-          <p style={styles.learnedSkillText}>
+          <p style={styles.moduleTitleText} title={item.title}>
+            {item.title}
+          </p>
+          <p style={styles.moduleCountText}>
             Tổng số bài học: {item.libraries.length}
           </p>
         </div>
@@ -140,7 +142,7 @@ const ModuleDetailPage = () => {
             return (
               <TouchableOpacity
                 key={subIndex}
-                style={[isDisabled && styles.disabledButton]}>
+                style={[isDisabled && !isSelected && styles.disabledButton]}>
                 <View
                   onClick={() => {
                     if (isDisabled) return;
@@ -386,20 +388,39 @@ const ModuleDetailPage = () => {
             <View style={styles.lessonContentHeader}>
               <Text style={styles.lessonContentTitle}>Nội dụng bài học</Text>
             </View>
-            <ScrollView
-              style={lessonScrollStyle}
-              contentContainerStyle={lessonScrollContentStyle}>
-              <View style={styles.libraryGap}>
-                <Collapse
-                  bordered={false}
-                  defaultActiveKey={[0]}
-                  expandIcon={({ isActive }) => (
-                    <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                  )}
-                  items={getItems(panelStyle)}
-                />
+            {isMobile ? (
+              // Plain View on mobile — react-native-web's ScrollView still
+              // attaches its own JS touch handling even with overflow
+              // disabled via style, which fights the page's native scroll
+              // and makes scrolling feel like it randomly stops working.
+              <View style={lessonScrollStyle}>
+                <View style={styles.libraryGap}>
+                  <Collapse
+                    bordered={false}
+                    defaultActiveKey={[0]}
+                    expandIcon={({ isActive }) => (
+                      <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                    )}
+                    items={getItems(panelStyle)}
+                  />
+                </View>
               </View>
-            </ScrollView>
+            ) : (
+              <ScrollView
+                style={lessonScrollStyle}
+                contentContainerStyle={lessonScrollContentStyle}>
+                <View style={styles.libraryGap}>
+                  <Collapse
+                    bordered={false}
+                    defaultActiveKey={[0]}
+                    expandIcon={({ isActive }) => (
+                      <CaretRightOutlined rotate={isActive ? 90 : 0} />
+                    )}
+                    items={getItems(panelStyle)}
+                  />
+                </View>
+              </ScrollView>
+            )}
           </View>
         )}
       </View>

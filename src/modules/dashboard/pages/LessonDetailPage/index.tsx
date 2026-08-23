@@ -150,8 +150,10 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       key: index.toString(),
       label: (
         <div style={styles.moduleContentHeader}>
-          <p style={styles.learnedSkillText}>{item.title}</p>
-          <p style={styles.learnedSkillText}>
+          <p style={styles.moduleTitleText} title={item.title}>
+            {item.title}
+          </p>
+          <p style={styles.moduleCountText}>
             Tổng số bài học: {item.libraries.length}
           </p>
         </div>
