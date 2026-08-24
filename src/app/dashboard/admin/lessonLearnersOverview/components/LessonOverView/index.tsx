@@ -1,71 +1,19 @@
 'use client';
-import React, { useState } from 'react';
-import { Card, Space, Spin, Statistic, message } from 'antd';
+import React from 'react';
+import { Card, Space, Spin, Statistic } from 'antd';
+import { useRouter } from 'next/navigation';
 import { adminQuery } from '~mdAdmin/redux';
-import {
-  LessonLearner,
-  LessonLearnersSummary,
-} from '~mdAdmin/redux/RTKQuery/type';
+import { LessonLearnersSummary } from '~mdAdmin/redux/RTKQuery/type';
 import './styles.scss';
-import {
-  CreatePracticeClassModal,
-  LessonLearnersModal,
-  LessonOverviewTable,
-} from './_component';
+import { LessonOverviewTable } from './_component';
 
 const LessonLearnersOverview: React.FC = () => {
-  const [selectedLessonOverview, setSelectedLessonOverview] =
-    useState<LessonLearnersSummary | null>(null);
-  const [isLearnersModalVisible, setIsLearnersModalVisible] = useState(false);
-  useState(false);
-
-  const [isCreatePracticeModalVisible, setIsCreatePracticeModalVisible] =
-    useState(false);
+  const router = useRouter();
   const { data: summaryData, isLoading: summaryLoading } =
     adminQuery.useGetLessonLearnersSummaryQuery();
 
-  const [exportLearners] = adminQuery.useExportLearnersMutation();
-
   const handleLessonSelect = (record: LessonLearnersSummary) => {
-    setSelectedLessonOverview(record);
-    setIsLearnersModalVisible(true);
-  };
-
-  const handleLearnersModalClose = () => {
-    setIsLearnersModalVisible(false);
-    setSelectedLessonOverview(null);
-  };
-
-  const handlePracticeCreated = async () => {
-    setIsCreatePracticeModalVisible(true);
-  };
-
-  const downloadFile = (blob: Blob, fileName: string) => {
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', fileName);
-    document.body.appendChild(link);
-    link.click();
-    link.parentNode?.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  };
-  const handleExportExcel = async (listItem: LessonLearner[]) => {
-    if (!listItem.length) {
-      message.warning('Không có dữ liệu để xuất');
-      return;
-    }
-
-    try {
-      const blob = await exportLearners({ learners: listItem }).unwrap();
-      const timestamp = new Date().toISOString().slice(0, 10);
-      const fileName = `${selectedLessonOverview?.title || 'learners'}_${timestamp}.xlsx`;
-      downloadFile(blob, fileName);
-      message.success('Tải file thành công!');
-    } catch (error) {
-      console.error('Lỗi export:', error);
-      message.error('Lỗi khi tải file. Vui lòng thử lại.');
-    }
+    router.push(`/dashboard/admin/lessonLearnersOverview/${record._id}`);
   };
 
   return (
@@ -107,21 +55,6 @@ const LessonLearnersOverview: React.FC = () => {
           />
         </Spin>
       </div>
-
-      <LessonLearnersModal
-        open={isLearnersModalVisible}
-        onClose={handleLearnersModalClose}
-        selectedLessonOverview={selectedLessonOverview}
-        onExport={handleExportExcel}
-        onCreatePracticeClass={handlePracticeCreated}
-      />
-
-      <CreatePracticeClassModal
-        open={isCreatePracticeModalVisible}
-        onClose={() => setIsCreatePracticeModalVisible(false)}
-        lessonId={selectedLessonOverview?._id}
-        onCreated={handlePracticeCreated}
-      />
     </div>
   );
 };

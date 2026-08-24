@@ -6,8 +6,6 @@ const styles = StyleSheet.create({
     width: '100%',
     minHeight: '100vh',
     backgroundColor: '#F9F9F9',
-    overflowX: 'hidden',
-    overflowY: 'auto',
   },
 });
 

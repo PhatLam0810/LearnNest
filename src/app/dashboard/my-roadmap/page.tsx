@@ -78,7 +78,11 @@ const MyRoadmapPage = () => {
       <h1 className="my-roadmap-heading">Lộ trình học tập của tôi</h1>
       <div className="my-roadmap-list">
         {insights.map((insight, idx) => (
-          <InsightCard key={insight._id} insight={insight} isLatest={idx === 0} />
+          <InsightCard
+            key={insight._id}
+            insight={insight}
+            isLatest={idx === 0}
+          />
         ))}
       </div>
     </div>

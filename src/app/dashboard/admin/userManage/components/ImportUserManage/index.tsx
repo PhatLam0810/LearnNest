@@ -93,7 +93,7 @@ const ImportUserManage = () => {
 
   const handlePreview = async () => {
     if (!fileUrl.trim()) {
-      messageApi.error('Nhập URL file Excel');
+      messageApi.warning('Vui lòng tải file Excel lên trước khi nhập dữ liệu');
       return;
     }
 
@@ -294,6 +294,11 @@ const ImportUserManage = () => {
       <div className="import-user-manage__header">
         <div className="import-user-manage__field">
           <Text strong>Tải lên file Excel</Text>
+          <Text type="secondary" className="import-user-manage__hint">
+            File Excel bắt buộc gồm các cột: <strong>Họ và tên</strong>,{' '}
+            <strong>MSSV</strong>, <strong>Email</strong>. Có thể thêm các cột
+            tùy chọn: Lớp, Khoa, Ngành.
+          </Text>
           <Upload
             maxCount={1}
             listType="picture-card"
@@ -308,10 +313,14 @@ const ImportUserManage = () => {
             }}>
             <Button type="text">Tải lên</Button>
           </Upload>
+          <Button
+            type="primary"
+            loading={previewLoading}
+            onClick={handlePreview}
+            className="import-user-manage__preview-btn">
+            Nhập dữ liệu từ file Excel
+          </Button>
         </div>
-        <Button type="primary" loading={previewLoading} onClick={handlePreview}>
-          Xem trước Excel
-        </Button>
       </div>
 
       {hasPreviewData && (

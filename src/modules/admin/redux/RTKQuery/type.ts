@@ -96,12 +96,16 @@ export interface LessonLearner {
   _id: string;
   lessonId: string;
   isCompleted: boolean;
+  isSelected?: boolean;
   firstAccessAt: string;
   fullName: string;
   email: string;
   studentId: string;
   class: string;
   major: string;
+  faculty?: string;
+  progress: number;
+  lastStudiedAt: string | null;
 }
 
 export interface PracticeClassItem {

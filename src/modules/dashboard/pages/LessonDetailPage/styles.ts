@@ -51,13 +51,12 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   mainColumn: {
-    flex: 3,
+    flex: 4,
     minWidth: 0,
   },
   sideColumn: {
-    flex: 1.2,
-    minWidth: 340,
-    maxWidth: 420,
+    flex: 1,
+    minWidth: 260,
   },
   thumbnailCard: {
     flex: 1,

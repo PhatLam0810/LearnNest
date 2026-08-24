@@ -56,7 +56,16 @@ const ModuleDetailPage = () => {
       dispatch(authAction.setIsShowLoading(true));
       const res = await generateQuestion({ url: selectedLibrary?.url });
       const parsedQuestions = JSON.parse(res.data);
-      setDataQuestion(parsedQuestions);
+      // AI-generated questions have no _id — without a stable per-question
+      // key, selecting an answer for one question ends up sharing the same
+      // key (undefined) as every other question, selecting all of them.
+      const questionsWithId = parsedQuestions.map(
+        (question: any, index: number) => ({
+          ...question,
+          _id: question._id || `q-${index}`,
+        }),
+      );
+      setDataQuestion(questionsWithId);
     } catch (error) {
       console.error('Lỗi khi tải dữ liệu câu hỏi:', error);
     } finally {

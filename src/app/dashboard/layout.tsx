@@ -88,20 +88,6 @@ export default function DashboardLayout({
               },
             ]
           : []),
-        {
-          key: '/dashboard/profile',
-          label: 'Cài Đặt',
-          icon: <SettingOutlined />,
-        },
-        ...(isAdmin
-          ? [
-              {
-                key: '/dashboard/admin',
-                label: 'Admin',
-                icon: <ControlOutlined />,
-              },
-            ]
-          : []),
       ],
     },
   ];

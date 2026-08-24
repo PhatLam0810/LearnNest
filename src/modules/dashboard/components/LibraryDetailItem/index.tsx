@@ -19,6 +19,12 @@ import { useAppSelector } from '@redux';
 import { useGetLessonProgressQuery } from '~mdDashboard/redux';
 import ResumeLessonModal from '@components/ResumeLessonModal';
 
+// How far ahead of the furthest-watched point a single forward seek may
+// jump, and how long the cooldown lasts afterward before another forward
+// seek is allowed at all.
+const SEEK_ALLOWANCE_SECONDS = 180;
+const SEEK_COOLDOWN_MS = 180_000;
+
 type LibraryDetailItemProps = {
   data: Library;
   dataQuestion?: any;
@@ -41,6 +47,11 @@ const LibraryDetailItem = forwardRef<
   const playerRef = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const correctingSkipRef = useRef(false);
+  // Timestamp (ms) until which forward-seeking is blocked entirely. Seeking
+  // ahead up to SEEK_ALLOWANCE_SECONDS is a one-shot allowance — using it at
+  // all starts this cooldown, during which even a small forward seek is
+  // blocked (must watch through in real time until it expires).
+  const skipCooldownUntilRef = useRef(0);
   const [lastPlayed, setLastPlayed] = useState(0);
   const [maxWatched, setMaxWatched] = useState(0);
   const [visibleQuestion, setVisibleQuestion] = useState<any>(null);
@@ -299,7 +310,12 @@ const LibraryDetailItem = forwardRef<
           pauseTracking();
         }
 
-        if (currentTime > maxWatched + 5) {
+        const inCooldown = Date.now() < skipCooldownUntilRef.current;
+        const jumpsAhead = currentTime > maxWatched;
+        const exceedsAllowance =
+          currentTime > maxWatched + SEEK_ALLOWANCE_SECONDS;
+
+        if (jumpsAhead && (inCooldown || exceedsAllowance)) {
           if (!correctingSkipRef.current) {
             correctingSkipRef.current = true;
             warning();
@@ -317,6 +333,10 @@ const LibraryDetailItem = forwardRef<
             }, 2000);
           }
         } else {
+          if (jumpsAhead && !inCooldown) {
+            // Used the one-shot forward-seek allowance — start the cooldown.
+            skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
+          }
           setLastPlayed(currentTime);
           setMaxWatched(prevMax => Math.max(prevMax, currentTime));
           updateProgress(currentTime, duration);
@@ -349,12 +369,21 @@ const LibraryDetailItem = forwardRef<
           pauseTracking();
         }
 
-        if (currentTime > maxWatched + 5) {
+        const inCooldown = Date.now() < skipCooldownUntilRef.current;
+        const jumpsAhead = currentTime > maxWatched;
+        const exceedsAllowance =
+          currentTime > maxWatched + SEEK_ALLOWANCE_SECONDS;
+
+        if (jumpsAhead && (inCooldown || exceedsAllowance)) {
           warning();
           videoRef.current.pause();
           videoRef.current.currentTime = lastPlayed;
           pauseTracking();
         } else {
+          if (jumpsAhead && !inCooldown) {
+            // Used the one-shot forward-seek allowance — start the cooldown.
+            skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
+          }
           setLastPlayed(currentTime);
           setMaxWatched(prevMax => Math.max(prevMax, currentTime));
           updateProgress(currentTime, duration);
@@ -815,7 +844,7 @@ const LibraryDetailItem = forwardRef<
                 type="primary"
                 onClick={handleSubmit}
                 style={styles.submitQuizButton}>
-                Xác nhận
+                Nộp bài
               </Button>
             </View>
           </ScrollView>

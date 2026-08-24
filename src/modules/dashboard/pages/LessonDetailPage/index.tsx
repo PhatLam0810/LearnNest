@@ -255,10 +255,12 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
 
   const sideColumnStyle = {
     ...styles.sideColumn,
-    minWidth: isMobile ? '100%' : isTablet ? 280 : 340,
-    maxWidth: isMobile ? '100%' : isTablet ? 360 : 420,
+    minWidth: isMobile ? '100%' : isTablet ? 220 : 240,
     position: (isMobile ? 'relative' : 'sticky') as 'relative' | 'sticky',
-    top: isMobile ? 0 : 8,
+    // Must clear the sticky dashboard topbar (~80px) above this page,
+    // otherwise the button sticks partway under it and visually "jumps"
+    // into view at an inconsistent point while scrolling.
+    top: isMobile ? 0 : 88,
   };
   if (isLoading) {
     return (

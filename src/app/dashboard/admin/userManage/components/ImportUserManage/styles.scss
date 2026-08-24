@@ -18,9 +18,18 @@
 
 .import-user-manage__field {
   display: flex;
-  flex: 1;
   flex-direction: column;
+  align-items: flex-start;
   gap: 8px;
+}
+
+.import-user-manage__hint {
+  font-size: 13px;
+  max-width: 480px;
+}
+
+.import-user-manage__preview-btn {
+  margin-top: 4px;
 }
 
 .import-user-manage__actions {

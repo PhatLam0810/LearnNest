@@ -10,6 +10,7 @@ import LoadingScreen from '~mdAuth/components/Loading';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import FeedbackWidget from '@components/FeedbackWidget';
+import Footer from '@components/Footer';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MessageProvider from '@components/MessageProvider';
 import styles from './layoutStyles';
@@ -36,6 +37,7 @@ export default function RootLayoutClient({
           <PersistGate persistor={persistor}>
             <MessageProvider />
             <View style={styles.appShell}>{children}</View>
+            <Footer />
             <Authentication />
             <FeedbackWidget />
             <LoadingScreen />

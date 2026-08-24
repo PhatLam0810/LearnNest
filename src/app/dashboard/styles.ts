@@ -20,8 +20,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: 12,
-    height: '100%',
-    minHeight: '100%',
+    minHeight: 'calc(100vh - 80px)',
     backgroundColor: '#ffffff',
     borderRight: '1px solid #f0f0f0',
   },
@@ -115,8 +114,6 @@ const styles = StyleSheet.create({
   content: {
     backgroundColor: '#fff',
     minHeight: 'calc(100vh - 80px)',
-    height: 'calc(100vh - 80px)',
-    overflowY: 'auto',
   },
   btnOpenDrawer: {
     color: '#1a1a1a',
@@ -125,12 +122,11 @@ const styles = StyleSheet.create({
   antSider: {
     position: 'sticky',
     top: 64,
-    height: 'calc(100vh - 80px)',
+    alignSelf: 'flex-start',
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: '#ffffff',
     padding: 0,
-    overflow: 'hidden',
   },
 });
 
