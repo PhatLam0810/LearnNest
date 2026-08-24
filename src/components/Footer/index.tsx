@@ -1,7 +1,12 @@
-import React from 'react';
+'use client';
+import React, { useState } from 'react';
+import FeedbackFormModal from '@components/FeedbackWidget/FeedbackFormModal';
+import { CommentOutlined } from '@ant-design/icons';
 import './styles.scss';
 
 const Footer: React.FC = () => {
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+
   return (
     <footer className="app-footer">
       <div className="app-footer__inner">
@@ -48,10 +53,20 @@ const Footer: React.FC = () => {
           <p className="app-footer__line">Mã trường: DVH - Hotline: 18001568</p>
         </div>
 
-        <div className="app-footer__copyright">
-          COPYRIGHT © 2025. VAN HIEN UNIVERSITY. All rights reserved.
+        <div className="app-footer__actions">
+          <button
+            type="button"
+            className="app-footer__feedback-btn"
+            onClick={() => setIsFeedbackOpen(true)}>
+            <CommentOutlined /> Gửi phản hồi
+          </button>
         </div>
       </div>
+
+      <FeedbackFormModal
+        open={isFeedbackOpen}
+        onOpenChange={setIsFeedbackOpen}
+      />
     </footer>
   );
 };
