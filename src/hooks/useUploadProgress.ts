@@ -4,10 +4,17 @@ import { useSocket } from './useSocket';
 
 export type UploadStage = 'transcoding' | 'uploading' | 'done';
 
+export type UploadSpeedInfo = {
+  sizeMB: number;
+  durationSec: number;
+  speedMBps: number;
+};
+
 type UploadProgressPayload = {
   uploadId: string;
   percent: number;
   stage: UploadStage;
+  meta?: UploadSpeedInfo;
 };
 
 // Tracks real transcode/upload progress pushed by the backend over socket.io
@@ -17,12 +24,14 @@ export const useUploadProgress = () => {
   const uploadIdRef = useRef<string>('');
   const [percent, setPercent] = useState<number | null>(null);
   const [stage, setStage] = useState<UploadStage | null>(null);
+  const [speedInfo, setSpeedInfo] = useState<UploadSpeedInfo | null>(null);
 
   useEffect(() => {
     const handleProgress = (payload: UploadProgressPayload) => {
       if (payload.uploadId !== uploadIdRef.current) return;
       setPercent(payload.percent);
       setStage(payload.stage);
+      if (payload.meta) setSpeedInfo(payload.meta);
     };
 
     socket.on('uploadProgress', handleProgress);
@@ -37,10 +46,11 @@ export const useUploadProgress = () => {
     uploadIdRef.current = crypto.randomUUID();
     setPercent(null);
     setStage(null);
+    setSpeedInfo(null);
     return uploadIdRef.current;
   }, []);
 
   const getUploadId = useCallback(() => uploadIdRef.current, []);
 
-  return { percent, stage, startNewUpload, getUploadId };
+  return { percent, stage, speedInfo, startNewUpload, getUploadId };
 };

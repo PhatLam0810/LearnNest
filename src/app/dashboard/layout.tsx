@@ -92,24 +92,6 @@ export default function DashboardLayout({
     },
   ];
 
-  const settingItems: MenuItem[] = [
-    {
-      key: 'Setting',
-      label: 'SETTING',
-      type: 'group',
-      children: [
-        {
-          key: 'logout',
-          icon: <LogoutOutlined />,
-          label: 'Đăng xuất',
-          onClick: () => {
-            dispatch(authAction.logout());
-          },
-        },
-      ],
-    },
-  ];
-
   const sidebarContent = (
     <View style={styles.sider}>
       <ScrollView
@@ -131,15 +113,6 @@ export default function DashboardLayout({
           }}
         />
       </ScrollView>
-      <Menu
-        mode="inline"
-        style={styles.menu}
-        selectedKeys={[pathname]}
-        items={settingItems}
-        onClick={item => {
-          onClickItem(item.key);
-        }}
-      />
     </View>
   );
 

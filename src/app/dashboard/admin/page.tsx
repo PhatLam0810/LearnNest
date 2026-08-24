@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Tabs } from 'antd';
+import { ConfigProvider, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { View } from 'react-native-web';
 import styles from './styles';
@@ -11,6 +11,7 @@ import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
 import LessonLearnersOverview from './lessonLearnersOverview';
 import FeedbackManage from './feedbackManage/page';
+import { ADMIN_PRIMARY } from './adminTheme';
 
 const items: TabsProps['items'] = [
   {
@@ -45,12 +46,23 @@ const AdminPage: React.FC = () => {
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab') || '1'; // Lấy `tab` từ URL, mặc định là '1'
   return (
-    <View style={styles.container}>
-      <View style={styles.headerWrapper}>
-        <h1 style={styles.pageTitle}>Quản Trị Hệ Thống</h1>
-      </View>
-      <Tabs defaultActiveKey={tab} items={items} />
-    </View>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: ADMIN_PRIMARY,
+          colorInfo: ADMIN_PRIMARY,
+          borderRadius: 10,
+        },
+      }}>
+      <div className="admin-page">
+        <View style={styles.container}>
+          <View style={styles.headerWrapper}>
+            <h1 style={styles.pageTitle}>Quản Trị Hệ Thống</h1>
+          </View>
+          <Tabs defaultActiveKey={tab} items={items} />
+        </View>
+      </div>
+    </ConfigProvider>
   );
 };
 

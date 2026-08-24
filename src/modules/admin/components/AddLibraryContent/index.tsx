@@ -48,10 +48,14 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   const [link, setLink] = useState('');
   const [fileUpload, setFileUpload] = useState<any[]>([]);
   const [uploadElapsed, setUploadElapsed] = useState(0);
+  const [clientPercent, setClientPercent] = useState(0);
+  const [clientSpeedMBps, setClientSpeedMBps] = useState<number | null>(null);
   const uploadTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const speedSampleRef = useRef<{ time: number; loaded: number } | null>(null);
   const {
     percent: uploadPercent,
     stage: uploadStage,
+    speedInfo: uploadSpeedInfo,
     startNewUpload,
     getUploadId,
   } = useUploadProgress();
@@ -83,21 +87,91 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
 
   const handleBeforeUpload = () => {
     startNewUpload();
+    setClientPercent(0);
+    setClientSpeedMBps(null);
+    speedSampleRef.current = null;
     return true;
   };
 
+  // Custom request thay cho action= mặc định của antd, để lấy được
+  // progressEvent.loaded/timestamp thực từ XHR — từ đó tính băng thông
+  // REALTIME của chặng máy người dùng -> server (chặng mà backend không
+  // biết vì lúc đó multer còn chưa nhận xong file).
+  const customUploadRequest = async (options: any) => {
+    const { file, onProgress, onSuccess, onError } = options;
+    const formData = new FormData();
+    formData.append('file', file as File);
+    formData.append('uploadId', getUploadId());
+
+    try {
+      const res = await api.post('/upload', formData, {
+        // Không tự set Content-Type: FormData cần trình duyệt tự sinh
+        // boundary, set cứng chuỗi này sẽ làm mất boundary và server
+        // không parse được multipart body.
+        headers: { 'Content-Type': undefined },
+        onUploadProgress: (progressEvent: any) => {
+          const loaded = progressEvent.loaded || 0;
+          const total = progressEvent.total || 0;
+          const percent = total ? Math.round((loaded / total) * 100) : 0;
+          setClientPercent(percent);
+          onProgress?.({ percent });
+
+          const now = Date.now();
+          const prev = speedSampleRef.current;
+          if (prev) {
+            const deltaSec = (now - prev.time) / 1000;
+            if (deltaSec >= 0.3) {
+              const deltaBytes = loaded - prev.loaded;
+              setClientSpeedMBps(
+                Math.max(deltaBytes, 0) / deltaSec / (1024 * 1024),
+              );
+              speedSampleRef.current = { time: now, loaded };
+            }
+          } else {
+            speedSampleRef.current = { time: now, loaded };
+          }
+        },
+      });
+      onSuccess?.(res.data, file);
+    } catch (err) {
+      onError?.(err as any);
+    }
+  };
   const renderUploadStatus = () => {
     if (fileUpload[0]?.status !== 'uploading') return null;
+
+    // Chưa nhận stage nào từ socket (transcoding/uploading lên bucket) tức là
+    // vẫn đang ở chặng máy người dùng -> server — hiện % + tốc độ realtime.
+    if (!uploadStage) {
+      const speedText =
+        clientSpeedMBps !== null ? ` — ${clientSpeedMBps.toFixed(2)} MB/s` : '';
+      return (
+        <div style={{ marginTop: 8, color: '#888', fontSize: 13 }}>
+          Đang tải lên server... {clientPercent}%{speedText} (
+          {formatElapsed(uploadElapsed)}) — video lớn có thể mất vài phút, vui
+          lòng không tải lại trang.
+        </div>
+      );
+    }
+
     const stageText =
       uploadStage === 'transcoding' && uploadPercent !== null
         ? `Đang xử lý video... ${uploadPercent}%`
-        : uploadStage === 'uploading'
-          ? 'Đang lưu lên máy chủ...'
-          : `Đang tải lên... ${formatElapsed(uploadElapsed)}`;
+        : 'Đang lưu lên máy chủ...';
     return (
       <div style={{ marginTop: 8, color: '#888', fontSize: 13 }}>
         {stageText} — video lớn có thể mất vài phút, vui lòng không tải lại
         trang.
+      </div>
+    );
+  };
+
+  const renderUploadSpeed = () => {
+    if (!uploadSpeedInfo) return null;
+    return (
+      <div style={{ marginTop: 8, color: '#16a34a', fontSize: 13 }}>
+        Đã tải lên {uploadSpeedInfo.sizeMB}MB trong{' '}
+        {uploadSpeedInfo.durationSec}s (~{uploadSpeedInfo.speedMBps} MB/s)
       </div>
     );
   };
@@ -187,14 +261,14 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 maxCount={1}
                 fileList={fileUpload}
                 listType="picture-card"
-                action={api.defaults.baseURL + '/upload'}
-                data={() => ({ uploadId: getUploadId() })}
+                customRequest={customUploadRequest}
                 beforeUpload={handleBeforeUpload}
                 onRemove={() => setFileUpload([])}
                 onChange={info => handleUploadChange(info)}>
                 <Button type="text">Tải lên</Button>
               </Upload>
               {renderUploadStatus()}
+              {renderUploadSpeed()}
             </>
           </Form.Item>
         );
@@ -234,8 +308,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 maxCount={1}
                 fileList={fileUpload}
                 listType="picture-card"
-                action={api.defaults.baseURL + '/upload'}
-                data={() => ({ uploadId: getUploadId() })}
+                customRequest={customUploadRequest}
                 beforeUpload={handleBeforeUpload}
                 onRemove={() => setFileUpload([])}
                 onChange={info =>
@@ -251,6 +324,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 <Button type="text">Tải lên</Button>
               </Upload>
               {renderUploadStatus()}
+              {renderUploadSpeed()}
             </>
           </Form.Item>
         );

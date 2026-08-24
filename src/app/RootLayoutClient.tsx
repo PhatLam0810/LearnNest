@@ -2,6 +2,7 @@
 import { persistor, store } from '@redux';
 import type { ReactNode } from 'react';
 import { View } from 'react-native-web';
+import { usePathname } from 'next/navigation';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Authentication } from '~mdAuth/components';
@@ -29,6 +30,8 @@ export default function RootLayoutClient({
   children: ReactNode;
 }) {
   dayjs.extend(relativeTime);
+  const pathname = usePathname();
+  const showFooter = pathname === '/dashboard/home';
 
   return (
     <>
@@ -37,9 +40,8 @@ export default function RootLayoutClient({
           <PersistGate persistor={persistor}>
             <MessageProvider />
             <View style={styles.appShell}>{children}</View>
-            <Footer />
+            {showFooter && <Footer />}
             <Authentication />
-            <FeedbackWidget />
             <LoadingScreen />
           </PersistGate>
         </QueryClientProvider>

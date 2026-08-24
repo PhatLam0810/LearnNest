@@ -42,3 +42,32 @@
   margin-top: 16px;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3); /* Thêm bóng cho sider */
 }
+
+.admin-page {
+  .ant-btn-primary {
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: #fff !important;
+    font-family: var(--font-plus-jakarta), $font-lexend;
+    font-weight: 600;
+  }
+  .ant-btn-primary:not(:disabled):hover,
+  .ant-btn-primary:not(:disabled):focus {
+    background: #15316b !important;
+    border-color: #15316b !important;
+    color: #fff !important;
+  }
+  .ant-btn-primary:disabled {
+    background: #a9b8d3 !important;
+    border-color: #a9b8d3 !important;
+    color: #f0f3f8 !important;
+  }
+  .ant-table-thead > tr > th {
+    background: #eef3fb !important;
+    color: $color-vhu-primary !important;
+    font-weight: 600;
+  }
+  .ant-table {
+    border-radius: 12px;
+  }
+}

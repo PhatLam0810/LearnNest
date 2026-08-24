@@ -1,4 +1,4 @@
-import { DM_Sans, Inter, Lexend } from 'next/font/google';
+import { DM_Sans, Inter, Lexend, Plus_Jakarta_Sans } from 'next/font/google';
 
 import { StyleSheet } from '../styleSheet';
 
@@ -11,6 +11,12 @@ export const lexend = Lexend({
 export const inter = Inter({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
   subsets: ['latin'],
+});
+
+export const plusJakartaSans = Plus_Jakarta_Sans({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-plus-jakarta',
 });
 
 export const typography = StyleSheet.create({

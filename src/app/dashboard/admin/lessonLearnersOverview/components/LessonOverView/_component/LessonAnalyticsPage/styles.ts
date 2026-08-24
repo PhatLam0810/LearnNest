@@ -3,6 +3,8 @@ import { StyleSheet } from '@styles';
 const styles = StyleSheet.create({
   page: {
     padding: 20,
+    backgroundColor: '#f7f9fc',
+    borderRadius: 12,
   },
   header: {
     display: 'flex',
@@ -25,7 +27,8 @@ const styles = StyleSheet.create({
   statCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    border: '1px solid #e2e8f0',
+    border: '1px solid #eef1f6',
+    boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
     padding: 20,
     display: 'flex',
     flexDirection: 'column',
@@ -61,12 +64,13 @@ const styles = StyleSheet.create({
   },
   learnerCard: {
     backgroundColor: '#fff',
-    borderRadius: 10,
-    border: '1px solid #e2e8f0',
+    borderRadius: 12,
+    border: '1px solid #eef1f6',
     padding: '14px 18px',
     display: 'flex',
     alignItems: 'center',
     gap: 20,
+    transition: 'box-shadow 0.2s',
   },
   learnerInfo: {
     flex: '1 1 220px',

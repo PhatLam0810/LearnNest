@@ -93,8 +93,8 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
           : initialValues.thumbnail,
       });
       form.setFieldsValue({
-        totalLibraries: initialValues.totalLibraries,
-        totalDuration: initialValues.totalDuration,
+        totalLibraries: initialValues?.totalLibraries,
+        totalDuration: initialValues?.totalDuration,
       });
       setListSelected(initialValues.modules);
     }
@@ -166,7 +166,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                     style={{ marginBottom: 0 }}>
                     <span className="ant-form-text">
                       {convertDurationToTime(
-                        totalDuration || initialValues.totalDuration,
+                        totalDuration || initialValues?.totalDuration,
                       )}
                     </span>
                   </Form.Item>

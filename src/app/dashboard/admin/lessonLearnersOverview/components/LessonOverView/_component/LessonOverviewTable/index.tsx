@@ -1,5 +1,5 @@
 import React from 'react';
-import { Badge, Table } from 'antd';
+import { Table, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { LessonLearnersSummary } from '~mdAdmin/redux/RTKQuery/type';
 import styles from './styles';
@@ -10,12 +10,21 @@ type Props = {
   onSelectLesson: (record: LessonLearnersSummary) => void;
 };
 
+const completionStatus = (rate: number) => {
+  if (rate >= 80) return { color: 'success', text: 'Hoàn thành tốt' };
+  if (rate >= 40) return { color: 'processing', text: 'Đang triển khai' };
+  return { color: 'warning', text: 'Cần theo dõi' };
+};
+
 const lessonColumns: ColumnsType<LessonLearnersSummary> = [
   {
     title: 'Tên Khóa Học',
     dataIndex: 'title',
     key: 'title',
-    width: '50%',
+    width: '40%',
+    render: (value: string) => (
+      <span style={styles.courseTitleCell}>{value}</span>
+    ),
   },
   {
     title: 'Tổng Số Người Học',
@@ -24,16 +33,27 @@ const lessonColumns: ColumnsType<LessonLearnersSummary> = [
     width: '25%',
     align: 'center',
     render: (value: number) => (
-      <Badge count={value || 0} style={styles.badgeSuccessStyle} />
+      <span style={styles.learnerCountCell}>{value || 0} học viên</span>
     ),
   },
   {
     title: 'Tỉ Lệ Hoàn Thành',
     dataIndex: 'completionRate',
     key: 'completionRate',
-    width: '25%',
+    width: '15%',
     align: 'center',
     render: (value: number) => `${value.toFixed(1)}%`,
+  },
+  {
+    title: 'Trạng Thái',
+    dataIndex: 'completionRate',
+    key: 'status',
+    width: '20%',
+    align: 'center',
+    render: (value: number) => {
+      const status = completionStatus(value || 0);
+      return <Tag color={status.color}>{status.text}</Tag>;
+    },
   },
 ];
 
@@ -51,7 +71,7 @@ const LessonOverviewTable: React.FC<Props> = ({
         </div>
       </div>
       <Table
-        className="lesson-learners-overview__table"
+        className="course-overview__table"
         columns={lessonColumns}
         dataSource={dataSource}
         rowKey="_id"
@@ -60,7 +80,7 @@ const LessonOverviewTable: React.FC<Props> = ({
         pagination={false}
         onRow={record => ({
           onClick: () => onSelectLesson(record),
-          className: 'lesson-learners-overview__table-row-clickable',
+          className: 'course-overview__table-row-clickable',
         })}
         locale={{
           emptyText: 'Không có dữ liệu khóa học',

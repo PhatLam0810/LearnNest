@@ -180,7 +180,12 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
 
       <div style={styles.statsRow}>
         <div style={styles.statCard}>
-          <Progress type="circle" percent={completionRate} size={90} />
+          <Progress
+            type="circle"
+            percent={completionRate}
+            size={90}
+            strokeColor="#1d418a"
+          />
           <div style={styles.statLabel}>Tỉ Lệ Hoàn Thành</div>
         </div>
         <div style={styles.statCard}>
@@ -189,7 +194,7 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
             percent={100}
             size={90}
             format={() => totalRecords}
-            strokeColor="#2563eb"
+            strokeColor="#88c1e9"
           />
           <div style={styles.statLabel}>Tổng Người Học</div>
         </div>
@@ -250,7 +255,7 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
                   percent={learner.progress}
                   size="small"
                   status="active"
-                  strokeColor="#2563eb"
+                  strokeColor={{ '0%': '#1d418a', '100%': '#88c1e9' }}
                 />
               </div>
               <div style={styles.learnerLastStudied}>

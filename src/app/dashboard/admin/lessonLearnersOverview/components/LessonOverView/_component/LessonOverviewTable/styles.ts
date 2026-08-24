@@ -13,9 +13,13 @@ const styles = StyleSheet.create({
   searchInputStyle: {
     minWidth: 240,
   },
-  badgeSuccessStyle: {
-    backgroundColor: '#1677ff',
-    fontSize: '14px',
+  courseTitleCell: {
+    fontWeight: 600,
+    color: '#111827',
+  },
+  learnerCountCell: {
+    color: '#1d418a',
+    fontWeight: 500,
   },
   modalContentWrap: {
     width: '100%',

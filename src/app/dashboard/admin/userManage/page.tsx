@@ -127,9 +127,10 @@ const UserManage = () => {
         style={{
           width: 280,
           padding: 24,
-          borderRadius: 16,
+          borderRadius: 12,
           marginBottom: 16,
-          boxShadow: '0 12px 24px rgba(0, 0, 0, 0.08)',
+          border: '1px solid #eef1f6',
+          boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
         }}>
         <Text
           style={{
@@ -140,7 +141,7 @@ const UserManage = () => {
           }}>
           Tổng số học viên
         </Text>
-        <Text style={{ fontSize: 36, fontWeight: 700, color: '#111827' }}>
+        <Text style={{ fontSize: 36, fontWeight: 700, color: '#1d418a' }}>
           {currentData?.totalRecords}
         </Text>
       </Card>
