@@ -28,6 +28,14 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<Category[]>) => res.data,
     }),
 
+    getLibraryById: builder.query<any, string>({
+      query: (id: string) => ({
+        url: `library/${id}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
     addLibrary: builder.mutation<any, any>({
       query: (body: any) => ({
         url: 'library',

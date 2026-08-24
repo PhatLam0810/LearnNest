@@ -129,7 +129,7 @@ const UserManage = () => {
           padding: 24,
           borderRadius: 12,
           marginBottom: 16,
-          border: '1px solid #eef1f6',
+          border: '1px solid #e2e8f0',
           boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
         }}>
         <Text

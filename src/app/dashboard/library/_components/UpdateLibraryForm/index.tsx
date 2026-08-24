@@ -14,7 +14,7 @@ import {
   Modal,
 } from 'antd';
 import api from '@services/api';
-import { adminAction } from '@/modules/admin/redux';
+import { adminAction, adminQuery } from '@/modules/admin/redux';
 import { useAppDispatch } from '@redux';
 import { PlusOutlined } from '@ant-design/icons';
 import { UpdateLibraryFormData } from './types';
@@ -39,6 +39,15 @@ const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({
   refresh,
 }) => {
   const dispatch = useAppDispatch();
+
+  // getAllLibrary (nguồn của `data`) cố tình bỏ questionList để bảng danh
+  // sách nhẹ hơn — fetch lại đầy đủ document khi mở form Cập nhật để không
+  // mất câu hỏi đã gắn sẵn cho bài học này.
+  const { data: fullLibrary } = adminQuery.useGetLibraryByIdQuery(
+    data?._id ?? '',
+    { skip: !isVisible || !data?._id },
+  );
+  const formInitialValues = fullLibrary ? { ...data, ...fullLibrary } : data;
 
   const onFinish = (values: any) => {
     dispatch(
@@ -65,7 +74,10 @@ const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({
       onCancel={onCloseModalAdd}
       footer={null}
       title="Thêm bài học">
-      <AddLibraryContent initialValues={data} onFinish={onFinish} />
+      <AddLibraryContent
+        initialValues={formInitialValues}
+        onFinish={onFinish}
+      />
     </Modal>
   );
 };

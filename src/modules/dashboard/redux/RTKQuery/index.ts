@@ -99,6 +99,17 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    checkAnswer: builder.mutation<
+      { correct: boolean },
+      { libraryId: string; questionId: string; answer: string }
+    >({
+      query: params => ({
+        url: '/library/check-answer',
+        method: 'POST',
+        body: params,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
     submitResultTest: builder.mutation({
       query: params => ({
         url: '/lesson/resultTest',

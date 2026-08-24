@@ -16,7 +16,7 @@ import { Button, Modal, Radio, Spin } from 'antd';
 import api from '@/services/api';
 import { messageApi } from '@hooks';
 import { useAppSelector } from '@redux';
-import { useGetLessonProgressQuery } from '~mdDashboard/redux';
+import { dashboardQuery, useGetLessonProgressQuery } from '~mdDashboard/redux';
 import ResumeLessonModal from '@components/ResumeLessonModal';
 
 // How far ahead of the furthest-watched point a single forward seek may
@@ -73,6 +73,8 @@ const LibraryDetailItem = forwardRef<
     (state: any) => state.authReducer?.tokenInfo?.userProfile,
   );
   const userId = userProfile?._id;
+  const isAdmin = userProfile?.role?.level <= 2;
+  const [checkAnswer] = dashboardQuery.useCheckAnswerMutation();
 
   const {
     currentData: progressRes,
@@ -300,9 +302,13 @@ const LibraryDetailItem = forwardRef<
         const currentTime = Math.floor(playerRef.current.getCurrentTime());
         const duration = playerRef.current.getDuration();
         const percentWatched = (maxWatched / duration) * 100;
+        // So sánh "đã tới hoặc qua mốc" thay vì đúng bằng tuyệt đối — interval
+        // chạy mỗi 1s có thể trôi/nhảy qua đúng giây appearTime, khiến so
+        // sánh === bỏ lỡ mốc vĩnh viễn. shownQuestionIds đảm bảo không hiện
+        // lại câu đã trả lời.
         const matchedQuestion = data.questionList?.find(
           (q: any) =>
-            q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
+            q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
         );
         if (matchedQuestion) {
           setVisibleQuestion(matchedQuestion);
@@ -315,7 +321,7 @@ const LibraryDetailItem = forwardRef<
         const exceedsAllowance =
           currentTime > maxWatched + SEEK_ALLOWANCE_SECONDS;
 
-        if (jumpsAhead && (inCooldown || exceedsAllowance)) {
+        if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
           if (!correctingSkipRef.current) {
             correctingSkipRef.current = true;
             warning();
@@ -333,7 +339,7 @@ const LibraryDetailItem = forwardRef<
             }, 2000);
           }
         } else {
-          if (jumpsAhead && !inCooldown) {
+          if (!isAdmin && jumpsAhead && !inCooldown) {
             // Used the one-shot forward-seek allowance — start the cooldown.
             skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
           }
@@ -349,7 +355,7 @@ const LibraryDetailItem = forwardRef<
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [lastPlayed, data, shownQuestionIds, maxWatched, onWatchFinish]);
+  }, [lastPlayed, data, shownQuestionIds, maxWatched, onWatchFinish, isAdmin]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -360,7 +366,7 @@ const LibraryDetailItem = forwardRef<
 
         const matchedQuestion = data.questionList?.find(
           (q: any) =>
-            q.appearTime === currentTime && !shownQuestionIds.includes(q._id),
+            q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
         );
 
         if (matchedQuestion) {
@@ -374,13 +380,13 @@ const LibraryDetailItem = forwardRef<
         const exceedsAllowance =
           currentTime > maxWatched + SEEK_ALLOWANCE_SECONDS;
 
-        if (jumpsAhead && (inCooldown || exceedsAllowance)) {
+        if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
           warning();
           videoRef.current.pause();
           videoRef.current.currentTime = lastPlayed;
           pauseTracking();
         } else {
-          if (jumpsAhead && !inCooldown) {
+          if (!isAdmin && jumpsAhead && !inCooldown) {
             // Used the one-shot forward-seek allowance — start the cooldown.
             skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
           }
@@ -411,6 +417,7 @@ const LibraryDetailItem = forwardRef<
     maxWatched,
     onWatchFinish,
     isSwitchingContext,
+    isAdmin,
   ]);
 
   useImperativeHandle(ref, () => ({
@@ -433,9 +440,23 @@ const LibraryDetailItem = forwardRef<
     },
   }));
 
-  const handleClose = () => {
+  const handleClose = async () => {
     if (!visibleQuestion || selectedAnswer === null) return;
-    const isCorrect = selectedAnswer === visibleQuestion.correctAnswer;
+    // Chấm điểm ở server — correctAnswer không còn được gửi về client nữa
+    // (xem lesson.service.ts#getLessonData), nên phải hỏi server câu này
+    // đúng hay sai thay vì so sánh tay như trước.
+    let isCorrect = false;
+    try {
+      const res = await checkAnswer({
+        libraryId: data._id,
+        questionId: visibleQuestion._id,
+        answer: selectedAnswer,
+      }).unwrap();
+      isCorrect = res.correct;
+    } catch (err) {
+      messageApi.error('Không thể kiểm tra đáp án, vui lòng thử lại.');
+      return;
+    }
     const player = playerRef.current;
     const video = videoRef.current;
     if (isCorrect) {
@@ -456,16 +477,21 @@ const LibraryDetailItem = forwardRef<
         resumeTracking(video.currentTime, video.duration);
       }
     } else {
-      const appearTime = visibleQuestion.appearTime;
+      // Tua về TRƯỚC appearTime (không phải maxWatched — điểm đó vẫn sau
+      // appearTime, nên với so sánh appearTime <= currentTime, tick kế tiếp
+      // sẽ khớp lại ngay lập tức và mở popup liên tục mà không cho xem lại
+      // đoạn nào cả, biến thành đoán mò tới khi đúng).
+      const rewindTo = Math.max(0, visibleQuestion.appearTime - 5);
 
       player?.pauseVideo?.();
-      player?.seekTo?.(Math.max(0, maxWatched - 5), true);
+      player?.seekTo?.(rewindTo, true);
 
       if (video) {
         video.pause();
-        video.currentTime = Math.max(0, maxWatched - 5);
+        video.currentTime = rewindTo;
       }
 
+      setLastPlayed(rewindTo);
       setShownQuestionIds(prev =>
         prev.filter(id => id !== visibleQuestion._id),
       );

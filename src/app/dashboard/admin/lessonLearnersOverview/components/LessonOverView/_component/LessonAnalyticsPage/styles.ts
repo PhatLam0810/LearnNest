@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
   statCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    border: '1px solid #eef1f6',
+    border: '1px solid #e2e8f0',
     boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
     padding: 20,
     display: 'flex',
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   learnerCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    border: '1px solid #eef1f6',
+    border: '1px solid #e2e8f0',
     padding: '14px 18px',
     display: 'flex',
     alignItems: 'center',

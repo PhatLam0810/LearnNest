@@ -19,7 +19,6 @@ import LibraryDetailItem, {
   LibraryDetailItemHandle,
 } from '~mdDashboard/components/LibraryDetailItem';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { authAction } from '~mdAuth/redux';
 
 const ModuleDetailPage = () => {
   const router = useRouter();
@@ -37,7 +36,6 @@ const ModuleDetailPage = () => {
   const libraryRef = useRef<LibraryDetailItemHandle>(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
-  const [generateQuestion] = dashboardQuery.useGenerateQuestionMutation();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [, contextHolder] = Modal.useModal();
@@ -51,33 +49,24 @@ const ModuleDetailPage = () => {
     isPass: false,
   });
 
-  const fetchQuestionData = async () => {
-    try {
-      dispatch(authAction.setIsShowLoading(true));
-      const res = await generateQuestion({ url: selectedLibrary?.url });
-      const parsedQuestions = JSON.parse(res.data);
-      // AI-generated questions have no _id — without a stable per-question
-      // key, selecting an answer for one question ends up sharing the same
-      // key (undefined) as every other question, selecting all of them.
-      const questionsWithId = parsedQuestions.map(
+  // Câu hỏi lấy trực tiếp từ selectedLibrary.questionList (đã có sẵn trong
+  // dữ liệu bài học tải về) — không còn fetch riêng qua generate-questions
+  // (endpoint đó trả nguyên JSON công khai trên GCS, có cả correctAnswer,
+  // lộ đáp án qua Network tab). correctAnswer đã bị lược bỏ ở server trước
+  // khi tới đây; chấm điểm thật diễn ra ở server khi submit.
+  useEffect(() => {
+    if (selectedLibrary?.type === 'Text') {
+      // Vài câu hỏi cũ có thể thiếu _id — không có key ổn định thì chọn đáp
+      // án cho 1 câu sẽ vô tình áp dụng cho mọi câu khác.
+      const questionsWithId = (selectedLibrary.questionList || []).map(
         (question: any, index: number) => ({
           ...question,
           _id: question._id || `q-${index}`,
         }),
       );
       setDataQuestion(questionsWithId);
-    } catch (error) {
-      console.error('Lỗi khi tải dữ liệu câu hỏi:', error);
-    } finally {
-      dispatch(authAction.setIsShowLoading(false));
     }
-  };
-
-  useEffect(() => {
-    if (selectedLibrary?.url && selectedLibrary?.type === 'Text') {
-      fetchQuestionData();
-    }
-  }, [selectedLibrary?.url]);
+  }, [selectedLibrary?._id, selectedLibrary?.questionList]);
 
   useEffect(() => {
     if (
@@ -243,35 +232,24 @@ const ModuleDetailPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (selectedAnswers: Record<string, string>) => {
+  const handleSubmit = async (selectedAnswers: Record<string, string>) => {
     const totalQuestions = dataQuestion.length;
     if (!totalQuestions || !selectedLibrary) return;
 
-    let correctCount = 0;
-
-    dataQuestion.forEach(question => {
-      const userAnswer = selectedAnswers[question._id];
-      const correctAnswer = question.correctAnswer;
-
-      if (userAnswer === correctAnswer) {
-        correctCount += 1;
-      }
-    });
-
-    const score = Number(((correctCount / totalQuestions) * 10).toFixed(2));
-    const isPass = correctCount >= (2 / 3) * totalQuestions;
-
-    submitResultTest({
-      userId: userProfile?._id,
-      libraryId: selectedLibrary._id,
-      score,
-      name: selectedLibrary.title,
-      userName: userProfile?.fullName,
-      isPass,
-      totalQuestions,
-      correctCount,
-    });
-    showModal(correctCount, totalQuestions, score, isPass);
+    // Chấm điểm ở server (correctAnswer không còn có mặt ở client để so
+    // sánh nữa) — gửi lựa chọn thô, nhận lại điểm số đã được server tính.
+    try {
+      const res = await submitResultTest({
+        userId: userProfile?._id,
+        libraryId: selectedLibrary._id,
+        name: selectedLibrary.title,
+        userName: userProfile?.fullName,
+        selectedAnswers,
+      }).unwrap();
+      showModal(res.correctCount, res.totalQuestions, res.score, res.isPass);
+    } catch (error) {
+      console.error('Lỗi khi nộp bài:', error);
+    }
   };
   const handlePauseVideo = () => {
     libraryRef.current?.pauseAll();
