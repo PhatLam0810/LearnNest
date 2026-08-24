@@ -18,6 +18,7 @@ import { messageApi } from '@hooks';
 import { useAppSelector } from '@redux';
 import { dashboardQuery, useGetLessonProgressQuery } from '~mdDashboard/redux';
 import ResumeLessonModal from '@components/ResumeLessonModal';
+import { useResponsive } from '@/styles/responsive';
 
 // How far ahead of the furthest-watched point a single forward seek may
 // jump, and how long the cooldown lasts afterward before another forward
@@ -75,6 +76,7 @@ const LibraryDetailItem = forwardRef<
   const userId = userProfile?._id;
   const isAdmin = userProfile?.role?.level <= 2;
   const [checkAnswer] = dashboardQuery.useCheckAnswerMutation();
+  const { isMobile } = useResponsive();
 
   const {
     currentData: progressRes,
@@ -784,7 +786,11 @@ const LibraryDetailItem = forwardRef<
         );
       case 'Text':
         return (
-          <ScrollView style={styles.quizContainer}>
+          <ScrollView
+            style={{
+              ...styles.quizContainer,
+              ...(isMobile ? styles.quizContainerMobile : {}),
+            }}>
             <View style={styles.quizContent}>
               {shuffledQuestions.map((question: any, index: number) => {
                 const isInvalid = invalidQuestions.includes(question._id);
@@ -793,13 +799,25 @@ const LibraryDetailItem = forwardRef<
                     key={question._id}
                     style={{
                       ...styles.questionCard,
+                      ...(isMobile ? styles.questionCardMobile : {}),
                       ...(isInvalid ? styles.questionCardInvalid : {}),
                     }}>
-                    <div style={styles.questionTop}>
-                      <div style={styles.questionNumber}>{index + 1}</div>
+                    <div
+                      style={{
+                        ...styles.questionTop,
+                        ...(isMobile ? styles.questionTopMobile : {}),
+                      }}>
+                      <div
+                        style={{
+                          ...styles.questionNumber,
+                          ...(isMobile ? styles.questionNumberMobile : {}),
+                        }}>
+                        {index + 1}
+                      </div>
                       <div
                         style={{
                           ...styles.questionText,
+                          ...(isMobile ? styles.questionTextMobile : {}),
                           color: isInvalid ? '#ef4444' : '#111827',
                         }}>
                         {question.question}
@@ -833,6 +851,7 @@ const LibraryDetailItem = forwardRef<
                             key={idx}
                             style={{
                               ...styles.answerOption,
+                              ...(isMobile ? styles.answerOptionMobile : {}),
                               ...(isSelected
                                 ? styles.answerOptionSelected
                                 : {}),
@@ -842,17 +861,34 @@ const LibraryDetailItem = forwardRef<
                               className="customQuizRadioItem"
                               value={optionLetter}
                               style={styles.radioButton}>
-                              <div style={styles.answerContent}>
+                              <div
+                                style={{
+                                  ...styles.answerContent,
+                                  ...(isMobile
+                                    ? styles.answerContentMobile
+                                    : {}),
+                                }}>
                                 <div
                                   style={{
                                     ...styles.answerLetterBox,
+                                    ...(isMobile
+                                      ? styles.answerLetterBoxMobile
+                                      : {}),
                                     ...(isSelected
                                       ? styles.answerLetterBoxSelected
                                       : {}),
                                   }}>
                                   {optionLetter}
                                 </div>
-                                <div style={styles.answerLabel}>{ans}</div>
+                                <div
+                                  style={{
+                                    ...styles.answerLabel,
+                                    ...(isMobile
+                                      ? styles.answerLabelMobile
+                                      : {}),
+                                  }}>
+                                  {ans}
+                                </div>
                               </div>
                             </Radio>
                           </div>
@@ -865,11 +901,18 @@ const LibraryDetailItem = forwardRef<
             </View>
 
             {/* FOOTER */}
-            <View style={styles.quizFooter}>
+            <View
+              style={{
+                ...styles.quizFooter,
+                ...(isMobile ? styles.quizFooterMobile : {}),
+              }}>
               <Button
                 type="primary"
                 onClick={handleSubmit}
-                style={styles.submitQuizButton}>
+                style={{
+                  ...styles.submitQuizButton,
+                  ...(isMobile ? styles.submitQuizButtonMobile : {}),
+                }}>
                 Nộp bài
               </Button>
             </View>

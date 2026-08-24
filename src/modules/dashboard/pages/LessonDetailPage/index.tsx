@@ -426,11 +426,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               </View>
               {!isMobile && (
                 <>
-                  <View
-                    style={{
-                      ...styles.lessonContent,
-                      maxWidth: isMobile ? '100%' : '90%',
-                    }}>
+                  <View style={styles.lessonContent}>
                     <Text
                       style={{
                         ...styles.lessonContentTitle,

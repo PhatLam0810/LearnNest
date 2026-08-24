@@ -12,6 +12,7 @@ import {
   Form,
   Input,
   Card,
+  Progress,
 } from 'antd';
 import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
@@ -19,6 +20,7 @@ import { adminQuery } from '~mdAdmin/redux';
 import dayjs from 'dayjs';
 import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
 import { authQuery } from '~mdAuth/redux/RTKQuery';
+import TrafficChart from './components/TrafficChart';
 const UserManage = () => {
   const { listItem, currentData, refresh, search, fetchData } =
     useAppPagination<UserItem>({
@@ -126,25 +128,38 @@ const UserManage = () => {
       <Card
         style={{
           width: 280,
-          padding: 24,
+          padding: 20,
           borderRadius: 12,
           marginBottom: 16,
-          border: '1px solid #e2e8f0',
+          border: '1px solid #eef1f6',
           boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
-        }}>
-        <Text
+        }}
+        styles={{ body: { padding: 0 } }}>
+        <View
           style={{
-            display: 'block',
-            fontSize: 14,
-            color: '#6b7280',
-            marginBottom: 8,
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 16,
           }}>
-          Tổng số học viên
-        </Text>
-        <Text style={{ fontSize: 36, fontWeight: 700, color: '#1d418a' }}>
-          {currentData?.totalRecords}
-        </Text>
+          <Progress
+            type="circle"
+            percent={100}
+            size={72}
+            format={() => currentData?.totalRecords ?? 0}
+            strokeColor="#1d418a"
+            trailColor="#eef3fb"
+          />
+          <Text
+            style={{
+              display: 'block',
+              fontSize: 14,
+              color: '#6b7280',
+            }}>
+            Tổng số học viên
+          </Text>
+        </View>
       </Card>
+      <TrafficChart />
       <View
         style={{
           display: 'flex',

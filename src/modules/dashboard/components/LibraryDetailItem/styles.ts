@@ -170,6 +170,10 @@ const styles = StyleSheet.create({
     scrollbarWidth: 'none',
   },
 
+  quizContainerMobile: {
+    padding: 12,
+  },
+
   quizHeader: {
     marginBottom: 28,
     borderBottom: '1px solid #f3f4f6',
@@ -201,6 +205,11 @@ const styles = StyleSheet.create({
     transition: 'all 0.25s ease',
   },
 
+  questionCardMobile: {
+    borderRadius: 14,
+    padding: 14,
+  },
+
   questionCardInvalid: {
     border: '1px solid #fecaca',
   },
@@ -211,6 +220,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: 14,
     marginBottom: 18,
+  },
+
+  questionTopMobile: {
+    gap: 10,
+    marginBottom: 12,
   },
 
   questionNumber: {
@@ -226,11 +240,23 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 
+  questionNumberMobile: {
+    minWidth: 28,
+    height: 28,
+    borderRadius: 9,
+    fontSize: 13,
+  },
+
   questionText: {
     fontSize: 18,
     fontWeight: '600',
     lineHeight: '28px',
     flex: 1,
+  },
+
+  questionTextMobile: {
+    fontSize: 14,
+    lineHeight: '20px',
   },
 
   answerGroup: {
@@ -246,6 +272,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     transition: 'all 0.25s ease',
     cursor: 'pointer',
+  },
+
+  answerOptionMobile: {
+    borderRadius: 12,
+    padding: '2px 10px',
   },
 
   answerOptionSelected: {
@@ -265,6 +296,11 @@ const styles = StyleSheet.create({
     padding: '10px 0',
   },
 
+  answerContentMobile: {
+    gap: 10,
+    padding: '8px 0',
+  },
+
   answerLetterBox: {
     width: 32,
     height: 32,
@@ -278,6 +314,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
+  answerLetterBoxMobile: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    fontSize: 12,
+  },
+
   answerLetterBoxSelected: {
     backgroundColor: '#1d418a',
     color: '#ffffff',
@@ -289,11 +332,21 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
+  answerLabelMobile: {
+    fontSize: 13,
+    lineHeight: '18px',
+  },
+
   quizFooter: {
     marginTop: 36,
     display: 'flex',
     alignItems: 'flex-end',
     paddingBottom: 24,
+  },
+
+  quizFooterMobile: {
+    marginTop: 20,
+    paddingBottom: 12,
   },
 
   submitQuizButton: {
@@ -306,6 +359,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 14,
     boxShadow: '0 10px 25px rgba(22,119,255,0.25)',
+  },
+
+  submitQuizButtonMobile: {
+    width: '100%',
+    height: 42,
+    paddingLeft: 16,
+    paddingRight: 16,
   },
 
   // YouTube Player Container

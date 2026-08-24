@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
   },
   lessonContent: {
     gap: 12,
+    width: '100%',
   },
   lessonContentTitle: {
     ...typography.titleM,

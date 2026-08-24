@@ -28,6 +28,18 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<Category[]>) => res.data,
     }),
 
+    getAnalyticsSummary: builder.query<
+      { label: string; count: number }[],
+      { groupBy: 'day' | 'week' | 'month' | 'year'; limit?: number }
+    >({
+      query: params => ({
+        url: '/analytics/summary',
+        method: 'GET',
+        params,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
     getLibraryById: builder.query<any, string>({
       query: (id: string) => ({
         url: `library/${id}`,

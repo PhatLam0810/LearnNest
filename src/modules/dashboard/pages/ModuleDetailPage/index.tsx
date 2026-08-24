@@ -323,7 +323,7 @@ const ModuleDetailPage = () => {
   ] as any;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isMobile && styles.containerMobile]}>
       {contextHolder}
       <View style={layoutRowStyle}>
         <View style={mainColumnStyle}>
@@ -331,7 +331,11 @@ const ModuleDetailPage = () => {
             <View style={videoStickyStyle}>
               <View style={styles.layoutTitleContainer}>
                 <View style={styles.fullWidthFlex}>
-                  <Text style={styles.layoutTitle}>
+                  <Text
+                    style={[
+                      styles.layoutTitle,
+                      isMobile && styles.layoutTitleMobile,
+                    ]}>
                     {selectedLibrary?.title}
                   </Text>
                 </View>
@@ -412,7 +416,7 @@ const ModuleDetailPage = () => {
         )}
       </View>
       <Modal
-        title="Kết quả bài thi"
+        title="Kết quả bài tập"
         open={isModalOpen}
         onCancel={handleClose}
         centered
@@ -443,8 +447,8 @@ const ModuleDetailPage = () => {
               resultData.isPass ? styles.statusBoxSuccess : styles.statusBoxFail
             }>
             {resultData.isPass
-              ? 'Chúc mừng! Bạn đã vượt qua bài thi này thành công.'
-              : 'Bạn chưa vượt qua bài thi này. Vui lòng thử lại.'}
+              ? 'Chúc mừng! Bạn đã vượt qua bài tập này thành công.'
+              : 'Bạn chưa vượt qua bài tập này. Vui lòng thử lại.'}
           </div>
 
           {/* Custom Buttons */}
@@ -454,7 +458,7 @@ const ModuleDetailPage = () => {
             size="large"
             style={{ backgroundColor: '#002766', marginBottom: '8px' }}
             onClick={handleClose}>
-            {resultData.isPass ? 'Tiếp tục bài học' : 'Làm lại bài thi'}
+            {resultData.isPass ? 'Tiếp tục bài học' : 'Làm lại bài tập'}
           </Button>
 
           <Button block size="large" onClick={() => setIsModalOpen(false)}>

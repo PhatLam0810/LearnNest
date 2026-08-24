@@ -6,6 +6,10 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     marginRight: 20,
   },
+  containerMobile: {
+    marginLeft: 12,
+    marginRight: 12,
+  },
   header: {
     flexDirection: 'row',
     gap: 12,
@@ -188,6 +192,12 @@ const styles = StyleSheet.create({
     fontSize: 28,
     marginTop: 16,
     marginBottom: 16,
+  },
+  layoutTitleMobile: {
+    fontSize: 19,
+    marginTop: 8,
+    marginBottom: 8,
+    lineHeight: '26px',
   },
   contentGap8Margin8: {
     gap: 8,

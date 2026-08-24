@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { Card, Space, Spin, Statistic, message } from 'antd';
+import { message } from 'antd';
 import { adminQuery } from '~mdAdmin/redux';
 import { useAppPagination } from '@hooks';
 import {
@@ -10,6 +10,23 @@ import {
 import './styles.scss';
 import PracticeClassOverview from './_components/PracticeClassOverview';
 import PracticeClassUsersModal from './_components/PracticeClassUsersModal';
+
+type StatCardProps = {
+  icon: string;
+  label: string;
+  value: React.ReactNode;
+};
+
+const StatCard: React.FC<StatCardProps> = ({ icon, label, value }) => (
+  <div className="practice-overview__stat-card">
+    <div className="practice-overview__stat-icon">{icon}</div>
+    <div className="practice-overview__stat-body">
+      <div className="practice-overview__stat-label">{label}</div>
+      <div className="practice-overview__stat-value">{value}</div>
+    </div>
+    <div className="practice-overview__stat-accent" />
+  </div>
+);
 
 const LessonLearnersOverview: React.FC = () => {
   const [isPracticeModalVisible, setIsPracticeModalVisible] = useState(false);
@@ -73,24 +90,18 @@ const LessonLearnersOverview: React.FC = () => {
     .map(item => item.count)
     .reduce((acc, curr) => acc + (curr || 0), 0);
   return (
-    <div className="lesson-learners-overview">
-      <div className="lesson-learners-overview__stats">
-        <Space wrap>
-          <Card className="lesson-learners-overview__stat-card">
-            <Statistic
-              title="Tổng Khóa Học"
-              value={practiceCurrent?.totalRecords}
-              prefix="📚"
-            />
-          </Card>
-          <Card className="lesson-learners-overview__stat-card">
-            <Statistic
-              title="Tổng Người Học (Toàn Bộ)"
-              value={totalPracticeLearners}
-              prefix="👥"
-            />
-          </Card>
-        </Space>
+    <div className="practice-overview">
+      <div className="practice-overview__stats">
+        <StatCard
+          icon="📚"
+          label="Tổng Lớp Thực Hành"
+          value={practiceCurrent?.totalRecords ?? 0}
+        />
+        <StatCard
+          icon="👥"
+          label="Tổng Người Học (Toàn Bộ)"
+          value={totalPracticeLearners}
+        />
       </div>
       <PracticeClassOverview
         dataSource={practiceData || []}
