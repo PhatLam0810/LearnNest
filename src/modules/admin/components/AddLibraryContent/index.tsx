@@ -35,11 +35,15 @@ type AddLibraryContentProps = {
   onFinish?: (values: any) => void;
   onDone?: (data: Library) => void;
   initialValues?: any;
+  // true trong lúc đang chờ tải đầy đủ dữ liệu gốc (vd. questionList) của
+  // bài học đang sửa — khoá nút nộp để tránh gửi đi bản thiếu dữ liệu.
+  isSubmitDisabled?: boolean;
 };
 const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   onFinish,
   onDone,
   initialValues,
+  isSubmitDisabled,
 }) => {
   const [form] = Form.useForm();
 
@@ -374,7 +378,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             Generate
           </Button>
         </Space>
-        <Form.Item label="Questions List" name="questionsList">
+        <Form.Item label="Questions List">
           <Form.List name="questionList">
             {(fields, { add, remove }) => (
               <div
@@ -409,7 +413,11 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
         </Form.Item>
       </ScrollView>
 
-      <Button type="primary" htmlType="submit">
+      <Button
+        type="primary"
+        htmlType="submit"
+        loading={isSubmitDisabled}
+        disabled={isSubmitDisabled}>
         {!initialValues ? 'Thêm bài học' : 'Cập nhật bài học'}
       </Button>
     </Form>

@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import styles from './styles';
-import { Text, View } from 'react-native-web';
+import { Text } from 'react-native-web';
 import {
   Form,
   Input,
@@ -48,6 +48,11 @@ const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({
     { skip: !isVisible || !data?._id },
   );
   const formInitialValues = fullLibrary ? { ...data, ...fullLibrary } : data;
+  // Form hiện ngay, không bắt đợi — nhưng nút "Cập nhật bài học" bị khoá
+  // (loading) cho tới khi có đủ dữ liệu gốc. Nếu cho bấm nộp sớm khi `data`
+  // (bản rút gọn thiếu questionList) chưa được bổ sung đầy đủ, form sẽ gửi
+  // đi thiếu câu hỏi và xoá mất toàn bộ questionList đã tạo trước đó.
+  const isSubmitDisabled = !!data?._id && !fullLibrary;
 
   const onFinish = (values: any) => {
     dispatch(
@@ -77,6 +82,7 @@ const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({
       <AddLibraryContent
         initialValues={formInitialValues}
         onFinish={onFinish}
+        isSubmitDisabled={isSubmitDisabled}
       />
     </Modal>
   );
