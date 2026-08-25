@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ScrollView, View } from 'react-native-web';
+import { ScrollView, Text, View } from 'react-native-web';
 import { Document, Page } from 'react-pdf';
 import { FullscreenOutlined } from '@ant-design/icons';
 import { Library } from '~mdDashboard/types';
@@ -338,11 +338,6 @@ const LibraryDetailItem = forwardRef<
           (q: any) =>
             q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
         );
-        if (matchedQuestion && !warningModalOpenRef.current) {
-          setVisibleQuestion(matchedQuestion);
-          player?.pauseVideo();
-          pauseTracking();
-        }
 
         const inCooldown = Date.now() < skipCooldownUntilRef.current;
         const jumpsAhead =
@@ -350,6 +345,20 @@ const LibraryDetailItem = forwardRef<
           currentTime > maxWatchedGuardRef.current;
         const exceedsAllowance =
           currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
+        // Decide up front whether the warning modal will fire this same
+        // tick — the question check must know this BEFORE it runs, not
+        // after, otherwise both modals can open together in the same tick.
+        const willWarn =
+          !isAdmin &&
+          jumpsAhead &&
+          (inCooldown || exceedsAllowance) &&
+          !correctingSkipRef.current;
+
+        if (matchedQuestion && !warningModalOpenRef.current && !willWarn) {
+          setVisibleQuestion(matchedQuestion);
+          player?.pauseVideo();
+          pauseTracking();
+        }
 
         if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
           if (!correctingSkipRef.current) {
@@ -403,18 +412,26 @@ const LibraryDetailItem = forwardRef<
             q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
         );
 
-        if (matchedQuestion && !warningModalOpenRef.current) {
-          setVisibleQuestion(matchedQuestion);
-          video?.pause();
-          pauseTracking();
-        }
-
         const inCooldown = Date.now() < skipCooldownUntilRef.current;
         const jumpsAhead =
           currentTime - lastPlayed > SEEK_JUMP_THRESHOLD_SECONDS &&
           currentTime > maxWatchedGuardRef.current;
         const exceedsAllowance =
           currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
+        // Decide up front whether the warning modal will fire this same
+        // tick — the question check must know this BEFORE it runs, not
+        // after, otherwise both modals can open together in the same tick.
+        const willWarn =
+          !isAdmin &&
+          jumpsAhead &&
+          (inCooldown || exceedsAllowance) &&
+          !correctingSkipRef.current;
+
+        if (matchedQuestion && !warningModalOpenRef.current && !willWarn) {
+          setVisibleQuestion(matchedQuestion);
+          video?.pause();
+          pauseTracking();
+        }
 
         if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
           if (!correctingSkipRef.current) {
@@ -734,6 +751,15 @@ const LibraryDetailItem = forwardRef<
     switch (data.type) {
       case 'Video':
       case 'Youtube':
+        if (!data.url) {
+          return (
+            <View style={styles.comingSoonContainer}>
+              <Text style={styles.comingSoonText}>
+                Khóa học này sẽ sớm ra mắt, mời bạn đón chờ nhé!
+              </Text>
+            </View>
+          );
+        }
         return (
           <View style={{ ...styles.mediaContainer, position: 'relative' }}>
             <OverlayLoading />

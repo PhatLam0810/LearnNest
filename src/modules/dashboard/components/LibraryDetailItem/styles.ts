@@ -13,6 +13,22 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#00000010',
   },
+  comingSoonContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#00000010',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  comingSoonText: {
+    ...typography.body1,
+    color: '#666',
+    textAlign: 'center',
+    fontSize: 16,
+  },
   shortContainer: {
     width: '100%',
     aspectRatio: 9 / 16,
