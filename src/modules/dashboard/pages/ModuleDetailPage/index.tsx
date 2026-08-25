@@ -47,6 +47,7 @@ const ModuleDetailPage = () => {
     totalQuestions: 0,
     score: 0,
     isPass: false,
+    feedback: '',
   });
 
   // Câu hỏi lấy trực tiếp từ selectedLibrary.questionList (đã có sẵn trong
@@ -227,8 +228,15 @@ const ModuleDetailPage = () => {
     totalQuestions: number,
     score: number,
     isPass: boolean,
+    feedback?: string,
   ) => {
-    setResultData({ correctCount, totalQuestions, score, isPass });
+    setResultData({
+      correctCount,
+      totalQuestions,
+      score,
+      isPass,
+      feedback: feedback || '',
+    });
     setIsModalOpen(true);
   };
 
@@ -246,7 +254,13 @@ const ModuleDetailPage = () => {
         userName: userProfile?.fullName,
         selectedAnswers,
       }).unwrap();
-      showModal(res.correctCount, res.totalQuestions, res.score, res.isPass);
+      showModal(
+        res.correctCount,
+        res.totalQuestions,
+        res.score,
+        res.isPass,
+        res.feedback,
+      );
     } catch (error) {
       console.error('Lỗi khi nộp bài:', error);
     }
@@ -450,6 +464,13 @@ const ModuleDetailPage = () => {
               ? 'Chúc mừng! Bạn đã vượt qua bài tập này thành công.'
               : 'Bạn chưa vượt qua bài tập này. Vui lòng thử lại.'}
           </div>
+
+          {resultData.feedback && (
+            <div style={styles.aiFeedbackBox}>
+              <strong>🤖 Nhận xét từ AI:</strong>
+              <p style={{ margin: '4px 0 0' }}>{resultData.feedback}</p>
+            </div>
+          )}
 
           {/* Custom Buttons */}
           <Button

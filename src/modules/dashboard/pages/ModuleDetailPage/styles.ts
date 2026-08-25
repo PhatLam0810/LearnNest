@@ -268,6 +268,17 @@ const styles = StyleSheet.create({
     color: '#cf1322',
     fontWeight: 'bold',
   },
+  aiFeedbackBox: {
+    padding: '14px 16px',
+    borderRadius: '8px',
+    marginBottom: '16px',
+    backgroundColor: '#f0f5ff',
+    color: '#1d418a',
+    fontSize: 14,
+    lineHeight: '20px',
+    width: '90%',
+    textAlign: 'left' as const,
+  },
 });
 
 export default styles;

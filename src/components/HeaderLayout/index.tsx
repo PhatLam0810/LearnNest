@@ -236,6 +236,14 @@ const HeaderLayout: React.FC = ({}) => {
             }}>
             Thư Viện
           </Button>
+          <Button
+            block
+            onClick={() => {
+              setOpen(false);
+              router.push('/dashboard/my-roadmap');
+            }}>
+            Lộ Trình AI
+          </Button>
           {!isAdmin && (
             <Button
               block

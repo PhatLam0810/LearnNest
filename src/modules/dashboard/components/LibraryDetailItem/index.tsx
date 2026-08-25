@@ -20,11 +20,19 @@ import { dashboardQuery, useGetLessonProgressQuery } from '~mdDashboard/redux';
 import ResumeLessonModal from '@components/ResumeLessonModal';
 import { useResponsive } from '@/styles/responsive';
 
-// How far ahead of the furthest-watched point a single forward seek may
-// jump, and how long the cooldown lasts afterward before another forward
-// seek is allowed at all.
+// How far ahead of the furthest-watched point a forward seek may freely
+// jump (no warning). Seeking past this triggers the warning + rewind and
+// starts a cooldown during which no further seeking is allowed at all —
+// only after watching through the cooldown does seeking free up again.
 const SEEK_ALLOWANCE_SECONDS = 180;
-const SEEK_COOLDOWN_MS = 180_000;
+const SEEK_COOLDOWN_MS = 120_000;
+// Interval tick is 1s, so normal forward playback advances currentTime by
+// ~1s each tick while maxWatched (updated at the end of that same tick)
+// still holds the previous tick's value — currentTime > maxWatched is true
+// on EVERY tick of ordinary playback, not just on a real seek. Only treat
+// it as a jump if the advance since the last tick clearly exceeds normal
+// playback speed (with slack for interval jitter under load).
+const SEEK_JUMP_THRESHOLD_SECONDS = 3;
 
 type LibraryDetailItemProps = {
   data: Library;
@@ -48,6 +56,9 @@ const LibraryDetailItem = forwardRef<
   const playerRef = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const correctingSkipRef = useRef(false);
+  // While the anti-skip warning modal is open, suppress the quiz-question
+  // modal so the two don't stack on top of each other.
+  const warningModalOpenRef = useRef(false);
   // Timestamp (ms) until which forward-seeking is blocked entirely. Seeking
   // ahead up to SEEK_ALLOWANCE_SECONDS is a one-shot allowance — using it at
   // all starts this cooldown, during which even a small forward seek is
@@ -55,6 +66,21 @@ const LibraryDetailItem = forwardRef<
   const skipCooldownUntilRef = useRef(0);
   const [lastPlayed, setLastPlayed] = useState(0);
   const [maxWatched, setMaxWatched] = useState(0);
+  // Bản sao đồng bộ của maxWatched dùng riêng cho việc chống tua — interval
+  // chống tua chạy mỗi 1s và có thể đọc phải giá trị maxWatched CŨ (từ
+  // closure render trước) nếu nó tick đúng lúc React đang xử lý một cập
+  // nhật state khác (vd. vừa "Tiếp tục học" từ vị trí đã lưu) — currentTime
+  // đã nhảy tới vị trí resume thật sự nhưng maxWatched (closure cũ) vẫn còn
+  // là 0, khiến bị chấm nhầm là "tua" dù người dùng không hề động vào gì.
+  // Dùng ref để interval luôn đọc đúng giá trị mới nhất ngay khi cập nhật.
+  const maxWatchedGuardRef = useRef(0);
+  const setGuardedMaxWatched = (value: number | ((prev: number) => number)) => {
+    setMaxWatched(prev => {
+      const next = typeof value === 'function' ? value(prev) : value;
+      maxWatchedGuardRef.current = next;
+      return next;
+    });
+  };
   const [visibleQuestion, setVisibleQuestion] = useState<any>(null);
   const [shownQuestionIds, setShownQuestionIds] = useState<string[]>([]);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -303,7 +329,7 @@ const LibraryDetailItem = forwardRef<
       if (playerRef.current) {
         const currentTime = Math.floor(playerRef.current.getCurrentTime());
         const duration = playerRef.current.getDuration();
-        const percentWatched = (maxWatched / duration) * 100;
+        const percentWatched = (maxWatchedGuardRef.current / duration) * 100;
         // So sánh "đã tới hoặc qua mốc" thay vì đúng bằng tuyệt đối — interval
         // chạy mỗi 1s có thể trôi/nhảy qua đúng giây appearTime, khiến so
         // sánh === bỏ lỡ mốc vĩnh viễn. shownQuestionIds đảm bảo không hiện
@@ -312,20 +338,27 @@ const LibraryDetailItem = forwardRef<
           (q: any) =>
             q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
         );
-        if (matchedQuestion) {
+        if (matchedQuestion && !warningModalOpenRef.current) {
           setVisibleQuestion(matchedQuestion);
           player?.pauseVideo();
           pauseTracking();
         }
 
         const inCooldown = Date.now() < skipCooldownUntilRef.current;
-        const jumpsAhead = currentTime > maxWatched;
+        const jumpsAhead =
+          currentTime - lastPlayed > SEEK_JUMP_THRESHOLD_SECONDS &&
+          currentTime > maxWatchedGuardRef.current;
         const exceedsAllowance =
-          currentTime > maxWatched + SEEK_ALLOWANCE_SECONDS;
+          currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
 
         if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
           if (!correctingSkipRef.current) {
             correctingSkipRef.current = true;
+            if (exceedsAllowance) {
+              // Real violation (jumped past the free allowance) — (re)start
+              // the cooldown that blocks further seeking until it expires.
+              skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
+            }
             warning();
             playerRef.current.pauseVideo();
             // allowSeekAhead=true so YouTube fetches the target position
@@ -341,12 +374,11 @@ const LibraryDetailItem = forwardRef<
             }, 2000);
           }
         } else {
-          if (!isAdmin && jumpsAhead && !inCooldown) {
-            // Used the one-shot forward-seek allowance — start the cooldown.
-            skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
-          }
+          // Forward seeks within the free allowance are accepted silently —
+          // no warning, no cooldown — the cooldown only starts on an actual
+          // violation above.
           setLastPlayed(currentTime);
-          setMaxWatched(prevMax => Math.max(prevMax, currentTime));
+          setGuardedMaxWatched(prevMax => Math.max(prevMax, currentTime));
           updateProgress(currentTime, duration);
         }
         if (percentWatched >= 99) {
@@ -364,43 +396,55 @@ const LibraryDetailItem = forwardRef<
       if (videoRef.current) {
         const currentTime = Math.floor(videoRef.current.currentTime);
         const duration = videoRef.current.duration;
-        const percentWatched = (maxWatched / duration) * 100;
+        const percentWatched = (maxWatchedGuardRef.current / duration) * 100;
 
         const matchedQuestion = data.questionList?.find(
           (q: any) =>
             q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
         );
 
-        if (matchedQuestion) {
+        if (matchedQuestion && !warningModalOpenRef.current) {
           setVisibleQuestion(matchedQuestion);
           video?.pause();
           pauseTracking();
         }
 
         const inCooldown = Date.now() < skipCooldownUntilRef.current;
-        const jumpsAhead = currentTime > maxWatched;
+        const jumpsAhead =
+          currentTime - lastPlayed > SEEK_JUMP_THRESHOLD_SECONDS &&
+          currentTime > maxWatchedGuardRef.current;
         const exceedsAllowance =
-          currentTime > maxWatched + SEEK_ALLOWANCE_SECONDS;
+          currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
 
         if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
-          warning();
-          videoRef.current.pause();
-          videoRef.current.currentTime = lastPlayed;
-          pauseTracking();
-        } else {
-          if (!isAdmin && jumpsAhead && !inCooldown) {
-            // Used the one-shot forward-seek allowance — start the cooldown.
-            skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
+          if (!correctingSkipRef.current) {
+            correctingSkipRef.current = true;
+            if (exceedsAllowance) {
+              // Real violation (jumped past the free allowance) — (re)start
+              // the cooldown that blocks further seeking until it expires.
+              skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
+            }
+            warning();
+            videoRef.current.pause();
+            videoRef.current.currentTime = lastPlayed;
+            pauseTracking();
+            setTimeout(() => {
+              correctingSkipRef.current = false;
+            }, 2000);
           }
+        } else {
+          // Forward seeks within the free allowance are accepted silently —
+          // no warning, no cooldown — the cooldown only starts on an actual
+          // violation above.
           setLastPlayed(currentTime);
-          setMaxWatched(prevMax => Math.max(prevMax, currentTime));
+          setGuardedMaxWatched(prevMax => Math.max(prevMax, currentTime));
           updateProgress(currentTime, duration);
         }
 
         if (percentWatched >= 99) {
           handleVideoEnd(duration);
           onWatchFinish?.();
-          setMaxWatched(0);
+          setGuardedMaxWatched(0);
           clearInterval(interval);
         }
         if (!videoStatus) {
@@ -503,11 +547,15 @@ const LibraryDetailItem = forwardRef<
   };
 
   const warning = () => {
+    warningModalOpenRef.current = true;
     modal.warning({
       title: 'Cảnh báo',
       content:
         'Bạn đang học nhanh hơn bình thường, vui lòng tránh bỏ qua quá nhiều khi học!',
       centered: true,
+      onOk: () => {
+        warningModalOpenRef.current = false;
+      },
     });
   };
 
@@ -534,7 +582,9 @@ const LibraryDetailItem = forwardRef<
     setIsSwitchingContext(false);
 
     if (resumeInfo) {
-      setMaxWatched(resumeInfo.watchedSeconds || resumeInfo.lastPosition);
+      setGuardedMaxWatched(
+        resumeInfo.watchedSeconds || resumeInfo.lastPosition,
+      );
       setLastPlayed(resumeInfo.lastPosition);
 
       if (data.type === 'Video' && videoRef.current) {
@@ -551,7 +601,7 @@ const LibraryDetailItem = forwardRef<
 
   const handleRestartLesson = () => {
     setIsConfirmingResume(false);
-    setMaxWatched(0);
+    setGuardedMaxWatched(0);
     setLastPlayed(0);
     setPendingSeek(null);
     setIsSwitchingContext(false);
@@ -603,7 +653,7 @@ const LibraryDetailItem = forwardRef<
     pauseTracking();
 
     setLastPlayed(0);
-    setMaxWatched(0);
+    setGuardedMaxWatched(0);
     setVisibleQuestion(null);
     setShownQuestionIds([]);
     setSelectedAnswer(null);

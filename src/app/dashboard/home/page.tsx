@@ -60,21 +60,28 @@ const HomeOverview = () => {
     rowGap: isMobile ? 16 : 20,
   };
 
-  const COURSE_MAPPING: Record<string, string> = {
-    'MOS WORD': 'MOS WORD',
-    'Học React': 'Học React',
-    'Học AI': 'Học AI',
+  // Banner text ("MOS WORD", "HỌC REACT", "HỌC AI") không trùng tuyệt đối
+  // với title thật của lesson trong DB ("Khóa học Mos", "Khóa Học React"...),
+  // nên dùng từ khóa để dò gần đúng thay vì so sánh bằng tuyệt đối.
+  const COURSE_KEYWORDS: Record<string, string> = {
+    'MOS WORD': 'mos',
+    'HỌC REACT': 'react',
+    'HỌC AI': 'ai',
   };
 
   const handleBannerClick = (buttonText: string) => {
-    const targetTitle = COURSE_MAPPING[buttonText];
+    const keyword = COURSE_KEYWORDS[buttonText];
+    if (!keyword) return;
 
-    if (targetTitle) {
-      const foundItem = data?.recommend.find(
-        item => item.title === targetTitle,
-      );
-      onClickLesson(foundItem._id);
+    const foundItem = data?.recommend.find(item =>
+      item.title?.toLowerCase().includes(keyword),
+    );
+
+    if (!foundItem) {
+      messageApi.info('Khóa học này sẽ sớm ra mắt, mời bạn đón chờ nhé!');
+      return;
     }
+    onClickLesson(foundItem._id);
   };
 
   return (

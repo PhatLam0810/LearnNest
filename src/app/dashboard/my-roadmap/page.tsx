@@ -67,8 +67,8 @@ const MyRoadmapPage = () => {
   if (!Array.isArray(insights) || insights.length === 0) {
     return (
       <div className="roadmap-empty-state">
-        Chưa có lộ trình học tập nào được tạo. Hệ thống sẽ tự động phân tích
-        tiến độ học của bạn theo định kỳ.
+        Chưa có lộ trình học tập nào được tạo. Bấm nút 🤖 ở góc màn hình để xin
+        AI tư vấn ngay, hoặc chờ hệ thống tự động phân tích định kỳ.
       </div>
     );
   }

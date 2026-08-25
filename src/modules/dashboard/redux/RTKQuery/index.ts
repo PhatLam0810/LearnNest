@@ -6,6 +6,7 @@ import {
   LessonProgressResponse,
   LessonRecommendRes,
   LibraryType,
+  RoadmapStep,
 } from './types';
 import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
@@ -147,8 +148,48 @@ export const dashboardQuery = baseQuery.injectEndpoints({
     getMyRoadmap: builder.query<LearningInsight[], string>({
       query: userId => `/ai-coach/history/${userId}`,
     }),
+    adviseCourse: builder.mutation<
+      {
+        hasStarted: boolean;
+        hasData: boolean;
+        summary: string;
+        roadmap?: RoadmapStep[];
+        lessonId?: string;
+        courseOverview?: {
+          title: string;
+          totalModules: number;
+          totalLessons: number;
+          totalDurationMinutes: number;
+          modules: { title: string; lessonCount: number }[];
+        };
+      },
+      'word' | 'excel'
+    >({
+      // Controller trả về object thô (không bọc trong { data: ... } như hầu
+      // hết endpoint khác), giống hệt getMyRoadmap phía trên — không dùng
+      // transformResponse ở đây, nếu không sẽ đọc nhầm field "data" không
+      // tồn tại và trả về undefined.
+      query: course => ({
+        url: `/ai-coach/advise/${course}`,
+        method: 'POST',
+      }),
+    }),
+    chatWithAdvisor: builder.mutation<
+      { limited: boolean; reply: string },
+      string
+    >({
+      query: message => ({
+        url: '/ai-coach/chat',
+        method: 'POST',
+        body: { message },
+      }),
+    }),
   }),
   overrideExisting: true,
 });
-export const { useGetLessonProgressQuery, useGetMyRoadmapQuery } =
-  dashboardQuery;
+export const {
+  useGetLessonProgressQuery,
+  useGetMyRoadmapQuery,
+  useAdviseCourseMutation,
+  useChatWithAdvisorMutation,
+} = dashboardQuery;

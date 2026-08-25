@@ -78,29 +78,43 @@
 @media (max-width: 768px) {
   .f8-banner-carousel {
     .slick-slide {
-      height: 250px; // Chiều cao tổng thể cho thiết bị di động
+      height: 260px; // Chiều cao tổng thể cho thiết bị di động
     }
 
     .slide-content {
-      padding: 20px;
+      // Chừa khoảng trống ở đáy để không đè lên chấm chỉ mục (dots) của carousel
+      padding: 20px 20px 36px;
       background: linear-gradient(
         to right,
         $color-vhu-primary,
         $vhu-light-blue
       );
+      justify-content: flex-start;
       h1 {
-        font-size: 24px;
-        margin-bottom: 10px;
+        font-size: 20px;
+        line-height: 1.3;
+        margin-bottom: 8px;
+        // Giới hạn tối đa 2 dòng, tránh tràn khi tiêu đề dài + emoji
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
       p {
-        font-size: 16px;
+        font-size: 14px;
+        line-height: 1.4;
         max-width: 100%;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
+        // Giới hạn tối đa 2 dòng, tránh đẩy nút xuống dưới bị che khuất
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
       .btn-action {
-        height: 40px;
+        height: 36px;
         padding: 0 16px;
-        font-size: 16px;
+        font-size: 14px;
       }
     }
   }

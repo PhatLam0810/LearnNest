@@ -11,6 +11,7 @@ import LoadingScreen from '~mdAuth/components/Loading';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import FeedbackWidget from '@components/FeedbackWidget';
+import AiAdvisorWidget from '@components/AiAdvisorWidget';
 import Footer from '@components/Footer';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MessageProvider from '@components/MessageProvider';
@@ -42,6 +43,7 @@ export default function RootLayoutClient({
             <MessageProvider />
             <PageViewTracker />
             <View style={styles.appShell}>{children}</View>
+            <AiAdvisorWidget />
             {showFooter && <Footer />}
             <Authentication />
             <LoadingScreen />

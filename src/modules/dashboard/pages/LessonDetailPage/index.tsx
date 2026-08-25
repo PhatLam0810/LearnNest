@@ -50,6 +50,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     dashboardQuery.useCheckRegistrationLessonMutation();
   const lessonLibraries =
     lessonDetail?.modules?.flatMap(module => module.libraries ?? []) ?? [];
+  const hasContent = lessonLibraries.length > 0;
 
   const { isMobile, isTablet } = useResponsive();
   const numColumns = isMobile ? 1 : 2;
@@ -324,9 +325,19 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   <View>
                     <button
                       className="button lesson-pill-button"
-                      onClick={handleStartLesson}>
+                      disabled={!hasContent}
+                      style={
+                        !hasContent
+                          ? { opacity: 0.6, cursor: 'not-allowed' }
+                          : undefined
+                      }
+                      onClick={hasContent ? handleStartLesson : undefined}>
                       <Icon name="liveTV" className="button-icon" />
-                      <span className="label">Bắt đầu khóa học</span>
+                      <span className="label">
+                        {hasContent
+                          ? 'Bắt đầu khóa học'
+                          : 'Sẽ có trong tương lai'}
+                      </span>
                     </button>
                     <Text style={styles.totalLibrary}>
                       Tổng thời lượng:{' '}
@@ -494,9 +505,19 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   <View>
                     <button
                       className="button lesson-pill-button"
-                      onClick={handleStartLesson}>
+                      disabled={!hasContent}
+                      style={
+                        !hasContent
+                          ? { opacity: 0.6, cursor: 'not-allowed' }
+                          : undefined
+                      }
+                      onClick={hasContent ? handleStartLesson : undefined}>
                       <Icon name="liveTV" className="button-icon" />
-                      <span className="label">Bắt đầu khóa học</span>
+                      <span className="label">
+                        {hasContent
+                          ? 'Bắt đầu khóa học'
+                          : 'Sẽ có trong tương lai'}
+                      </span>
                     </button>
                     <Text style={styles.totalLibrary}>
                       Tổng thời lượng:{' '}
