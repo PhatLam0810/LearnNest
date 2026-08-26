@@ -100,6 +100,14 @@ const styles = StyleSheet.create({
     flex: '0 0 120px',
     textAlign: 'right',
   },
+  learnerReminder: {
+    flex: '0 0 140px',
+    textAlign: 'right',
+  },
+  reminderHint: {
+    fontSize: 12,
+    color: '#9ca3af',
+  },
   paginationWrap: {
     display: 'flex',
     justifyContent: 'center',

@@ -106,6 +106,13 @@ export interface LessonLearner {
   faculty?: string;
   progress: number;
   lastStudiedAt: string | null;
+  lastRemindedAt: string | null;
+}
+
+export interface RemindLearnersBulkResponse {
+  totalEligible: number;
+  sent: number;
+  failed: number;
 }
 
 export interface PracticeClassItem {

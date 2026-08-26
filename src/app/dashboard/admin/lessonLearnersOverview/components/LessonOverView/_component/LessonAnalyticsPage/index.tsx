@@ -27,8 +27,40 @@ import styles from './styles';
 dayjs.extend(relativeTime);
 dayjs.locale('vi');
 
+// Phải khớp với REMINDER_ELIGIBLE_INACTIVE_DAYS / REMINDER_COOLDOWN_DAYS ở
+// backend (src/admin/user/admin.service.ts) — chỉ dùng để hiển thị đúng
+// trạng thái nút, điều kiện thật vẫn do backend quyết định.
+const REMINDER_INACTIVE_DAYS = 3;
+const REMINDER_COOLDOWN_DAYS = 3;
+
 type Props = {
   lessonId: string;
+};
+
+const getReminderState = (
+  learner: LessonLearner,
+): { eligible: boolean; hint: string | null } => {
+  if (!learner.lastStudiedAt) return { eligible: false, hint: null };
+
+  const daysSinceStudied = dayjs().diff(dayjs(learner.lastStudiedAt), 'day');
+  if (daysSinceStudied < REMINDER_INACTIVE_DAYS) {
+    return { eligible: false, hint: null };
+  }
+
+  if (learner.lastRemindedAt) {
+    const daysSinceReminded = dayjs().diff(
+      dayjs(learner.lastRemindedAt),
+      'day',
+    );
+    if (daysSinceReminded < REMINDER_COOLDOWN_DAYS) {
+      return {
+        eligible: false,
+        hint: `Đã nhắc ${dayjs(learner.lastRemindedAt).fromNow()}`,
+      };
+    }
+  }
+
+  return { eligible: true, hint: null };
 };
 
 const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
@@ -56,6 +88,10 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
     });
 
   const [exportLearners] = adminQuery.useExportLearnersMutation();
+  const [remindLearner] = adminQuery.useRemindLearnerMutation();
+  const [remindLearnersBulk, { isLoading: isBulkReminding }] =
+    adminQuery.useRemindLearnersBulkMutation();
+  const [remindingUserId, setRemindingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (lessonId) fetchData();
@@ -95,6 +131,41 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
     } catch (error) {
       console.error('Lỗi export:', error);
       message.error('Lỗi khi tải file. Vui lòng thử lại.');
+    }
+  };
+
+  const handleRemindLearner = async (learner: LessonLearner) => {
+    setRemindingUserId(learner._id);
+    try {
+      await remindLearner({ lessonId, userId: learner._id }).unwrap();
+      message.success(`Đã gửi email nhắc nhở tới ${learner.fullName}`);
+      fetchData();
+    } catch (error: any) {
+      message.error(
+        error?.data?.message || 'Gửi email nhắc nhở thất bại, thử lại sau',
+      );
+    } finally {
+      setRemindingUserId(null);
+    }
+  };
+
+  const handleRemindBulk = async () => {
+    try {
+      const res = await remindLearnersBulk({ lessonId }).unwrap();
+      if (res.totalEligible === 0) {
+        message.info('Hiện không có học viên nào đủ điều kiện để nhắc nhở');
+        return;
+      }
+      message.success(
+        `Đã gửi nhắc nhở cho ${res.sent}/${res.totalEligible} học viên${
+          res.failed ? ` (${res.failed} gửi thất bại)` : ''
+        }`,
+      );
+      fetchData();
+    } catch (error: any) {
+      message.error(
+        error?.data?.message || 'Gửi nhắc nhở hàng loạt thất bại, thử lại sau',
+      );
     }
   };
 
@@ -227,6 +298,9 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
         </Space>
         <div style={styles.actionsRow}>
           <Button onClick={handleExportExcel}>Tải Excel</Button>
+          <Button loading={isBulkReminding} onClick={handleRemindBulk}>
+            Nhắc Hàng Loạt
+          </Button>
           <Button
             type="primary"
             disabled={!isCanCreatePracticeClass}
@@ -242,34 +316,52 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
         </div>
       ) : (
         <div style={styles.learnerList}>
-          {learners.map(learner => (
-            <div key={learner._id} style={styles.learnerCard}>
-              <div style={styles.learnerInfo}>
-                <div style={styles.learnerName}>{learner.fullName}</div>
-                <div style={styles.learnerMeta}>
-                  {learner.email} · {learner.class || '—'}
+          {learners.map(learner => {
+            const reminderState = getReminderState(learner);
+            return (
+              <div key={learner._id} style={styles.learnerCard}>
+                <div style={styles.learnerInfo}>
+                  <div style={styles.learnerName}>{learner.fullName}</div>
+                  <div style={styles.learnerMeta}>
+                    {learner.email} · {learner.class || '—'}
+                  </div>
+                </div>
+                <div style={styles.learnerProgressWrap}>
+                  <Progress
+                    percent={learner.progress}
+                    size="small"
+                    status="active"
+                    strokeColor={{ '0%': '#1d418a', '100%': '#88c1e9' }}
+                  />
+                </div>
+                <div style={styles.learnerLastStudied}>
+                  {learner.lastStudiedAt
+                    ? `Học gần nhất: ${dayjs(learner.lastStudiedAt).fromNow()}`
+                    : 'Chưa xem video nào'}
+                </div>
+                <div style={styles.learnerStatus}>
+                  <Tag color={learner.isCompleted ? 'success' : 'default'}>
+                    {learner.isCompleted ? 'Hoàn thành' : 'Chưa hoàn thành'}
+                  </Tag>
+                </div>
+                <div style={styles.learnerReminder}>
+                  {reminderState.eligible && (
+                    <Button
+                      size="small"
+                      loading={remindingUserId === learner._id}
+                      onClick={() => handleRemindLearner(learner)}>
+                      Nhắc nhở
+                    </Button>
+                  )}
+                  {!reminderState.eligible && reminderState.hint && (
+                    <span style={styles.reminderHint}>
+                      {reminderState.hint}
+                    </span>
+                  )}
                 </div>
               </div>
-              <div style={styles.learnerProgressWrap}>
-                <Progress
-                  percent={learner.progress}
-                  size="small"
-                  status="active"
-                  strokeColor={{ '0%': '#1d418a', '100%': '#88c1e9' }}
-                />
-              </div>
-              <div style={styles.learnerLastStudied}>
-                {learner.lastStudiedAt
-                  ? `Học gần nhất: ${dayjs(learner.lastStudiedAt).fromNow()}`
-                  : 'Chưa xem video nào'}
-              </div>
-              <div style={styles.learnerStatus}>
-                <Tag color={learner.isCompleted ? 'success' : 'default'}>
-                  {learner.isCompleted ? 'Hoàn thành' : 'Chưa hoàn thành'}
-                </Tag>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

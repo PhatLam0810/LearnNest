@@ -16,6 +16,7 @@ import {
   LessonLearnersSummaryResponse,
   PracticeClassListResponse,
   PracticeClassUsersResponse,
+  RemindLearnersBulkResponse,
   SendImportEmailsRequest,
   SendImportEmailsResponse,
   SetRoleParams,
@@ -310,6 +311,25 @@ export const adminQuery = baseQuery.injectEndpoints({
         body,
         responseHandler: response => response.blob(),
       }),
+    }),
+    remindLearner: builder.mutation<
+      { message: string },
+      { lessonId: string; userId: string }
+    >({
+      query: ({ lessonId, userId }) => ({
+        url: `admin/lessons/${lessonId}/learners/${userId}/remind`,
+        method: 'POST',
+      }),
+    }),
+    remindLearnersBulk: builder.mutation<
+      RemindLearnersBulkResponse,
+      { lessonId: string }
+    >({
+      query: ({ lessonId }) => ({
+        url: `admin/lessons/${lessonId}/learners/remind-bulk`,
+        method: 'POST',
+      }),
+      transformResponse: (res: any) => res.data,
     }),
   }),
   overrideExisting: true,
