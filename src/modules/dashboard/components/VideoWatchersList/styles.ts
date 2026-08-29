@@ -1,126 +1,134 @@
 import { StyleSheet, typography, lexend } from '@styles';
 
 const styles = StyleSheet.create({
-  // Text styles
-  secondaryText12: {
-    ...typography.body2,
-    fontSize: 12,
-    color: '#8D8D8D',
-  },
-  strongText14: {
-    ...typography.body1,
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  secondaryText11: {
-    ...typography.body2,
-    fontSize: 11,
-    color: '#8D8D8D',
-    marginTop: 4,
-  },
-  marginBottom4: {
-    marginBottom: 4,
-  },
-  text12Center: {
-    fontSize: 12,
-    minWidth: 80,
-    textAlign: 'center',
-  },
-  text16Bold: {
-    fontFamily: lexend.style.fontFamily,
-    fontWeight: '600',
-    fontSize: 16,
-  },
-  smallText12: {
-    fontSize: 12,
-    padding: 2,
-    paddingTop: 8,
-    paddingBottom: 8,
-    margin: 0,
-  },
-  // Icon styles
-  icon10: {
-    fontSize: 10,
-  },
-  // Tag/Badge styles
-  tagStyle: {
-    backgroundColor: '#f0f0f0',
-    borderColor: '#d9d9d9',
-  },
-  tagYouStyle: {
-    fontSize: 11,
-    paddingTop: 6,
-    paddingBottom: 6,
-    height: 20,
-    lineHeight: '20px',
-    margin: 0,
-  },
-  tagCompletedStyle: {
-    fontSize: 11,
-    paddingTop: 6,
-    paddingBottom: 6,
-    height: 20,
-    lineHeight: '20px',
-    margin: 0,
-  },
-  // Avatar styles
-  avatarStyle: {
-    width: 40,
-    height: 40,
-    fontSize: 16,
-  },
-  // Container styles
-  container240: {
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    textOverflow: 'ellipsis',
-    maxWidth: 240,
-  },
-  columnMargin12: {
-    margin: 0,
-    marginTop: 12,
-    marginBottom: 12,
-  },
-  spaceVertical: {
-    width: '100%',
-  },
-  spaceVerticalPadding: {
-    width: '100%',
-    paddingTop: 8,
-    paddingBottom: 8,
-  },
-  // Layout styles
-  watcherRow: {
+  header: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  paginationRow: {
-    marginTop: 20,
-    paddingTop: 16,
-    borderTop: '1px solid #f0f0f0',
-  },
-  listItemStyle: {
-    paddingRight: 12,
-    paddingLeft: 12,
+    marginBottom: 16,
+    paddingBottom: 12,
     borderBottom: '1px solid #f0f0f0',
   },
-  avatarSize32: {
-    width: 32,
-    height: 32,
+  headerTitle: {
+    fontFamily: lexend.style.fontFamily,
+    fontWeight: '600',
+    fontSize: 16,
+    color: '#212121',
   },
-  progressContainer: {
+  countTag: {
+    fontSize: 12,
+    fontWeight: 600,
+    borderRadius: 999,
+  },
+  list: {
     display: 'flex',
     flexDirection: 'column',
+    gap: 10,
+  },
+  card: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 12,
+    padding: '12px 14px',
+    borderRadius: 12,
+    border: '1px solid #f0f0f0',
+    backgroundColor: '#fff',
   },
-  statisticLabel: {
-    marginBottom: 16,
+  avatar: {
+    width: 40,
+    height: 40,
+    fontSize: 15,
+    flexShrink: 0,
   },
-  emptyPadding: {
-    paddingRight: 40,
-    paddingLeft: 40,
+  cardBody: {
+    flex: 1,
+    minWidth: 0,
+  },
+  nameRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  name: {
+    ...typography.body1,
+    fontWeight: '600',
+    fontSize: 14,
+    color: '#212121',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  meRow: {
+    fontSize: 11,
+    height: 20,
+    lineHeight: '20px',
+    margin: 0,
+    borderRadius: 999,
+  },
+  doneTag: {
+    fontSize: 11,
+    height: 20,
+    lineHeight: '20px',
+    margin: 0,
+    borderRadius: 999,
+  },
+  email: {
+    ...typography.body2,
+    fontSize: 12,
+    color: '#8D8D8D',
+    marginBottom: 6,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  progressRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  progressBarWrap: {
+    flex: 1,
+  },
+  progressLabel: {
+    fontSize: 12,
+    color: '#8D8D8D',
+    minWidth: 34,
+    textAlign: 'right',
+  },
+  metaRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  metaText: {
+    fontSize: 11,
+    color: '#a3a3a3',
+  },
+  emptyWrap: {
+    padding: '32px 0',
+  },
+  paginationRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    marginTop: 16,
+    paddingTop: 12,
+    borderTop: '1px solid #f0f0f0',
+  },
+  pageText: {
+    fontSize: 12,
+    color: '#595959',
+    minWidth: 60,
+    textAlign: 'center',
   },
 });
 

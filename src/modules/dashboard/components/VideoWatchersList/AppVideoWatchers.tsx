@@ -2,34 +2,16 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  List,
-  Avatar,
-  Tag,
-  Button,
-  Spin,
-  Empty,
-  Typography,
-  Space,
-  Tooltip,
-  Progress,
-  message,
-  Row,
-  Col,
-} from 'antd';
+import { Avatar, Tag, Button, Spin, Empty, Progress, message } from 'antd';
 import {
   UserOutlined,
-  CheckCircleOutlined,
-  PlayCircleOutlined,
-  CalendarOutlined,
-  EyeOutlined,
+  CheckCircleFilled,
   ArrowLeftOutlined,
   ArrowRightOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
+import { View, Text } from 'react-native-web';
 import styles from './styles';
-
-const { Text } = Typography;
 
 interface WatcherItem {
   _id: string;
@@ -74,6 +56,12 @@ interface AppVideoWatchersProps {
   onClose?: () => void;
 }
 
+// Danh sách "đã xem bài này" — dùng cả cho học viên (nút mắt cạnh mỗi video,
+// admin/level<=2 mới thấy nút) lẫn cho trang tổng quan nội dung khóa học của
+// admin. Toàn bộ chữ hiển thị PHẢI là tiếng Việt — component này trước đây
+// để nguyên tiếng Anh (Viewers/users/You/Completed/No viewers yet...), đã
+// dịch lại hết + làm gọn giao diện (card thay vì List thô, bỏ progress bar
+// lặp lại 2 lần cho cùng 1 số %).
 const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
   subLessonId,
   subLessonTitle,
@@ -109,12 +97,10 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
   }, []);
 
   const getDisplayName = useCallback((item: WatcherItem): string => {
-    if (item.fullName) {
-      return item.fullName;
-    }
+    if (item.fullName) return item.fullName;
     if (item.username) return item.username;
     if (item.email) return item.email.split('@')[0];
-    return `User ${item.userId?.slice(-6) || ''}`;
+    return `Người dùng ${item.userId?.slice(-6) || ''}`;
   }, []);
 
   const formatDate = useCallback((dateString: string): string => {
@@ -122,8 +108,8 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
       return new Intl.DateTimeFormat('vi-VN', {
-        month: 'short',
-        day: 'numeric',
+        day: '2-digit',
+        month: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
       }).format(date);
@@ -134,7 +120,7 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
 
   const fetchWatchers = useCallback(async () => {
     if (!subLessonId) {
-      message.warning('Missing video ID');
+      message.warning('Thiếu ID video');
       return;
     }
 
@@ -183,10 +169,10 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
       });
     } catch (error: any) {
       console.error('Fetch error:', error);
-      const errorMessage =
-        error.response?.data?.message || error.message || 'Failed to load data';
-
-      message.error(errorMessage);
+      message.error(
+        error.response?.data?.message ||
+          'Không tải được danh sách, thử lại sau',
+      );
       setWatchers([]);
     } finally {
       setLoading(false);
@@ -214,176 +200,124 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
   };
 
   const getProgressColor = (progress: number) => {
-    if (progress >= 90) return 'success';
-    if (progress >= 50) return 'active';
-    return 'normal';
-  };
-
-  const renderWatcherItem = useCallback(
-    (item: WatcherItem) => {
-      const actualWatchedTime = getActualWatchedTime(item);
-      const watchedTimeStr = formatSecondsToTime(actualWatchedTime);
-      const totalTimeStr = formatSecondsToTime(item.duration);
-      const displayName = getDisplayName(item);
-      const isCurrentUser = item.userId === userId;
-      const initials = displayName.charAt(0).toUpperCase();
-
-      return (
-        <List.Item
-          key={item._id}
-          actions={[
-            <Tooltip key="time" title={formatDate(item.watchedAt)}>
-              <Text type="secondary" style={styles.secondaryText12}>
-                <CalendarOutlined /> {formatDate(item.watchedAt)}
-              </Text>
-            </Tooltip>,
-          ]}
-          style={styles.listItemStyle}>
-          <List.Item.Meta
-            avatar={
-              <Avatar
-                src={item.avatar}
-                icon={!item.avatar && <UserOutlined />}
-                style={{
-                  backgroundColor: isCurrentUser ? '#1890ff' : '#f56a00',
-                  ...styles.avatarStyle,
-                }}>
-                {!item.avatar && initials}
-              </Avatar>
-            }
-            title={
-              <Space size={4}>
-                <Text strong style={styles.strongText14}>
-                  {displayName}
-                </Text>
-                {isCurrentUser && (
-                  <Tag
-                    color="blue"
-                    icon={<UserOutlined style={styles.icon10} />}
-                    style={styles.tagYouStyle}>
-                    You
-                  </Tag>
-                )}
-                {item.completed && (
-                  <Tag
-                    color="success"
-                    icon={<CheckCircleOutlined style={styles.icon10} />}
-                    style={styles.tagCompletedStyle}>
-                    Completed
-                  </Tag>
-                )}
-              </Space>
-            }
-            description={
-              <Space direction="vertical" size={4} style={styles.spaceVertical}>
-                <Row
-                  justify="space-between"
-                  align="middle"
-                  style={styles.statisticLabel}>
-                  <Col>
-                    <Text type="secondary" style={styles.secondaryText12}>
-                      <PlayCircleOutlined /> {item.progress || 0}%
-                    </Text>
-                  </Col>
-                </Row>
-                <Progress
-                  percent={item.progress || 0}
-                  size="small"
-                  status={getProgressColor(item.progress)}
-                  showInfo={false}
-                />
-                {item.email && (
-                  <Text type="secondary" style={styles.secondaryText11}>
-                    {item.email}
-                  </Text>
-                )}
-              </Space>
-            }
-          />
-        </List.Item>
-      );
-    },
-    [
-      formatSecondsToTime,
-      getActualWatchedTime,
-      getDisplayName,
-      formatDate,
-      userId,
-    ],
-  );
-
-  const renderPagination = () => {
-    if (pagination.totalPages <= 1) return null;
-
-    const hasPrev = pagination.pageNum > 1;
-    const hasNext = pagination.pageNum < pagination.totalPages;
-
-    return (
-      <Row justify="center" align="middle" style={styles.paginationRow}>
-        <Col>
-          <Button
-            icon={<ArrowLeftOutlined />}
-            disabled={!hasPrev}
-            onClick={handlePrevPage}
-            size="small"
-            style={styles.avatarSize32}
-          />
-        </Col>
-        <Col style={styles.columnMargin12}>
-          <Text style={styles.text12Center}>
-            {pagination.pageNum} / {pagination.totalPages}
-          </Text>
-        </Col>
-        <Col>
-          <Button
-            icon={<ArrowRightOutlined />}
-            disabled={!hasNext}
-            onClick={handleNextPage}
-            size="small"
-            style={styles.avatarSize32}
-          />
-        </Col>
-      </Row>
-    );
+    if (progress >= 90) return '#16a34a';
+    if (progress >= 50) return '#1d418a';
+    return '#d97706';
   };
 
   return (
-    <Spin spinning={loading} tip="Loading...">
-      <Space direction="vertical" style={styles.spaceVerticalPadding}>
-        <Row
-          justify="space-between"
-          align="middle"
-          style={styles.statisticLabel}>
-          <Col>
-            <Text strong style={styles.text16Bold}>
-              👥 Viewers: {subLessonTitle}
-            </Text>
-          </Col>
-          <Col>
-            <Tag color="blue" style={styles.smallText12}>
-              {watchers.length} users
-              {pagination.total > 0}
-            </Tag>
-          </Col>
-        </Row>
+    <Spin spinning={loading}>
+      {/* Modal bọc ngoài (LessonDetailPage/LessonContentOverview) đã hiện
+          tên video ở title của Modal rồi — chỉ hiện số lượng ở đây, tránh
+          lặp lại tên video 2 lần. */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Người đã xem</Text>
+        <Tag color="blue" style={styles.countTag}>
+          {pagination.total} người
+        </Tag>
+      </View>
 
-        {watchers.length === 0 && !loading ? (
+      {watchers.length === 0 && !loading ? (
+        <View style={styles.emptyWrap}>
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description="No viewers yet"
-            style={styles.emptyPadding}
+            description="Chưa có ai xem bài học này"
           />
-        ) : (
-          <>
-            <List
-              dataSource={watchers}
-              renderItem={renderWatcherItem}
-              locale={{ emptyText: 'No data available' }}
-            />
-            {renderPagination()}
-          </>
-        )}
-      </Space>
+        </View>
+      ) : (
+        <>
+          <View style={styles.list}>
+            {watchers.map(item => {
+              const actualWatchedTime = getActualWatchedTime(item);
+              const watchedTimeStr = formatSecondsToTime(actualWatchedTime);
+              const totalTimeStr = formatSecondsToTime(item.duration);
+              const displayName = getDisplayName(item);
+              const isCurrentUser = item.userId === userId;
+              const initials = displayName.charAt(0).toUpperCase();
+
+              return (
+                <View key={item._id} style={styles.card}>
+                  <Avatar
+                    src={item.avatar}
+                    icon={!item.avatar && <UserOutlined />}
+                    style={{
+                      ...styles.avatar,
+                      backgroundColor: isCurrentUser ? '#1d418a' : '#f56a00',
+                    }}>
+                    {!item.avatar && initials}
+                  </Avatar>
+                  <View style={styles.cardBody}>
+                    <View style={styles.nameRow}>
+                      <Text style={styles.name} numberOfLines={1}>
+                        {displayName}
+                      </Text>
+                      {isCurrentUser && (
+                        <Tag color="blue" style={styles.meRow}>
+                          Bạn
+                        </Tag>
+                      )}
+                      {item.completed && (
+                        <Tag
+                          color="success"
+                          icon={<CheckCircleFilled />}
+                          style={styles.doneTag}>
+                          Đã hoàn thành
+                        </Tag>
+                      )}
+                    </View>
+                    {item.email && (
+                      <Text style={styles.email} numberOfLines={1}>
+                        {item.email}
+                      </Text>
+                    )}
+                    <View style={styles.progressRow}>
+                      <View style={styles.progressBarWrap}>
+                        <Progress
+                          percent={item.progress || 0}
+                          size="small"
+                          showInfo={false}
+                          strokeColor={getProgressColor(item.progress)}
+                        />
+                      </View>
+                      <Text style={styles.progressLabel}>
+                        {item.progress || 0}%
+                      </Text>
+                    </View>
+                    <View style={styles.metaRow}>
+                      <Text style={styles.metaText}>
+                        Đã xem {watchedTimeStr} / {totalTimeStr}
+                      </Text>
+                      <Text style={styles.metaText}>
+                        {formatDate(item.watchedAt)}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+
+          {pagination.totalPages > 1 && (
+            <View style={styles.paginationRow}>
+              <Button
+                icon={<ArrowLeftOutlined />}
+                disabled={pagination.pageNum <= 1}
+                onClick={handlePrevPage}
+                size="small"
+              />
+              <Text style={styles.pageText}>
+                Trang {pagination.pageNum}/{pagination.totalPages}
+              </Text>
+              <Button
+                icon={<ArrowRightOutlined />}
+                disabled={pagination.pageNum >= pagination.totalPages}
+                onClick={handleNextPage}
+                size="small"
+              />
+            </View>
+          )}
+        </>
+      )}
     </Spin>
   );
 };

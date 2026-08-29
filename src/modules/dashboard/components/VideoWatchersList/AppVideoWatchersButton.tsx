@@ -19,7 +19,7 @@ const AppVideoWatchersButton: React.FC<AppVideoWatchersButtonProps> = ({
   onClick,
 }) => {
   return (
-    <Tooltip title="View users who watched this video">
+    <Tooltip title="Xem danh sách người đã học bài này">
       <Button
         type="text"
         icon={<EyeOutlined />}
