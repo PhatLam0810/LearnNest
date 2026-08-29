@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, Text, View } from 'react-native-web';
 import styles from './styles';
 import Search from 'antd/es/input/Search';
-import { Button, Modal as AntdModal, Card, Segmented, Select, Tag } from 'antd';
+import { Button, Modal as AntdModal, Segmented, Select, Tag } from 'antd';
+import { CheckCircleFilled } from '@ant-design/icons';
 import { Library } from '~mdDashboard/types';
 import { PracticeTask, PracticeSubject } from '~mdDashboard/types/practice';
 import { AddLibraryContent } from '~mdAdmin/components';
@@ -136,6 +137,7 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                   />
                 </View>
                 <FlatList
+                  key="library-list"
                   data={listItem}
                   numColumns={4}
                   onEndReached={fetchData}
@@ -183,39 +185,56 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                     ]}
                   />
                 </View>
+                {/* Danh sách 1 cột, không phải lưới thẻ như bài học video —
+                    tiêu đề bài thực hành thường dài (1 câu mô tả bài tập),
+                    lưới 4 cột làm chữ bị bóp/xuống dòng xấu và trông vỡ
+                    layout. Mỗi dòng cao tự nhiên theo nội dung, có dấu tick
+                    rõ ràng khi đã chọn thay vì chỉ đổi viền. */}
                 <FlatList
+                  key="task-list"
                   data={filteredTasks}
-                  numColumns={4}
-                  columnWrapperStyle={{ gap: '0.5%' }}
+                  numColumns={1}
                   showsVerticalScrollIndicator={false}
                   keyExtractor={(item, index) => item._id + index}
-                  renderItem={({ item }) => (
-                    <Card
-                      hoverable
-                      onClick={() => handleSelectTask(item)}
-                      style={{
-                        maxWidth: '23.5%',
-                        minWidth: '23.5%',
-                        minHeight: 140,
-                        marginBottom: 12,
-                        ...(selectedTasks.some(t => t._id === item._id)
-                          ? styles.itemSelected
-                          : {}),
-                      }}>
-                      <Tag color={item.subject === 'Excel' ? 'green' : 'blue'}>
-                        {item.subject}
-                      </Tag>
-                      {!item.isPublished && <Tag color="default">Nháp</Tag>}
-                      <div
+                  renderItem={({ item }) => {
+                    const isSelected = selectedTasks.some(
+                      t => t._id === item._id,
+                    );
+                    return (
+                      <View
+                        onClick={() => handleSelectTask(item)}
                         style={{
-                          marginTop: 8,
-                          fontWeight: 500,
-                          fontSize: 14,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 10,
+                          padding: 12,
+                          marginBottom: 10,
+                          borderRadius: 8,
+                          borderWidth: isSelected ? 2 : 0.5,
+                          borderColor: isSelected
+                            ? 'var(--color-vhu-primary)'
+                            : '#8D8D8D',
+                          cursor: 'pointer',
                         }}>
-                        {item.title}
-                      </div>
-                    </Card>
-                  )}
+                        <Tag
+                          color={item.subject === 'Excel' ? 'green' : 'blue'}>
+                          {item.subject}
+                        </Tag>
+                        {!item.isPublished && <Tag color="default">Nháp</Tag>}
+                        <Text style={{ flex: 1, fontSize: 14 }}>
+                          {item.title}
+                        </Text>
+                        {isSelected && (
+                          <CheckCircleFilled
+                            style={{
+                              color: 'var(--color-vhu-primary)',
+                              fontSize: 18,
+                            }}
+                          />
+                        )}
+                      </View>
+                    );
+                  }}
                 />
               </>
             )}
