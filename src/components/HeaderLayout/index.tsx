@@ -244,6 +244,14 @@ const HeaderLayout: React.FC = ({}) => {
             }}>
             Lộ Trình AI
           </Button>
+          <Button
+            block
+            onClick={() => {
+              setOpen(false);
+              router.push('/dashboard/practice');
+            }}>
+            Thực Hành MOS
+          </Button>
           {!isAdmin && (
             <Button
               block

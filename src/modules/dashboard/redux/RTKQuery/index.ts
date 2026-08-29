@@ -10,6 +10,11 @@ import {
 } from './types';
 import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
+import {
+  PracticeSubmission,
+  PracticeTask,
+  PracticeTaskDetail,
+} from '~mdDashboard/types/practice';
 import { LessonDetailDataResponse } from '../saga/type';
 
 export const dashboardQuery = baseQuery.injectEndpoints({
@@ -184,6 +189,33 @@ export const dashboardQuery = baseQuery.injectEndpoints({
         body: { message },
       }),
     }),
+
+    // ---- MOS Practice Exam (học viên làm bài thực hành Word/Excel) ----
+    getPracticeTasksStudent: builder.query<
+      PracticeTask[],
+      { subject?: 'Word' | 'Excel' } | void
+    >({
+      query: params => ({
+        url: '/practice/tasks',
+        method: 'GET',
+        params: params ?? undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getPracticeTaskDetailStudent: builder.query<PracticeTaskDetail, string>({
+      query: taskId => ({
+        url: `/practice/tasks/${taskId}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getMyPracticeSubmissions: builder.query<PracticeSubmission[], string>({
+      query: taskId => ({
+        url: `/practice/tasks/${taskId}/my-submissions`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });
@@ -192,4 +224,7 @@ export const {
   useGetMyRoadmapQuery,
   useAdviseCourseMutation,
   useChatWithAdvisorMutation,
+  useGetPracticeTasksStudentQuery,
+  useGetPracticeTaskDetailStudentQuery,
+  useGetMyPracticeSubmissionsQuery,
 } = dashboardQuery;

@@ -209,6 +209,38 @@ export interface LessonLearnersData {
   totalPages: number;
 }
 
+// ---- MOS Practice Exam (soạn đề Word/Excel thực hành) ----
+export interface CreatePracticeTaskPayload {
+  subject: 'Word' | 'Excel';
+  title: string;
+  description?: string;
+  starterFileUrl: string;
+  assetFileUrls?: string[];
+  lessonId?: string;
+}
+
+export interface UpdatePracticeTaskPayload extends CreatePracticeTaskPayload {
+  isPublished?: boolean;
+}
+
+export interface UpdatePracticeTaskParams {
+  taskId: string;
+  body: UpdatePracticeTaskPayload;
+}
+
+export interface PracticeCriteriaInput {
+  order?: number;
+  type: string;
+  params: Record<string, any>;
+  points?: number;
+  instructionOverride?: string;
+}
+
+export interface SetPracticeCriteriaParams {
+  taskId: string;
+  criteria: PracticeCriteriaInput[];
+}
+
 export interface LessonLearnersResponse {
   lessonId: string;
   lessonTitle: string;

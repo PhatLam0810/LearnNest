@@ -11,6 +11,7 @@ import {
   ImportUsersResponse,
   CreatePracticeClassPayload,
   CreatePracticeClassResponse,
+  CreatePracticeTaskPayload,
   LessonLearnerPoolResponse,
   LessonLearnersResponse,
   LessonLearnersSummaryResponse,
@@ -19,8 +20,17 @@ import {
   RemindLearnersBulkResponse,
   SendImportEmailsRequest,
   SendImportEmailsResponse,
+  SetPracticeCriteriaParams,
   SetRoleParams,
+  UpdatePracticeTaskParams,
 } from './type';
+import {
+  PracticeCriteria,
+  PracticeInstructionItem,
+  PracticeSubmission,
+  PracticeTask,
+  PracticeTaskDetail,
+} from '~mdDashboard/types/practice';
 
 export const adminQuery = baseQuery.injectEndpoints({
   endpoints: builder => ({
@@ -330,6 +340,79 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
       }),
       transformResponse: (res: any) => res.data,
+    }),
+
+    // ---- MOS Practice Exam (soạn đề Word/Excel thực hành) ----
+    getPracticeTasksAdmin: builder.query<
+      PracticeTask[],
+      { subject?: 'Word' | 'Excel' } | void
+    >({
+      query: params => ({
+        url: 'practice/tasks/admin/all',
+        method: 'GET',
+        params: params ?? undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getPracticeTaskDetailAdmin: builder.query<PracticeTaskDetail, string>({
+      query: taskId => ({
+        url: `practice/tasks/${taskId}`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    createPracticeTask: builder.mutation<
+      PracticeTask,
+      CreatePracticeTaskPayload
+    >({
+      query: body => ({
+        url: 'practice/tasks',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    updatePracticeTask: builder.mutation<
+      PracticeTask,
+      UpdatePracticeTaskParams
+    >({
+      query: ({ taskId, body }) => ({
+        url: `practice/tasks/${taskId}`,
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    deletePracticeTask: builder.mutation<void, string>({
+      query: taskId => ({
+        url: `practice/tasks/${taskId}`,
+        method: 'DELETE',
+      }),
+    }),
+    setPracticeCriteria: builder.mutation<
+      PracticeCriteria[],
+      SetPracticeCriteriaParams
+    >({
+      query: ({ taskId, criteria }) => ({
+        url: `practice/tasks/${taskId}/criteria`,
+        method: 'PUT',
+        body: { criteria },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getPracticeInstructions: builder.query<PracticeInstructionItem[], string>({
+      query: taskId => ({
+        url: `practice/tasks/${taskId}/instructions`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getPracticeSubmissionsForTask: builder.query<PracticeSubmission[], string>({
+      query: taskId => ({
+        url: `practice/admin/tasks/${taskId}/submissions`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
   }),
   overrideExisting: true,

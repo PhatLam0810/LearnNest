@@ -1,0 +1,52 @@
+.practice-list-page {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.practice-list-heading {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.practice-list-subheading {
+  color: #888;
+  margin: 4px 0 16px;
+}
+
+.practice-task-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.practice-task-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+  background: #fff;
+}
+
+.practice-task-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.practice-task-title {
+  margin: 8px 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.practice-task-desc {
+  color: #666;
+  font-size: 13px;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
