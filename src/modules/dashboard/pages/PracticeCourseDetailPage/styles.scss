@@ -69,13 +69,32 @@
   color: #888;
 }
 
+.practice-course-task-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .practice-course-task-list {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
+.practice-course-subject-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 2px;
+}
+
 .practice-course-task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;

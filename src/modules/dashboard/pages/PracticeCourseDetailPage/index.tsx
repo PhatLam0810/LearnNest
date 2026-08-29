@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Collapse, Empty, Spin } from 'antd';
+import { Button, Collapse, Empty, Spin, Tag } from 'antd';
 import { CaretRightOutlined, LeftOutlined } from '@ant-design/icons';
 import { dashboardQuery } from '~mdDashboard/redux';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
@@ -68,36 +68,66 @@ const PracticeCourseDetailPage: React.FC<Props> = ({ lessonId }) => {
     m => (tasksByModule[m._id] || []).length > 0,
   );
 
-  const collapseItems = modulesWithTasks.map((module, index) => ({
-    key: String(index),
-    label: (
-      <div className="practice-course-module-header">
-        <span className="practice-course-module-title">{module.title}</span>
-        <span className="practice-course-module-count">
-          {tasksByModule[module._id].length} bài tập
-        </span>
-      </div>
-    ),
-    children: (
-      <div className="practice-course-task-list">
-        {tasksByModule[module._id].map(task => (
-          <div
-            key={task._id}
-            className={
-              'practice-course-task-item' +
-              (task._id === selectedTaskId
-                ? ' practice-course-task-item--active'
-                : '')
-            }
-            role="button"
-            tabIndex={0}
-            onClick={() => setSelectedTaskId(task._id)}>
-            {task.title}
-          </div>
-        ))}
-      </div>
-    ),
-  }));
+  // 1 module có thể chứa cả bài Word lẫn Excel (VD gán nhầm/gộp lúc soạn
+  // đề) — tách hẳn thành 2 nhóm con Word/Excel trong danh sách thay vì để
+  // lẫn lộn 1 danh sách, cho rõ bài nào thuộc môn nào.
+  const collapseItems = modulesWithTasks.map((module, index) => {
+    const moduleTasks = tasksByModule[module._id];
+    const wordTasks = moduleTasks.filter(t => t.subject === 'Word');
+    const excelTasks = moduleTasks.filter(t => t.subject === 'Excel');
+    const groups: { subject: 'Word' | 'Excel'; tasks: PracticeTask[] }[] = [
+      ...(wordTasks.length
+        ? [{ subject: 'Word' as const, tasks: wordTasks }]
+        : []),
+      ...(excelTasks.length
+        ? [{ subject: 'Excel' as const, tasks: excelTasks }]
+        : []),
+    ];
+    const showGroupLabel = groups.length > 1;
+
+    return {
+      key: String(index),
+      label: (
+        <div className="practice-course-module-header">
+          <span className="practice-course-module-title">{module.title}</span>
+          <span className="practice-course-module-count">
+            {moduleTasks.length} bài tập
+          </span>
+        </div>
+      ),
+      children: (
+        <div className="practice-course-task-groups">
+          {groups.map(group => (
+            <div className="practice-course-task-list" key={group.subject}>
+              {showGroupLabel && (
+                <div className="practice-course-subject-label">
+                  {group.subject}
+                </div>
+              )}
+              {group.tasks.map(task => (
+                <div
+                  key={task._id}
+                  className={
+                    'practice-course-task-item' +
+                    (task._id === selectedTaskId
+                      ? ' practice-course-task-item--active'
+                      : '')
+                  }
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedTaskId(task._id)}>
+                  <span>{task.title}</span>
+                  <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
+                    {task.subject}
+                  </Tag>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ),
+    };
+  });
 
   return (
     <div className="practice-course-page">
