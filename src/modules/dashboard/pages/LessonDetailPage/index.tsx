@@ -52,6 +52,25 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     lessonDetail?.modules?.flatMap(module => module.libraries ?? []) ?? [];
   const hasContent = lessonLibraries.length > 0;
 
+  // "Khóa thực hành" (MOS practice) dùng lại đúng Lesson/Module này nhưng
+  // không có library video nào — nếu vào nhầm trang khóa học video thường
+  // (từ danh sách/tìm kiếm chung) thì tự chuyển sang đúng trang làm bài
+  // thực hành thay vì hiện giao diện "Sẽ có trong tương lai" gây hiểu nhầm.
+  const { data: practiceTasksOfLesson } =
+    dashboardQuery.useGetPracticeTasksStudentQuery(
+      { lessonId: id },
+      { skip: !id || hasContent },
+    );
+  useEffect(() => {
+    if (
+      !hasContent &&
+      practiceTasksOfLesson &&
+      practiceTasksOfLesson.length > 0
+    ) {
+      router.replace(`/dashboard/practice/course/${id}`);
+    }
+  }, [hasContent, practiceTasksOfLesson, id, router]);
+
   const { isMobile, isTablet } = useResponsive();
   const numColumns = isMobile ? 1 : 2;
 

@@ -189,7 +189,7 @@ const HeaderLayout: React.FC = ({}) => {
             <Dropdown trigger={['hover']} menu={{ items: menuItemsUser }}>
               <Avatar
                 size={screens.md ? 42 : 36}
-                src={userProfile?.avatar}
+                src={userProfile?.avatar || undefined}
                 icon={<UserOutlined />}
                 className="header-avatar"
               />
