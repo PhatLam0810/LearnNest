@@ -21,6 +21,12 @@ const styles = StyleSheet.create({
     fontWeight: 600,
     borderRadius: 999,
   },
+  headerActions: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   list: {
     display: 'flex',
     flexDirection: 'column',

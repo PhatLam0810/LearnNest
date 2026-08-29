@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 import { View, Text } from 'react-native-web';
+import { adminQuery } from '~mdAdmin/redux';
 import styles from './styles';
 
 interface WatcherItem {
@@ -53,6 +54,10 @@ interface AppVideoWatchersProps {
   subLessonId: string;
   subLessonTitle: string;
   userId: string;
+  // Chỉ admin mở từ trang quản trị mới truyền — có giá trị thì mới hiện nút
+  // "Nhắc những người chưa xem" (cần lessonId để gọi đúng API nhắc theo
+  // khóa). Không truyền thì ẩn nút, không đổi gì hành vi cũ.
+  lessonId?: string;
   onClose?: () => void;
 }
 
@@ -66,7 +71,10 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
   subLessonId,
   subLessonTitle,
   userId,
+  lessonId,
 }) => {
+  const [remindNotWatched, { isLoading: isReminding }] =
+    adminQuery.useRemindNotWatchedVideoMutation();
   const [watchers, setWatchers] = useState<WatcherItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -205,6 +213,28 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
     return '#d97706';
   };
 
+  const handleRemindNotWatched = async () => {
+    if (!lessonId) return;
+    try {
+      const res = await remindNotWatched({ lessonId, subLessonId }).unwrap();
+      if (res.totalEligible === 0) {
+        message.info(
+          'Hiện không có ai cần nhắc (đã xem hết hoặc mới nhắc gần đây)',
+        );
+        return;
+      }
+      message.success(
+        `Đã nhắc ${res.sent}/${res.totalEligible} học viên chưa xem${
+          res.failed ? ` (${res.failed} gửi thất bại)` : ''
+        }`,
+      );
+    } catch (error: any) {
+      message.error(
+        error?.data?.message || 'Gửi nhắc nhở thất bại, thử lại sau',
+      );
+    }
+  };
+
   return (
     <Spin spinning={loading}>
       {/* Modal bọc ngoài (LessonDetailPage/LessonContentOverview) đã hiện
@@ -212,9 +242,19 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
           lặp lại tên video 2 lần. */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Người đã xem</Text>
-        <Tag color="blue" style={styles.countTag}>
-          {pagination.total} người
-        </Tag>
+        <View style={styles.headerActions}>
+          <Tag color="blue" style={styles.countTag}>
+            {pagination.total} người
+          </Tag>
+          {lessonId && (
+            <Button
+              size="small"
+              loading={isReminding}
+              onClick={handleRemindNotWatched}>
+              Nhắc người chưa xem
+            </Button>
+          )}
+        </View>
       </View>
 
       {watchers.length === 0 && !loading ? (

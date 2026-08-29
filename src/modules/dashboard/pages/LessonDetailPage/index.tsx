@@ -678,6 +678,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
           subLessonId={selectedSubLessonId || ''}
           subLessonTitle={selectedSubLessonTitle}
           userId={userProfile?._id || ''}
+          lessonId={lessonDetail?._id}
           onClose={() => setWatcherModalVisible(false)}
         />
       </Modal>

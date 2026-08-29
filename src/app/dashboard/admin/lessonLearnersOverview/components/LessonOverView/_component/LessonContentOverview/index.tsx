@@ -161,6 +161,7 @@ const LessonContentOverview: React.FC<Props> = ({ lessonId }) => {
             subLessonId={watcherLibrary.id}
             subLessonTitle={watcherLibrary.title}
             userId={userProfile?._id || ''}
+            lessonId={lessonId}
           />
         )}
       </Modal>

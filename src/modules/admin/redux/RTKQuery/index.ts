@@ -354,6 +354,19 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res.data,
     }),
+    // Nhắc riêng những học viên CHƯA XEM XONG đúng 1 video/bài học cụ thể —
+    // khác remindLearnersBulk (nhắc theo "im lặng bao lâu" tính chung cả
+    // khóa), dùng ngay trong modal "Người đã xem" của 1 video.
+    remindNotWatchedVideo: builder.mutation<
+      RemindLearnersBulkResponse,
+      { lessonId: string; subLessonId: string }
+    >({
+      query: ({ lessonId, subLessonId }) => ({
+        url: `admin/lessons/${lessonId}/videos/${subLessonId}/remind-not-watched`,
+        method: 'POST',
+      }),
+      transformResponse: (res: any) => res.data,
+    }),
     sendPracticeClassEmails: builder.mutation<
       { successful: number; failed: number; details: any[] },
       { classId: string }
