@@ -59,6 +59,28 @@ const PracticeTaskDetailPage: React.FC<Props> = ({ taskId }) => {
   const { task, criteria } = detail;
   const accept = task.subject === 'Excel' ? '.xlsx' : '.docx';
 
+  const handleDownloadStarter = async () => {
+    try {
+      const res = await api.get(`/practice/tasks/${taskId}/starter-file`, {
+        responseType: 'blob',
+      });
+      const blobUrl = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      // Tên file dễ hiểu theo tiêu đề đề bài, thay vì tên hash dài của
+      // Firebase Storage — proxy qua backend nên tải blob rồi tự đặt tên,
+      // không dùng thẳng link Firebase (cross-origin nên thuộc tính
+      // `download` của thẻ <a> sẽ bị trình duyệt bỏ qua).
+      a.download = `${task.title}${accept}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      messageApi.error('Tải file đề gốc thất bại, vui lòng thử lại');
+    }
+  };
+
   const uploadProps: UploadProps = {
     accept,
     maxCount: 1,
@@ -109,7 +131,10 @@ const PracticeTaskDetailPage: React.FC<Props> = ({ taskId }) => {
       </div>
 
       {task.description && (
-        <p className="practice-detail-desc">{task.description}</p>
+        <div className="practice-detail-requirements">
+          <h3>Yêu cầu đề bài</h3>
+          <p className="practice-detail-desc">{task.description}</p>
+        </div>
       )}
 
       <p className="practice-detail-meta">
@@ -118,9 +143,9 @@ const PracticeTaskDetailPage: React.FC<Props> = ({ taskId }) => {
       </p>
 
       <div className="practice-detail-actions">
-        <a href={task.starterFileUrl} target="_blank" rel="noreferrer">
-          <Button icon={<DownloadOutlined />}>Tải file đề gốc</Button>
-        </a>
+        <Button icon={<DownloadOutlined />} onClick={handleDownloadStarter}>
+          Tải file đề gốc
+        </Button>
         <Upload {...uploadProps}>
           <Button
             type="primary"
