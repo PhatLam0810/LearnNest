@@ -37,6 +37,13 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
   // học để tiện sắp xếp theo thứ tự". Vị trí (index) trong mảng này chính
   // là "order" dùng khi lưu, cho cả 2 loại nội dung.
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
+  // Chụp lại đúng tập bài thực hành phần học này CÓ SẴN lúc mở form sửa —
+  // dùng lúc lưu để biết bài nào bị bỏ chọn cần gỡ, mà KHÔNG cần allTasks
+  // phải tải xong lại lần nữa lúc bấm Lưu (nguồn của 1 lỗi thật: nếu
+  // allTasks còn đang tải lúc submit, code cũ im lặng bỏ qua toàn bộ việc
+  // gán bài thực hành — dễ trúng nhất ở modal "Tạo phần học" vì admin
+  // thường điền form và bấm lưu rất nhanh sau khi mở).
+  const [initialTaskIds, setInitialTaskIds] = useState<Set<string>>(new Set());
   const [isVisibleModalLibrarySelect, setIsVisibleModalLibrarySelect] =
     useState(false);
 
@@ -61,32 +68,35 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
       (a: any, b: any) => a._order - b._order,
     );
     setContentItems(merged);
+    setInitialTaskIds(
+      new Set(taskItems.map(i => (i.data as PracticeTask)._id)),
+    );
   }, [initialValues?._id, allTasks]);
 
   // Đồng bộ bài thực hành vào đúng lúc phần học được lưu — không gọi PUT
   // .../module ngay lúc chọn trong picker, giống hệt cách library items chỉ
-  // thật sự ghi vào Module.libraries[] lúc submit.
-  const reconcileTasks = async (moduleId: string) => {
-    if (!allTasks) return;
-    const selectedTaskIdsWithOrder = new Map(
-      contentItems
-        .map((item, index) => ({ item, index }))
-        .filter(({ item }) => item.type === 'task')
-        .map(({ item, index }) => [(item.data as PracticeTask)._id, index]),
+  // thật sự ghi vào Module.libraries[] lúc submit. Không phụ thuộc allTasks
+  // ở bước này (đã có sẵn dữ liệu task đầy đủ ngay trong contentItems, do
+  // ModalSelectLibrary trả về nguyên object task lúc chọn) — tránh lỗi
+  // race nêu trên.
+  const syncTasks = async (moduleId: string) => {
+    const currentTaskItems = contentItems.filter(i => i.type === 'task');
+    const currentTaskIds = new Set(
+      currentTaskItems.map(i => (i.data as PracticeTask)._id),
     );
-    const ops = allTasks
-      .filter(
-        t => t.moduleId === moduleId || selectedTaskIdsWithOrder.has(t._id),
-      )
-      .map(t => {
-        const isSelected = selectedTaskIdsWithOrder.has(t._id);
-        return setTaskModule({
-          taskId: t._id,
-          moduleId: isSelected ? moduleId : null,
-          order: isSelected ? selectedTaskIdsWithOrder.get(t._id) : undefined,
-        });
-      });
-    await Promise.all(ops);
+
+    const assignOps = currentTaskItems.map(item =>
+      setTaskModule({
+        taskId: (item.data as PracticeTask)._id,
+        moduleId,
+        order: contentItems.indexOf(item),
+      }),
+    );
+    const removeOps = [...initialTaskIds]
+      .filter(id => !currentTaskIds.has(id))
+      .map(taskId => setTaskModule({ taskId, moduleId: null }));
+
+    await Promise.all([...assignOps, ...removeOps]);
   };
 
   return (
@@ -109,12 +119,12 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
         if (onFinish) {
           // Sửa phần học đã có sẵn — đã biết _id, gắn/gỡ bài thực hành
           // ngay, không cần đợi module lưu xong.
-          if (initialValues?._id) await reconcileTasks(initialValues._id);
+          if (initialValues?._id) await syncTasks(initialValues._id);
           onFinish(formValues);
         } else {
           addModule(formValues)
             .then(async res => {
-              await reconcileTasks(res.data._id);
+              await syncTasks(res.data._id);
               messageApi.success('Add new module successfully!');
               form.resetFields();
               setContentItems([]);
