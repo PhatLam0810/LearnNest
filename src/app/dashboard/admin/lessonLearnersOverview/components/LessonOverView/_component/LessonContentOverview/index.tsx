@@ -77,7 +77,9 @@ const LessonContentOverview: React.FC<Props> = ({ lessonId }) => {
                       setWatcherLibrary({ id: v.libraryId, title: v.title })
                     }>
                     <View style={styles.itemInfo}>
-                      <PlayCircleOutlined style={{ color: '#1d418a' }} />
+                      <PlayCircleOutlined
+                        style={{ color: 'var(--color-vhu-primary)' }}
+                      />
                       <Text style={styles.itemTitle} numberOfLines={1}>
                         {v.title}
                       </Text>
@@ -111,7 +113,9 @@ const LessonContentOverview: React.FC<Props> = ({ lessonId }) => {
                     style={styles.itemRow}
                     onClick={() => setSubmissionsTaskId(t.taskId)}>
                     <View style={styles.itemInfo}>
-                      <FileTextOutlined style={{ color: '#7c3aed' }} />
+                      <FileTextOutlined
+                        style={{ color: 'var(--color-vhu-primary)' }}
+                      />
                       <Text style={styles.itemTitle} numberOfLines={1}>
                         {t.title}
                       </Text>

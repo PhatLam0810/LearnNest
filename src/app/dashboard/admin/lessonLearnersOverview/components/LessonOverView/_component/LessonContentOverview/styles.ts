@@ -9,7 +9,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   moduleHeader: {
-    padding: '14px 18px',
+    // react-native-web KHÔNG hiểu shorthand CSS dạng chuỗi ('14px 18px') —
+    // style system của nó chỉ nhận paddingVertical/paddingHorizontal (hoặc
+    // paddingTop/Right/Bottom/Left) là số. Dùng chuỗi shorthand bị ÂM THẦM
+    // BỎ QUA hoàn toàn (không lỗi, không warning) — đây là nguyên nhân thật
+    // khiến cả khối "Theo nội dung khóa học" không có padding nào cả, đã
+    // xác nhận bằng getComputedStyle thực tế (padding: 0px mọi cấp).
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     backgroundColor: '#f7f9fc',
     borderBottom: '1px solid #e2e8f0',
     display: 'flex',
@@ -27,7 +34,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
   },
   itemRow: {
-    padding: '10px 18px',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
     display: 'flex',
     // react-native-web View mặc định flexDirection:'column' (khác CSS web
     // mặc định 'row') — thiếu dòng này là nguyên nhân thật khiến icon/tiêu
@@ -69,7 +77,8 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   emptyModule: {
-    padding: '10px 18px',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
     color: '#9ca3af',
     fontSize: 13,
   },
