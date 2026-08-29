@@ -16,11 +16,24 @@ type Props = {
 const DragPracticeTaskItem: React.FC<Props> = ({ data, onDelete }) => {
   return (
     <View style={styles.container} onClick={e => e.stopPropagation()}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      {/* flex:1 ở đây (không chỉ ở Text bên trong) — nếu không, nhóm
+          tag+tiêu đề chỉ co vừa đúng nội dung của nó, không chiếm hết
+          khoảng trống còn lại của hàng, khiến nút xoá bị đẩy sát ngay sau
+          chữ thay vì nằm ở mép phải cùng hàng. */}
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 8,
+          minWidth: 0,
+        }}>
         <Tag color={data.subject === 'Excel' ? 'green' : 'blue'}>
           {data.subject}
         </Tag>
-        <Text style={styles.title}>{data?.title}</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          {data?.title}
+        </Text>
       </View>
       <Button
         color="danger"

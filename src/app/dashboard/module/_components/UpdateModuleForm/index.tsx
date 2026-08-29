@@ -51,6 +51,12 @@ const UpdateModuleForm: React.FC<UpdateModuleFormProps> = ({
 
   return (
     <Modal
+      // Không có title -> antd không render header riêng, nút đóng (X) nằm
+      // đè thẳng lên góc trên-phải của vùng ScrollView bên dưới — đúng chỗ
+      // thanh scroll dọc render (đã đo thực tế: đè nhau ~20x24px). Thêm
+      // title để có header riêng, tách hẳn khỏi vùng cuộn, giống modal
+      // "Thêm phần học" bên ModuleManage vốn không bị lỗi này.
+      title={data?.title ? `Cập nhật: ${data.title}` : 'Cập nhật phần học'}
       open={isVisible}
       onCancel={onCloseModalAdd}
       footer={null}
