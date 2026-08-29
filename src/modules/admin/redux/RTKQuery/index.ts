@@ -341,6 +341,16 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res.data,
     }),
+    sendPracticeClassEmails: builder.mutation<
+      { successful: number; failed: number; details: any[] },
+      { classId: string }
+    >({
+      query: ({ classId }) => ({
+        url: `admin/practice-classes/${classId}/send-email`,
+        method: 'POST',
+      }),
+      transformResponse: (res: any) => res.data,
+    }),
 
     // ---- MOS Practice Exam (soạn đề Word/Excel thực hành) ----
     getPracticeTasksAdmin: builder.query<

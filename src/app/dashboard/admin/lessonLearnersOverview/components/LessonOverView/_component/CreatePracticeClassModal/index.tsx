@@ -8,6 +8,7 @@ import {
   Table,
   Checkbox,
   Space,
+  Typography,
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { adminQuery } from '~mdAdmin/redux';
@@ -39,6 +40,8 @@ const CreatePracticeClassModal: React.FC<Props> = ({
     useState<CreatePracticeClassResponse | null>(null);
   const [searchText, setSearchText] = useState('');
   const [createPracticeClass] = adminQuery.useCreatePracticeClassMutation();
+  const [sendPracticeClassEmails, { isLoading: isSendingEmails }] =
+    adminQuery.useSendPracticeClassEmailsMutation();
   const { listItem, currentData, fetchData, search, refresh } =
     useAppPagination<any>({
       apiUrl: `admin/lessons/${lessonId}/learners/pool`,
@@ -71,15 +74,45 @@ const CreatePracticeClassModal: React.FC<Props> = ({
         },
       }).unwrap();
 
+      // Không đóng modal ngay — hiện bước xác nhận để admin có thể gửi
+      // email báo cho học viên trong lớp vừa tạo, rồi mới đóng.
       setCreatedPracticeClass(response);
-      onClose();
-      messageApi.success('Tạo practice class thành công');
+      messageApi.success('Tạo lớp thực hành thành công');
       form.resetFields();
+      setSelectedUsers([]);
       onCreated();
     } catch (error) {
       console.error(error);
       message.error('Tạo practice class thất bại');
     }
+  };
+
+  const handleSendEmails = () => {
+    if (!createdPracticeClass) return;
+    Modal.confirm({
+      title: 'Gửi email cho học viên?',
+      content: `Hệ thống sẽ gửi email báo cho ${createdPracticeClass.count} học viên trong lớp "${createdPracticeClass.practiceClassName}" — hành động này gửi email thật, không thể thu hồi.`,
+      okText: 'Gửi email',
+      cancelText: 'Huỷ',
+      onOk: async () => {
+        try {
+          const result = await sendPracticeClassEmails({
+            classId: createdPracticeClass._id,
+          }).unwrap();
+          messageApi.success(
+            `Đã gửi ${result.successful}/${result.successful + result.failed} email thành công`,
+          );
+        } catch (error) {
+          console.error(error);
+          messageApi.error('Gửi email thất bại');
+        }
+      },
+    });
+  };
+
+  const handleCloseAll = () => {
+    setCreatedPracticeClass(null);
+    onClose();
   };
   const columns: ColumnsType<LessonLearnerPoolItem> = [
     {
@@ -135,90 +168,114 @@ const CreatePracticeClassModal: React.FC<Props> = ({
   return (
     <Modal
       open={open}
-      onCancel={onClose}
+      onCancel={handleCloseAll}
       title="Tạo Practice Class"
       width={'80%'}
       footer={null}>
       {contextHolder}
-      <Form form={form} layout="vertical" onFinish={handleSubmit}>
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Form.Item
-            label="Tên lớp thực hành"
-            name="practiceClassName"
-            rules={[{ required: true }]}>
-            <Input placeholder="Nhập tên lớp thực thành" />
-          </Form.Item>
-          <Form.Item
-            rules={[{ required: true }]}
-            label="Nhập mã lớp thực thành"
-            name="class">
-            <Input style={{ width: '100%' }} />
-          </Form.Item>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
-              gap: 16,
-              flexWrap: 'wrap',
-            }}>
-            <div>
-              <div style={{ fontWeight: 600, marginBottom: 6 }}>
-                Chọn: {selectedUsers.length} / {currentData?.totalRecords || 0}{' '}
-                học viên
-              </div>
-              <div style={{ color: '#595959' }}>
-                Chọn tối thiểu 30 học viên để tạo lớp thực hành.
-              </div>
-            </div>
+      {createdPracticeClass ? (
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+          <div>
+            <Typography.Title level={5} style={{ margin: 0 }}>
+              Đã tạo lớp &quot;{createdPracticeClass.practiceClassName}&quot;
+              thành công
+            </Typography.Title>
+            <Typography.Text type="secondary">
+              {createdPracticeClass.count} học viên trong lớp.
+            </Typography.Text>
           </div>
-          <Input.Search
-            placeholder="Tìm học viên"
-            value={searchText}
-            onChange={e => setSearchText(e.target.value)}
-            onSearch={value => {
-              setSearchText(value);
-              search(value);
-            }}
-            style={{ marginBottom: 12 }}
-          />
-          <Table
-            columns={columns}
-            dataSource={listItem}
-            rowKey="_id"
-            onChange={res => {
-              fetchData({ pageNum: res.current });
-            }}
-            onRow={record => ({
-              onClick: () => {
-                const isSelected = selectedUsers.some(
-                  item => item._id === record._id,
-                );
-                if (isSelected) {
-                  setSelectedUsers(prev =>
-                    prev.filter(item => item._id !== record._id),
-                  );
-                } else {
-                  setSelectedUsers(prev => [...prev, record]);
-                }
-              },
-            })}
-            pagination={{
-              current: currentData?.pageNum,
-              total: currentData?.totalRecords,
-              pageSize: currentData?.pageSize,
-              showSizeChanger: false,
-              position: ['bottomCenter'],
-            }}
-          />
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button onClick={onClose}>Đóng</Button>
-            <Button type="primary" htmlType="submit">
-              Tạo lớp thực hành
+            <Button onClick={handleCloseAll}>Đóng</Button>
+            <Button
+              type="primary"
+              loading={isSendingEmails}
+              onClick={handleSendEmails}>
+              Gửi email cho học viên
             </Button>
           </div>
         </Space>
-      </Form>
+      ) : (
+        <Form form={form} layout="vertical" onFinish={handleSubmit}>
+          <Space direction="vertical" style={{ width: '100%' }}>
+            <Form.Item
+              label="Tên lớp thực hành"
+              name="practiceClassName"
+              rules={[{ required: true }]}>
+              <Input placeholder="Nhập tên lớp thực thành" />
+            </Form.Item>
+            <Form.Item
+              rules={[{ required: true }]}
+              label="Nhập mã lớp thực thành"
+              name="class">
+              <Input style={{ width: '100%' }} />
+            </Form.Item>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                gap: 16,
+                flexWrap: 'wrap',
+              }}>
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: 6 }}>
+                  Chọn: {selectedUsers.length} /{' '}
+                  {currentData?.totalRecords || 0} học viên
+                </div>
+                <div style={{ color: '#595959' }}>
+                  Chọn tối thiểu 30 học viên để tạo lớp thực hành.
+                </div>
+              </div>
+            </div>
+            <Input.Search
+              placeholder="Tìm học viên"
+              value={searchText}
+              onChange={e => setSearchText(e.target.value)}
+              onSearch={value => {
+                setSearchText(value);
+                search(value);
+              }}
+              style={{ marginBottom: 12 }}
+            />
+            <Table
+              columns={columns}
+              dataSource={listItem}
+              rowKey="_id"
+              onChange={res => {
+                fetchData({ pageNum: res.current });
+              }}
+              onRow={record => ({
+                onClick: () => {
+                  const isSelected = selectedUsers.some(
+                    item => item._id === record._id,
+                  );
+                  if (isSelected) {
+                    setSelectedUsers(prev =>
+                      prev.filter(item => item._id !== record._id),
+                    );
+                  } else {
+                    setSelectedUsers(prev => [...prev, record]);
+                  }
+                },
+              })}
+              pagination={{
+                current: currentData?.pageNum,
+                total: currentData?.totalRecords,
+                pageSize: currentData?.pageSize,
+                showSizeChanger: false,
+                position: ['bottomCenter'],
+              }}
+            />
+            <div
+              style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <Button onClick={handleCloseAll}>Đóng</Button>
+              <Button type="primary" htmlType="submit">
+                Tạo lớp thực hành
+              </Button>
+            </div>
+          </Space>
+        </Form>
+      )}
     </Modal>
   );
 };
