@@ -253,6 +253,31 @@ export interface GeneratedCriterion {
   params: Record<string, any>;
 }
 
+// Tổng quan nội dung 1 khóa học theo từng Phần học (video + bài thực hành
+// trộn chung) — xem AdminService.getLessonContentOverview.
+export interface LessonContentOverviewVideo {
+  libraryId: string;
+  title: string;
+  duration: number;
+  completedCount: number;
+  totalLearners: number;
+}
+
+export interface LessonContentOverviewTask {
+  taskId: string;
+  title: string;
+  subject: 'Word' | 'Excel';
+  passedCount: number;
+  totalLearners: number;
+}
+
+export interface LessonContentOverviewModule {
+  moduleId: string;
+  title: string;
+  videos: LessonContentOverviewVideo[];
+  tasks: LessonContentOverviewTask[];
+}
+
 export interface LessonLearnersResponse {
   lessonId: string;
   lessonTitle: string;

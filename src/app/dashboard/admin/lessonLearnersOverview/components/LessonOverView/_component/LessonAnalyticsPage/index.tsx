@@ -8,6 +8,7 @@ import {
   Input,
   Pagination,
   Progress,
+  Segmented,
   Select,
   Space,
   Tag,
@@ -22,6 +23,7 @@ import { adminQuery } from '~mdAdmin/redux';
 import { LessonLearner } from '~mdAdmin/redux/RTKQuery/type';
 import { useAppPagination } from '@hooks';
 import CreatePracticeClassModal from '../CreatePracticeClassModal';
+import LessonContentOverview from '../LessonContentOverview';
 import styles from './styles';
 
 dayjs.extend(relativeTime);
@@ -69,6 +71,11 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
   const [openFilter, setOpenFilter] = useState(false);
   const [isCreatePracticeModalVisible, setIsCreatePracticeModalVisible] =
     useState(false);
+  // "Học viên": danh sách từng người + % tiến độ (đã có sẵn từ trước).
+  // "Nội dung khóa học": tổng quan theo từng Phần học, gộp cả video lẫn bài
+  // thực hành — trục nhìn khác hẳn (theo NỘI DUNG thay vì theo NGƯỜI), nên
+  // tách hẳn view thay vì nhồi chung 1 danh sách.
+  const [viewMode, setViewMode] = useState<'learners' | 'content'>('learners');
 
   const { data: summaryData } = adminQuery.useGetLessonLearnersSummaryQuery();
   const lessonTitle = useMemo(
@@ -281,100 +288,117 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
         </div>
       </div>
 
-      <div style={styles.toolbar}>
-        <Space>
-          <Input.Search
-            placeholder="Tìm kiếm học viên"
-            onSearch={search}
-            style={styles.searchInput}
-          />
-          <Dropdown
-            open={openFilter}
-            trigger={['click']}
-            onOpenChange={setOpenFilter}
-            popupRender={filterContent}>
-            <Button icon={<FilterOutlined />}>Lọc</Button>
-          </Dropdown>
-        </Space>
-        <div style={styles.actionsRow}>
-          <Button onClick={handleExportExcel}>Tải Excel</Button>
-          <Button loading={isBulkReminding} onClick={handleRemindBulk}>
-            Nhắc Hàng Loạt
-          </Button>
-          <Button
-            type="primary"
-            disabled={!isCanCreatePracticeClass}
-            onClick={() => setIsCreatePracticeModalVisible(true)}>
-            Tạo Lớp Thực Hành
-          </Button>
-        </div>
+      <div style={{ marginBottom: 16 }}>
+        <Segmented
+          value={viewMode}
+          onChange={v => setViewMode(v as 'learners' | 'content')}
+          options={[
+            { label: 'Theo học viên', value: 'learners' },
+            { label: 'Theo nội dung khóa học', value: 'content' },
+          ]}
+        />
       </div>
 
-      {learners.length === 0 ? (
-        <div style={styles.emptyState}>
-          <Empty description="Không có người học" />
-        </div>
-      ) : (
-        <div style={styles.learnerList}>
-          {learners.map(learner => {
-            const reminderState = getReminderState(learner);
-            return (
-              <div key={learner._id} style={styles.learnerCard}>
-                <div style={styles.learnerInfo}>
-                  <div style={styles.learnerName}>{learner.fullName}</div>
-                  <div style={styles.learnerMeta}>
-                    {learner.email} · {learner.class || '—'}
-                  </div>
-                </div>
-                <div style={styles.learnerProgressWrap}>
-                  <Progress
-                    percent={learner.progress}
-                    size="small"
-                    status="active"
-                    strokeColor={{ '0%': '#1d418a', '100%': '#88c1e9' }}
-                  />
-                </div>
-                <div style={styles.learnerLastStudied}>
-                  {learner.lastStudiedAt
-                    ? `Học gần nhất: ${dayjs(learner.lastStudiedAt).fromNow()}`
-                    : 'Chưa xem video nào'}
-                </div>
-                <div style={styles.learnerStatus}>
-                  <Tag color={learner.isCompleted ? 'success' : 'default'}>
-                    {learner.isCompleted ? 'Hoàn thành' : 'Chưa hoàn thành'}
-                  </Tag>
-                </div>
-                <div style={styles.learnerReminder}>
-                  {reminderState.eligible && (
-                    <Button
-                      size="small"
-                      loading={remindingUserId === learner._id}
-                      onClick={() => handleRemindLearner(learner)}>
-                      Nhắc nhở
-                    </Button>
-                  )}
-                  {!reminderState.eligible && reminderState.hint && (
-                    <span style={styles.reminderHint}>
-                      {reminderState.hint}
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      {viewMode === 'content' && <LessonContentOverview lessonId={lessonId} />}
 
-      {totalRecords > pageSize && (
-        <div style={styles.paginationWrap}>
-          <Pagination
-            current={pageNum}
-            total={totalRecords}
-            pageSize={pageSize}
-            showSizeChanger={false}
-            onChange={page => fetchData({ pageNum: page })}
-          />
-        </div>
+      {viewMode === 'learners' && (
+        <>
+          <div style={styles.toolbar}>
+            <Space>
+              <Input.Search
+                placeholder="Tìm kiếm học viên"
+                onSearch={search}
+                style={styles.searchInput}
+              />
+              <Dropdown
+                open={openFilter}
+                trigger={['click']}
+                onOpenChange={setOpenFilter}
+                popupRender={filterContent}>
+                <Button icon={<FilterOutlined />}>Lọc</Button>
+              </Dropdown>
+            </Space>
+            <div style={styles.actionsRow}>
+              <Button onClick={handleExportExcel}>Tải Excel</Button>
+              <Button loading={isBulkReminding} onClick={handleRemindBulk}>
+                Nhắc Hàng Loạt
+              </Button>
+              <Button
+                type="primary"
+                disabled={!isCanCreatePracticeClass}
+                onClick={() => setIsCreatePracticeModalVisible(true)}>
+                Tạo Lớp Thực Hành
+              </Button>
+            </div>
+          </div>
+
+          {learners.length === 0 ? (
+            <div style={styles.emptyState}>
+              <Empty description="Không có người học" />
+            </div>
+          ) : (
+            <div style={styles.learnerList}>
+              {learners.map(learner => {
+                const reminderState = getReminderState(learner);
+                return (
+                  <div key={learner._id} style={styles.learnerCard}>
+                    <div style={styles.learnerInfo}>
+                      <div style={styles.learnerName}>{learner.fullName}</div>
+                      <div style={styles.learnerMeta}>
+                        {learner.email} · {learner.class || '—'}
+                      </div>
+                    </div>
+                    <div style={styles.learnerProgressWrap}>
+                      <Progress
+                        percent={learner.progress}
+                        size="small"
+                        status="active"
+                        strokeColor={{ '0%': '#1d418a', '100%': '#88c1e9' }}
+                      />
+                    </div>
+                    <div style={styles.learnerLastStudied}>
+                      {learner.lastStudiedAt
+                        ? `Học gần nhất: ${dayjs(learner.lastStudiedAt).fromNow()}`
+                        : 'Chưa xem video nào'}
+                    </div>
+                    <div style={styles.learnerStatus}>
+                      <Tag color={learner.isCompleted ? 'success' : 'default'}>
+                        {learner.isCompleted ? 'Hoàn thành' : 'Chưa hoàn thành'}
+                      </Tag>
+                    </div>
+                    <div style={styles.learnerReminder}>
+                      {reminderState.eligible && (
+                        <Button
+                          size="small"
+                          loading={remindingUserId === learner._id}
+                          onClick={() => handleRemindLearner(learner)}>
+                          Nhắc nhở
+                        </Button>
+                      )}
+                      {!reminderState.eligible && reminderState.hint && (
+                        <span style={styles.reminderHint}>
+                          {reminderState.hint}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {totalRecords > pageSize && (
+            <div style={styles.paginationWrap}>
+              <Pagination
+                current={pageNum}
+                total={totalRecords}
+                pageSize={pageSize}
+                showSizeChanger={false}
+                onChange={page => fetchData({ pageNum: page })}
+              />
+            </div>
+          )}
+        </>
       )}
 
       <CreatePracticeClassModal

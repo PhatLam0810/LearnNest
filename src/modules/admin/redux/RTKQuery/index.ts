@@ -14,6 +14,7 @@ import {
   CreatePracticeTaskPayload,
   GenerateCriteriaParams,
   GeneratedCriterion,
+  LessonContentOverviewModule,
   LessonLearnerPoolResponse,
   LessonLearnersResponse,
   LessonLearnersSummaryResponse,
@@ -244,6 +245,16 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (res: any) => res?.data ?? res,
+    }),
+    getLessonContentOverview: builder.query<
+      LessonContentOverviewModule[],
+      string
+    >({
+      query: lessonId => ({
+        url: `admin/lessons/${lessonId}/content-overview`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
     getLessonLearners: builder.mutation<
       LessonLearnersResponse,
