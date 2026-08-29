@@ -414,6 +414,17 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    setPracticeTaskModule: builder.mutation<
+      PracticeTask,
+      { taskId: string; moduleId: string | null }
+    >({
+      query: ({ taskId, moduleId }) => ({
+        url: `practice/tasks/${taskId}/module`,
+        method: 'PUT',
+        body: { moduleId },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });

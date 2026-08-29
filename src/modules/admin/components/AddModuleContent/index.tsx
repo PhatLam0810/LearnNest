@@ -7,7 +7,11 @@ import { Module } from '~mdDashboard/redux/saga/type';
 import { PlusOutlined } from '@ant-design/icons';
 import { messageApi } from '@hooks';
 import styles from './styles';
-import { DragLibraryItem, ModalSelectLibrary } from './components';
+import {
+  DragLibraryItem,
+  ModalSelectLibrary,
+  PracticeTaskSection,
+} from './components';
 import { DraggableList } from '@components';
 
 type AddModuleContentProps = {
@@ -99,6 +103,7 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
             }}
           />
         </View>
+        <PracticeTaskSection moduleId={initialValues?._id} />
       </ScrollView>
 
       <Button style={styles.button} htmlType="submit">
