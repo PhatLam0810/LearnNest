@@ -1,7 +1,9 @@
-import React from 'react';
-import { Checkbox, Empty, Spin, Tag, Typography } from 'antd';
+import React, { useState } from 'react';
+import { Button, Checkbox, Empty, Spin, Tag, Typography } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { useAppPagination } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
+import CreateTaskInlineForm from './CreateTaskInlineForm';
 
 type LessonMatch = { _id: string; title: string };
 
@@ -35,6 +37,7 @@ const PracticeTaskSection: React.FC<Props> = ({ moduleId }) => {
     { skip: !lessonId },
   );
   const [setTaskModule] = adminQuery.useSetPracticeTaskModuleMutation();
+  const [isCreating, setIsCreating] = useState(false);
 
   if (!moduleId) {
     return (
@@ -50,7 +53,24 @@ const PracticeTaskSection: React.FC<Props> = ({ moduleId }) => {
 
   return (
     <div style={{ marginTop: 16 }}>
-      <Typography.Title level={5}>Bài thực hành</Typography.Title>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+        <Typography.Title level={5} style={{ margin: 0 }}>
+          Bài thực hành
+        </Typography.Title>
+        {lessonId && !isCreating && (
+          <Button
+            size="small"
+            icon={<PlusOutlined />}
+            onClick={() => setIsCreating(true)}>
+            Tạo bài thực hành mới
+          </Button>
+        )}
+      </div>
       {isLoadingLesson ? (
         <Spin size="small" />
       ) : !lessonId ? (
@@ -58,36 +78,55 @@ const PracticeTaskSection: React.FC<Props> = ({ moduleId }) => {
           Phần học này chưa thuộc khóa học nào — lưu khóa học có chứa phần này
           trước (mục Sắp xếp Phần học), rồi quay lại đây.
         </Typography.Text>
-      ) : isLoadingTasks ? (
-        <Spin size="small" />
-      ) : !tasks || tasks.length === 0 ? (
-        <Empty
-          description="Khóa học này chưa có bài thực hành nào — tạo ở tab Thực Hành MOS trước."
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {tasks.map(task => (
-            <div
-              key={task._id}
-              style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Checkbox
-                checked={task.moduleId === moduleId}
-                onChange={e => {
-                  setTaskModule({
-                    taskId: task._id,
-                    moduleId: e.target.checked ? moduleId : null,
-                  }).then(() => refetchTasks());
+        <>
+          {isCreating && (
+            <div style={{ marginTop: 12 }}>
+              <CreateTaskInlineForm
+                lessonId={lessonId}
+                moduleId={moduleId}
+                onCancel={() => setIsCreating(false)}
+                onCreated={() => {
+                  setIsCreating(false);
+                  refetchTasks();
                 }}
               />
-              <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
-                {task.subject}
-              </Tag>
-              <span>{task.title}</span>
-              {!task.isPublished && <Tag color="default">Nháp</Tag>}
             </div>
-          ))}
-        </div>
+          )}
+          {isLoadingTasks ? (
+            <Spin size="small" />
+          ) : !tasks || tasks.length === 0 ? (
+            !isCreating && (
+              <Empty
+                description="Khóa học này chưa có bài thực hành nào."
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {tasks.map(task => (
+                <div
+                  key={task._id}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Checkbox
+                    checked={task.moduleId === moduleId}
+                    onChange={e => {
+                      setTaskModule({
+                        taskId: task._id,
+                        moduleId: e.target.checked ? moduleId : null,
+                      }).then(() => refetchTasks());
+                    }}
+                  />
+                  <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
+                    {task.subject}
+                  </Tag>
+                  <span>{task.title}</span>
+                  {!task.isPublished && <Tag color="default">Nháp</Tag>}
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

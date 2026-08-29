@@ -218,11 +218,10 @@ export interface CreatePracticeTaskPayload {
   assetFileUrls?: string[];
   lessonId?: string;
   moduleId?: string;
-}
-
-export interface UpdatePracticeTaskPayload extends CreatePracticeTaskPayload {
   isPublished?: boolean;
 }
+
+export type UpdatePracticeTaskPayload = CreatePracticeTaskPayload;
 
 export interface UpdatePracticeTaskParams {
   taskId: string;
