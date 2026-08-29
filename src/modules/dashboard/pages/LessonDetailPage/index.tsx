@@ -5,6 +5,7 @@ import {
   PlayCircleOutlined,
   CaretRightOutlined,
   DollarOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import './styles.scss';
 
@@ -22,7 +23,7 @@ import {
 } from 'react-native-web';
 import styles from './styles';
 import { convertDurationToTime } from '@utils';
-import { Collapse, CollapseProps, message, Modal } from 'antd';
+import { Collapse, CollapseProps, message, Modal, Tag } from 'antd';
 import { authAction } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
 import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/AppVideoWatchersButton';
@@ -52,16 +53,23 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     lessonDetail?.modules?.flatMap(module => module.libraries ?? []) ?? [];
   const hasContent = lessonLibraries.length > 0;
 
-  // "Khóa thực hành" (MOS practice) dùng lại đúng Lesson/Module này nhưng
-  // không có library video nào — nếu vào nhầm trang khóa học video thường
-  // (từ danh sách/tìm kiếm chung) thì tự chuyển sang đúng trang làm bài
-  // thực hành thay vì hiện giao diện "Sẽ có trong tương lai" gây hiểu nhầm.
+  // "Khóa thực hành" (MOS practice) dùng lại đúng Lesson/Module này — nếu
+  // KHÔNG có video nào thì tự chuyển sang đúng trang làm bài thực hành
+  // thay vì hiện giao diện "Sẽ có trong tương lai" gây hiểu nhầm; nếu khóa
+  // có CẢ video lẫn bài thực hành (nội dung trộn) thì fetch để trộn vào
+  // đúng chỗ trong "Nội dung khóa học" bên dưới.
   const { data: practiceTasksOfLesson } =
     dashboardQuery.useGetPracticeTasksStudentQuery(
       { lessonId: id },
-      { skip: !id || hasContent },
+      { skip: !id },
     );
   useEffect(() => {
+    // Đợi lessonDetail tải xong hẳn mới xét — nếu không, hasContent tạm
+    // thời là false trong lúc lessonDetail còn undefined (chưa load), gây
+    // redirect nhầm sang trang thực hành dù khóa thật sự có video (lỗi
+    // thật đã gặp: 1 khóa có nhiều module video + 1 module trộn bài thực
+    // hành vẫn bị đẩy nhầm sang PracticeCourseDetailPage).
+    if (isLoading) return;
     if (
       !hasContent &&
       practiceTasksOfLesson &&
@@ -69,7 +77,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     ) {
       router.replace(`/dashboard/practice/course/${id}`);
     }
-  }, [hasContent, practiceTasksOfLesson, id, router]);
+  }, [isLoading, hasContent, practiceTasksOfLesson, id, router]);
 
   const { isMobile, isTablet } = useResponsive();
   const numColumns = isMobile ? 1 : 2;
@@ -186,70 +194,117 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       dispatch(authAction.setIsShowLoading(false));
     }
   };
+  // Trộn bài học video (order = vị trí trong module.libraries[]) với bài
+  // thực hành thuộc module này (order = field riêng) — 1 khóa học có thể
+  // chứa cả 2 loại nội dung xen kẽ theo đúng thứ tự admin đã sắp xếp.
+  const getModuleContentItems = (moduleItem: any) => {
+    const libraryItems = (moduleItem.libraries || []).map(
+      (l: any, i: number) => ({ kind: 'library' as const, data: l, order: i }),
+    );
+    const taskItems = (practiceTasksOfLesson || [])
+      .filter(t => t.moduleId === moduleItem._id)
+      .map(t => ({ kind: 'task' as const, data: t, order: t.order ?? 0 }));
+    return [...libraryItems, ...taskItems].sort((a, b) => a.order - b.order);
+  };
+
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
-    lessonDetail?.modules?.map((item, index) => ({
-      key: index.toString(),
-      label: (
-        <div style={styles.moduleContentHeader}>
-          <p style={styles.moduleTitleText} title={item.title}>
-            {item.title}
-          </p>
-          <p style={styles.moduleCountText}>
-            Tổng số bài học: {item.libraries.length}
-          </p>
-        </div>
-      ),
-      children: (
-        <View style={styles.contentGap8Margin8}>
-          {item.libraries.map((subItem, subIndex) => {
-            const isDisabled = !hasAccessToLibrary(subItem);
-            return (
-              <TouchableOpacity
-                key={subIndex}
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}>
-                <TouchableOpacity
-                  style={[isDisabled && styles.disabledButton, { flex: 1 }]}>
-                  <View
-                    style={styles.buttonModule}
-                    onClick={() => handleLibraryClick(subItem, item)}>
-                    <View style={styles.rowGap10}>
-                      <PlayCircleOutlined />
-                      <View style={styles.moduleItemContainer}>
-                        <Text numberOfLines={2} style={styles.moduleItemTitle}>
-                          {subItem.title}
-                        </Text>
-                        <Text style={styles.moduleItemTime}>
-                          {subItem.type !== 'Text'
-                            ? convertDurationToTime(subItem.duration)
-                            : 'Trắc nghiệm'}
-                        </Text>
+    lessonDetail?.modules?.map((item, index) => {
+      const contentItems = getModuleContentItems(item);
+      return {
+        key: index.toString(),
+        label: (
+          <div style={styles.moduleContentHeader}>
+            <p style={styles.moduleTitleText} title={item.title}>
+              {item.title}
+            </p>
+            <p style={styles.moduleCountText}>
+              Tổng số bài học: {contentItems.length}
+            </p>
+          </div>
+        ),
+        children: (
+          <View style={styles.contentGap8Margin8}>
+            {contentItems.map((contentItem, subIndex) => {
+              if (contentItem.kind === 'task') {
+                const task = contentItem.data;
+                return (
+                  <TouchableOpacity key={task._id}>
+                    <View
+                      style={styles.buttonModule}
+                      onClick={() =>
+                        router.push(`/dashboard/practice/${task._id}`)
+                      }>
+                      <View style={styles.rowGap10}>
+                        <FileTextOutlined />
+                        <View style={styles.moduleItemContainer}>
+                          <Text
+                            numberOfLines={2}
+                            style={styles.moduleItemTitle}>
+                            {task.title}
+                          </Text>
+                          <Tag
+                            color={task.subject === 'Excel' ? 'green' : 'blue'}>
+                            Bài thực hành {task.subject}
+                          </Tag>
+                        </View>
                       </View>
                     </View>
-                    {userProfile?.role?.level <= 2 &&
-                      subItem.type !== 'Text' && (
-                        <AppVideoWatchersButton
-                          subLessonId={subItem._id}
-                          subLessonTitle={subItem.title}
-                          onClick={e => {
-                            e.stopPropagation();
-                            setSelectedSubLessonId(subItem._id);
-                            setSelectedSubLessonTitle(subItem.title);
-                            setWatcherModalVisible(true);
-                          }}
-                        />
-                      )}
-                  </View>
+                  </TouchableOpacity>
+                );
+              }
+
+              const subItem = contentItem.data;
+              const isDisabled = !hasAccessToLibrary(subItem);
+              return (
+                <TouchableOpacity
+                  key={subIndex}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <TouchableOpacity
+                    style={[isDisabled && styles.disabledButton, { flex: 1 }]}>
+                    <View
+                      style={styles.buttonModule}
+                      onClick={() => handleLibraryClick(subItem, item)}>
+                      <View style={styles.rowGap10}>
+                        <PlayCircleOutlined />
+                        <View style={styles.moduleItemContainer}>
+                          <Text
+                            numberOfLines={2}
+                            style={styles.moduleItemTitle}>
+                            {subItem.title}
+                          </Text>
+                          <Text style={styles.moduleItemTime}>
+                            {subItem.type !== 'Text'
+                              ? convertDurationToTime(subItem.duration)
+                              : 'Trắc nghiệm'}
+                          </Text>
+                        </View>
+                      </View>
+                      {userProfile?.role?.level <= 2 &&
+                        subItem.type !== 'Text' && (
+                          <AppVideoWatchersButton
+                            subLessonId={subItem._id}
+                            subLessonTitle={subItem.title}
+                            onClick={e => {
+                              e.stopPropagation();
+                              setSelectedSubLessonId(subItem._id);
+                              setSelectedSubLessonTitle(subItem.title);
+                              setWatcherModalVisible(true);
+                            }}
+                          />
+                        )}
+                    </View>
+                  </TouchableOpacity>
                 </TouchableOpacity>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      ),
-      style: panelStyle,
-    })) || [];
+              );
+            })}
+          </View>
+        ),
+        style: panelStyle,
+      };
+    }) || [];
 
   const panelStyle: React.CSSProperties = {
     background: '#f5f5f5',

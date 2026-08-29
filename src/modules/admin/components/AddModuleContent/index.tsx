@@ -10,10 +10,13 @@ import { messageApi } from '@hooks';
 import styles from './styles';
 import {
   DragLibraryItem,
+  DragPracticeTaskItem,
   ModalSelectLibrary,
-  PracticeTaskSection,
 } from './components';
 import { DraggableList } from '@components';
+
+type ContentItem =
+  { type: 'library'; data: any } | { type: 'task'; data: PracticeTask };
 
 type AddModuleContentProps = {
   onFinish?: (values: Module) => void;
@@ -29,40 +32,60 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
   const [addModule] = adminQuery.useAddModuleMutation();
   const [setTaskModule] = adminQuery.useSetPracticeTaskModuleMutation();
   const { data: allTasks } = adminQuery.useGetPracticeTasksAdminQuery();
-  const [selectedLibraries, setSelectedLibraries] = useState<any[]>([]);
-  const [selectedTasks, setSelectedTasks] = useState<PracticeTask[]>([]);
+  // 1 danh sách DUY NHẤT trộn cả bài học video và bài thực hành, sắp xếp
+  // kéo-thả chung — đúng yêu cầu "để bài thực hành chung với danh sách bài
+  // học để tiện sắp xếp theo thứ tự". Vị trí (index) trong mảng này chính
+  // là "order" dùng khi lưu, cho cả 2 loại nội dung.
+  const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [isVisibleModalLibrarySelect, setIsVisibleModalLibrarySelect] =
     useState(false);
 
   useEffect(() => {
     if (initialValues) {
       form.setFieldsValue(initialValues);
-      setSelectedLibraries(initialValues?.libraries);
     }
   }, [initialValues, form]);
 
-  // Bài thực hành đã gắn vào phần học này từ trước — lấy từ danh sách
-  // chung (allTasks) theo moduleId, không cần lưu phần học trước mới biết.
+  // Dựng lại danh sách trộn từ dữ liệu đã lưu: libraries theo đúng thứ tự
+  // mảng module.libraries[], bài thực hành theo field order riêng — rồi
+  // sắp theo order để ra đúng thứ tự hiển thị đã lưu trước đó.
   useEffect(() => {
-    if (initialValues?._id && allTasks) {
-      setSelectedTasks(allTasks.filter(t => t.moduleId === initialValues._id));
-    }
+    if (!initialValues) return;
+    const libraryItems: ContentItem[] = (initialValues.libraries || []).map(
+      (l: any, i: number) => ({ type: 'library', data: l, _order: i }) as any,
+    );
+    const taskItems: ContentItem[] = (allTasks || [])
+      .filter(t => t.moduleId === initialValues._id)
+      .map(t => ({ type: 'task', data: t, _order: t.order ?? 0 }) as any);
+    const merged = [...libraryItems, ...taskItems].sort(
+      (a: any, b: any) => a._order - b._order,
+    );
+    setContentItems(merged);
   }, [initialValues?._id, allTasks]);
 
-  // Đồng bộ lựa chọn bài thực hành vào đúng lúc phần học được lưu — không
-  // gọi PUT .../module ngay lúc tick chọn trong picker (giống hệt cách
-  // selectedLibraries chỉ thật sự ghi vào Module.libraries[] lúc submit).
+  // Đồng bộ bài thực hành vào đúng lúc phần học được lưu — không gọi PUT
+  // .../module ngay lúc chọn trong picker, giống hệt cách library items chỉ
+  // thật sự ghi vào Module.libraries[] lúc submit.
   const reconcileTasks = async (moduleId: string) => {
     if (!allTasks) return;
-    const selectedIds = new Set(selectedTasks.map(t => t._id));
+    const selectedTaskIdsWithOrder = new Map(
+      contentItems
+        .map((item, index) => ({ item, index }))
+        .filter(({ item }) => item.type === 'task')
+        .map(({ item, index }) => [(item.data as PracticeTask)._id, index]),
+    );
     const ops = allTasks
-      .filter(t => (t.moduleId === moduleId) !== selectedIds.has(t._id))
-      .map(t =>
-        setTaskModule({
+      .filter(
+        t => t.moduleId === moduleId || selectedTaskIdsWithOrder.has(t._id),
+      )
+      .map(t => {
+        const isSelected = selectedTaskIdsWithOrder.has(t._id);
+        return setTaskModule({
           taskId: t._id,
-          moduleId: selectedIds.has(t._id) ? moduleId : null,
-        }),
-      );
+          moduleId: isSelected ? moduleId : null,
+          order: isSelected ? selectedTaskIdsWithOrder.get(t._id) : undefined,
+        });
+      });
     await Promise.all(ops);
   };
 
@@ -72,13 +95,15 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
       layout="vertical"
       onFinish={async values => {
+        const libraries = contentItems
+          .filter(i => i.type === 'library')
+          .map(i => i.data._id);
         const formValues = {
           ...values,
-          libraries: selectedLibraries.map(item => item._id),
-          durations: selectedLibraries.reduce(
-            (cur, prev) => cur + (prev.durations || 0),
-            0,
-          ),
+          libraries,
+          durations: contentItems
+            .filter(i => i.type === 'library')
+            .reduce((cur, i) => cur + (i.data.durations || 0), 0),
         };
 
         if (onFinish) {
@@ -92,8 +117,7 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
               await reconcileTasks(res.data._id);
               messageApi.success('Add new module successfully!');
               form.resetFields();
-              setSelectedLibraries(null);
-              setSelectedTasks([]);
+              setContentItems([]);
               onDone && onDone(res.data);
             })
             .catch(() => {
@@ -118,33 +142,47 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
             <PlusOutlined />
           </Button>
           <DraggableList
-            data={selectedLibraries}
-            keyExtractor={item => item?._id}
-            handleUpdatedList={setSelectedLibraries}
-            renderItem={({ item, index }) => {
-              if (item) {
+            data={contentItems}
+            keyExtractor={item => item?.data?._id}
+            handleUpdatedList={setContentItems}
+            renderItem={({ item }) => {
+              if (!item) return null;
+              if (item.type === 'library') {
                 return (
                   <DragLibraryItem
-                    data={item}
-                    key={item._id}
+                    data={item.data}
+                    key={item.data._id}
                     onDelete={() => {
-                      const newList = [...selectedLibraries].filter(
-                        sItem => sItem._id !== item._id,
+                      setContentItems(
+                        contentItems.filter(
+                          i =>
+                            !(
+                              i.type === 'library' &&
+                              i.data._id === item.data._id
+                            ),
+                        ),
                       );
-                      setSelectedLibraries(newList);
                     }}
                   />
                 );
               }
+              return (
+                <DragPracticeTaskItem
+                  data={item.data}
+                  key={item.data._id}
+                  onDelete={() => {
+                    setContentItems(
+                      contentItems.filter(
+                        i =>
+                          !(i.type === 'task' && i.data._id === item.data._id),
+                      ),
+                    );
+                  }}
+                />
+              );
             }}
           />
         </View>
-        <PracticeTaskSection
-          tasks={selectedTasks}
-          onRemove={taskId =>
-            setSelectedTasks(selectedTasks.filter(t => t._id !== taskId))
-          }
-        />
       </ScrollView>
 
       <Button style={styles.button} htmlType="submit">
@@ -154,10 +192,33 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
       <ModalSelectLibrary
         isVisible={isVisibleModalLibrarySelect}
         setIsVisible={setIsVisibleModalLibrarySelect}
-        onFinish={setSelectedLibraries}
-        initialValues={selectedLibraries}
-        onFinishTasks={setSelectedTasks}
-        initialTaskValues={selectedTasks}
+        initialValues={contentItems
+          .filter(i => i.type === 'library')
+          .map(i => i.data)}
+        initialTaskValues={contentItems
+          .filter(i => i.type === 'task')
+          .map(i => i.data)}
+        onDone={(newLibraries, newTasks) => {
+          setContentItems(prev => {
+            const newLibraryIds = new Set(newLibraries.map(l => l._id));
+            const newTaskIds = new Set(newTasks.map(t => t._id));
+            // Giữ nguyên vị trí các mục còn được chọn, bỏ các mục bị bỏ
+            // chọn, rồi nối thêm các mục MỚI được chọn vào cuối.
+            const kept = prev.filter(i =>
+              i.type === 'library'
+                ? newLibraryIds.has(i.data._id)
+                : newTaskIds.has(i.data._id),
+            );
+            const keptIds = new Set(kept.map(i => i.data._id));
+            const addedLibraries: ContentItem[] = newLibraries
+              .filter(l => !keptIds.has(l._id))
+              .map(l => ({ type: 'library', data: l }));
+            const addedTasks: ContentItem[] = newTasks
+              .filter(t => !keptIds.has(t._id))
+              .map(t => ({ type: 'task', data: t }));
+            return [...kept, ...addedLibraries, ...addedTasks];
+          });
+        }}
       />
     </Form>
   );

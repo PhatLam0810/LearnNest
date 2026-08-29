@@ -9,9 +9,13 @@ import {
   ActivityIndicator,
 } from 'react-native-web';
 import styles from './styles';
-import { CaretRightOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import {
+  CaretRightOutlined,
+  FileTextOutlined,
+  PlayCircleOutlined,
+} from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { Button, Collapse, CollapseProps, Modal } from 'antd';
+import { Button, Collapse, CollapseProps, Modal, Tag } from 'antd';
 import { convertDurationToTime } from '@utils';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { useResponsive } from '@/styles/responsive';
@@ -30,6 +34,14 @@ const ModuleDetailPage = () => {
     dashboardQuery.useGetLessonIdQuery({
       id: lessonId,
     });
+  // 1 khóa học có thể chứa cả bài học video và bài thực hành trong cùng 1
+  // phần — lấy thêm danh sách bài thực hành đã publish của khóa này để
+  // trộn vào đúng chỗ (theo order) khi hiện "Nội dung khóa học".
+  const { data: practiceTasksForLesson } =
+    dashboardQuery.useGetPracticeTasksStudentQuery(
+      { lessonId },
+      { skip: !lessonId },
+    );
 
   const { selectedLibrary } = useAppSelector(state => state.dashboardReducer);
   const dispatch = useAppDispatch();
@@ -119,73 +131,115 @@ const ModuleDetailPage = () => {
   const hasAccess = (item: any) =>
     isAdmin || item?.usersCanPlay?.some(user => user._id === userProfile?._id);
 
-  const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
-    lessonDetail?.modules?.map((item, index) => ({
-      key: index,
-      label: (
-        <div style={styles.moduleContentHeader}>
-          <p style={styles.moduleTitleText} title={item.title}>
-            {item.title}
-          </p>
-          <p style={styles.moduleCountText}>
-            Tổng số bài học: {item.libraries.length}
-          </p>
-        </div>
-      ),
-      children: (
-        <View style={styles.contentGap8Margin8}>
-          {item.libraries.map((subItem, subIndex) => {
-            const isDisabled = !hasAccess(subItem);
-            const isSelected = selectedLibrary?._id === subItem._id;
+  // Trộn bài học video (order = vị trí trong module.libraries[]) với bài
+  // thực hành thuộc module này (order = field riêng) thành 1 danh sách nội
+  // dung duy nhất, đúng thứ tự admin đã sắp xếp trong màn Phần học.
+  const getModuleContentItems = (moduleItem: any) => {
+    const libraryItems = (moduleItem.libraries || []).map(
+      (l: any, i: number) => ({ kind: 'library' as const, data: l, order: i }),
+    );
+    const taskItems = (practiceTasksForLesson || [])
+      .filter(t => t.moduleId === moduleItem._id)
+      .map(t => ({ kind: 'task' as const, data: t, order: t.order ?? 0 }));
+    return [...libraryItems, ...taskItems].sort((a, b) => a.order - b.order);
+  };
 
-            return (
-              <TouchableOpacity
-                key={subIndex}
-                style={[isDisabled && !isSelected && styles.disabledButton]}>
-                <View
-                  onClick={() => {
-                    if (isDisabled) return;
-                    handleSelectLibrary(subItem);
-                  }}
-                  style={[
-                    styles.buttonModule,
-                    isSelected && {
-                      backgroundColor: 'var(--color-vhu-primary)',
-                      color: '#FFF',
-                    },
-                  ]}>
-                  <PlayCircleOutlined />
-                  <View style={styles.libraryItemPadding}>
-                    <Text
-                      numberOfLines={1}
-                      style={[
-                        styles.moduleItemTitle,
-                        isSelected && {
-                          color: '#FFF',
-                        },
-                      ]}>
-                      {subItem.title}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.moduleItemTime,
-                        isSelected && {
-                          color: '#FFF',
-                        },
-                      ]}>
-                      {subItem.type !== 'Text'
-                        ? convertDurationToTime(subItem.duration)
-                        : 'Trắc nghiệm'}
-                    </Text>
+  const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
+    lessonDetail?.modules?.map((item, index) => {
+      const contentItems = getModuleContentItems(item);
+      return {
+        key: index,
+        label: (
+          <div style={styles.moduleContentHeader}>
+            <p style={styles.moduleTitleText} title={item.title}>
+              {item.title}
+            </p>
+            <p style={styles.moduleCountText}>
+              Tổng số bài học: {contentItems.length}
+            </p>
+          </div>
+        ),
+        children: (
+          <View style={styles.contentGap8Margin8}>
+            {contentItems.map((contentItem, subIndex) => {
+              if (contentItem.kind === 'task') {
+                const task = contentItem.data;
+                return (
+                  <TouchableOpacity key={task._id}>
+                    <View
+                      onClick={() =>
+                        router.push(`/dashboard/practice/${task._id}`)
+                      }
+                      style={styles.buttonModule}>
+                      <FileTextOutlined />
+                      <View style={styles.libraryItemPadding}>
+                        <Text numberOfLines={1} style={styles.moduleItemTitle}>
+                          {task.title}
+                        </Text>
+                        <Tag
+                          color={task.subject === 'Excel' ? 'green' : 'blue'}
+                          style={{ marginTop: 2 }}>
+                          Bài thực hành {task.subject}
+                        </Tag>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              }
+
+              const subItem = contentItem.data;
+              const isDisabled = !hasAccess(subItem);
+              const isSelected = selectedLibrary?._id === subItem._id;
+
+              return (
+                <TouchableOpacity
+                  key={subIndex}
+                  style={[isDisabled && !isSelected && styles.disabledButton]}>
+                  <View
+                    onClick={() => {
+                      if (isDisabled) return;
+                      handleSelectLibrary(subItem);
+                    }}
+                    style={[
+                      styles.buttonModule,
+                      isSelected && {
+                        backgroundColor: 'var(--color-vhu-primary)',
+                        color: '#FFF',
+                      },
+                    ]}>
+                    <PlayCircleOutlined />
+                    <View style={styles.libraryItemPadding}>
+                      <Text
+                        numberOfLines={1}
+                        style={[
+                          styles.moduleItemTitle,
+                          isSelected && {
+                            color: '#FFF',
+                          },
+                        ]}>
+                        {subItem.title}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.moduleItemTime,
+                          isSelected && {
+                            color: '#FFF',
+                          },
+                        ]}>
+                        {subItem.type !== 'Text'
+                          ? convertDurationToTime(subItem.duration)
+                          : 'Trắc nghiệm'}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      ),
-      style: panelStyle,
-    })) || [];
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ),
+        style: panelStyle,
+      };
+    }) || [];
 
   const panelStyle: React.CSSProperties = {
     marginBottom: 12,

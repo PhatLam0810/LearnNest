@@ -426,12 +426,12 @@ export const adminQuery = baseQuery.injectEndpoints({
     }),
     setPracticeTaskModule: builder.mutation<
       PracticeTask,
-      { taskId: string; moduleId: string | null }
+      { taskId: string; moduleId: string | null; order?: number }
     >({
-      query: ({ taskId, moduleId }) => ({
+      query: ({ taskId, moduleId, order }) => ({
         url: `practice/tasks/${taskId}/module`,
         method: 'PUT',
-        body: { moduleId },
+        body: { moduleId, order },
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),

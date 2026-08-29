@@ -4,9 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, Text, View } from 'react-native-web';
 import styles from './styles';
 import Search from 'antd/es/input/Search';
-import { Button, Modal as AntdModal, Card, Tabs, Tag } from 'antd';
+import { Button, Modal as AntdModal, Card, Segmented, Select, Tag } from 'antd';
 import { Library } from '~mdDashboard/types';
-import { PracticeTask } from '~mdDashboard/types/practice';
+import { PracticeTask, PracticeSubject } from '~mdDashboard/types/practice';
 import { AddLibraryContent } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import './styles.scss';
@@ -14,10 +14,9 @@ import './styles.scss';
 type ModalSelectLibraryProps = {
   isVisible: boolean;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  onFinish: (data: any[]) => void;
   initialValues?: Library[];
-  onFinishTasks: (data: PracticeTask[]) => void;
   initialTaskValues?: PracticeTask[];
+  onDone: (libraries: Library[], tasks: PracticeTask[]) => void;
 };
 
 // 1 modal chọn cả 2 loại nội dung cho 1 phần học: bài học video (tab có
@@ -29,16 +28,18 @@ type ModalSelectLibraryProps = {
 const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
   isVisible,
   setIsVisible,
-  onFinish,
   initialValues,
-  onFinishTasks,
   initialTaskValues,
+  onDone,
 }) => {
   const { listItem, fetchData, search, refresh } = useAppPagination<Library>({
     apiUrl: 'library/getAllLibrary',
   });
   const [selectedItems, setSelectedItems] = useState<Library[]>([]);
   const [isVisibleModalAddNew, setIsVisibleModalAddNew] = useState(false);
+  const [activeTab, setActiveTab] = useState<'library' | 'practiceTask'>(
+    'library',
+  );
 
   // Bài thực hành không thuộc riêng 1 khóa học nào khi chưa gắn — lấy hết
   // toàn bộ để chọn, giống hệt cách bài học video cũng không lọc theo
@@ -46,13 +47,15 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
   const { data: allTasks } = adminQuery.useGetPracticeTasksAdminQuery();
   const [selectedTasks, setSelectedTasks] = useState<PracticeTask[]>([]);
   const [taskSearch, setTaskSearch] = useState('');
+  const [subjectFilter, setSubjectFilter] = useState<PracticeSubject | 'all'>(
+    'all',
+  );
 
   const closeModal = () => setIsVisible(false);
   const closeModalAddNew = () => setIsVisibleModalAddNew(false);
 
   const handleDone = () => {
-    onFinish(selectedItems);
-    onFinishTasks(selectedTasks);
+    onDone(selectedItems, selectedTasks);
     closeModal();
   };
 
@@ -60,6 +63,7 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
     if (isVisible) {
       setSelectedItems(initialValues || []);
       setSelectedTasks(initialTaskValues || []);
+      setActiveTab('library');
     }
   }, [isVisible]);
 
@@ -79,33 +83,48 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
     }
   };
 
-  const filteredTasks = (allTasks || []).filter(t =>
-    t.title.toLowerCase().includes(taskSearch.toLowerCase()),
+  const filteredTasks = (allTasks || []).filter(
+    t =>
+      t.title.toLowerCase().includes(taskSearch.toLowerCase()) &&
+      (subjectFilter === 'all' || t.subject === subjectFilter),
   );
 
   return (
-    <Modal2Container
-      isVisible={isVisible}
-      closeModal={closeModal}
-      footer={
-        <View style={{ flexDirection: 'row', gap: 12 }}>
-          <Button style={styles.button} onClick={handleDone}>
-            <Text style={styles.buttonText}>Done</Text>
-          </Button>
-          <Button
-            style={styles.buttonAddNew}
-            onClick={() => setIsVisibleModalAddNew(true)}>
-            <Text style={styles.buttonText}>Add new library</Text>
-          </Button>
-        </View>
-      }>
-      <Tabs
-        defaultActiveKey="library"
-        items={[
-          {
-            key: 'library',
-            label: `Bài học video (${selectedItems.length})`,
-            children: (
+    <Modal
+      visible={isVisible}
+      style={styles.modalContainer}
+      transparent
+      animationType="fade">
+      <View style={styles.modal} onClick={closeModal}>
+        <View
+          style={{
+            ...styles.content,
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+          onClick={e => e.stopPropagation()}>
+          <Segmented
+            style={{ marginBottom: 16, alignSelf: 'flex-start' }}
+            value={activeTab}
+            onChange={v => setActiveTab(v as 'library' | 'practiceTask')}
+            options={[
+              {
+                label: `Bài học video (${selectedItems.length})`,
+                value: 'library',
+              },
+              {
+                label: `Bài thực hành (${selectedTasks.length})`,
+                value: 'practiceTask',
+              },
+            ]}
+          />
+
+          {/* flex:1 + overflowY:auto + minHeight:0 — bắt buộc phải có cả 3 để
+              vùng này tự cuộn riêng bên trong khung modal cố định 90vh, thay
+              vì đẩy cả trang cuộn theo khiến nút Done/Add new library bị đẩy
+              ra ngoài tầm với. */}
+          <View style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+            {activeTab === 'library' ? (
               <>
                 <View style={{ gap: 8, marginBottom: 20 }}>
                   <Search
@@ -136,20 +155,32 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                   )}
                 />
               </>
-            ),
-          },
-          {
-            key: 'practiceTask',
-            label: `Bài thực hành (${selectedTasks.length})`,
-            children: (
+            ) : (
               <>
-                <View style={{ gap: 8, marginBottom: 20 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: 8,
+                    marginBottom: 20,
+                  }}>
                   <Search
                     placeholder="Tìm bài thực hành"
                     enterButton="Search"
                     allowClear
                     size="large"
+                    style={{ flex: 1 }}
                     onSearch={setTaskSearch}
+                  />
+                  <Select
+                    value={subjectFilter}
+                    onChange={setSubjectFilter}
+                    style={{ width: 140 }}
+                    size="large"
+                    options={[
+                      { value: 'all', label: 'Tất cả môn' },
+                      { value: 'Word', label: 'Word' },
+                      { value: 'Excel', label: 'Excel' },
+                    ]}
                   />
                 </View>
                 <FlatList
@@ -187,10 +218,27 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                   )}
                 />
               </>
-            ),
-          },
-        ]}
-      />
+            )}
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 12,
+              paddingTop: 12,
+              flexShrink: 0,
+            }}>
+            <Button style={styles.button} onClick={handleDone}>
+              <Text style={styles.buttonText}>Done</Text>
+            </Button>
+            <Button
+              style={styles.buttonAddNew}
+              onClick={() => setIsVisibleModalAddNew(true)}>
+              <Text style={styles.buttonText}>Add new library</Text>
+            </Button>
+          </View>
+        </View>
+      </View>
       <AntdModal
         open={isVisibleModalAddNew}
         onCancel={closeModalAddNew}
@@ -204,31 +252,6 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
           }}
         />
       </AntdModal>
-    </Modal2Container>
-  );
-};
-
-// Giữ nguyên đúng "khung" modal cũ (kích thước 90vw/90vh, nền tối, bấm ra
-// ngoài để đóng) — chỉ tách riêng để bọc children bằng Tabs mà không phải
-// viết lại phần khung.
-const Modal2Container: React.FC<{
-  isVisible: boolean;
-  closeModal: () => void;
-  footer: React.ReactNode;
-  children: React.ReactNode;
-}> = ({ isVisible, closeModal, footer, children }) => {
-  return (
-    <Modal
-      visible={isVisible}
-      style={styles.modalContainer}
-      transparent
-      animationType="fade">
-      <View style={styles.modal} onClick={closeModal}>
-        <View style={styles.content} onClick={e => e.stopPropagation()}>
-          {children}
-          {footer}
-        </View>
-      </View>
     </Modal>
   );
 };

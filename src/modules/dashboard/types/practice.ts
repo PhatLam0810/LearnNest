@@ -47,6 +47,7 @@ export interface PracticeTask {
   assetFileUrls?: string[];
   lessonId?: string;
   moduleId?: string;
+  order?: number;
   createdBy?: string;
   isPublished: boolean;
   createdAt?: string;
