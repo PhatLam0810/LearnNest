@@ -139,6 +139,7 @@ const ModuleManage = () => {
         footer={null}
         width={'80%'}
         centered
+        destroyOnClose
         title={selectedItem ? selectedItem.title : 'Thêm phần học'}>
         <ScrollView style={{ height: (width * 0.8 * 9) / 16 }}>
           <AddModuleContent onDone={onDone} />

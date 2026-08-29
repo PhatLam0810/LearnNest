@@ -55,7 +55,8 @@ const UpdateModuleForm: React.FC<UpdateModuleFormProps> = ({
       onCancel={onCloseModalAdd}
       footer={null}
       width={'80%'}
-      centered>
+      centered
+      destroyOnClose>
       <ScrollView style={{ height: height }}>
         <AddModuleContent initialValues={data} onFinish={onFinish} />
       </ScrollView>

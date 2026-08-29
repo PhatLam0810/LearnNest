@@ -11,7 +11,6 @@ import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
 import LessonLearnersOverview from './lessonLearnersOverview';
 import FeedbackManage from './feedbackManage/page';
-import PracticeManage from './practiceManage';
 import { ADMIN_PRIMARY } from './adminTheme';
 
 const items: TabsProps['items'] = [
@@ -39,11 +38,6 @@ const items: TabsProps['items'] = [
     key: '5',
     label: 'Phản Hồi Người Dùng',
     children: <FeedbackManage />,
-  },
-  {
-    key: '6',
-    label: 'Thực Hành MOS',
-    children: <PracticeManage />,
   },
 ];
 

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
 import { Module } from '~mdDashboard/redux/saga/type';
+import { PracticeTask } from '~mdDashboard/types/practice';
 import { PlusOutlined } from '@ant-design/icons';
 import { messageApi } from '@hooks';
 import styles from './styles';
@@ -26,7 +27,10 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [addModule] = adminQuery.useAddModuleMutation();
+  const [setTaskModule] = adminQuery.useSetPracticeTaskModuleMutation();
+  const { data: allTasks } = adminQuery.useGetPracticeTasksAdminQuery();
   const [selectedLibraries, setSelectedLibraries] = useState<any[]>([]);
+  const [selectedTasks, setSelectedTasks] = useState<PracticeTask[]>([]);
   const [isVisibleModalLibrarySelect, setIsVisibleModalLibrarySelect] =
     useState(false);
 
@@ -37,12 +41,37 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
     }
   }, [initialValues, form]);
 
+  // Bài thực hành đã gắn vào phần học này từ trước — lấy từ danh sách
+  // chung (allTasks) theo moduleId, không cần lưu phần học trước mới biết.
+  useEffect(() => {
+    if (initialValues?._id && allTasks) {
+      setSelectedTasks(allTasks.filter(t => t.moduleId === initialValues._id));
+    }
+  }, [initialValues?._id, allTasks]);
+
+  // Đồng bộ lựa chọn bài thực hành vào đúng lúc phần học được lưu — không
+  // gọi PUT .../module ngay lúc tick chọn trong picker (giống hệt cách
+  // selectedLibraries chỉ thật sự ghi vào Module.libraries[] lúc submit).
+  const reconcileTasks = async (moduleId: string) => {
+    if (!allTasks) return;
+    const selectedIds = new Set(selectedTasks.map(t => t._id));
+    const ops = allTasks
+      .filter(t => (t.moduleId === moduleId) !== selectedIds.has(t._id))
+      .map(t =>
+        setTaskModule({
+          taskId: t._id,
+          moduleId: selectedIds.has(t._id) ? moduleId : null,
+        }),
+      );
+    await Promise.all(ops);
+  };
+
   return (
     <Form
       form={form}
       style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
       layout="vertical"
-      onFinish={values => {
+      onFinish={async values => {
         const formValues = {
           ...values,
           libraries: selectedLibraries.map(item => item._id),
@@ -52,18 +81,25 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
           ),
         };
 
-        onFinish
-          ? onFinish(formValues)
-          : addModule(formValues)
-              .then(res => {
-                messageApi.success('Add new module successfully!');
-                form.resetFields();
-                setSelectedLibraries(null);
-                onDone && onDone(res.data);
-              })
-              .catch(err => {
-                messageApi.error('Add new module failed!');
-              });
+        if (onFinish) {
+          // Sửa phần học đã có sẵn — đã biết _id, gắn/gỡ bài thực hành
+          // ngay, không cần đợi module lưu xong.
+          if (initialValues?._id) await reconcileTasks(initialValues._id);
+          onFinish(formValues);
+        } else {
+          addModule(formValues)
+            .then(async res => {
+              await reconcileTasks(res.data._id);
+              messageApi.success('Add new module successfully!');
+              form.resetFields();
+              setSelectedLibraries(null);
+              setSelectedTasks([]);
+              onDone && onDone(res.data);
+            })
+            .catch(() => {
+              messageApi.error('Add new module failed!');
+            });
+        }
       }}>
       <ScrollView>
         <Form.Item
@@ -103,7 +139,12 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
             }}
           />
         </View>
-        <PracticeTaskSection moduleId={initialValues?._id} />
+        <PracticeTaskSection
+          tasks={selectedTasks}
+          onRemove={taskId =>
+            setSelectedTasks(selectedTasks.filter(t => t._id !== taskId))
+          }
+        />
       </ScrollView>
 
       <Button style={styles.button} htmlType="submit">
@@ -115,6 +156,8 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
         setIsVisible={setIsVisibleModalLibrarySelect}
         onFinish={setSelectedLibraries}
         initialValues={selectedLibraries}
+        onFinishTasks={setSelectedTasks}
+        initialTaskValues={selectedTasks}
       />
     </Form>
   );
