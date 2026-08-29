@@ -21,9 +21,21 @@ const PracticeListPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const subject = SUBJECT_TABS.find(t => t.key === activeTab)?.subject;
 
-  const { data, isFetching } = dashboardQuery.useGetPracticeTasksStudentQuery(
-    subject ? { subject } : undefined,
+  const { data: courses, isFetching: isLoadingCourses } =
+    dashboardQuery.useGetPracticeCoursesQuery();
+  // Bài tập chưa gắn vào khóa thực hành nào (chưa có lessonId) — vẫn hiện
+  // riêng bên dưới để không "mất" đề cũ nếu admin chưa kịp gán khóa/phần.
+  const { data: allTasks, isFetching: isLoadingTasks } =
+    dashboardQuery.useGetPracticeTasksStudentQuery();
+
+  const filteredCourses = (courses || []).filter(
+    c => !subject || c.subject === subject,
   );
+  const orphanTasks = (allTasks || []).filter(
+    t => !t.lessonId && (!subject || t.subject === subject),
+  );
+
+  const isLoading = isLoadingCourses || isLoadingTasks;
 
   return (
     <div className="practice-list-page">
@@ -40,29 +52,61 @@ const PracticeListPage = () => {
         items={SUBJECT_TABS.map(t => ({ key: t.key, label: t.label }))}
       />
 
-      {isFetching ? (
+      {isLoading ? (
         <Spin />
-      ) : !data || data.length === 0 ? (
+      ) : filteredCourses.length === 0 && orphanTasks.length === 0 ? (
         <Empty description="Chưa có đề thực hành nào" />
       ) : (
-        <div className="practice-task-grid">
-          {data.map(task => (
-            <div
-              key={task._id}
-              className="practice-task-card"
-              role="button"
-              tabIndex={0}
-              onClick={() => router.push(`/dashboard/practice/${task._id}`)}>
-              <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
-                {task.subject}
-              </Tag>
-              <h3 className="practice-task-title">{task.title}</h3>
-              {task.description && (
-                <p className="practice-task-desc">{task.description}</p>
-              )}
+        <>
+          {filteredCourses.length > 0 && (
+            <div className="practice-task-grid">
+              {filteredCourses.map(course => (
+                <div
+                  key={course.lessonId}
+                  className="practice-task-card"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() =>
+                    router.push(`/dashboard/practice/course/${course.lessonId}`)
+                  }>
+                  <Tag color={course.subject === 'Excel' ? 'green' : 'blue'}>
+                    {course.subject}
+                  </Tag>
+                  <h3 className="practice-task-title">{course.title}</h3>
+                  <p className="practice-task-desc">
+                    {course.taskCount} bài tập
+                  </p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+
+          {orphanTasks.length > 0 && (
+            <>
+              <h2 className="practice-list-subheading-2">Bài tập khác</h2>
+              <div className="practice-task-grid">
+                {orphanTasks.map(task => (
+                  <div
+                    key={task._id}
+                    className="practice-task-card"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() =>
+                      router.push(`/dashboard/practice/${task._id}`)
+                    }>
+                    <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
+                      {task.subject}
+                    </Tag>
+                    <h3 className="practice-task-title">{task.title}</h3>
+                    {task.description && (
+                      <p className="practice-task-desc">{task.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
       )}
     </div>
   );

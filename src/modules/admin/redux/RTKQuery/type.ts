@@ -217,6 +217,7 @@ export interface CreatePracticeTaskPayload {
   starterFileUrl: string;
   assetFileUrls?: string[];
   lessonId?: string;
+  moduleId?: string;
 }
 
 export interface UpdatePracticeTaskPayload extends CreatePracticeTaskPayload {

@@ -15,6 +15,12 @@
   margin: 4px 0 16px;
 }
 
+.practice-list-subheading-2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 24px 0 8px;
+}
+
 .practice-task-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));

@@ -11,6 +11,7 @@ import {
 import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
 import {
+  PracticeCourseSummary,
   PracticeSubmission,
   PracticeTask,
   PracticeTaskDetail,
@@ -193,12 +194,19 @@ export const dashboardQuery = baseQuery.injectEndpoints({
     // ---- MOS Practice Exam (học viên làm bài thực hành Word/Excel) ----
     getPracticeTasksStudent: builder.query<
       PracticeTask[],
-      { subject?: 'Word' | 'Excel' } | void
+      { subject?: 'Word' | 'Excel'; lessonId?: string } | void
     >({
       query: params => ({
         url: '/practice/tasks',
         method: 'GET',
         params: params ?? undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getPracticeCourses: builder.query<PracticeCourseSummary[], void>({
+      query: () => ({
+        url: '/practice/tasks/courses',
+        method: 'GET',
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
@@ -227,4 +235,5 @@ export const {
   useGetPracticeTasksStudentQuery,
   useGetPracticeTaskDetailStudentQuery,
   useGetMyPracticeSubmissionsQuery,
+  useGetPracticeCoursesQuery,
 } = dashboardQuery;

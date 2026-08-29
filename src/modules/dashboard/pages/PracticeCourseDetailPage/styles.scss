@@ -1,0 +1,97 @@
+.practice-course-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.practice-course-loading {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.practice-course-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 20px;
+
+  h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+  }
+}
+
+.practice-course-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+  }
+}
+
+.practice-course-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.practice-course-side {
+  width: 320px;
+  flex-shrink: 0;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 16px;
+
+  @media (max-width: 900px) {
+    width: 100%;
+  }
+}
+
+.practice-course-side-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.practice-course-module-header {
+  display: flex;
+  flex-direction: column;
+}
+
+.practice-course-module-title {
+  font-weight: 600;
+}
+
+.practice-course-module-count {
+  font-size: 12px;
+  color: #888;
+}
+
+.practice-course-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.practice-course-task-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  background: #fff;
+
+  &:hover {
+    background: #f0f5ff;
+  }
+}
+
+.practice-course-task-item--active {
+  background: var(--color-vhu-primary, #002766);
+  color: #fff;
+
+  &:hover {
+    background: var(--color-vhu-primary, #002766);
+  }
+}

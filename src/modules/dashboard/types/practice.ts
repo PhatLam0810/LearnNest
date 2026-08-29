@@ -46,6 +46,7 @@ export interface PracticeTask {
   starterFileUrl: string;
   assetFileUrls?: string[];
   lessonId?: string;
+  moduleId?: string;
   createdBy?: string;
   isPublished: boolean;
   createdAt?: string;
@@ -95,6 +96,16 @@ export interface PracticeSubmissionUser {
   email?: string;
   studentId?: string;
   class?: string;
+}
+
+// 1 "khóa thực hành" = 1 Lesson thật (tái dùng Lesson/Module của khóa học
+// video) có ít nhất 1 đề đã publish gắn lessonId — trang danh sách học viên
+// hiển thị dạng thẻ khóa học thay vì liệt kê từng bài tập rời rạc.
+export interface PracticeCourseSummary {
+  lessonId: string;
+  title: string;
+  subject: PracticeSubject;
+  taskCount: number;
 }
 
 export interface PracticeSubmission {

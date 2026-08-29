@@ -345,7 +345,7 @@ export const adminQuery = baseQuery.injectEndpoints({
     // ---- MOS Practice Exam (soạn đề Word/Excel thực hành) ----
     getPracticeTasksAdmin: builder.query<
       PracticeTask[],
-      { subject?: 'Word' | 'Excel' } | void
+      { subject?: 'Word' | 'Excel'; lessonId?: string } | void
     >({
       query: params => ({
         url: 'practice/tasks/admin/all',
