@@ -241,6 +241,18 @@ export interface SetPracticeCriteriaParams {
   criteria: PracticeCriteriaInput[];
 }
 
+export interface GenerateCriteriaParams {
+  subject: 'Word' | 'Excel';
+  title?: string;
+  description: string;
+}
+
+export interface GeneratedCriterion {
+  type: string;
+  points: number;
+  params: Record<string, any>;
+}
+
 export interface LessonLearnersResponse {
   lessonId: string;
   lessonTitle: string;

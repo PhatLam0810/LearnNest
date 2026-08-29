@@ -87,27 +87,32 @@ const CreatePracticeClassModal: React.FC<Props> = ({
     }
   };
 
+  // Modal.confirm (static call) không render ra DOM node nào trong app này
+  // (kiểm chứng thực tế lúc sửa PracticeTaskEditorDrawer — khả năng thiếu
+  // context antd <App> cho các static method), nên hộp thoại xác nhận gửi
+  // email THẬT SỰ không bao giờ hiện ra — bấm "Gửi email cho học viên"
+  // trước đây không có phản ứng gì. Đổi sang <Modal open> có state riêng.
+  const [isConfirmSendOpen, setIsConfirmSendOpen] = useState(false);
+
   const handleSendEmails = () => {
     if (!createdPracticeClass) return;
-    Modal.confirm({
-      title: 'Gửi email cho học viên?',
-      content: `Hệ thống sẽ gửi email báo cho ${createdPracticeClass.count} học viên trong lớp "${createdPracticeClass.practiceClassName}" — hành động này gửi email thật, không thể thu hồi.`,
-      okText: 'Gửi email',
-      cancelText: 'Huỷ',
-      onOk: async () => {
-        try {
-          const result = await sendPracticeClassEmails({
-            classId: createdPracticeClass._id,
-          }).unwrap();
-          messageApi.success(
-            `Đã gửi ${result.successful}/${result.successful + result.failed} email thành công`,
-          );
-        } catch (error) {
-          console.error(error);
-          messageApi.error('Gửi email thất bại');
-        }
-      },
-    });
+    setIsConfirmSendOpen(true);
+  };
+
+  const confirmSendEmails = async () => {
+    if (!createdPracticeClass) return;
+    setIsConfirmSendOpen(false);
+    try {
+      const result = await sendPracticeClassEmails({
+        classId: createdPracticeClass._id,
+      }).unwrap();
+      messageApi.success(
+        `Đã gửi ${result.successful}/${result.successful + result.failed} email thành công`,
+      );
+    } catch (error) {
+      console.error(error);
+      messageApi.error('Gửi email thất bại');
+    }
   };
 
   const handleCloseAll = () => {
@@ -276,6 +281,18 @@ const CreatePracticeClassModal: React.FC<Props> = ({
           </Space>
         </Form>
       )}
+
+      <Modal
+        title="Gửi email cho học viên?"
+        open={isConfirmSendOpen}
+        onCancel={() => setIsConfirmSendOpen(false)}
+        okText="Gửi email"
+        cancelText="Huỷ"
+        onOk={confirmSendEmails}
+        confirmLoading={isSendingEmails}>
+        {createdPracticeClass &&
+          `Hệ thống sẽ gửi email báo cho ${createdPracticeClass.count} học viên trong lớp "${createdPracticeClass.practiceClassName}" — hành động này gửi email thật, không thể thu hồi.`}
+      </Modal>
     </Modal>
   );
 };

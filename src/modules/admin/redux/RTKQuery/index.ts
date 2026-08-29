@@ -12,6 +12,8 @@ import {
   CreatePracticeClassPayload,
   CreatePracticeClassResponse,
   CreatePracticeTaskPayload,
+  GenerateCriteriaParams,
+  GeneratedCriterion,
   LessonLearnerPoolResponse,
   LessonLearnersResponse,
   LessonLearnersSummaryResponse,
@@ -432,6 +434,20 @@ export const adminQuery = baseQuery.injectEndpoints({
         url: `practice/tasks/${taskId}/module`,
         method: 'PUT',
         body: { moduleId, order },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    // Gợi ý tiêu chí chấm điểm bằng AI, đọc mô tả đề bài — chỉ là điểm khởi
+    // đầu để admin xem/chỉnh trước khi bấm "Lưu tiêu chí" thật, không tự
+    // lưu vào task.
+    generateCriteria: builder.mutation<
+      GeneratedCriterion[],
+      GenerateCriteriaParams
+    >({
+      query: body => ({
+        url: `practice/tasks/generate-criteria`,
+        method: 'POST',
+        body,
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),

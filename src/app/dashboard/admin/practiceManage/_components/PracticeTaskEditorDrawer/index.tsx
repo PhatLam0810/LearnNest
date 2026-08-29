@@ -5,13 +5,14 @@ import {
   Drawer,
   Form,
   Input,
+  Modal,
   Select,
   Space,
   Switch,
   Upload,
   UploadFile,
 } from 'antd';
-import { PlusOutlined, UploadOutlined } from '@ant-design/icons';
+import { PlusOutlined, RobotOutlined, UploadOutlined } from '@ant-design/icons';
 import { messageApi, useAppPagination } from '@hooks';
 import api from '@services/api';
 import { adminQuery } from '~mdAdmin/redux';
@@ -44,6 +45,13 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
   const [instructions, setInstructions] = useState<
     { criteriaId: string; instruction: string }[] | null
   >(null);
+  // Modal.confirm (static call) không render ra bất kỳ DOM node nào trong
+  // app này (đã kiểm chứng: gọi xong, criteria vẫn giữ giá trị cũ và
+  // document.querySelectorAll('.ant-modal*') rỗng — không có lỗi console
+  // nào cả, chỉ đơn giản là không hoạt động, khả năng do thiếu context của
+  // antd <App> cho các static method) — dùng <Modal open> có state riêng
+  // thay vì static Modal.confirm để chắc chắn hiện ra được.
+  const [isConfirmReplaceOpen, setIsConfirmReplaceOpen] = useState(false);
 
   const { data: detail, isFetching: isLoadingDetail } =
     adminQuery.useGetPracticeTaskDetailAdminQuery(currentTaskId, {
@@ -57,6 +65,8 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     adminQuery.useSetPracticeCriteriaMutation();
   const [fetchInstructions, { isFetching: isLoadingInstructions }] =
     adminQuery.useLazyGetPracticeInstructionsQuery();
+  const [generateCriteria, { isLoading: isGeneratingCriteria }] =
+    adminQuery.useGenerateCriteriaMutation();
 
   // Gắn đề vào 1 khóa thực hành (Lesson) + 1 Phần (Module) đã có sẵn —
   // tái dùng đúng khóa học/module admin đã tạo ở tab "Tạo Khóa Học".
@@ -151,6 +161,49 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     } catch {
       messageApi.error('Không tải được hướng dẫn xem trước');
     }
+  };
+
+  // Đọc thẳng từ form đề bài (kể cả khi CHƯA lưu) để gợi ý tiêu chí bằng AI
+  // — không bắt buộc phải tạo đề trước mới dùng được. Kết quả chỉ điền vào
+  // form tiêu chí, admin vẫn phải bấm "Lưu tiêu chí" mới thật sự ghi vào DB.
+  const runGenerateCriteria = async () => {
+    const {
+      subject: formSubject,
+      title,
+      description,
+    } = taskForm.getFieldsValue(['subject', 'title', 'description']);
+    if (!description?.trim()) {
+      messageApi.warning('Nhập mô tả / yêu cầu đề bài trước khi dùng AI');
+      return;
+    }
+    try {
+      const suggested = await generateCriteria({
+        subject: formSubject || subject,
+        title,
+        description,
+      }).unwrap();
+      if (!suggested.length) {
+        messageApi.warning(
+          'AI không nhận diện được tiêu chí nào cụ thể từ mô tả — hãy viết rõ hơn hoặc nhập thủ công',
+        );
+        return;
+      }
+      criteriaForm.setFieldsValue({ criteria: suggested });
+      messageApi.success(
+        `AI đã gợi ý ${suggested.length} tiêu chí — kiểm tra lại rồi bấm "Lưu tiêu chí"`,
+      );
+    } catch {
+      messageApi.error('Tạo gợi ý bằng AI thất bại, vui lòng thử lại');
+    }
+  };
+
+  const handleGenerateCriteria = () => {
+    const current = criteriaForm.getFieldValue('criteria') || [];
+    if (current.length > 0) {
+      setIsConfirmReplaceOpen(true);
+      return;
+    }
+    runGenerateCriteria();
   };
 
   return (
@@ -276,6 +329,14 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                 form={criteriaForm}
                 layout="vertical"
                 onFinish={handleSaveCriteria}>
+                <Button
+                  icon={<RobotOutlined />}
+                  loading={isGeneratingCriteria}
+                  onClick={handleGenerateCriteria}
+                  style={{ marginBottom: 16 }}
+                  block>
+                  Dùng AI tạo tiêu chí từ mô tả đề bài
+                </Button>
                 <Form.List name="criteria">
                   {(fields, { add, remove }) => (
                     <>
@@ -336,6 +397,20 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
           </>
         )}
       </div>
+
+      <Modal
+        title="Thay thế tiêu chí hiện tại?"
+        open={isConfirmReplaceOpen}
+        onCancel={() => setIsConfirmReplaceOpen(false)}
+        okText="Thay thế"
+        cancelText="Hủy"
+        onOk={() => {
+          setIsConfirmReplaceOpen(false);
+          runGenerateCriteria();
+        }}>
+        Danh sách tiêu chí đang có sẽ bị thay bằng gợi ý mới từ AI. Bạn vẫn cần
+        bấm &quot;Lưu tiêu chí&quot; để ghi lại thật sự.
+      </Modal>
     </Drawer>
   );
 };
