@@ -52,6 +52,10 @@ export interface PracticeTask {
   isPublished: boolean;
   createdAt?: string;
   updatedAt?: string;
+  // Chỉ có khi API được gọi từ phía học viên (đã đăng nhập) — đã có lần nộp
+  // nào đạt >= 80% số điểm chưa. Dùng để mở khóa nội dung tiếp theo trong
+  // khóa học, y hệt cơ chế usersCanPlay của Library nhưng cho bài thực hành.
+  hasPassed?: boolean;
 }
 
 export interface PracticeCriteria {
@@ -88,6 +92,9 @@ export interface PracticeSubmitResponse {
   submissionId: string;
   totalScore: number;
   maxScore: number;
+  // true nếu totalScore/maxScore >= 80% — đủ điều kiện mở khóa nội dung
+  // tiếp theo trong khóa học.
+  isPass: boolean;
   items: PracticeSubmissionResultItem[];
 }
 

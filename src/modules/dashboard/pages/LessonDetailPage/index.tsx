@@ -227,106 +227,144 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     return [...libraryItems, ...taskItems].sort((a, b) => a.order - b.order);
   };
 
-  const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
-    lessonDetail?.modules?.map((item, index) => {
-      const contentItems = getModuleContentItems(item);
-      return {
-        key: index.toString(),
-        label: (
-          <div style={styles.moduleContentHeader}>
-            <p style={styles.moduleTitleText} title={item.title}>
-              {item.title}
-            </p>
-            <p style={styles.moduleCountText}>
-              Tổng số bài học: {contentItems.length}
-            </p>
-          </div>
-        ),
-        children: (
-          <View style={styles.contentGap8Margin8}>
-            {contentItems.map((contentItem, subIndex) => {
-              if (contentItem.kind === 'task') {
-                const task = contentItem.data;
-                return (
-                  <TouchableOpacity key={task._id}>
-                    <View
-                      style={styles.buttonModule}
-                      onClick={() =>
-                        router.push(
-                          `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail?._id}&taskId=${task._id}`,
-                        )
-                      }>
-                      <View style={styles.rowGap10}>
-                        <FileTextOutlined />
-                        <View style={styles.moduleItemContainer}>
-                          <Text
-                            numberOfLines={2}
-                            style={styles.moduleItemTitle}>
-                            {task.title}
-                          </Text>
-                          <Tag
-                            color={task.subject === 'Excel' ? 'green' : 'blue'}>
-                            Bài thực hành {task.subject}
-                          </Tag>
+  // Toàn bộ nội dung khóa học theo 1 thứ tự duy nhất (nối các module theo
+  // đúng thứ tự) — dùng để khoá bài thực hành chưa tới lượt, y hệt
+  // ModuleDetailPage.
+  const getLessonContentItems = () =>
+    (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
+
+  // Chỉ khoá được chắc chắn chiều "bài thực hành trước chưa đạt >= 80%" —
+  // xem giải thích đầy đủ ở ModuleDetailPage.isTaskAccessible.
+  const isTaskAccessible = (
+    seq: { kind: 'library' | 'task'; data: any }[],
+    idx: number,
+  ) => {
+    if (idx <= 0) return true;
+    const prev = seq[idx - 1];
+    if (prev.kind === 'task') return !!prev.data.hasPassed;
+    return true;
+  };
+
+  const getItems = (panelStyle: CSSProperties): CollapseProps['items'] => {
+    const lessonSeq = getLessonContentItems();
+    return (
+      lessonDetail?.modules?.map((item, index) => {
+        const contentItems = getModuleContentItems(item);
+        return {
+          key: index.toString(),
+          label: (
+            <div style={styles.moduleContentHeader}>
+              <p style={styles.moduleTitleText} title={item.title}>
+                {item.title}
+              </p>
+              <p style={styles.moduleCountText}>
+                Tổng số bài học: {contentItems.length}
+              </p>
+            </div>
+          ),
+          children: (
+            <View style={styles.contentGap8Margin8}>
+              {contentItems.map((contentItem, subIndex) => {
+                if (contentItem.kind === 'task') {
+                  const task = contentItem.data;
+                  const globalIdx = lessonSeq.findIndex(
+                    it => it.kind === 'task' && it.data._id === task._id,
+                  );
+                  const isTaskDisabled = !isTaskAccessible(
+                    lessonSeq,
+                    globalIdx,
+                  );
+                  return (
+                    <TouchableOpacity
+                      key={task._id}
+                      style={isTaskDisabled && styles.disabledButton}>
+                      <View
+                        style={styles.buttonModule}
+                        onClick={() => {
+                          if (isTaskDisabled) return;
+                          router.push(
+                            `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail?._id}&taskId=${task._id}`,
+                          );
+                        }}>
+                        <View style={styles.rowGap10}>
+                          <FileTextOutlined />
+                          <View style={styles.moduleItemContainer}>
+                            <Text
+                              numberOfLines={2}
+                              style={styles.moduleItemTitle}>
+                              {task.title}
+                            </Text>
+                            <Tag
+                              color={
+                                task.subject === 'Excel' ? 'green' : 'blue'
+                              }>
+                              Bài thực hành {task.subject}
+                              {task.hasPassed ? ' · Đạt' : ''}
+                            </Tag>
+                          </View>
                         </View>
                       </View>
-                    </View>
+                    </TouchableOpacity>
+                  );
+                }
+
+                const subItem = contentItem.data;
+                const isDisabled = !hasAccessToLibrary(subItem);
+                return (
+                  <TouchableOpacity
+                    key={subIndex}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}>
+                    <TouchableOpacity
+                      style={[
+                        isDisabled && styles.disabledButton,
+                        { flex: 1 },
+                      ]}>
+                      <View
+                        style={styles.buttonModule}
+                        onClick={() => handleLibraryClick(subItem, item)}>
+                        <View style={styles.rowGap10}>
+                          <PlayCircleOutlined />
+                          <View style={styles.moduleItemContainer}>
+                            <Text
+                              numberOfLines={2}
+                              style={styles.moduleItemTitle}>
+                              {subItem.title}
+                            </Text>
+                            <Text style={styles.moduleItemTime}>
+                              {subItem.type !== 'Text'
+                                ? convertDurationToTime(subItem.duration)
+                                : 'Trắc nghiệm'}
+                            </Text>
+                          </View>
+                        </View>
+                        {userProfile?.role?.level <= 2 &&
+                          subItem.type !== 'Text' && (
+                            <AppVideoWatchersButton
+                              subLessonId={subItem._id}
+                              subLessonTitle={subItem.title}
+                              onClick={e => {
+                                e.stopPropagation();
+                                setSelectedSubLessonId(subItem._id);
+                                setSelectedSubLessonTitle(subItem.title);
+                                setWatcherModalVisible(true);
+                              }}
+                            />
+                          )}
+                      </View>
+                    </TouchableOpacity>
                   </TouchableOpacity>
                 );
-              }
-
-              const subItem = contentItem.data;
-              const isDisabled = !hasAccessToLibrary(subItem);
-              return (
-                <TouchableOpacity
-                  key={subIndex}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}>
-                  <TouchableOpacity
-                    style={[isDisabled && styles.disabledButton, { flex: 1 }]}>
-                    <View
-                      style={styles.buttonModule}
-                      onClick={() => handleLibraryClick(subItem, item)}>
-                      <View style={styles.rowGap10}>
-                        <PlayCircleOutlined />
-                        <View style={styles.moduleItemContainer}>
-                          <Text
-                            numberOfLines={2}
-                            style={styles.moduleItemTitle}>
-                            {subItem.title}
-                          </Text>
-                          <Text style={styles.moduleItemTime}>
-                            {subItem.type !== 'Text'
-                              ? convertDurationToTime(subItem.duration)
-                              : 'Trắc nghiệm'}
-                          </Text>
-                        </View>
-                      </View>
-                      {userProfile?.role?.level <= 2 &&
-                        subItem.type !== 'Text' && (
-                          <AppVideoWatchersButton
-                            subLessonId={subItem._id}
-                            subLessonTitle={subItem.title}
-                            onClick={e => {
-                              e.stopPropagation();
-                              setSelectedSubLessonId(subItem._id);
-                              setSelectedSubLessonTitle(subItem.title);
-                              setWatcherModalVisible(true);
-                            }}
-                          />
-                        )}
-                    </View>
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        ),
-        style: panelStyle,
-      };
-    }) || [];
+              })}
+            </View>
+          ),
+          style: panelStyle,
+        };
+      }) || []
+    );
+  };
 
   const panelStyle: React.CSSProperties = {
     background: '#f5f5f5',

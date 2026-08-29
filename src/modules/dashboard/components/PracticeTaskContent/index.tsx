@@ -18,13 +18,19 @@ import {
 } from '~mdDashboard/types/practice';
 import './styles.scss';
 
-type Props = { taskId: string };
+type Props = {
+  taskId: string;
+  // Gọi đúng 1 lần khi 1 lần nộp bài ĐẠT (>= 80% số điểm) — nơi gọi (VD
+  // ModuleDetailPage) dùng để mở khóa + có thể tự chuyển sang nội dung tiếp
+  // theo trong khóa học, y hệt cách video/trắc nghiệm hoạt động.
+  onPassed?: () => void;
+};
 
 // Toàn bộ nội dung "làm 1 bài tập thực hành": mô tả yêu cầu, tải đề gốc,
 // nộp bài + chấm điểm, kết quả, lịch sử nộp. Tách riêng khỏi trang để dùng
 // lại được ở cả 2 chỗ: trang chi tiết đứng riêng (/dashboard/practice/[id])
 // và bên phải trang khóa thực hành dạng sidebar Phần > Bài tập.
-const PracticeTaskContent: React.FC<Props> = ({ taskId }) => {
+const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
   const accessToken = useAppSelector(
     state => state.authReducer.tokenInfo?.accessToken,
   );
@@ -109,9 +115,16 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId }) => {
         const result: PracticeSubmitResponse = info.file.response?.data;
         if (result) {
           setLatestResult(result);
-          messageApi.success(
-            `Đã chấm xong: ${result.totalScore}/${result.maxScore} điểm`,
-          );
+          if (result.isPass) {
+            messageApi.success(
+              `Đã đạt ${result.totalScore}/${result.maxScore} điểm — bạn có thể qua nội dung tiếp theo.`,
+            );
+            onPassed?.();
+          } else {
+            messageApi.warning(
+              `Được ${result.totalScore}/${result.maxScore} điểm — cần đạt tối thiểu 80% số điểm mới được qua nội dung tiếp theo, hãy làm lại.`,
+            );
+          }
           refetchSubmissions();
         }
       }
@@ -159,6 +172,15 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId }) => {
         <div className="practice-result-panel">
           <h3>
             Kết quả: {latestResult.totalScore}/{latestResult.maxScore} điểm
+            {latestResult.isPass ? (
+              <span className="practice-result-status practice-result-status--pass">
+                Đạt
+              </span>
+            ) : (
+              <span className="practice-result-status practice-result-status--fail">
+                Chưa đạt (cần ≥ 80%)
+              </span>
+            )}
           </h3>
           {latestResult.items.map((item, idx) => (
             <ResultItemRow key={item.criteriaId} item={item} index={idx} />

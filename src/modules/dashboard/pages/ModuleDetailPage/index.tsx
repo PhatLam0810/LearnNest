@@ -42,7 +42,7 @@ const ModuleDetailPage = () => {
   // 1 khóa học có thể chứa cả bài học video và bài thực hành trong cùng 1
   // phần — lấy thêm danh sách bài thực hành đã publish của khóa này để
   // trộn vào đúng chỗ (theo order) khi hiện "Nội dung khóa học".
-  const { data: practiceTasksForLesson } =
+  const { data: practiceTasksForLesson, refetch: refetchPracticeTasks } =
     dashboardQuery.useGetPracticeTasksStudentQuery(
       { lessonId },
       { skip: !lessonId },
@@ -159,114 +159,162 @@ const ModuleDetailPage = () => {
     return [...libraryItems, ...taskItems].sort((a, b) => a.order - b.order);
   };
 
-  const getItems = (panelStyle: CSSProperties): CollapseProps['items'] =>
-    lessonDetail?.modules?.map((item, index) => {
-      const contentItems = getModuleContentItems(item);
-      return {
-        key: index,
-        label: (
-          <div style={styles.moduleContentHeader}>
-            <p style={styles.moduleTitleText} title={item.title}>
-              {item.title}
-            </p>
-            <p style={styles.moduleCountText}>
-              Tổng số bài học: {contentItems.length}
-            </p>
-          </div>
-        ),
-        children: (
-          <View style={styles.contentGap8Margin8}>
-            {contentItems.map((contentItem, subIndex) => {
-              if (contentItem.kind === 'task') {
-                const task = contentItem.data;
-                const isTaskSelected = taskId === task._id;
+  // Toàn bộ nội dung khóa học (video + bài thực hành) theo ĐÚNG 1 thứ tự
+  // duy nhất, nối các module lại theo đúng thứ tự module — dùng để: (1) tìm
+  // "nội dung tiếp theo" thật sự khi 1 video xem xong hoặc 1 bài thực hành
+  // đạt >= 80%, dù nội dung kế tiếp là video hay bài thực hành; (2) khoá
+  // các bài thực hành CHƯA tới lượt trong sidebar.
+  const getLessonContentItems = () =>
+    (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
+
+  // Bài thực hành ở vị trí idx trong seq có được phép làm/xem chưa. Chỉ
+  // khoá chắc chắn được chiều "bài thực hành trước chưa đạt >= 80%" —
+  // hasPassed là tín hiệu trực tiếp, đáng tin. Chiều "video/trắc nghiệm
+  // ngay trước chưa xem xong" KHÔNG khoá được: usersCanPlay chỉ cho biết
+  // 1 video đã "tới lượt" (mở khoá), không phân biệt được với "đã xem
+  // xong" — không có tín hiệu nào khác để dựa vào mà không thêm hạ tầng
+  // theo dõi mới. Đây là giới hạn có chủ đích, không phải sót.
+  const isTaskAccessible = (
+    seq: { kind: 'library' | 'task'; data: any }[],
+    idx: number,
+  ) => {
+    if (idx <= 0) return true;
+    const prev = seq[idx - 1];
+    if (prev.kind === 'task') return !!prev.data.hasPassed;
+    return true;
+  };
+
+  const getItems = (panelStyle: CSSProperties): CollapseProps['items'] => {
+    const lessonSeq = getLessonContentItems();
+    return (
+      lessonDetail?.modules?.map((item, index) => {
+        const contentItems = getModuleContentItems(item);
+        return {
+          key: index,
+          label: (
+            <div style={styles.moduleContentHeader}>
+              <p style={styles.moduleTitleText} title={item.title}>
+                {item.title}
+              </p>
+              <p style={styles.moduleCountText}>
+                Tổng số bài học: {contentItems.length}
+              </p>
+            </div>
+          ),
+          children: (
+            <View style={styles.contentGap8Margin8}>
+              {contentItems.map((contentItem, subIndex) => {
+                if (contentItem.kind === 'task') {
+                  const task = contentItem.data;
+                  const isTaskSelected = taskId === task._id;
+                  const globalIdx = lessonSeq.findIndex(
+                    it => it.kind === 'task' && it.data._id === task._id,
+                  );
+                  const isTaskDisabled = !isTaskAccessible(
+                    lessonSeq,
+                    globalIdx,
+                  );
+                  return (
+                    <TouchableOpacity
+                      key={task._id}
+                      style={[
+                        isTaskDisabled &&
+                          !isTaskSelected &&
+                          styles.disabledButton,
+                      ]}>
+                      <View
+                        onClick={() => {
+                          if (isTaskDisabled) return;
+                          handleSelectTask(task);
+                        }}
+                        style={[
+                          styles.buttonModule,
+                          isTaskSelected && {
+                            backgroundColor: 'var(--color-vhu-primary)',
+                            color: '#FFF',
+                          },
+                        ]}>
+                        <FileTextOutlined
+                          style={isTaskSelected ? { color: '#FFF' } : undefined}
+                        />
+                        <View style={styles.libraryItemPadding}>
+                          <Text
+                            numberOfLines={1}
+                            style={[
+                              styles.moduleItemTitle,
+                              isTaskSelected && { color: '#FFF' },
+                            ]}>
+                            {task.title}
+                          </Text>
+                          <Tag
+                            color={task.subject === 'Excel' ? 'green' : 'blue'}
+                            style={{ marginTop: 2 }}>
+                            Bài thực hành {task.subject}
+                            {task.hasPassed ? ' · Đạt' : ''}
+                          </Tag>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                }
+
+                const subItem = contentItem.data;
+                const isDisabled = !hasAccess(subItem);
+                const isSelected = selectedLibrary?._id === subItem._id;
+
                 return (
-                  <TouchableOpacity key={task._id}>
+                  <TouchableOpacity
+                    key={subIndex}
+                    style={[
+                      isDisabled && !isSelected && styles.disabledButton,
+                    ]}>
                     <View
-                      onClick={() => handleSelectTask(task)}
+                      onClick={() => {
+                        if (isDisabled) return;
+                        handleSelectLibrary(subItem);
+                      }}
                       style={[
                         styles.buttonModule,
-                        isTaskSelected && {
+                        isSelected && {
                           backgroundColor: 'var(--color-vhu-primary)',
                           color: '#FFF',
                         },
                       ]}>
-                      <FileTextOutlined
-                        style={isTaskSelected ? { color: '#FFF' } : undefined}
-                      />
+                      <PlayCircleOutlined />
                       <View style={styles.libraryItemPadding}>
                         <Text
                           numberOfLines={1}
                           style={[
                             styles.moduleItemTitle,
-                            isTaskSelected && { color: '#FFF' },
+                            isSelected && {
+                              color: '#FFF',
+                            },
                           ]}>
-                          {task.title}
+                          {subItem.title}
                         </Text>
-                        <Tag
-                          color={task.subject === 'Excel' ? 'green' : 'blue'}
-                          style={{ marginTop: 2 }}>
-                          Bài thực hành {task.subject}
-                        </Tag>
+                        <Text
+                          style={[
+                            styles.moduleItemTime,
+                            isSelected && {
+                              color: '#FFF',
+                            },
+                          ]}>
+                          {subItem.type !== 'Text'
+                            ? convertDurationToTime(subItem.duration)
+                            : 'Trắc nghiệm'}
+                        </Text>
                       </View>
                     </View>
                   </TouchableOpacity>
                 );
-              }
-
-              const subItem = contentItem.data;
-              const isDisabled = !hasAccess(subItem);
-              const isSelected = selectedLibrary?._id === subItem._id;
-
-              return (
-                <TouchableOpacity
-                  key={subIndex}
-                  style={[isDisabled && !isSelected && styles.disabledButton]}>
-                  <View
-                    onClick={() => {
-                      if (isDisabled) return;
-                      handleSelectLibrary(subItem);
-                    }}
-                    style={[
-                      styles.buttonModule,
-                      isSelected && {
-                        backgroundColor: 'var(--color-vhu-primary)',
-                        color: '#FFF',
-                      },
-                    ]}>
-                    <PlayCircleOutlined />
-                    <View style={styles.libraryItemPadding}>
-                      <Text
-                        numberOfLines={1}
-                        style={[
-                          styles.moduleItemTitle,
-                          isSelected && {
-                            color: '#FFF',
-                          },
-                        ]}>
-                        {subItem.title}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.moduleItemTime,
-                          isSelected && {
-                            color: '#FFF',
-                          },
-                        ]}>
-                        {subItem.type !== 'Text'
-                          ? convertDurationToTime(subItem.duration)
-                          : 'Trắc nghiệm'}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        ),
-        style: panelStyle,
-      };
-    }) || [];
+              })}
+            </View>
+          ),
+          style: panelStyle,
+        };
+      }) || []
+    );
+  };
 
   const panelStyle: React.CSSProperties = {
     marginBottom: 12,
@@ -275,29 +323,50 @@ const ModuleDetailPage = () => {
     border: 'none',
   };
 
-  const onWatchFinish = async () => {
-    if (!selectedLibrary || !lessonDetail?.modules) return;
-
-    const libraries = lessonDetail?.modules?.flatMap(
-      module => module.libraries,
+  // Tìm mục kế tiếp trong TOÀN BỘ khóa học (video + bài thực hành trộn
+  // chung 1 thứ tự) rồi mở khóa/chuyển sang đúng mục đó — dùng chung cho cả
+  // 2 trường hợp "vừa xem xong 1 video/trắc nghiệm" và "vừa nộp bài thực
+  // hành đạt >= 80%". Trước đây chỉ tìm trong danh sách video (bỏ qua bài
+  // thực hành hoàn toàn) nên nếu mục kế tiếp là bài thực hành, video xong
+  // sẽ không chuyển đi đâu cả (hoặc nhảy nhầm sang video sau đó, bỏ qua bài
+  // thực hành xen giữa).
+  const goToNextContentItem = async (
+    currentKind: 'library' | 'task',
+    currentId: string,
+  ) => {
+    const seq = getLessonContentItems();
+    const currentIndex = seq.findIndex(
+      it => it.kind === currentKind && it.data._id === currentId,
     );
+    if (currentIndex === -1) return;
+    const next = seq[currentIndex + 1];
+    if (!next) return;
 
-    const currentIndex = libraries.findIndex(
-      lib => lib._id === selectedLibrary?._id,
-    );
-
-    const nextLibrary = libraries[currentIndex + 1] || null;
-
-    await setLibraryCanPlay({
-      libraryId: nextLibrary?._id,
-      userId: userProfile?._id,
-    });
-
-    await dispatch(dashboardAction.getLessonDetail({ id: lessonDetail._id }));
-
-    if (nextLibrary) {
-      handleSelectLibrary(nextLibrary);
+    if (next.kind === 'library') {
+      await setLibraryCanPlay({
+        libraryId: next.data._id,
+        userId: userProfile?._id,
+      });
+      await dispatch(dashboardAction.getLessonDetail({ id: lessonId }));
+      handleSelectLibrary(next.data);
+    } else {
+      handleSelectTask(next.data);
     }
+  };
+
+  const onWatchFinish = async () => {
+    if (!selectedLibrary) return;
+    await goToNextContentItem('library', selectedLibrary._id);
+  };
+
+  // Bài thực hành vừa nộp đạt >= 80% (PracticeTaskContent tự kiểm tra, chỉ
+  // gọi callback này khi isPass) — tải lại danh sách bài thực hành để
+  // hasPassed cập nhật (mở khóa các bài thực hành phụ thuộc phía sau), rồi
+  // chuyển sang mục tiếp theo như bình thường.
+  const handleTaskPassed = async () => {
+    if (!taskId) return;
+    await refetchPracticeTasks();
+    await goToNextContentItem('task', taskId);
   };
   const handleClose = () => {
     setIsModalOpen(false);
@@ -424,7 +493,10 @@ const ModuleDetailPage = () => {
         <View style={mainColumnStyle}>
           {taskId ? (
             <View style={videoStickyStyle}>
-              <PracticeTaskContent taskId={taskId} />
+              <PracticeTaskContent
+                taskId={taskId}
+                onPassed={handleTaskPassed}
+              />
             </View>
           ) : selectedLibrary?.type === 'Text' ? (
             <View style={videoStickyStyle}>
