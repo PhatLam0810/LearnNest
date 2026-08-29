@@ -166,10 +166,24 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       }
 
       const modules = lessonDetail.modules || [];
-      const firstModule = modules[0];
-      const firstLibrary = firstModule?.libraries?.[0];
+      // Tìm nội dung ĐẦU TIÊN theo đúng thứ tự đã sắp xếp — có thể là video
+      // hoặc bài thực hành. Trước đây chỉ nhìn `firstModule.libraries[0]`
+      // nên hễ phần học đầu tiên không có video nào (toàn bài thực hành) là
+      // báo nhầm "chưa có nội dung", dù chính module đó (hoặc module sau)
+      // thật ra có bài tập để làm ngay.
+      let firstModuleWithContent: any = null;
+      let firstContentItem: { kind: 'library' | 'task'; data: any } | null =
+        null;
+      for (const m of modules) {
+        const items = getModuleContentItems(m);
+        if (items.length > 0) {
+          firstModuleWithContent = m;
+          firstContentItem = items[0];
+          break;
+        }
+      }
 
-      if (!firstModule || !firstLibrary) {
+      if (!firstModuleWithContent || !firstContentItem) {
         messageApi.open({
           type: 'error',
           content: 'Khóa học này hiện chưa có nội dung.',
@@ -178,11 +192,17 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
         return;
       }
 
-      dispatch(dashboardAction.setSelectedModule(firstModule));
-      dispatch(dashboardAction.setSelectedLibrary(firstLibrary));
-      router.push(
-        `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail._id}`,
-      );
+      if (firstContentItem.kind === 'task') {
+        router.push(
+          `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail._id}&taskId=${firstContentItem.data._id}`,
+        );
+      } else {
+        dispatch(dashboardAction.setSelectedModule(firstModuleWithContent));
+        dispatch(dashboardAction.setSelectedLibrary(firstContentItem.data));
+        router.push(
+          `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail._id}`,
+        );
+      }
     } catch (error) {
       console.error('handleStartLesson error:', error);
       messageApi.open({
@@ -232,7 +252,9 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     <View
                       style={styles.buttonModule}
                       onClick={() =>
-                        router.push(`/dashboard/practice/${task._id}`)
+                        router.push(
+                          `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail?._id}&taskId=${task._id}`,
+                        )
                       }>
                       <View style={styles.rowGap10}>
                         <FileTextOutlined />

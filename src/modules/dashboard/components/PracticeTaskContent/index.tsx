@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { Button, Empty, Spin, Tag, Upload, UploadProps } from 'antd';
+import { Button, Empty, Spin, Upload, UploadProps } from 'antd';
 import {
   CheckCircleFilled,
   CloseCircleFilled,
@@ -126,9 +126,6 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId }) => {
   return (
     <div className="practice-content">
       <div className="practice-content-header">
-        <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
-          {task.subject}
-        </Tag>
         <h1>{task.title}</h1>
       </div>
 

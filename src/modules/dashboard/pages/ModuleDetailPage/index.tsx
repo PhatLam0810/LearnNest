@@ -22,6 +22,7 @@ import { useResponsive } from '@/styles/responsive';
 import LibraryDetailItem, {
   LibraryDetailItemHandle,
 } from '~mdDashboard/components/LibraryDetailItem';
+import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 const ModuleDetailPage = () => {
@@ -30,6 +31,10 @@ const ModuleDetailPage = () => {
 
   const lessonId = searchParams.get('lessonId') || '';
   const subLessonId = searchParams.get('subLessonId') || '';
+  // Bài thực hành làm NGAY trong trang này (không điều hướng sang
+  // /dashboard/practice/[id] nữa) — chọn bài nào thì đổi query param này,
+  // y hệt cách subLessonId hoạt động cho video.
+  const taskId = searchParams.get('taskId') || '';
   const { data: lessonDetail, isLoading: isLoadingData } =
     dashboardQuery.useGetLessonIdQuery({
       id: lessonId,
@@ -82,6 +87,9 @@ const ModuleDetailPage = () => {
   }, [selectedLibrary?._id, selectedLibrary?.questionList]);
 
   useEffect(() => {
+    // Đang xem 1 bài thực hành (taskId trên URL) — không tự chọn video nào
+    // cả, để nguyên cho nhánh render bài thực hành bên dưới xử lý.
+    if (taskId) return;
     if (
       isLoadingData ||
       !lessonDetail?.modules ||
@@ -114,6 +122,7 @@ const ModuleDetailPage = () => {
   }, [
     lessonDetail,
     subLessonId,
+    taskId,
     isLoadingData,
     selectedLibrary?._id,
     dispatch,
@@ -123,6 +132,12 @@ const ModuleDetailPage = () => {
     dispatch(dashboardAction.setSelectedLibrary(subItem));
     router.push(
       `/dashboard/home/lesson/moduleDetail?lessonId=${lessonId}&subLessonId=${subItem._id}`,
+    );
+  };
+
+  const handleSelectTask = (task: any) => {
+    router.push(
+      `/dashboard/home/lesson/moduleDetail?lessonId=${lessonId}&taskId=${task._id}`,
     );
   };
 
@@ -164,16 +179,28 @@ const ModuleDetailPage = () => {
             {contentItems.map((contentItem, subIndex) => {
               if (contentItem.kind === 'task') {
                 const task = contentItem.data;
+                const isTaskSelected = taskId === task._id;
                 return (
                   <TouchableOpacity key={task._id}>
                     <View
-                      onClick={() =>
-                        router.push(`/dashboard/practice/${task._id}`)
-                      }
-                      style={styles.buttonModule}>
-                      <FileTextOutlined />
+                      onClick={() => handleSelectTask(task)}
+                      style={[
+                        styles.buttonModule,
+                        isTaskSelected && {
+                          backgroundColor: 'var(--color-vhu-primary)',
+                          color: '#FFF',
+                        },
+                      ]}>
+                      <FileTextOutlined
+                        style={isTaskSelected ? { color: '#FFF' } : undefined}
+                      />
                       <View style={styles.libraryItemPadding}>
-                        <Text numberOfLines={1} style={styles.moduleItemTitle}>
+                        <Text
+                          numberOfLines={1}
+                          style={[
+                            styles.moduleItemTitle,
+                            isTaskSelected && { color: '#FFF' },
+                          ]}>
                           {task.title}
                         </Text>
                         <Tag
@@ -323,7 +350,7 @@ const ModuleDetailPage = () => {
     libraryRef.current?.pauseAll();
   };
 
-  if (isLoadingData && !selectedLibrary) {
+  if (isLoadingData && !selectedLibrary && !taskId) {
     return (
       <View
         style={{
@@ -339,7 +366,7 @@ const ModuleDetailPage = () => {
     );
   }
 
-  if (!selectedLibrary) {
+  if (!selectedLibrary && !taskId) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Text style={{ color: '#999' }}>
@@ -395,7 +422,11 @@ const ModuleDetailPage = () => {
       {contextHolder}
       <View style={layoutRowStyle}>
         <View style={mainColumnStyle}>
-          {selectedLibrary?.type === 'Text' ? (
+          {taskId ? (
+            <View style={videoStickyStyle}>
+              <PracticeTaskContent taskId={taskId} />
+            </View>
+          ) : selectedLibrary?.type === 'Text' ? (
             <View style={videoStickyStyle}>
               <View style={styles.layoutTitleContainer}>
                 <View style={styles.fullWidthFlex}>

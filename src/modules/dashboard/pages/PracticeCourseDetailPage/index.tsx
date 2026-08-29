@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Collapse, Empty, Spin, Tag } from 'antd';
+import { Button, Collapse, Empty, Spin } from 'antd';
 import { CaretRightOutlined, LeftOutlined } from '@ant-design/icons';
 import { dashboardQuery } from '~mdDashboard/redux';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
@@ -109,9 +109,6 @@ const PracticeCourseDetailPage: React.FC<Props> = ({ lessonId }) => {
       </Button>
 
       <div className="practice-course-header">
-        <Tag color={lessonDetail.modules?.length ? 'blue' : undefined}>
-          Khóa thực hành
-        </Tag>
         <h1>{lessonDetail.title}</h1>
       </div>
 

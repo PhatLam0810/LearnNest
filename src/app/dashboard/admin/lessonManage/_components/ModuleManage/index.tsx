@@ -31,6 +31,19 @@ const ModuleManage = () => {
     });
 
   const [deleteItem] = adminQuery.useDeleteModuleMutation();
+  // "Tổng bài học" phải tính cả bài thực hành gắn vào phần học, không chỉ
+  // library video — trước đây chỉ đếm record.libraries.length nên phần học
+  // toàn bài thực hành (không có video nào) luôn hiện "0 bài học" dù thực
+  // ra đã có nội dung.
+  const { data: allTasks } = adminQuery.useGetPracticeTasksAdminQuery();
+  const taskCountByModule = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    (allTasks || []).forEach(t => {
+      if (!t.moduleId) return;
+      map[t.moduleId] = (map[t.moduleId] || 0) + 1;
+    });
+    return map;
+  }, [allTasks]);
   const columns: TableProps<Module>['columns'] = [
     {
       title: 'Tên phần học',
@@ -42,7 +55,10 @@ const ModuleManage = () => {
       dataIndex: 'Library',
       key: 'Library',
       render: (_, record) => (
-        <p style={{ margin: 0 }}> {record.libraries.length} bài học </p>
+        <p style={{ margin: 0 }}>
+          {record.libraries.length + (taskCountByModule[record._id] || 0)} bài
+          học
+        </p>
       ),
     },
     {

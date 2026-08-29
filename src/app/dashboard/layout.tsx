@@ -4,6 +4,7 @@ import { GetProp, Grid, Layout, Menu, MenuProps } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   ControlOutlined,
+  FileTextOutlined,
   IdcardOutlined,
   LogoutOutlined,
   RocketOutlined,
@@ -73,6 +74,15 @@ export default function DashboardLayout({
               color={pathname === '/dashboard/library' ? 'white' : 'black'}
             />
           ),
+        },
+        {
+          // Hub luyện tập MOS đứng riêng — chỉ để duyệt/làm bài thực hành
+          // không gắn với 1 khóa video cụ thể nào. Bài thực hành nằm TRONG
+          // 1 khóa video (nội dung trộn) thì làm ngay tại moduleDetail của
+          // khóa đó, không dùng khu vực này.
+          key: '/dashboard/practice',
+          label: 'Luyện Tập',
+          icon: <FileTextOutlined />,
         },
         ...(!isAdmin
           ? [
