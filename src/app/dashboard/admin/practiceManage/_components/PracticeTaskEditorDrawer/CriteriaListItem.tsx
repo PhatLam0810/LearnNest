@@ -57,6 +57,7 @@ const WORD_TYPES: PracticeCriteriaType[] = [
   'word_table_caption',
   'word_table_cell_merged',
   'word_no_headers_footers',
+  'word_table_style_name',
 ];
 
 type Props = {
@@ -794,6 +795,27 @@ const CriteriaListItem: React.FC<Props> = ({
         );
       case 'word_no_headers_footers':
         return null;
+      case 'word_table_style_name':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Bảng thứ mấy (0 = bảng đầu tiên)"
+              name={[name, 'params', 'tableIndex']}
+              initialValue={0}
+              rules={[{ required: true, message: 'Nhập vị trí bảng' }]}>
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Tên kiểu bảng (viết liền, không dấu cách)"
+              name={[name, 'params', 'styleName']}
+              rules={[{ required: true, message: 'Nhập tên kiểu bảng' }]}
+              tooltip="Word bỏ dấu cách/gạch ngang khi lưu vào file — VD 'Grid Table 4 - Accent 3' lưu là 'GridTable4-Accent3'.">
+              <Input placeholder="VD: GridTable4-Accent3" />
+            </Form.Item>
+          </>
+        );
       default:
         return null;
     }
