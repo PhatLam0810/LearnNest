@@ -24,6 +24,7 @@ const EXCEL_TYPES: PracticeCriteriaType[] = [
   'excel_cell_value',
   'excel_wrap_text',
   'excel_table_name',
+  'excel_table_banded_rows',
   'excel_sparkline_exists',
   'excel_chart_title',
   'excel_chart_axis_title',
@@ -376,6 +377,19 @@ const CriteriaListItem: React.FC<Props> = ({
               name={[name, 'params', 'name']}
               rules={[{ required: true, message: 'Nhập tên bảng' }]}>
               <Input placeholder="VD: ProductInventory" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_table_banded_rows':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Tên bảng"
+              name={[name, 'params', 'name']}
+              rules={[{ required: true, message: 'Nhập tên bảng' }]}>
+              <Input placeholder="VD: Tasks" />
             </Form.Item>
           </>
         );

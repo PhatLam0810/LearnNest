@@ -13,6 +13,7 @@ export const PRACTICE_CRITERIA_TYPES = [
   'excel_cell_value',
   'excel_wrap_text',
   'excel_table_name',
+  'excel_table_banded_rows',
   // Excel — đọc XML thô (chart/sparkline, exceljs không hỗ trợ).
   'excel_sparkline_exists',
   'excel_chart_title',
@@ -51,6 +52,7 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   word_bookmark_exists: 'Có Bookmark trong văn bản',
   excel_wrap_text: 'Tự động ngắt dòng (Wrap Text)',
   excel_table_name: 'Tên bảng (Table Name)',
+  excel_table_banded_rows: 'Tô bóng hàng xen kẽ (Banded Rows)',
   excel_sparkline_exists: 'Sparkline',
   excel_chart_title: 'Tiêu đề biểu đồ',
   excel_chart_axis_title: 'Tiêu đề trục biểu đồ',
