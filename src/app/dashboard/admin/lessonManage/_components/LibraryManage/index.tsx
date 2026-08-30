@@ -146,6 +146,7 @@ const LibraryManage = () => {
       </View>
       <View ref={divRef} style={{ flex: 1 }}>
         <Table
+          rowKey="_id"
           scroll={{ y: height - 100 }}
           columns={columns}
           dataSource={listItem}

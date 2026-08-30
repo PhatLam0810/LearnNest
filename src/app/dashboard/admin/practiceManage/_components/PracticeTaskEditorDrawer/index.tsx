@@ -72,6 +72,14 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     items: PracticeSubmissionResultItem[];
   } | null>(null);
   const [isTestGrading, setIsTestGrading] = useState(false);
+  // Tăng lên mỗi lần drawer MỞ (kể cả mở lại đúng task cũ) — dùng làm 1 phần
+  // "khoá populate" bên dưới. Bug thật đã gặp: chỉ reset lastPopulatedTaskIdRef
+  // trong effect mở drawer thì không đủ, vì effect đổ dữ liệu form lại chỉ
+  // chạy theo [detail] — nếu mở lại ĐÚNG task cũ (chưa lưu gì nên `detail`
+  // vẫn y hệt tham chiếu cũ), effect đó không chạy lại, chữ đang gõ dở từ
+  // lần trước bị bỏ sót trên form dù trông như "task mới mở". Thêm
+  // openSession vào dependency để buộc effect populate chạy lại đúng lúc mở.
+  const [openSession, setOpenSession] = useState(0);
   const accessToken = useAppSelector(
     state => state.authReducer.tokenInfo?.accessToken,
   );
@@ -108,11 +116,11 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     setCurrentTaskId(taskId);
     setInstructions(null);
     setTestGradeResult(null);
-    // Mở lại drawer (kể cả cho ĐÚNG task cũ) phải populate lại từ đầu — nếu
-    // không, effect populate-1-lần bên dưới sẽ tưởng đã populate rồi (do
-    // component không unmount giữa các lần mở/đóng) và bỏ qua, hiện nhầm
-    // form state còn sót từ lần sửa dở trước đó.
-    lastPopulatedTaskIdRef.current = undefined;
+    // Mở lại drawer (kể cả cho ĐÚNG task cũ) phải populate lại từ đầu —
+    // openSession đổi buộc effect populate bên dưới chạy lại dù `detail` vẫn
+    // y hệt tham chiếu cũ (task cũ, chưa lưu gì nên RTK Query không có gì để
+    // refetch mới).
+    setOpenSession(s => s + 1);
     if (!taskId) {
       taskForm.resetFields();
       criteriaForm.resetFields();
@@ -121,20 +129,25 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     }
   }, [open, taskId]);
 
-  // Chỉ đổ dữ liệu vào form đúng 1 LẦN cho mỗi task (lúc mở drawer/chuyển
-  // task), không phải mỗi khi `detail` đổi tham chiếu — getPracticeTaskDetailAdmin
+  // Chỉ đổ dữ liệu vào form đúng 1 LẦN cho mỗi "phiên mở" (openSession) của
+  // 1 task, không phải mỗi khi `detail` đổi tham chiếu — getPracticeTaskDetailAdmin
   // giờ tự động refetch nền sau khi tag PracticeTask bị invalidate (VD: vừa
   // lưu tiêu chí xong), và nếu người dùng đang gõ dở tiêu đề/mô tả đúng lúc
   // refetch đó về, effect cũ (chạy theo [detail]) sẽ ghi đè mất chữ đang gõ
-  // dở — lỗi thật đã gặp khi test tag invalidation. lastPopulatedTaskIdRef
-  // đảm bảo cùng 1 taskId thì chỉ populate 1 lần, dữ liệu mới hơn từ refetch
-  // nền bị bỏ qua (chấp nhận được — nếu cần thấy tiêu chí mới nhất, đóng mở
-  // lại drawer).
-  const lastPopulatedTaskIdRef = useRef<string | undefined>(undefined);
+  // dở — lỗi thật đã gặp khi test tag invalidation.
+  //
+  // Khoá theo (taskId + openSession) chứ KHÔNG chỉ theo taskId — nếu chỉ so
+  // taskId, đóng rồi mở lại ĐÚNG task cũ (chưa lưu gì) sẽ bị bỏ qua vì
+  // taskId không đổi, để sót chữ đang gõ dở từ lần trước trên form dù trông
+  // như "vừa mở task mới" — lỗi thật thứ 2 đã gặp. openSession tăng mỗi lần
+  // mở (xem effect trên) nên luôn buộc populate lại đúng lúc mở, trong khi
+  // vẫn bỏ qua refetch nền xảy ra GIỮA lúc đang mở (openSession không đổi).
+  const lastPopulatedKeyRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!detail) return;
-    if (lastPopulatedTaskIdRef.current === detail.task._id) return;
-    lastPopulatedTaskIdRef.current = detail.task._id;
+    const key = `${detail.task._id}:${openSession}`;
+    if (lastPopulatedKeyRef.current === key) return;
+    lastPopulatedKeyRef.current = key;
     taskForm.setFieldsValue(detail.task);
     setSubject(detail.task.subject);
     if (detail.task.starterFileUrl) {
@@ -156,7 +169,7 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
         params: c.params,
       })),
     });
-  }, [detail]);
+  }, [detail, openSession]);
 
   const handleSaveTask = async (values: any) => {
     try {
