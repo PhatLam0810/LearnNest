@@ -250,11 +250,14 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const getLessonContentItems = () =>
     (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
 
-  // Xem giải thích đầy đủ ở ModuleDetailPage.isTaskAccessible.
+  // Xem giải thích đầy đủ ở ModuleDetailPage.isTaskAccessible. Admin phải
+  // xem được mọi bài thực hành (giống hasAccessToLibrary đã bypass sẵn cho
+  // library), không bị khoá theo tiến độ học thật của chính họ.
   const isTaskAccessible = (
     seq: { kind: 'library' | 'task'; data: any }[],
     idx: number,
   ) => {
+    if (userProfile?.role?.level <= 2) return true;
     if (idx <= 0) return true;
     const prev = seq[idx - 1];
     if (prev.kind === 'task') return !!prev.data.hasPassed;

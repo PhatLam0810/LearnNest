@@ -195,6 +195,11 @@ const ModuleDetailPage = () => {
     seq: { kind: 'library' | 'task'; data: any }[],
     idx: number,
   ) => {
+    // Admin phải xem được mọi bài thực hành để kiểm tra/soạn đề, không bị
+    // khoá theo tiến độ học thật của chính họ — giống hệt bypass isAdmin đã
+    // có sẵn ở hasAccess phía trên, nhưng hàm này trước giờ thiếu, nên admin
+    // bị khoá nhầm y như học viên thật mỗi khi thêm 1 chiều gating mới.
+    if (isAdmin) return true;
     if (idx <= 0) return true;
     const prev = seq[idx - 1];
     if (prev.kind === 'task') return !!prev.data.hasPassed;
