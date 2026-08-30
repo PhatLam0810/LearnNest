@@ -37,6 +37,7 @@ const EXCEL_TYPES: PracticeCriteriaType[] = [
   'excel_merged_cells',
   'excel_table_style_name',
   'excel_print_area',
+  'excel_fit_to_page',
 ];
 
 const WORD_TYPES: PracticeCriteriaType[] = [
@@ -524,6 +525,8 @@ const CriteriaListItem: React.FC<Props> = ({
             </Form.Item>
           </>
         );
+      case 'excel_fit_to_page':
+        return <>{sheetField}</>;
       case 'excel_sparkline_exists':
         return (
           <>

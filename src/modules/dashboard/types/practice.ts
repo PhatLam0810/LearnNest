@@ -29,6 +29,7 @@ export const PRACTICE_CRITERIA_TYPES = [
   'excel_merged_cells',
   'excel_table_style_name',
   'excel_print_area',
+  'excel_fit_to_page',
   // Word — dựa trên đọc XML thô (jszip).
   'word_line_spacing',
   'word_margins',
@@ -79,6 +80,7 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   excel_merged_cells: 'Gộp ô (Merge Cells)',
   excel_table_style_name: 'Kiểu bảng (Table Style)',
   excel_print_area: 'Vùng in (Print Area)',
+  excel_fit_to_page: 'In vừa 1 trang (Fit to Page)',
 };
 
 export interface PracticeTask {
