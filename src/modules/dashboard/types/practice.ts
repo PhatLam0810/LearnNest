@@ -42,6 +42,11 @@ export const PRACTICE_CRITERIA_TYPES = [
   'word_table_cell_spacing',
   'word_footnotes_to_endnotes',
   'word_text_shadow_color',
+  'word_highlight_color',
+  'word_paragraph_spacing',
+  'word_table_caption',
+  'word_table_cell_merged',
+  'word_no_headers_footers',
 ] as const;
 
 export type PracticeCriteriaType = (typeof PRACTICE_CRITERIA_TYPES)[number];
@@ -81,6 +86,11 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   excel_table_style_name: 'Kiểu bảng (Table Style)',
   excel_print_area: 'Vùng in (Print Area)',
   excel_fit_to_page: 'In vừa 1 trang (Fit to Page)',
+  word_highlight_color: 'Tô sáng (Highlight)',
+  word_paragraph_spacing: 'Khoảng cách đoạn văn (Before/After)',
+  word_table_caption: 'Alt Text của bảng',
+  word_table_cell_merged: 'Gộp ô trong bảng',
+  word_no_headers_footers: 'Xoá header/footer/watermark',
 };
 
 export interface PracticeTask {

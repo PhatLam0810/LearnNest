@@ -52,6 +52,11 @@ const WORD_TYPES: PracticeCriteriaType[] = [
   'word_table_cell_spacing',
   'word_footnotes_to_endnotes',
   'word_text_shadow_color',
+  'word_highlight_color',
+  'word_paragraph_spacing',
+  'word_table_caption',
+  'word_table_cell_merged',
+  'word_no_headers_footers',
 ];
 
 type Props = {
@@ -682,6 +687,113 @@ const CriteriaListItem: React.FC<Props> = ({
             </Form.Item>
           </>
         );
+      case 'word_highlight_color':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Đoạn văn chứa cụm từ"
+              name={[name, 'params', 'textContains']}
+              rules={[
+                { required: true, message: 'Nhập cụm từ nhận diện đoạn văn' },
+              ]}>
+              <Input placeholder="VD: highlight test" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Tên màu tô sáng (theo Word)"
+              name={[name, 'params', 'color']}
+              rules={[{ required: true, message: 'Nhập tên màu, VD: yellow' }]}
+              tooltip="Tên nội bộ Word lưu trong file, không phải tên hiển thị trên UI — VD chọn Bright Green trên UI có thể lưu là 'yellow'. Không chắc thì dùng 'yellow'.">
+              <Input placeholder="VD: yellow" />
+            </Form.Item>
+          </>
+        );
+      case 'word_paragraph_spacing':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Đoạn văn chứa cụm từ"
+              name={[name, 'params', 'textContains']}
+              rules={[
+                { required: true, message: 'Nhập cụm từ nhận diện đoạn văn' },
+              ]}>
+              <Input placeholder="VD: Paragraph with custom spacing" />
+            </Form.Item>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <Form.Item
+                {...restField}
+                label="Before (pt) — không bắt buộc"
+                name={[name, 'params', 'beforePt']}
+                style={{ flex: 1 }}>
+                <InputNumber min={0} style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item
+                {...restField}
+                label="After (pt) — không bắt buộc"
+                name={[name, 'params', 'afterPt']}
+                style={{ flex: 1 }}>
+                <InputNumber min={0} style={{ width: '100%' }} />
+              </Form.Item>
+            </div>
+          </>
+        );
+      case 'word_table_caption':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Bảng thứ mấy (0 = bảng đầu tiên)"
+              name={[name, 'params', 'tableIndex']}
+              initialValue={0}
+              rules={[{ required: true, message: 'Nhập vị trí bảng' }]}>
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Title — không bắt buộc"
+              name={[name, 'params', 'title']}>
+              <Input placeholder="VD: Rock Crawling" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Description — không bắt buộc"
+              name={[name, 'params', 'description']}>
+              <Input placeholder="VD: Vehicles Commonly Used" />
+            </Form.Item>
+          </>
+        );
+      case 'word_table_cell_merged':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Bảng thứ mấy (0 = bảng đầu tiên)"
+              name={[name, 'params', 'tableIndex']}
+              initialValue={0}
+              rules={[{ required: true, message: 'Nhập vị trí bảng' }]}>
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Hàng thứ mấy (0 = hàng đầu tiên)"
+              name={[name, 'params', 'rowIndex']}
+              initialValue={0}
+              rules={[{ required: true, message: 'Nhập vị trí hàng' }]}>
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Số cột đã gộp"
+              name={[name, 'params', 'gridSpan']}
+              rules={[{ required: true, message: 'Nhập số cột đã gộp' }]}>
+              <InputNumber min={2} style={{ width: '100%' }} />
+            </Form.Item>
+          </>
+        );
+      case 'word_no_headers_footers':
+        return null;
       default:
         return null;
     }
