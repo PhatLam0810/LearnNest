@@ -18,6 +18,7 @@ import {
   LessonLearnerPoolResponse,
   LessonLearnersResponse,
   LessonLearnersSummaryResponse,
+  PracticeCriteriaInput,
   PracticeClassListResponse,
   PracticeClassUsersResponse,
   ReminderLogItem,
@@ -523,6 +524,21 @@ export const adminQuery = baseQuery.injectEndpoints({
       query: taskId => ({
         url: `practice/tasks/${taskId}/instructions`,
         method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    // Xem trước hướng dẫn từ tiêu chí ĐANG CÓ trên form (kể cả chưa lưu) —
+    // khác getPracticeInstructions ở trên (luôn đọc DB, nên hiện hướng dẫn
+    // CŨ/rỗng nếu vừa sửa tiêu chí mà chưa bấm "Lưu tiêu chí" — bug thật đã
+    // gặp khiến nút xem trước trông như không hoạt động).
+    previewInstructions: builder.mutation<
+      PracticeInstructionItem[],
+      PracticeCriteriaInput[]
+    >({
+      query: criteria => ({
+        url: `practice/tasks/preview-instructions`,
+        method: 'POST',
+        body: { criteria },
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),

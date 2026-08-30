@@ -84,7 +84,13 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     state => state.authReducer.tokenInfo?.accessToken,
   );
 
-  const { data: detail, isFetching: isLoadingDetail } =
+  // currentData (không phải data) — bug thật đã gặp: đóng drawer đang SỬA
+  // task F rồi mở "Thêm đề thực hành mới" (currentTaskId -> undefined),
+  // `data` của RTK Query vẫn giữ nguyên kết quả CŨ của task F một nhịp (để
+  // tránh nháy UI khi đổi tham số bình thường) — form "Thêm mới" vẫn hiện
+  // y hệt dữ liệu task F dù tiêu đề drawer đã đổi đúng. `currentData` luôn
+  // undefined ngay khi tham số đổi (hoặc bị skip), không bị dính giá trị cũ.
+  const { currentData: detail, isFetching: isLoadingDetail } =
     adminQuery.useGetPracticeTaskDetailAdminQuery(currentTaskId, {
       skip: !currentTaskId,
     });
@@ -94,8 +100,8 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     adminQuery.useUpdatePracticeTaskMutation();
   const [setCriteria, { isLoading: isSavingCriteria }] =
     adminQuery.useSetPracticeCriteriaMutation();
-  const [fetchInstructions, { isFetching: isLoadingInstructions }] =
-    adminQuery.useLazyGetPracticeInstructionsQuery();
+  const [previewInstructionsMutation, { isLoading: isLoadingInstructions }] =
+    adminQuery.usePreviewInstructionsMutation();
   const [generateCriteria, { isLoading: isGeneratingCriteria }] =
     adminQuery.useGenerateCriteriaMutation();
 
@@ -144,7 +150,10 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
   // vẫn bỏ qua refetch nền xảy ra GIỮA lúc đang mở (openSession không đổi).
   const lastPopulatedKeyRef = useRef<string | undefined>(undefined);
   useEffect(() => {
-    if (!detail) return;
+    // Chốt chặn thêm: detail phải khớp đúng currentTaskId ĐANG chọn — phòng
+    // trường hợp tương tự (RTK Query trả dữ liệu của tham số cũ) tái diễn ở
+    // đâu đó khác mà không bị vô hiệu hoàn toàn chỉ nhờ đổi data->currentData.
+    if (!detail || detail.task._id !== currentTaskId) return;
     const key = `${detail.task._id}:${openSession}`;
     if (lastPopulatedKeyRef.current === key) return;
     lastPopulatedKeyRef.current = key;
@@ -205,10 +214,17 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     }
   };
 
+  // Dùng tiêu chí ĐANG CÓ trên form (criteriaForm), không phải bản đã lưu
+  // trong DB — nếu không, sửa/dùng AI xong mà chưa bấm "Lưu tiêu chí" thì
+  // bấm nút này vẫn hiện hướng dẫn CŨ (hoặc rỗng), trông như không hoạt động.
   const handlePreviewInstructions = async () => {
-    if (!currentTaskId) return;
+    const current = criteriaForm.getFieldValue('criteria') || [];
+    if (!current.length) {
+      messageApi.warning('Chưa có tiêu chí nào để xem trước hướng dẫn');
+      return;
+    }
     try {
-      const res = await fetchInstructions(currentTaskId).unwrap();
+      const res = await previewInstructionsMutation(current).unwrap();
       setInstructions(res);
     } catch {
       messageApi.error('Không tải được hướng dẫn xem trước');
