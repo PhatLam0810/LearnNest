@@ -38,6 +38,7 @@ const EXCEL_TYPES: PracticeCriteriaType[] = [
   'excel_table_style_name',
   'excel_print_area',
   'excel_fit_to_page',
+  'excel_document_property',
 ];
 
 const WORD_TYPES: PracticeCriteriaType[] = [
@@ -534,6 +535,33 @@ const CriteriaListItem: React.FC<Props> = ({
         );
       case 'excel_fit_to_page':
         return <>{sheetField}</>;
+      case 'excel_document_property':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Thuộc tính"
+              name={[name, 'params', 'property']}
+              rules={[{ required: true, message: 'Chọn thuộc tính' }]}>
+              <Select
+                options={[
+                  { value: 'title', label: 'Title' },
+                  { value: 'subject', label: 'Subject' },
+                  { value: 'category', label: 'Category' },
+                  { value: 'keywords', label: 'Keywords/Tags' },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Giá trị yêu cầu"
+              name={[name, 'params', 'value']}
+              rules={[{ required: true, message: 'Nhập giá trị yêu cầu' }]}>
+              <Input placeholder="VD: bicycles" />
+            </Form.Item>
+          </>
+        );
       case 'excel_sparkline_exists':
         return (
           <>

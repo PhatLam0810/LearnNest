@@ -30,6 +30,7 @@ export const PRACTICE_CRITERIA_TYPES = [
   'excel_table_style_name',
   'excel_print_area',
   'excel_fit_to_page',
+  'excel_document_property',
   // Word — dựa trên đọc XML thô (jszip).
   'word_line_spacing',
   'word_margins',
@@ -88,6 +89,7 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   excel_table_style_name: 'Kiểu bảng (Table Style)',
   excel_print_area: 'Vùng in (Print Area)',
   excel_fit_to_page: 'In vừa 1 trang (Fit to Page)',
+  excel_document_property: 'Thuộc tính tệp (Title/Category...)',
   word_highlight_color: 'Tô sáng (Highlight)',
   word_paragraph_spacing: 'Khoảng cách đoạn văn (Before/After)',
   word_table_caption: 'Alt Text của bảng',
