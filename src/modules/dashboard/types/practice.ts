@@ -33,6 +33,7 @@ export const PRACTICE_CRITERIA_TYPES = [
   'excel_document_property',
   'excel_chart_trendline',
   'excel_chart_secondary_axis',
+  'excel_smartart_text',
   // Word — dựa trên đọc XML thô (jszip).
   'word_line_spacing',
   'word_margins',
@@ -54,6 +55,8 @@ export const PRACTICE_CRITERIA_TYPES = [
   'word_document_property',
   'word_track_changes_resolved',
   'word_smartart_text',
+  'word_smartart_alt_text',
+  'word_smartart_bevel',
 ] as const;
 
 export type PracticeCriteriaType = (typeof PRACTICE_CRITERIA_TYPES)[number];
@@ -96,6 +99,7 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   excel_document_property: 'Thuộc tính tệp (Title/Category...)',
   excel_chart_trendline: 'Đường xu hướng (Trendline)',
   excel_chart_secondary_axis: 'Trục phụ (Secondary Axis)',
+  excel_smartart_text: 'Nội dung chữ trong SmartArt',
   word_highlight_color: 'Tô sáng (Highlight)',
   word_paragraph_spacing: 'Khoảng cách đoạn văn (Before/After)',
   word_table_caption: 'Alt Text của bảng',
@@ -105,6 +109,8 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   word_document_property: 'Thuộc tính tệp (Title/Category...)',
   word_track_changes_resolved: 'Đã xử lý xong Track Changes (Accept/Reject All)',
   word_smartart_text: 'Nội dung chữ trong SmartArt',
+  word_smartart_alt_text: 'Alt Text của SmartArt',
+  word_smartart_bevel: 'Hiệu ứng Bevel cho SmartArt',
 };
 
 export interface PracticeTask {
