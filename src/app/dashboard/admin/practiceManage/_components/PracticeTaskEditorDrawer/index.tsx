@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Divider,
@@ -108,6 +108,11 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     setCurrentTaskId(taskId);
     setInstructions(null);
     setTestGradeResult(null);
+    // Mở lại drawer (kể cả cho ĐÚNG task cũ) phải populate lại từ đầu — nếu
+    // không, effect populate-1-lần bên dưới sẽ tưởng đã populate rồi (do
+    // component không unmount giữa các lần mở/đóng) và bỏ qua, hiện nhầm
+    // form state còn sót từ lần sửa dở trước đó.
+    lastPopulatedTaskIdRef.current = undefined;
     if (!taskId) {
       taskForm.resetFields();
       criteriaForm.resetFields();
@@ -116,8 +121,20 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     }
   }, [open, taskId]);
 
+  // Chỉ đổ dữ liệu vào form đúng 1 LẦN cho mỗi task (lúc mở drawer/chuyển
+  // task), không phải mỗi khi `detail` đổi tham chiếu — getPracticeTaskDetailAdmin
+  // giờ tự động refetch nền sau khi tag PracticeTask bị invalidate (VD: vừa
+  // lưu tiêu chí xong), và nếu người dùng đang gõ dở tiêu đề/mô tả đúng lúc
+  // refetch đó về, effect cũ (chạy theo [detail]) sẽ ghi đè mất chữ đang gõ
+  // dở — lỗi thật đã gặp khi test tag invalidation. lastPopulatedTaskIdRef
+  // đảm bảo cùng 1 taskId thì chỉ populate 1 lần, dữ liệu mới hơn từ refetch
+  // nền bị bỏ qua (chấp nhận được — nếu cần thấy tiêu chí mới nhất, đóng mở
+  // lại drawer).
+  const lastPopulatedTaskIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!detail) return;
+    if (lastPopulatedTaskIdRef.current === detail.task._id) return;
+    lastPopulatedTaskIdRef.current = detail.task._id;
     taskForm.setFieldsValue(detail.task);
     setSubject(detail.task.subject);
     if (detail.task.starterFileUrl) {

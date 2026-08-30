@@ -127,6 +127,8 @@ export interface ReminderLogItem {
   sent: number;
   failed: number;
   createdAt: string;
+  triggeredByAdminId?: string;
+  triggeredByAdminName?: string;
 }
 
 export interface PracticeClassItem {

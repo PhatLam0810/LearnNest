@@ -31,14 +31,13 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
   const [form] = Form.useForm();
   const [addModule] = adminQuery.useAddModuleMutation();
   const [setTaskModule] = adminQuery.useSetPracticeTaskModuleMutation();
-  // Không có cache-tag invalidation nào trong dự án — sau khi syncTasks lưu
-  // moduleId mới cho các task, cache RTK Query của allTasks vẫn giữ dữ liệu
-  // CŨ (từ trước lúc lưu) nếu component này đã fetch nó từ trước. Hậu quả
-  // thật đã gặp: mở lại 1 phần học vừa lưu để sửa -> danh sách bài thực hành
-  // đã gán hiện RỖNG dù DB đã đúng, vì effect bên dưới lọc theo bản allTasks
-  // cũ. Phải refetch() tường minh ngay sau khi syncTasks xong.
-  const { data: allTasks, refetch: refetchAllTasks } =
-    adminQuery.useGetPracticeTasksAdminQuery();
+  // getPracticeTasksAdmin providesTags 'PracticeTask', setTaskModule
+  // invalidatesTags cùng loại — sau khi syncTasks lưu moduleId mới, cache
+  // allTasks tự làm mới, không cần refetch() thủ công nữa (trước đây dự án
+  // không có cache-tag nào nên phải tự refetch, và thiếu bước đó gây lỗi
+  // thật: mở lại 1 phần học vừa lưu để sửa -> danh sách bài thực hành đã gán
+  // hiện RỖNG dù DB đã đúng, vì effect bên dưới lọc theo bản allTasks cũ).
+  const { data: allTasks } = adminQuery.useGetPracticeTasksAdminQuery();
   // 1 danh sách DUY NHẤT trộn cả bài học video và bài thực hành, sắp xếp
   // kéo-thả chung — đúng yêu cầu "để bài thực hành chung với danh sách bài
   // học để tiện sắp xếp theo thứ tự". Vị trí (index) trong mảng này chính
@@ -104,10 +103,9 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
       .map(taskId => setTaskModule({ taskId, moduleId: null }));
 
     await Promise.all([...assignOps, ...removeOps]);
-    // Ép cache allTasks tải lại ngay — nếu không, mở lại phần học này để
-    // sửa (hoặc mở phần học khác chứa các task vừa bị gỡ) sẽ vẫn thấy trạng
-    // thái CŨ do RTK Query không tự invalidate.
-    await refetchAllTasks();
+    // Không cần refetch thủ công — mỗi setTaskModule ở trên đã tự
+    // invalidatesTags 'PracticeTask', cache allTasks (ở đây lẫn ở mọi nơi
+    // khác đang subscribe getPracticeTasksAdmin) tự làm mới.
   };
 
   return (

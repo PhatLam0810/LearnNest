@@ -44,6 +44,7 @@ const ReminderHistory: React.FC<Props> = ({ lessonId, type, targetId }) => {
         <Text key={log._id} style={{ fontSize: 12, color: '#666' }}>
           Đã nhắc {log.sent}/{log.totalEligible} người ·{' '}
           {dayjs(log.createdAt).fromNow()}
+          {log.triggeredByAdminName ? ` · bởi ${log.triggeredByAdminName}` : ''}
           {log.failed ? ` (${log.failed} gửi thất bại)` : ''}
         </Text>
       ))}
