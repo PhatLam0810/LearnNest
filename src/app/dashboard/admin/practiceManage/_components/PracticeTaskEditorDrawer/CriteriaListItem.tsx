@@ -63,6 +63,7 @@ const WORD_TYPES: PracticeCriteriaType[] = [
   'word_table_style_name',
   'word_document_property',
   'word_track_changes_resolved',
+  'word_smartart_text',
 ];
 
 type Props = {
@@ -926,6 +927,16 @@ const CriteriaListItem: React.FC<Props> = ({
               <Input placeholder="VD: nội dung đã Reject/xoá" />
             </Form.Item>
           </>
+        );
+      case 'word_smartart_text':
+        return (
+          <Form.Item
+            {...restField}
+            label="Nội dung SmartArt phải chứa"
+            name={[name, 'params', 'mustContain']}
+            rules={[{ required: true, message: 'Nhập nội dung cần có' }]}>
+            <Input placeholder="VD: Bước 1" />
+          </Form.Item>
         );
       default:
         return null;
