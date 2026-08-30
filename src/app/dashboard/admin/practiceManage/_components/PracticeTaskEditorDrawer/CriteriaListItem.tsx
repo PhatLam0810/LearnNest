@@ -39,6 +39,8 @@ const EXCEL_TYPES: PracticeCriteriaType[] = [
   'excel_print_area',
   'excel_fit_to_page',
   'excel_document_property',
+  'excel_chart_trendline',
+  'excel_chart_secondary_axis',
 ];
 
 const WORD_TYPES: PracticeCriteriaType[] = [
@@ -631,6 +633,42 @@ const CriteriaListItem: React.FC<Props> = ({
         );
       case 'excel_chart_data_labels':
         return <>{sheetField}</>;
+      case 'excel_chart_trendline':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Kiểu Trendline — không bắt buộc"
+              name={[name, 'params', 'trendlineType']}>
+              <Select
+                allowClear
+                placeholder="Chọn kiểu (bỏ trống nếu chỉ cần có Trendline)"
+                options={[
+                  { value: 'linear', label: 'Linear' },
+                  { value: 'exp', label: 'Exponential' },
+                  { value: 'log', label: 'Logarithmic' },
+                  { value: 'movingAvg', label: 'Moving Average' },
+                  { value: 'poly', label: 'Polynomial' },
+                  { value: 'power', label: 'Power' },
+                ]}
+              />
+            </Form.Item>
+          </>
+        );
+      case 'excel_chart_secondary_axis':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Tên chuỗi dữ liệu (Series Name)"
+              name={[name, 'params', 'seriesName']}
+              rules={[{ required: true, message: 'Nhập tên chuỗi dữ liệu' }]}>
+              <Input placeholder="VD: Profit" />
+            </Form.Item>
+          </>
+        );
       case 'word_header_different_first_page':
         return (
           <Form.Item
