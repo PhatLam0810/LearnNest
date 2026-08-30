@@ -9,15 +9,28 @@ import {
   Select,
   Space,
   Switch,
+  Tag,
   Upload,
   UploadFile,
 } from 'antd';
-import { PlusOutlined, RobotOutlined, UploadOutlined } from '@ant-design/icons';
+import {
+  CheckCircleFilled,
+  CloseCircleFilled,
+  ExperimentOutlined,
+  PlusOutlined,
+  RobotOutlined,
+  UploadOutlined,
+} from '@ant-design/icons';
 import { messageApi, useAppPagination } from '@hooks';
 import api from '@services/api';
+import { useAppSelector } from '@redux';
 import { adminQuery } from '~mdAdmin/redux';
 import { dashboardQuery } from '~mdDashboard/redux';
-import { PracticeCriteria, PracticeSubject } from '~mdDashboard/types/practice';
+import {
+  PracticeCriteria,
+  PracticeSubject,
+  PracticeSubmissionResultItem,
+} from '~mdDashboard/types/practice';
 import CriteriaListItem from './CriteriaListItem';
 
 type LessonOption = { _id: string; title: string };
@@ -52,6 +65,18 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
   // antd <App> cho các static method) — dùng <Modal open> có state riêng
   // thay vì static Modal.confirm để chắc chắn hiện ra được.
   const [isConfirmReplaceOpen, setIsConfirmReplaceOpen] = useState(false);
+  // Kết quả "thử chấm" file mẫu với bộ tiêu chí hiện có trên form — không
+  // liên quan gì tới PracticeSubmission thật, chỉ để admin tự kiểm tra
+  // tiêu chí có đúng ý mình trước khi publish, xem handleTestGrade.
+  const [testGradeResult, setTestGradeResult] = useState<{
+    totalScore: number;
+    maxScore: number;
+    items: PracticeSubmissionResultItem[];
+  } | null>(null);
+  const [isTestGrading, setIsTestGrading] = useState(false);
+  const accessToken = useAppSelector(
+    state => state.authReducer.tokenInfo?.accessToken,
+  );
 
   const { data: detail, isFetching: isLoadingDetail } =
     adminQuery.useGetPracticeTaskDetailAdminQuery(currentTaskId, {
@@ -84,6 +109,7 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     if (!open) return;
     setCurrentTaskId(taskId);
     setInstructions(null);
+    setTestGradeResult(null);
     if (!taskId) {
       taskForm.resetFields();
       criteriaForm.resetFields();
@@ -204,6 +230,56 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
       return;
     }
     runGenerateCriteria();
+  };
+
+  // "Thử chấm với file mẫu": chạy đúng engine chấm điểm thật với bộ tiêu
+  // chí ĐANG CÓ trên form (kể cả chưa bấm "Lưu tiêu chí") — không tạo
+  // PracticeSubmission, không lưu gì cả, chỉ để admin tự kiểm tra tiêu chí
+  // có đúng ý mình trước khi publish cho học viên. Dùng antd Upload trực
+  // tiếp (như file đề gốc/bài nộp học viên) vì đây là multipart thật, RTK
+  // Query mutation không hợp cho việc này.
+  const testGradeAccept = subject === 'Excel' ? '.xlsx' : '.docx';
+  const testGradeUploadProps = {
+    accept: testGradeAccept,
+    maxCount: 1,
+    showUploadList: false,
+    action: `${api.defaults.baseURL}/practice/tasks/test-grade`,
+    headers: accessToken
+      ? { Authorization: `Bearer ${accessToken}` }
+      : undefined,
+    data: () => ({
+      subject,
+      criteria: JSON.stringify(criteriaForm.getFieldValue('criteria') || []),
+    }),
+    beforeUpload: () => {
+      const current = criteriaForm.getFieldValue('criteria') || [];
+      if (!current.length) {
+        messageApi.warning('Chưa có tiêu chí nào để thử chấm');
+        return Upload.LIST_IGNORE;
+      }
+      setIsTestGrading(true);
+      setTestGradeResult(null);
+      return true;
+    },
+    onChange: (info: any) => {
+      if (info.file.status === 'done') {
+        setIsTestGrading(false);
+        const result = info.file.response?.data;
+        if (result) {
+          setTestGradeResult(result);
+          messageApi.success(
+            `Thử chấm xong: ${result.totalScore}/${result.maxScore} điểm`,
+          );
+        }
+      }
+      if (info.file.status === 'error') {
+        setIsTestGrading(false);
+        const serverMessage = info.file.response?.message;
+        messageApi.error(
+          serverMessage || 'Thử chấm thất bại, vui lòng thử lại',
+        );
+      }
+    },
   };
 
   return (
@@ -361,7 +437,7 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                     </>
                   )}
                 </Form.List>
-                <Space>
+                <Space wrap>
                   <Button
                     type="primary"
                     htmlType="submit"
@@ -373,8 +449,54 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                     loading={isLoadingInstructions}>
                     Xem trước hướng dẫn tự sinh
                   </Button>
+                  <Upload {...testGradeUploadProps}>
+                    <Button
+                      icon={<ExperimentOutlined />}
+                      loading={isTestGrading}>
+                      Thử chấm với file mẫu ({testGradeAccept})
+                    </Button>
+                  </Upload>
                 </Space>
               </Form>
+            )}
+            {testGradeResult && (
+              <div
+                style={{
+                  marginTop: 16,
+                  border: '1px solid #f0f0f0',
+                  borderRadius: 8,
+                  padding: 12,
+                }}>
+                <b>
+                  Kết quả thử chấm: {testGradeResult.totalScore}/
+                  {testGradeResult.maxScore} điểm
+                </b>
+                <div style={{ marginTop: 8 }}>
+                  {testGradeResult.items.map((item, idx) => (
+                    <div
+                      key={item.criteriaId}
+                      style={{
+                        display: 'flex',
+                        gap: 8,
+                        alignItems: 'flex-start',
+                        padding: '6px 0',
+                        borderBottom: '1px solid #f5f5f5',
+                      }}>
+                      {item.passed ? (
+                        <CheckCircleFilled style={{ color: '#52c41a' }} />
+                      ) : (
+                        <CloseCircleFilled style={{ color: '#ff4d4f' }} />
+                      )}
+                      <div>
+                        <div>Tiêu chí {idx + 1}</div>
+                        <div style={{ color: '#666', fontSize: 13 }}>
+                          {item.detail}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
             {instructions && (
               <div

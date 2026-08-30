@@ -224,6 +224,20 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    // Tiến độ xem TOÀN BỘ video trong 1 lesson của chính user đang đăng
+    // nhập, 1 lần gọi — {[subLessonId]: đã xem xong (completed) hay chưa}.
+    // Dùng để khoá bài thực hành đứng ngay sau 1 video theo đúng "đã xem
+    // xong", khác hẳn "đã tới lượt xem" (usersCanPlay).
+    getMyLessonVideoProgress: builder.query<
+      Record<string, boolean>,
+      { userId: string; lessonId: string }
+    >({
+      query: ({ userId, lessonId }) => ({
+        url: `/lesson/user/${userId}/lesson/${lessonId}/video-progress`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });

@@ -367,6 +367,18 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res.data,
     }),
+    // Nhắc riêng những học viên CHƯA ĐẠT (>= 80%) 1 bài thực hành cụ thể —
+    // đối xứng remindNotWatchedVideo nhưng cho bài thực hành.
+    remindNotPassedTask: builder.mutation<
+      RemindLearnersBulkResponse,
+      { lessonId: string; taskId: string }
+    >({
+      query: ({ lessonId, taskId }) => ({
+        url: `admin/lessons/${lessonId}/tasks/${taskId}/remind-not-passed`,
+        method: 'POST',
+      }),
+      transformResponse: (res: any) => res.data,
+    }),
     sendPracticeClassEmails: builder.mutation<
       { successful: number; failed: number; details: any[] },
       { classId: string }

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Modal, Table, Tag } from 'antd';
+import { Button, Modal, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
+import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import {
   PracticeSubmission,
@@ -17,6 +18,42 @@ const PracticeSubmissionsModal: React.FC<Props> = ({ taskId, onClose }) => {
     taskId,
     { skip: !taskId },
   );
+  // Cần lessonId để gọi API nhắc — task tự mang theo lessonId của chính nó
+  // (gắn lúc soạn đề), không cần caller của modal này biết trước.
+  const { data: taskDetail } = adminQuery.useGetPracticeTaskDetailAdminQuery(
+    taskId,
+    { skip: !taskId },
+  );
+  const [remindNotPassed, { isLoading: isReminding }] =
+    adminQuery.useRemindNotPassedTaskMutation();
+
+  const handleRemindNotPassed = async () => {
+    const lessonId = taskDetail?.task?.lessonId;
+    if (!taskId || !lessonId) {
+      messageApi.warning(
+        'Bài này chưa gắn vào khóa thực hành nào nên không xác định được ai cần nhắc',
+      );
+      return;
+    }
+    try {
+      const res = await remindNotPassed({ lessonId, taskId }).unwrap();
+      if (res.totalEligible === 0) {
+        messageApi.info(
+          'Hiện không có ai cần nhắc (đã đạt hết hoặc mới nhắc gần đây)',
+        );
+        return;
+      }
+      messageApi.success(
+        `Đã nhắc ${res.sent}/${res.totalEligible} học viên chưa đạt${
+          res.failed ? ` (${res.failed} gửi thất bại)` : ''
+        }`,
+      );
+    } catch (error: any) {
+      messageApi.error(
+        error?.data?.message || 'Gửi nhắc nhở thất bại, thử lại sau',
+      );
+    }
+  };
 
   const columns = [
     {
@@ -68,6 +105,16 @@ const PracticeSubmissionsModal: React.FC<Props> = ({ taskId, onClose }) => {
       onCancel={onClose}
       footer={null}
       width={800}>
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          marginBottom: 12,
+        }}>
+        <Button loading={isReminding} onClick={handleRemindNotPassed}>
+          Nhắc người chưa làm
+        </Button>
+      </div>
       <Table
         rowKey="_id"
         loading={isFetching}
@@ -87,6 +134,7 @@ const PracticeSubmissionsModal: React.FC<Props> = ({ taskId, onClose }) => {
             </div>
           ),
         }}
+        locale={{ emptyText: 'Chưa có ai nộp bài' }}
         pagination={false}
       />
     </Modal>

@@ -50,11 +50,20 @@ const ModuleDetailPage = () => {
 
   const { selectedLibrary } = useAppSelector(state => state.dashboardReducer);
   const dispatch = useAppDispatch();
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
+  // Bài thực hành đứng NGAY SAU 1 video chỉ mở khóa được nếu biết chắc video
+  // đó đã XEM XONG (không chỉ "đã tới lượt xem") — usersCanPlay không đủ vì
+  // chỉ báo đã mở khóa, không phân biệt được với đã xem hết. Xem
+  // isTaskAccessible bên dưới.
+  const { data: videoCompletedBySubLesson, refetch: refetchVideoProgress } =
+    dashboardQuery.useGetMyLessonVideoProgressQuery(
+      { userId: userProfile?._id || '', lessonId },
+      { skip: !userProfile?._id || !lessonId },
+    );
   const libraryRef = useRef<LibraryDetailItemHandle>(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
-  const { userProfile } =
-    useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [, contextHolder] = Modal.useModal();
   const { isMobile, isTablet } = useResponsive();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -167,13 +176,16 @@ const ModuleDetailPage = () => {
   const getLessonContentItems = () =>
     (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
 
-  // Bài thực hành ở vị trí idx trong seq có được phép làm/xem chưa. Chỉ
-  // khoá chắc chắn được chiều "bài thực hành trước chưa đạt >= 80%" —
-  // hasPassed là tín hiệu trực tiếp, đáng tin. Chiều "video/trắc nghiệm
-  // ngay trước chưa xem xong" KHÔNG khoá được: usersCanPlay chỉ cho biết
-  // 1 video đã "tới lượt" (mở khoá), không phân biệt được với "đã xem
-  // xong" — không có tín hiệu nào khác để dựa vào mà không thêm hạ tầng
-  // theo dõi mới. Đây là giới hạn có chủ đích, không phải sót.
+  // Bài thực hành ở vị trí idx trong seq có được phép làm/xem chưa.
+  // - Mục trước là bài thực hành: dựa thẳng vào hasPassed (đạt >= 80%).
+  // - Mục trước là video: dựa vào VideoTracking.completed (đã xem >= 95%,
+  //   lấy qua getMyLessonVideoProgress) — KHÔNG dùng usersCanPlay, vì đó chỉ
+  //   là "đã tới lượt xem" (mở khoá), không xác nhận đã xem hết.
+  // - Mục trước là trắc nghiệm (Library type Text, không có VideoTracking):
+  //   không có tín hiệu "đã xem xong" nào khác ngoài usersCanPlay của mục
+  //   NGAY SAU nó — dùng hasAccess(seq[idx]) khi mục hiện tại (task) cũng là
+  //   library... nhưng task thì không nằm trong usersCanPlay nên đành coi
+  //   là đã qua (không khoá được chiều này, giới hạn có chủ đích).
   const isTaskAccessible = (
     seq: { kind: 'library' | 'task'; data: any }[],
     idx: number,
@@ -181,7 +193,8 @@ const ModuleDetailPage = () => {
     if (idx <= 0) return true;
     const prev = seq[idx - 1];
     if (prev.kind === 'task') return !!prev.data.hasPassed;
-    return true;
+    if (prev.data.type === 'Text') return true; // trắc nghiệm — xem giới hạn trên
+    return !!videoCompletedBySubLesson?.[prev.data._id];
   };
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] => {
@@ -356,6 +369,10 @@ const ModuleDetailPage = () => {
 
   const onWatchFinish = async () => {
     if (!selectedLibrary) return;
+    // Tải lại tiến độ xem NGAY sau khi video này báo đã xong — nếu không,
+    // mục kế tiếp (nếu là bài thực hành) vẫn thấy cache cũ (video CHƯA xem
+    // xong) và bị khóa nhầm dù thật ra vừa xem xong đây.
+    await refetchVideoProgress();
     await goToNextContentItem('library', selectedLibrary._id);
   };
 

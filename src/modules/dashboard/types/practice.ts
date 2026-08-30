@@ -47,6 +47,9 @@ export interface PracticeTask {
   assetFileUrls?: string[];
   lessonId?: string;
   moduleId?: string;
+  // Tên phần học moduleId đang trỏ tới — backend tra sẵn, chỉ để hiển thị
+  // (VD: cảnh báo "đang thuộc phần khác" trong picker chọn bài thực hành).
+  moduleTitle?: string;
   order?: number;
   createdBy?: string;
   isPublished: boolean;

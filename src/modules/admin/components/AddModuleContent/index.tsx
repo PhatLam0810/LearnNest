@@ -213,6 +213,7 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
       <ModalSelectLibrary
         isVisible={isVisibleModalLibrarySelect}
         setIsVisible={setIsVisibleModalLibrarySelect}
+        currentModuleId={initialValues?._id}
         initialValues={contentItems
           .filter(i => i.type === 'library')
           .map(i => i.data)}

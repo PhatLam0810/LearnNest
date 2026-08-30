@@ -15,6 +15,11 @@ import './styles.scss';
 type ModalSelectLibraryProps = {
   isVisible: boolean;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  // Phần học ĐANG sửa (undefined lúc tạo mới) — dùng để phân biệt "bài này
+  // đã thuộc CHÍNH phần đang sửa" (bình thường) với "đang thuộc phần khác"
+  // (cần cảnh báo, vì 1 bài thực hành chỉ thuộc được 1 phần — chọn nó ở đây
+  // sẽ ÂM THẦM gỡ nó khỏi phần kia khi lưu).
+  currentModuleId?: string;
   initialValues?: Library[];
   initialTaskValues?: PracticeTask[];
   onDone: (libraries: Library[], tasks: PracticeTask[]) => void;
@@ -29,6 +34,7 @@ type ModalSelectLibraryProps = {
 const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
   isVisible,
   setIsVisible,
+  currentModuleId,
   initialValues,
   initialTaskValues,
   onDone,
@@ -200,6 +206,14 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                     const isSelected = selectedTasks.some(
                       t => t._id === item._id,
                     );
+                    // moduleId khác currentModuleId (kể cả currentModuleId
+                    // là undefined lúc tạo mới) -> bài này đang thật sự
+                    // thuộc 1 phần học KHÁC. Chọn nó ở đây, lúc lưu sẽ gỡ nó
+                    // khỏi phần đó — đúng thiết kế (1 bài chỉ ở 1 phần) chứ
+                    // không phải lỗi, nhưng admin cần biết trước để khỏi
+                    // nhầm là "thêm mới" như với 1 bài chưa gán đâu cả.
+                    const assignedElsewhere =
+                      !!item.moduleId && item.moduleId !== currentModuleId;
                     return (
                       <View
                         onClick={() => handleSelectTask(item)}
@@ -224,6 +238,11 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                         <Text style={{ flex: 1, fontSize: 14 }}>
                           {item.title}
                         </Text>
+                        {assignedElsewhere && (
+                          <Tag color="warning">
+                            Đang thuộc: {item.moduleTitle || 'phần khác'}
+                          </Tag>
+                        )}
                         {isSelected && (
                           <CheckCircleFilled
                             style={{

@@ -63,6 +63,14 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       { lessonId: id },
       { skip: !id },
     );
+  // Bài thực hành đứng ngay sau 1 video chỉ mở khóa được nếu video đó đã
+  // XEM XONG (VideoTracking.completed) — không dùng usersCanPlay (chỉ báo
+  // "đã tới lượt"). Xem giải thích đầy đủ ở isTaskAccessible bên dưới.
+  const { data: videoCompletedBySubLesson } =
+    dashboardQuery.useGetMyLessonVideoProgressQuery(
+      { userId: userProfile?._id || '', lessonId: id },
+      { skip: !userProfile?._id || !id },
+    );
   useEffect(() => {
     // Đợi lessonDetail tải xong hẳn mới xét — nếu không, hasContent tạm
     // thời là false trong lúc lessonDetail còn undefined (chưa load), gây
@@ -233,8 +241,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const getLessonContentItems = () =>
     (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
 
-  // Chỉ khoá được chắc chắn chiều "bài thực hành trước chưa đạt >= 80%" —
-  // xem giải thích đầy đủ ở ModuleDetailPage.isTaskAccessible.
+  // Xem giải thích đầy đủ ở ModuleDetailPage.isTaskAccessible.
   const isTaskAccessible = (
     seq: { kind: 'library' | 'task'; data: any }[],
     idx: number,
@@ -242,7 +249,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     if (idx <= 0) return true;
     const prev = seq[idx - 1];
     if (prev.kind === 'task') return !!prev.data.hasPassed;
-    return true;
+    if (prev.data.type === 'Text') return true;
+    return !!videoCompletedBySubLesson?.[prev.data._id];
   };
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] => {
