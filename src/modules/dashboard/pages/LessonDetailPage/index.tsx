@@ -71,6 +71,15 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       { userId: userProfile?._id || '', lessonId: id },
       { skip: !userProfile?._id || !id },
     );
+  // Tương tự nhưng cho quiz (ResultTest.isPass) — xem isTaskAccessible bên
+  // dưới. Trang này không sở hữu luồng "vừa làm xong quiz/xem xong video rồi
+  // tự chuyển tiếp" (đó là ModuleDetailPage), nên chỉ đọc tĩnh, không cần
+  // refetch chủ động ở đây.
+  const { data: quizPassedByLibrary } =
+    dashboardQuery.useGetMyLessonQuizProgressQuery(
+      { userId: userProfile?._id || '', lessonId: id },
+      { skip: !userProfile?._id || !id },
+    );
   useEffect(() => {
     // Đợi lessonDetail tải xong hẳn mới xét — nếu không, hasContent tạm
     // thời là false trong lúc lessonDetail còn undefined (chưa load), gây
@@ -249,7 +258,9 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     if (idx <= 0) return true;
     const prev = seq[idx - 1];
     if (prev.kind === 'task') return !!prev.data.hasPassed;
-    if (prev.data.type === 'Text') return true;
+    if (prev.data.type === 'Text') {
+      return !!quizPassedByLibrary?.[prev.data._id];
+    }
     return !!videoCompletedBySubLesson?.[prev.data._id];
   };
 

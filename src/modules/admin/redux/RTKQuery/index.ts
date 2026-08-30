@@ -20,6 +20,8 @@ import {
   LessonLearnersSummaryResponse,
   PracticeClassListResponse,
   PracticeClassUsersResponse,
+  ReminderLogItem,
+  ReminderLogType,
   RemindLearnersBulkResponse,
   SendImportEmailsRequest,
   SendImportEmailsResponse,
@@ -34,6 +36,15 @@ import {
   PracticeTask,
   PracticeTaskDetail,
 } from '~mdDashboard/types/practice';
+
+// Id tag ReminderLog phải khớp CHÍNH XÁC giữa providesTags (getReminderLogs)
+// và invalidatesTags (4 mutation nhắc nhở) — targetId rỗng dùng cho loại
+// 'inactivity' (nhắc chung cả khóa, không gắn 1 nội dung cụ thể nào).
+const reminderLogTagId = (
+  lessonId: string,
+  type: ReminderLogType,
+  targetId?: string,
+) => `${lessonId}:${type}:${targetId ?? 'none'}`;
 
 export const adminQuery = baseQuery.injectEndpoints({
   endpoints: builder => ({
@@ -343,6 +354,9 @@ export const adminQuery = baseQuery.injectEndpoints({
         url: `admin/lessons/${lessonId}/learners/${userId}/remind`,
         method: 'POST',
       }),
+      invalidatesTags: (_result, _error, { lessonId }) => [
+        { type: 'ReminderLog', id: reminderLogTagId(lessonId, 'inactivity') },
+      ],
     }),
     remindLearnersBulk: builder.mutation<
       RemindLearnersBulkResponse,
@@ -353,6 +367,9 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
       }),
       transformResponse: (res: any) => res.data,
+      invalidatesTags: (_result, _error, { lessonId }) => [
+        { type: 'ReminderLog', id: reminderLogTagId(lessonId, 'inactivity') },
+      ],
     }),
     // Nhắc riêng những học viên CHƯA XEM XONG đúng 1 video/bài học cụ thể —
     // khác remindLearnersBulk (nhắc theo "im lặng bao lâu" tính chung cả
@@ -366,6 +383,12 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
       }),
       transformResponse: (res: any) => res.data,
+      invalidatesTags: (_result, _error, { lessonId, subLessonId }) => [
+        {
+          type: 'ReminderLog',
+          id: reminderLogTagId(lessonId, 'video', subLessonId),
+        },
+      ],
     }),
     // Nhắc riêng những học viên CHƯA ĐẠT (>= 80%) 1 bài thực hành cụ thể —
     // đối xứng remindNotWatchedVideo nhưng cho bài thực hành.
@@ -378,6 +401,29 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
       }),
       transformResponse: (res: any) => res.data,
+      invalidatesTags: (_result, _error, { lessonId, taskId }) => [
+        { type: 'ReminderLog', id: reminderLogTagId(lessonId, 'task', taskId) },
+      ],
+    }),
+    // Lịch sử các đợt nhắc gần đây — hiện ngay dưới từng nút nhắc tương ứng
+    // để admin biết "đã nhắc chưa, lúc nào, bao nhiêu người" thay vì chỉ
+    // thấy kết quả thoáng qua lúc bấm xong rồi mất.
+    getReminderLogs: builder.query<
+      ReminderLogItem[],
+      { lessonId: string; type?: ReminderLogType; targetId?: string }
+    >({
+      query: ({ lessonId, type, targetId }) => ({
+        url: `admin/lessons/${lessonId}/reminder-logs`,
+        method: 'GET',
+        params: { type, targetId },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data.items,
+      providesTags: (_result, _error, { lessonId, type, targetId }) => [
+        {
+          type: 'ReminderLog',
+          id: reminderLogTagId(lessonId, type ?? 'inactivity', targetId),
+        },
+      ],
     }),
     sendPracticeClassEmails: builder.mutation<
       { successful: number; failed: number; details: any[] },
@@ -401,6 +447,16 @@ export const adminQuery = baseQuery.injectEndpoints({
         params: params ?? undefined,
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: result =>
+        result
+          ? [
+              ...result.map(t => ({
+                type: 'PracticeTask' as const,
+                id: t._id,
+              })),
+              { type: 'PracticeTask' as const, id: 'LIST' },
+            ]
+          : [{ type: 'PracticeTask' as const, id: 'LIST' }],
     }),
     getPracticeTaskDetailAdmin: builder.query<PracticeTaskDetail, string>({
       query: taskId => ({
@@ -408,6 +464,9 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_result, _error, taskId) => [
+        { type: 'PracticeTask', id: taskId },
+      ],
     }),
     createPracticeTask: builder.mutation<
       PracticeTask,
@@ -419,6 +478,7 @@ export const adminQuery = baseQuery.injectEndpoints({
         body,
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [{ type: 'PracticeTask', id: 'LIST' }],
     }),
     updatePracticeTask: builder.mutation<
       PracticeTask,
@@ -430,12 +490,20 @@ export const adminQuery = baseQuery.injectEndpoints({
         body,
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_result, _error, { taskId }) => [
+        { type: 'PracticeTask', id: taskId },
+        { type: 'PracticeTask', id: 'LIST' },
+      ],
     }),
     deletePracticeTask: builder.mutation<void, string>({
       query: taskId => ({
         url: `practice/tasks/${taskId}`,
         method: 'DELETE',
       }),
+      invalidatesTags: (_result, _error, taskId) => [
+        { type: 'PracticeTask', id: taskId },
+        { type: 'PracticeTask', id: 'LIST' },
+      ],
     }),
     setPracticeCriteria: builder.mutation<
       PracticeCriteria[],
@@ -447,6 +515,9 @@ export const adminQuery = baseQuery.injectEndpoints({
         body: { criteria },
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_result, _error, { taskId }) => [
+        { type: 'PracticeTask', id: taskId },
+      ],
     }),
     getPracticeInstructions: builder.query<PracticeInstructionItem[], string>({
       query: taskId => ({
@@ -472,6 +543,12 @@ export const adminQuery = baseQuery.injectEndpoints({
         body: { moduleId, order },
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      // Đổi module của 1 task ảnh hưởng cả moduleTitle hiển thị ở list lẫn
+      // tag "Đang thuộc: ..." trong picker chọn bài thực hành ở module khác.
+      invalidatesTags: (_result, _error, { taskId }) => [
+        { type: 'PracticeTask', id: taskId },
+        { type: 'PracticeTask', id: 'LIST' },
+      ],
     }),
     // Gợi ý tiêu chí chấm điểm bằng AI, đọc mô tả đề bài — chỉ là điểm khởi
     // đầu để admin xem/chỉnh trước khi bấm "Lưu tiêu chí" thật, không tự

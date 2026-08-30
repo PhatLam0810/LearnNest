@@ -238,6 +238,19 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    // Tương tự getMyLessonVideoProgress nhưng cho quiz — {[libraryId]: đã
+    // ĐẠT (isPass, >= 2/3 số câu) hay chưa. Dùng để khoá bài thực hành đứng
+    // ngay sau 1 quiz, xem ModuleDetailPage/LessonDetailPage.isTaskAccessible.
+    getMyLessonQuizProgress: builder.query<
+      Record<string, boolean>,
+      { userId: string; lessonId: string }
+    >({
+      query: ({ userId, lessonId }) => ({
+        url: `/lesson/user/${userId}/lesson/${lessonId}/quiz-progress`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });

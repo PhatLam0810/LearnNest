@@ -21,10 +21,12 @@ const PracticeManage = () => {
     string | undefined
   >();
 
-  const { data, isFetching, refetch } =
-    adminQuery.useGetPracticeTasksAdminQuery(
-      subjectFilter ? { subject: subjectFilter } : undefined,
-    );
+  // Không cần refetch() thủ công nữa — getPracticeTasksAdmin đã providesTags
+  // 'PracticeTask', các mutation bên dưới (xoá/tạo/sửa/đổi module) đều
+  // invalidatesTags cùng loại nên list tự cập nhật.
+  const { data, isFetching } = adminQuery.useGetPracticeTasksAdminQuery(
+    subjectFilter ? { subject: subjectFilter } : undefined,
+  );
   const [deleteTask, { isLoading: isDeleting }] =
     adminQuery.useDeletePracticeTaskMutation();
 
@@ -48,7 +50,6 @@ const PracticeManage = () => {
       await deleteTask(deletingTask._id).unwrap();
       messageApi.success('Đã xoá đề thực hành');
       setDeletingTask(null);
-      refetch();
     } catch {
       messageApi.error('Xoá đề thực hành thất bại');
     }
@@ -140,7 +141,6 @@ const PracticeManage = () => {
         open={isDrawerOpen}
         taskId={editingTaskId}
         onClose={() => setIsDrawerOpen(false)}
-        onSaved={refetch}
       />
 
       <PracticeSubmissionsModal

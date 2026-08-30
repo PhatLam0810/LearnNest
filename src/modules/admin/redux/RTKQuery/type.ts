@@ -115,6 +115,20 @@ export interface RemindLearnersBulkResponse {
   failed: number;
 }
 
+export type ReminderLogType = 'inactivity' | 'video' | 'task';
+
+export interface ReminderLogItem {
+  _id: string;
+  lessonId: string;
+  type: ReminderLogType;
+  targetId?: string;
+  targetTitle?: string;
+  totalEligible: number;
+  sent: number;
+  failed: number;
+  createdAt: string;
+}
+
 export interface PracticeClassItem {
   _id: string;
   lessonId?: string;

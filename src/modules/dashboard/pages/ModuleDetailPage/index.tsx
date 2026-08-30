@@ -61,6 +61,13 @@ const ModuleDetailPage = () => {
       { userId: userProfile?._id || '', lessonId },
       { skip: !userProfile?._id || !lessonId },
     );
+  // Tương tự nhưng cho quiz — bài thực hành đứng ngay sau 1 quiz chỉ mở khóa
+  // được nếu đã ĐẠT quiz đó (isPass), xem isTaskAccessible bên dưới.
+  const { data: quizPassedByLibrary, refetch: refetchQuizProgress } =
+    dashboardQuery.useGetMyLessonQuizProgressQuery(
+      { userId: userProfile?._id || '', lessonId },
+      { skip: !userProfile?._id || !lessonId },
+    );
   const libraryRef = useRef<LibraryDetailItemHandle>(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
@@ -178,14 +185,12 @@ const ModuleDetailPage = () => {
 
   // Bài thực hành ở vị trí idx trong seq có được phép làm/xem chưa.
   // - Mục trước là bài thực hành: dựa thẳng vào hasPassed (đạt >= 80%).
+  // - Mục trước là trắc nghiệm (Library type Text): dựa vào ResultTest.isPass
+  //   (đạt >= 2/3 số câu, lấy qua getMyLessonQuizProgress) — trước đây luôn
+  //   coi là đã qua bất kể làm bài chưa, đây là lỗ hổng đã sửa.
   // - Mục trước là video: dựa vào VideoTracking.completed (đã xem >= 95%,
   //   lấy qua getMyLessonVideoProgress) — KHÔNG dùng usersCanPlay, vì đó chỉ
   //   là "đã tới lượt xem" (mở khoá), không xác nhận đã xem hết.
-  // - Mục trước là trắc nghiệm (Library type Text, không có VideoTracking):
-  //   không có tín hiệu "đã xem xong" nào khác ngoài usersCanPlay của mục
-  //   NGAY SAU nó — dùng hasAccess(seq[idx]) khi mục hiện tại (task) cũng là
-  //   library... nhưng task thì không nằm trong usersCanPlay nên đành coi
-  //   là đã qua (không khoá được chiều này, giới hạn có chủ đích).
   const isTaskAccessible = (
     seq: { kind: 'library' | 'task'; data: any }[],
     idx: number,
@@ -193,7 +198,9 @@ const ModuleDetailPage = () => {
     if (idx <= 0) return true;
     const prev = seq[idx - 1];
     if (prev.kind === 'task') return !!prev.data.hasPassed;
-    if (prev.data.type === 'Text') return true; // trắc nghiệm — xem giới hạn trên
+    if (prev.data.type === 'Text') {
+      return !!quizPassedByLibrary?.[prev.data._id];
+    }
     return !!videoCompletedBySubLesson?.[prev.data._id];
   };
 
@@ -369,10 +376,13 @@ const ModuleDetailPage = () => {
 
   const onWatchFinish = async () => {
     if (!selectedLibrary) return;
-    // Tải lại tiến độ xem NGAY sau khi video này báo đã xong — nếu không,
-    // mục kế tiếp (nếu là bài thực hành) vẫn thấy cache cũ (video CHƯA xem
-    // xong) và bị khóa nhầm dù thật ra vừa xem xong đây.
-    await refetchVideoProgress();
+    // Tải lại tiến độ xem/làm bài NGAY sau khi mục này báo đã xong — nếu
+    // không, mục kế tiếp (nếu là bài thực hành) vẫn thấy cache cũ (chưa xem
+    // xong/chưa đạt) và bị khóa nhầm dù thật ra vừa xong đây. Gọi chung cả 2
+    // (video lẫn quiz) thay vì rẽ nhánh theo selectedLibrary.type — hàm này
+    // đã dùng chung cho cả 2 luồng đóng modal quiz (handleClose) lẫn video
+    // xem xong, gọi thừa 1 lần refetch không hại gì.
+    await Promise.all([refetchVideoProgress(), refetchQuizProgress()]);
     await goToNextContentItem('library', selectedLibrary._id);
   };
 

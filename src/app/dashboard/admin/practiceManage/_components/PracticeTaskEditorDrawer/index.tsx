@@ -39,14 +39,12 @@ type Props = {
   open: boolean;
   taskId?: string;
   onClose: () => void;
-  onSaved: () => void;
 };
 
 const PracticeTaskEditorDrawer: React.FC<Props> = ({
   open,
   taskId,
   onClose,
-  onSaved,
 }) => {
   const [taskForm] = Form.useForm();
   const [criteriaForm] = Form.useForm();
@@ -155,7 +153,6 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
           'Đã tạo đề — giờ hãy thêm tiêu chí chấm điểm bên dưới',
         );
       }
-      onSaved();
     } catch {
       messageApi.error('Lưu đề thực hành thất bại');
     }
@@ -171,7 +168,6 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
         criteria: values.criteria || [],
       }).unwrap();
       messageApi.success('Đã lưu tiêu chí chấm điểm');
-      onSaved();
     } catch {
       messageApi.error(
         'Lưu tiêu chí thất bại — kiểm tra lại các trường bắt buộc',

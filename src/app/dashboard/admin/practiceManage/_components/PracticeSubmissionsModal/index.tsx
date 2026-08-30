@@ -3,6 +3,7 @@ import { Button, Modal, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
+import { ReminderHistory } from '~mdAdmin/components';
 import {
   PracticeSubmission,
   PracticeSubmissionUser,
@@ -108,9 +109,19 @@ const PracticeSubmissionsModal: React.FC<Props> = ({ taskId, onClose }) => {
       <div
         style={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           marginBottom: 12,
         }}>
+        {taskId && taskDetail?.task?.lessonId ? (
+          <ReminderHistory
+            lessonId={taskDetail.task.lessonId}
+            type="task"
+            targetId={taskId}
+          />
+        ) : (
+          <span />
+        )}
         <Button loading={isReminding} onClick={handleRemindNotPassed}>
           Nhắc người chưa làm
         </Button>

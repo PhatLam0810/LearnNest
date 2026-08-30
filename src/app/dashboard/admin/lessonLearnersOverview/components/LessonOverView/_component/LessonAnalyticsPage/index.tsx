@@ -21,6 +21,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/vi';
 import { adminQuery } from '~mdAdmin/redux';
 import { LessonLearner } from '~mdAdmin/redux/RTKQuery/type';
+import { ReminderHistory } from '~mdAdmin/components';
 import { useAppPagination } from '@hooks';
 import CreatePracticeClassModal from '../CreatePracticeClassModal';
 import LessonContentOverview from '../LessonContentOverview';
@@ -330,6 +331,9 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
                 Tạo Lớp Thực Hành
               </Button>
             </div>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <ReminderHistory lessonId={lessonId} type="inactivity" />
           </div>
 
           {learners.length === 0 ? (

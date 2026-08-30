@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import { View, Text } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
+import { ReminderHistory } from '~mdAdmin/components';
 import styles from './styles';
 
 interface WatcherItem {
@@ -256,6 +257,15 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
           )}
         </View>
       </View>
+      {lessonId && (
+        <View style={{ marginBottom: 8 }}>
+          <ReminderHistory
+            lessonId={lessonId}
+            type="video"
+            targetId={subLessonId}
+          />
+        </View>
+      )}
 
       {watchers.length === 0 && !loading ? (
         <View style={styles.emptyWrap}>
