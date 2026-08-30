@@ -30,6 +30,13 @@ const EXCEL_TYPES: PracticeCriteriaType[] = [
   'excel_chart_axis_title',
   'excel_chart_data_labels',
   'excel_table_converted_to_range',
+  'excel_named_range_exists',
+  'excel_hyperlink',
+  'excel_row_height',
+  'excel_sheet_tab_color',
+  'excel_merged_cells',
+  'excel_table_style_name',
+  'excel_print_area',
 ];
 
 const WORD_TYPES: PracticeCriteriaType[] = [
@@ -403,6 +410,117 @@ const CriteriaListItem: React.FC<Props> = ({
               name={[name, 'params', 'range']}
               rules={[{ required: true, message: 'Nhập vùng ô, VD: A1:C6' }]}>
               <Input placeholder="VD: A1:C6" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_named_range_exists':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Tên vùng (Named Range)"
+              name={[name, 'params', 'name']}
+              rules={[{ required: true, message: 'Nhập tên vùng' }]}>
+              <Input placeholder="VD: MyRange" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_hyperlink':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Ô cần kiểm tra"
+              name={[name, 'params', 'cell']}
+              rules={[{ required: true, message: 'Nhập vị trí ô, VD: A1' }]}>
+              <Input placeholder="VD: A1" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Địa chỉ liên kết phải chứa — không bắt buộc"
+              name={[name, 'params', 'mustContainUrl']}>
+              <Input placeholder="VD: example.com" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_row_height':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Hàng số mấy"
+              name={[name, 'params', 'row']}
+              rules={[{ required: true, message: 'Nhập số hàng' }]}>
+              <InputNumber min={1} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Chiều cao yêu cầu"
+              name={[name, 'params', 'height']}
+              rules={[{ required: true, message: 'Nhập chiều cao' }]}>
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+          </>
+        );
+      case 'excel_sheet_tab_color':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Màu tab (hex, không dấu #)"
+              name={[name, 'params', 'color']}
+              rules={[{ required: true, message: 'Nhập màu, VD: FF0000' }]}>
+              <Input placeholder="VD: FF0000" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_merged_cells':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Vùng ô cần gộp (range)"
+              name={[name, 'params', 'range']}
+              rules={[{ required: true, message: 'Nhập vùng ô, VD: B2:C2' }]}>
+              <Input placeholder="VD: B2:C2" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_table_style_name':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Tên bảng"
+              name={[name, 'params', 'name']}
+              rules={[{ required: true, message: 'Nhập tên bảng' }]}>
+              <Input placeholder="VD: MyTable" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Tên kiểu bảng (Table Style)"
+              name={[name, 'params', 'styleName']}
+              rules={[{ required: true, message: 'Nhập tên kiểu bảng' }]}>
+              <Input placeholder="VD: TableStyleMedium9" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_print_area':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Vùng in (range)"
+              name={[name, 'params', 'range']}
+              rules={[{ required: true, message: 'Nhập vùng ô, VD: A1:D10' }]}>
+              <Input placeholder="VD: A1:D10" />
             </Form.Item>
           </>
         );

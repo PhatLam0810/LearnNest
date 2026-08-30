@@ -20,6 +20,15 @@ export const PRACTICE_CRITERIA_TYPES = [
   'excel_chart_axis_title',
   'excel_chart_data_labels',
   'excel_table_converted_to_range',
+  // Excel — exceljs đọc trực tiếp (definedNames, hyperlink, row height,
+  // tabColor, isMerged, table.style.theme, pageSetup.printArea).
+  'excel_named_range_exists',
+  'excel_hyperlink',
+  'excel_row_height',
+  'excel_sheet_tab_color',
+  'excel_merged_cells',
+  'excel_table_style_name',
+  'excel_print_area',
   // Word — dựa trên đọc XML thô (jszip).
   'word_line_spacing',
   'word_margins',
@@ -63,6 +72,13 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   word_table_cell_spacing: 'Khoảng cách giữa các ô trong bảng',
   word_footnotes_to_endnotes: 'Chuyển chú thích cuối trang → cuối văn bản',
   word_text_shadow_color: 'Hiệu ứng chữ (đổ bóng + màu)',
+  excel_named_range_exists: 'Vùng đặt tên (Named Range)',
+  excel_hyperlink: 'Hyperlink trong ô',
+  excel_row_height: 'Chiều cao hàng',
+  excel_sheet_tab_color: 'Màu tab sheet',
+  excel_merged_cells: 'Gộp ô (Merge Cells)',
+  excel_table_style_name: 'Kiểu bảng (Table Style)',
+  excel_print_area: 'Vùng in (Print Area)',
 };
 
 export interface PracticeTask {
