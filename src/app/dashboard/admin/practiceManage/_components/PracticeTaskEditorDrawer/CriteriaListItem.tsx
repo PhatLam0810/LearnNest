@@ -22,6 +22,13 @@ const EXCEL_TYPES: PracticeCriteriaType[] = [
   'excel_column_width',
   'excel_cell_style',
   'excel_cell_value',
+  'excel_wrap_text',
+  'excel_table_name',
+  'excel_sparkline_exists',
+  'excel_chart_title',
+  'excel_chart_axis_title',
+  'excel_chart_data_labels',
+  'excel_table_converted_to_range',
 ];
 
 const WORD_TYPES: PracticeCriteriaType[] = [
@@ -31,6 +38,11 @@ const WORD_TYPES: PracticeCriteriaType[] = [
   'word_table_structure',
   'word_bookmark_exists',
   'word_line_spacing',
+  'word_header_different_first_page',
+  'word_symbol_inserted',
+  'word_table_cell_spacing',
+  'word_footnotes_to_endnotes',
+  'word_text_shadow_color',
 ];
 
 type Props = {
@@ -338,6 +350,200 @@ const CriteriaListItem: React.FC<Props> = ({
                 { required: true, message: 'Nhập hệ số giãn dòng, VD: 1.5' },
               ]}>
               <InputNumber min={1} step={0.5} style={{ width: '100%' }} />
+            </Form.Item>
+          </>
+        );
+      case 'excel_wrap_text':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Vùng ô (range)"
+              name={[name, 'params', 'range']}
+              rules={[{ required: true, message: 'Nhập vùng ô, VD: A5:G5' }]}>
+              <Input placeholder="VD: A5:G5" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_table_name':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Tên bảng yêu cầu"
+              name={[name, 'params', 'name']}
+              rules={[{ required: true, message: 'Nhập tên bảng' }]}>
+              <Input placeholder="VD: ProductInventory" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_table_converted_to_range':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Vùng ô của bảng cũ (range)"
+              name={[name, 'params', 'range']}
+              rules={[{ required: true, message: 'Nhập vùng ô, VD: A1:C6' }]}>
+              <Input placeholder="VD: A1:C6" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_sparkline_exists':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Vùng chứa Sparkline (1 cột hoặc 1 hàng)"
+              name={[name, 'params', 'range']}
+              rules={[{ required: true, message: 'Nhập vùng ô, VD: D2:D6' }]}>
+              <Input placeholder="VD: D2:D6" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Kiểu Sparkline — không bắt buộc"
+              name={[name, 'params', 'sparkType']}>
+              <Select
+                allowClear
+                placeholder="Chọn kiểu"
+                options={[
+                  { value: 'line', label: 'Line' },
+                  { value: 'column', label: 'Column' },
+                  { value: 'stacked', label: 'Win/Loss' },
+                ]}
+              />
+            </Form.Item>
+          </>
+        );
+      case 'excel_chart_title':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Tiêu đề biểu đồ yêu cầu"
+              name={[name, 'params', 'mustContain']}
+              rules={[{ required: true, message: 'Nhập tiêu đề yêu cầu' }]}>
+              <Input placeholder="VD: Doanh thu theo quý" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_chart_axis_title':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Trục"
+              name={[name, 'params', 'axis']}
+              initialValue="vertical"
+              rules={[{ required: true, message: 'Chọn trục' }]}>
+              <Select
+                options={[
+                  { value: 'vertical', label: 'Trục dọc' },
+                  { value: 'horizontal', label: 'Trục ngang' },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Tiêu đề trục yêu cầu"
+              name={[name, 'params', 'mustContain']}
+              rules={[{ required: true, message: 'Nhập tiêu đề yêu cầu' }]}>
+              <Input placeholder="VD: Hours" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_chart_data_labels':
+        return <>{sheetField}</>;
+      case 'word_header_different_first_page':
+        return (
+          <Form.Item
+            {...restField}
+            label="Nội dung header trang đầu — không bắt buộc"
+            name={[name, 'params', 'headerTextContains']}>
+            <Input placeholder="VD: Integral" />
+          </Form.Item>
+        );
+      case 'word_symbol_inserted':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Đoạn văn gần vị trí chèn — không bắt buộc"
+              name={[name, 'params', 'textContains']}>
+              <Input placeholder="VD: Caution: the baking tray" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Font ký hiệu"
+              name={[name, 'params', 'font']}
+              rules={[
+                { required: true, message: 'Nhập tên font, VD: Webdings' },
+              ]}>
+              <Input placeholder="VD: Webdings" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Mã ký tự (character code)"
+              name={[name, 'params', 'charCode']}
+              rules={[{ required: true, message: 'Nhập mã ký tự' }]}>
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+          </>
+        );
+      case 'word_table_cell_spacing':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Bảng thứ mấy (0 = bảng đầu tiên)"
+              name={[name, 'params', 'tableIndex']}
+              initialValue={0}
+              rules={[{ required: true, message: 'Nhập vị trí bảng' }]}>
+              <InputNumber min={0} style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Khoảng cách giữa các ô (inch)"
+              name={[name, 'params', 'spacingInch']}
+              rules={[{ required: true, message: 'Nhập khoảng cách' }]}>
+              <InputNumber min={0} step={0.01} style={{ width: '100%' }} />
+            </Form.Item>
+          </>
+        );
+      case 'word_footnotes_to_endnotes':
+        return (
+          <Form.Item
+            {...restField}
+            label="Số chú thích cuối văn bản tối thiểu"
+            name={[name, 'params', 'minEndnoteCount']}
+            initialValue={1}>
+            <InputNumber min={1} style={{ width: '100%' }} />
+          </Form.Item>
+        );
+      case 'word_text_shadow_color':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Đoạn văn chứa cụm từ"
+              name={[name, 'params', 'textContains']}
+              rules={[
+                { required: true, message: 'Nhập cụm từ nhận diện đoạn văn' },
+              ]}>
+              <Input placeholder="VD: Styled Text Here" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Màu chữ (hex, không dấu #)"
+              name={[name, 'params', 'color']}
+              rules={[{ required: true, message: 'Nhập màu, VD: FF0000' }]}>
+              <Input placeholder="VD: FF0000" />
             </Form.Item>
           </>
         );

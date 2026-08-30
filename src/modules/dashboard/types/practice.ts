@@ -11,6 +11,14 @@ export const PRACTICE_CRITERIA_TYPES = [
   'excel_column_width',
   'excel_cell_style',
   'excel_cell_value',
+  'excel_wrap_text',
+  'excel_table_name',
+  // Excel — đọc XML thô (chart/sparkline, exceljs không hỗ trợ).
+  'excel_sparkline_exists',
+  'excel_chart_title',
+  'excel_chart_axis_title',
+  'excel_chart_data_labels',
+  'excel_table_converted_to_range',
   // Word — dựa trên đọc XML thô (jszip).
   'word_line_spacing',
   'word_margins',
@@ -18,6 +26,11 @@ export const PRACTICE_CRITERIA_TYPES = [
   'word_find_replace_result',
   'word_table_structure',
   'word_bookmark_exists',
+  'word_header_different_first_page',
+  'word_symbol_inserted',
+  'word_table_cell_spacing',
+  'word_footnotes_to_endnotes',
+  'word_text_shadow_color',
 ] as const;
 
 export type PracticeCriteriaType = (typeof PRACTICE_CRITERIA_TYPES)[number];
@@ -36,6 +49,18 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   word_find_replace_result: 'Nội dung tìm/thay thế trong văn bản',
   word_table_structure: 'Cấu trúc bảng (số hàng/cột)',
   word_bookmark_exists: 'Có Bookmark trong văn bản',
+  excel_wrap_text: 'Tự động ngắt dòng (Wrap Text)',
+  excel_table_name: 'Tên bảng (Table Name)',
+  excel_sparkline_exists: 'Sparkline',
+  excel_chart_title: 'Tiêu đề biểu đồ',
+  excel_chart_axis_title: 'Tiêu đề trục biểu đồ',
+  excel_chart_data_labels: 'Nhãn dữ liệu biểu đồ (Data Labels)',
+  excel_table_converted_to_range: 'Chuyển bảng thành vùng (Convert to Range)',
+  word_header_different_first_page: 'Header khác trang đầu',
+  word_symbol_inserted: 'Chèn ký hiệu (Symbol)',
+  word_table_cell_spacing: 'Khoảng cách giữa các ô trong bảng',
+  word_footnotes_to_endnotes: 'Chuyển chú thích cuối trang → cuối văn bản',
+  word_text_shadow_color: 'Hiệu ứng chữ (đổ bóng + màu)',
 };
 
 export interface PracticeTask {
