@@ -58,6 +58,7 @@ const WORD_TYPES: PracticeCriteriaType[] = [
   'word_table_cell_merged',
   'word_no_headers_footers',
   'word_table_style_name',
+  'word_document_property',
 ];
 
 type Props = {
@@ -813,6 +814,32 @@ const CriteriaListItem: React.FC<Props> = ({
               rules={[{ required: true, message: 'Nhập tên kiểu bảng' }]}
               tooltip="Word bỏ dấu cách/gạch ngang khi lưu vào file — VD 'Grid Table 4 - Accent 3' lưu là 'GridTable4-Accent3'.">
               <Input placeholder="VD: GridTable4-Accent3" />
+            </Form.Item>
+          </>
+        );
+      case 'word_document_property':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Thuộc tính"
+              name={[name, 'params', 'property']}
+              rules={[{ required: true, message: 'Chọn thuộc tính' }]}>
+              <Select
+                options={[
+                  { value: 'title', label: 'Title' },
+                  { value: 'subject', label: 'Subject' },
+                  { value: 'category', label: 'Category' },
+                  { value: 'keywords', label: 'Keywords/Tags' },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Giá trị yêu cầu"
+              name={[name, 'params', 'value']}
+              rules={[{ required: true, message: 'Nhập giá trị yêu cầu' }]}>
+              <Input placeholder="VD: animals" />
             </Form.Item>
           </>
         );
