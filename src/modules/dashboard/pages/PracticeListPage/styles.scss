@@ -1,7 +1,5 @@
 .practice-list-page {
   padding: 24px;
-  max-width: 1000px;
-  margin: 0 auto;
 }
 
 .practice-list-heading {
@@ -23,7 +21,7 @@
 
 .practice-task-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: 16px;
   margin-top: 8px;
 }
