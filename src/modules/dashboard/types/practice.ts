@@ -50,6 +50,7 @@ export const PRACTICE_CRITERIA_TYPES = [
   'word_no_headers_footers',
   'word_table_style_name',
   'word_document_property',
+  'word_track_changes_resolved',
 ] as const;
 
 export type PracticeCriteriaType = (typeof PRACTICE_CRITERIA_TYPES)[number];
@@ -97,6 +98,7 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   word_no_headers_footers: 'Xoá header/footer/watermark',
   word_table_style_name: 'Kiểu bảng (Table Style)',
   word_document_property: 'Thuộc tính tệp (Title/Category...)',
+  word_track_changes_resolved: 'Đã xử lý xong Track Changes (Accept/Reject All)',
 };
 
 export interface PracticeTask {

@@ -60,6 +60,7 @@ const WORD_TYPES: PracticeCriteriaType[] = [
   'word_no_headers_footers',
   'word_table_style_name',
   'word_document_property',
+  'word_track_changes_resolved',
 ];
 
 type Props = {
@@ -868,6 +869,23 @@ const CriteriaListItem: React.FC<Props> = ({
               name={[name, 'params', 'value']}
               rules={[{ required: true, message: 'Nhập giá trị yêu cầu' }]}>
               <Input placeholder="VD: animals" />
+            </Form.Item>
+          </>
+        );
+      case 'word_track_changes_resolved':
+        return (
+          <>
+            <Form.Item
+              {...restField}
+              label="Văn bản phải còn chứa — không bắt buộc"
+              name={[name, 'params', 'mustContain']}>
+              <Input placeholder="VD: nội dung đã Accept" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Văn bản không được còn chứa — không bắt buộc"
+              name={[name, 'params', 'mustNotContain']}>
+              <Input placeholder="VD: nội dung đã Reject/xoá" />
             </Form.Item>
           </>
         );
