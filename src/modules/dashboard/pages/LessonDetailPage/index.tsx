@@ -28,6 +28,7 @@ import { authAction } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
 import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/AppVideoWatchersButton';
 import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
+import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
 import { useResponsive } from '@/styles/responsive';
 
 interface LessonDetailPageProps {
@@ -250,22 +251,18 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const getLessonContentItems = () =>
     (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
 
-  // Xem giải thích đầy đủ ở ModuleDetailPage.isTaskAccessible. Admin phải
-  // xem được mọi bài thực hành (giống hasAccessToLibrary đã bypass sẵn cho
-  // library), không bị khoá theo tiến độ học thật của chính họ.
+  // Logic thật nằm ở utils/isTaskAccessible.ts (dùng chung với
+  // ModuleDetailPage, có test riêng) — wrapper này chỉ khép kín state của
+  // trang lại thành đúng chữ ký (seq, idx) mà các chỗ gọi bên dưới đang dùng.
   const isTaskAccessible = (
     seq: { kind: 'library' | 'task'; data: any }[],
     idx: number,
-  ) => {
-    if (userProfile?.role?.level <= 2) return true;
-    if (idx <= 0) return true;
-    const prev = seq[idx - 1];
-    if (prev.kind === 'task') return !!prev.data.hasPassed;
-    if (prev.data.type === 'Text') {
-      return !!quizPassedByLibrary?.[prev.data._id];
-    }
-    return !!videoCompletedBySubLesson?.[prev.data._id];
-  };
+  ) =>
+    checkTaskAccessible(seq, idx, {
+      isAdmin: userProfile?.role?.level <= 2,
+      videoCompletedBySubLesson,
+      quizPassedByLibrary,
+    });
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] => {
     const lessonSeq = getLessonContentItems();

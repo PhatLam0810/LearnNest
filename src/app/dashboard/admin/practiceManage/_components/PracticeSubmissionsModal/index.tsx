@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Modal, Table, Tag } from 'antd';
+import { Button, Modal, Popconfirm, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
@@ -122,9 +122,14 @@ const PracticeSubmissionsModal: React.FC<Props> = ({ taskId, onClose }) => {
         ) : (
           <span />
         )}
-        <Button loading={isReminding} onClick={handleRemindNotPassed}>
-          Nhắc người chưa làm
-        </Button>
+        <Popconfirm
+          title="Gửi email nhắc nhở?"
+          description="Sẽ gửi email THẬT tới toàn bộ học viên chưa đạt bài thực hành này. Không thể thu hồi sau khi gửi."
+          okText="Gửi"
+          cancelText="Huỷ"
+          onConfirm={handleRemindNotPassed}>
+          <Button loading={isReminding}>Nhắc người chưa làm</Button>
+        </Popconfirm>
       </div>
       <Table
         rowKey="_id"

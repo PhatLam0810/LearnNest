@@ -7,6 +7,7 @@ import {
   Empty,
   Input,
   Pagination,
+  Popconfirm,
   Progress,
   Segmented,
   Select,
@@ -321,9 +322,14 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
             </Space>
             <div style={styles.actionsRow}>
               <Button onClick={handleExportExcel}>Tải Excel</Button>
-              <Button loading={isBulkReminding} onClick={handleRemindBulk}>
-                Nhắc Hàng Loạt
-              </Button>
+              <Popconfirm
+                title="Gửi email nhắc nhở hàng loạt?"
+                description="Sẽ gửi email THẬT tới mọi học viên im lặng lâu ngày trong khóa này. Không thể thu hồi sau khi gửi."
+                okText="Gửi"
+                cancelText="Huỷ"
+                onConfirm={handleRemindBulk}>
+                <Button loading={isBulkReminding}>Nhắc Hàng Loạt</Button>
+              </Popconfirm>
               <Button
                 type="primary"
                 disabled={!isCanCreatePracticeClass}
@@ -372,12 +378,17 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
                     </div>
                     <div style={styles.learnerReminder}>
                       {reminderState.eligible && (
-                        <Button
-                          size="small"
-                          loading={remindingUserId === learner._id}
-                          onClick={() => handleRemindLearner(learner)}>
-                          Nhắc nhở
-                        </Button>
+                        <Popconfirm
+                          title={`Gửi email nhắc ${learner.fullName}?`}
+                          okText="Gửi"
+                          cancelText="Huỷ"
+                          onConfirm={() => handleRemindLearner(learner)}>
+                          <Button
+                            size="small"
+                            loading={remindingUserId === learner._id}>
+                            Nhắc nhở
+                          </Button>
+                        </Popconfirm>
                       )}
                       {!reminderState.eligible && reminderState.hint && (
                         <span style={styles.reminderHint}>

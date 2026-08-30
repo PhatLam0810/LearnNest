@@ -23,6 +23,7 @@ import LibraryDetailItem, {
   LibraryDetailItemHandle,
 } from '~mdDashboard/components/LibraryDetailItem';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
+import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 const ModuleDetailPage = () => {
@@ -183,31 +184,18 @@ const ModuleDetailPage = () => {
   const getLessonContentItems = () =>
     (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
 
-  // Bài thực hành ở vị trí idx trong seq có được phép làm/xem chưa.
-  // - Mục trước là bài thực hành: dựa thẳng vào hasPassed (đạt >= 80%).
-  // - Mục trước là trắc nghiệm (Library type Text): dựa vào ResultTest.isPass
-  //   (đạt >= 2/3 số câu, lấy qua getMyLessonQuizProgress) — trước đây luôn
-  //   coi là đã qua bất kể làm bài chưa, đây là lỗ hổng đã sửa.
-  // - Mục trước là video: dựa vào VideoTracking.completed (đã xem >= 95%,
-  //   lấy qua getMyLessonVideoProgress) — KHÔNG dùng usersCanPlay, vì đó chỉ
-  //   là "đã tới lượt xem" (mở khoá), không xác nhận đã xem hết.
+  // Logic thật nằm ở utils/isTaskAccessible.ts (dùng chung với
+  // LessonDetailPage, có test riêng) — wrapper này chỉ khép kín state của
+  // trang lại thành đúng chữ ký (seq, idx) mà các chỗ gọi bên dưới đang dùng.
   const isTaskAccessible = (
     seq: { kind: 'library' | 'task'; data: any }[],
     idx: number,
-  ) => {
-    // Admin phải xem được mọi bài thực hành để kiểm tra/soạn đề, không bị
-    // khoá theo tiến độ học thật của chính họ — giống hệt bypass isAdmin đã
-    // có sẵn ở hasAccess phía trên, nhưng hàm này trước giờ thiếu, nên admin
-    // bị khoá nhầm y như học viên thật mỗi khi thêm 1 chiều gating mới.
-    if (isAdmin) return true;
-    if (idx <= 0) return true;
-    const prev = seq[idx - 1];
-    if (prev.kind === 'task') return !!prev.data.hasPassed;
-    if (prev.data.type === 'Text') {
-      return !!quizPassedByLibrary?.[prev.data._id];
-    }
-    return !!videoCompletedBySubLesson?.[prev.data._id];
-  };
+  ) =>
+    checkTaskAccessible(seq, idx, {
+      isAdmin,
+      videoCompletedBySubLesson,
+      quizPassedByLibrary,
+    });
 
   const getItems = (panelStyle: CSSProperties): CollapseProps['items'] => {
     const lessonSeq = getLessonContentItems();

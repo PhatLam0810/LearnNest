@@ -2,7 +2,16 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Avatar, Tag, Button, Spin, Empty, Progress, message } from 'antd';
+import {
+  Avatar,
+  Tag,
+  Button,
+  Popconfirm,
+  Spin,
+  Empty,
+  Progress,
+  message,
+} from 'antd';
 import {
   UserOutlined,
   CheckCircleFilled,
@@ -248,12 +257,16 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
             {pagination.total} người
           </Tag>
           {lessonId && (
-            <Button
-              size="small"
-              loading={isReminding}
-              onClick={handleRemindNotWatched}>
-              Nhắc người chưa xem
-            </Button>
+            <Popconfirm
+              title="Gửi email nhắc nhở?"
+              description="Sẽ gửi email THẬT tới toàn bộ học viên chưa xem xong video này. Không thể thu hồi sau khi gửi."
+              okText="Gửi"
+              cancelText="Huỷ"
+              onConfirm={handleRemindNotWatched}>
+              <Button size="small" loading={isReminding}>
+                Nhắc người chưa xem
+              </Button>
+            </Popconfirm>
           )}
         </View>
       </View>

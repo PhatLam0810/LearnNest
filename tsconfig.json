@@ -6,6 +6,12 @@
     "skipLibCheck": true,
     "strict": false,
     "noEmit": true,
+    // Cho phép import `.ts` viết tường minh phần mở rộng — cần cho các file
+    // *.test.ts (chạy trực tiếp bằng `node --test`, không qua bundler nên
+    // Node đòi phần mở rộng tường minh). An toàn bật vì đã có noEmit: true
+    // (điều kiện bắt buộc của cờ này) và Next.js build không dùng tsc để
+    // emit, chỉ dùng để kiểm tra kiểu.
+    "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
