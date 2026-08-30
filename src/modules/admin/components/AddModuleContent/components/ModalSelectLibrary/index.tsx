@@ -4,7 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, Text, View } from 'react-native-web';
 import styles from './styles';
 import Search from 'antd/es/input/Search';
-import { Button, Modal as AntdModal, Segmented, Select, Tag } from 'antd';
+import {
+  Button,
+  Modal as AntdModal,
+  Segmented,
+  Select,
+  Tag,
+  Tooltip,
+} from 'antd';
 import { CheckCircleFilled } from '@ant-design/icons';
 import { Library } from '~mdDashboard/types';
 import { PracticeTask, PracticeSubject } from '~mdDashboard/types/practice';
@@ -208,15 +215,17 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                     );
                     // moduleId khác currentModuleId (kể cả currentModuleId
                     // là undefined lúc tạo mới) -> bài này đang thật sự
-                    // thuộc 1 phần học KHÁC. Chọn nó ở đây, lúc lưu sẽ gỡ nó
-                    // khỏi phần đó — đúng thiết kế (1 bài chỉ ở 1 phần) chứ
-                    // không phải lỗi, nhưng admin cần biết trước để khỏi
-                    // nhầm là "thêm mới" như với 1 bài chưa gán đâu cả.
+                    // thuộc 1 phần học KHÁC. Trước đây vẫn cho chọn (lưu sẽ
+                    // âm thầm gỡ khỏi phần kia) — giờ đổi sang KHOÁ hẳn, bắt
+                    // admin tự gỡ bên phần đó trước, tránh gỡ nhầm không
+                    // chủ đích khi chỉ đang tìm bài để thêm vào đây.
                     const assignedElsewhere =
                       !!item.moduleId && item.moduleId !== currentModuleId;
-                    return (
+                    const row = (
                       <View
-                        onClick={() => handleSelectTask(item)}
+                        onClick={() =>
+                          !assignedElsewhere && handleSelectTask(item)
+                        }
                         style={{
                           flexDirection: 'row',
                           alignItems: 'center',
@@ -228,7 +237,8 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                           borderColor: isSelected
                             ? 'var(--color-vhu-primary)'
                             : '#8D8D8D',
-                          cursor: 'pointer',
+                          cursor: assignedElsewhere ? 'not-allowed' : 'pointer',
+                          opacity: assignedElsewhere ? 0.5 : 1,
                         }}>
                         <Tag
                           color={item.subject === 'Excel' ? 'green' : 'blue'}>
@@ -252,6 +262,16 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                           />
                         )}
                       </View>
+                    );
+                    return assignedElsewhere ? (
+                      <Tooltip
+                        title={`Bài này đang thuộc "${
+                          item.moduleTitle || 'phần khác'
+                        }" — vui lòng gỡ khỏi phần đó trước khi thêm vào phần học này.`}>
+                        {row}
+                      </Tooltip>
+                    ) : (
+                      row
                     );
                   }}
                 />
