@@ -39,7 +39,33 @@
   white-space: pre-wrap;
   color: #444;
   line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.practice-content-instruction-list {
   margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  li {
+    padding-left: 4px;
+  }
+}
+
+.practice-content-instruction-label {
+  font-weight: 600;
+  color: #1677ff;
+  font-size: 13px;
+}
+
+.practice-content-instruction-text {
+  white-space: pre-line;
+  color: #333;
+  line-height: 1.6;
+  font-size: 14px;
+  margin-top: 2px;
 }
 
 .practice-content-meta {

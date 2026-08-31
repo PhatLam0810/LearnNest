@@ -46,6 +46,13 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
     dashboardQuery.useGetMyPracticeSubmissionsQuery(taskId, {
       skip: !taskId,
     });
+  // Hướng dẫn "Bước 1,2,3..." của TỪNG yêu cầu — hiện ngay từ đầu (không đợi
+  // nộp sai mới thấy) để học viên biết chính xác cần làm gì cho mỗi tiêu chí
+  // chấm điểm, giống cách đề thi MOS thật liệt kê rõ từng yêu cầu.
+  const { data: instructions } =
+    dashboardQuery.useGetPracticeTaskInstructionsQuery(taskId, {
+      skip: !taskId,
+    });
 
   // Đổi bài tập (taskId khác) thì phải xoá kết quả lần nộp trước đi, không
   // thì kết quả bài cũ sẽ hiện nhầm lên bài mới vừa chọn.
@@ -142,12 +149,26 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
         <h1>{task.title}</h1>
       </div>
 
-      {task.description && (
-        <div className="practice-content-requirements">
-          <h3>Yêu cầu đề bài</h3>
+      <div className="practice-content-requirements">
+        <h3>Yêu cầu đề bài</h3>
+        {task.description && (
           <p className="practice-content-desc">{task.description}</p>
-        </div>
-      )}
+        )}
+        {instructions && instructions.length > 0 && (
+          <ol className="practice-content-instruction-list">
+            {instructions.map((it, idx) => (
+              <li key={it.criteriaId}>
+                <span className="practice-content-instruction-label">
+                  Yêu cầu {idx + 1}
+                </span>
+                <div className="practice-content-instruction-text">
+                  {it.instruction}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
 
       <p className="practice-content-meta">
         Đề bài có {criteria.length} yêu cầu chấm điểm — nộp bài đúng .

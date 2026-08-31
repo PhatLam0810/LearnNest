@@ -12,6 +12,7 @@ import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
 import {
   PracticeCourseSummary,
+  PracticeInstructionItem,
   PracticeSubmission,
   PracticeTask,
   PracticeTaskDetail,
@@ -224,6 +225,19 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    // Danh sách "Bước 1,2,3..." tự sinh cho TỪNG tiêu chí của đề — hiện cho
+    // học viên xem TRƯỚC khi làm bài (đề bài "Yêu cầu 1, 2, 3..." rõ ràng
+    // như đề thi MOS thật), không phải đợi nộp sai mới thấy hướng dẫn.
+    getPracticeTaskInstructions: builder.query<
+      PracticeInstructionItem[],
+      string
+    >({
+      query: taskId => ({
+        url: `/practice/tasks/${taskId}/instructions`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
     // Tiến độ xem TOÀN BỘ video trong 1 lesson của chính user đang đăng
     // nhập, 1 lần gọi — {[subLessonId]: đã xem xong (completed) hay chưa}.
     // Dùng để khoá bài thực hành đứng ngay sau 1 video theo đúng "đã xem
@@ -263,4 +277,5 @@ export const {
   useGetPracticeTaskDetailStudentQuery,
   useGetMyPracticeSubmissionsQuery,
   useGetPracticeCoursesQuery,
+  useGetPracticeTaskInstructionsQuery,
 } = dashboardQuery;
