@@ -14,7 +14,8 @@ const DragModuleItem: React.FC<DragModuleItemProps> = ({ data, onDelete }) => {
       <View>
         <Text style={styles.title}>{data.title}</Text>
         <Text style={styles.subTitle}>
-          Tổng số bài học: {data.libraries?.length}
+          Tổng số bài học:{' '}
+          {(data.libraries?.length || 0) + (data.practiceTaskCount || 0)}
         </Text>
       </View>
       <Button

@@ -45,7 +45,10 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
   const { totalLibraries, totalDuration } = listSelected.reduce(
     (acc, item) => {
       const libArray = Array.isArray(item.libraries) ? item.libraries : [];
-      acc.totalLibraries += libArray.length;
+      // + bài thực hành đã gắn vào module này (không phải Library thật, xem
+      // getAllModule ở BE) — nếu không "Tổng bài học" hiện thiếu so với số
+      // học viên thấy thật ở màn học.
+      acc.totalLibraries += libArray.length + (item.practiceTaskCount || 0);
 
       const durationSumInLibraries = libArray.reduce((sum, lib) => {
         return sum + (Number(lib.duration) || 0);

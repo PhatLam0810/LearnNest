@@ -55,6 +55,10 @@ export interface Module {
   updatedAt: string;
   subLessons?: Sublesson[];
   libraries?: Library[];
+  // Số bài thực hành (PracticeTask) đã publish đang gán vào module này qua
+  // moduleId — chỉ có ở response của getAllModule (BE tự tính, không lưu
+  // trong DB), dùng để "Tổng số bài học" đếm đúng cả bài thực hành.
+  practiceTaskCount?: number;
   __v: number;
 }
 

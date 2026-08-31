@@ -62,7 +62,11 @@ const PracticeListPage = () => {
             <div className="practice-task-grid">
               {filteredCourses.map(course => (
                 <div
-                  key={course.lessonId}
+                  // 1 lesson có thể chứa cả bài Word lẫn Excel (VD: phần
+                  // thực hành gộp nhiều môn) — BE trả về 2 dòng riêng cho
+                  // cùng 1 lessonId, phải ghép thêm subject mới ra key
+                  // duy nhất, tránh trùng key React.
+                  key={`${course.lessonId}-${course.subject}`}
                   className="practice-task-card"
                   role="button"
                   tabIndex={0}

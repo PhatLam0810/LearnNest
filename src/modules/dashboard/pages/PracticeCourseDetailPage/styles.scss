@@ -47,6 +47,8 @@
   flex: 0 0 20%;
   max-width: 20%;
   background: #fafafa;
+  height: calc(80vh - 80px);
+  overflow: scroll;
   border-radius: 12px;
   padding: 16px;
 
