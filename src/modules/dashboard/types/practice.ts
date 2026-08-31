@@ -111,7 +111,8 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   word_no_headers_footers: 'Xoá header/footer/watermark',
   word_table_style_name: 'Kiểu bảng (Table Style)',
   word_document_property: 'Thuộc tính tệp (Title/Category...)',
-  word_track_changes_resolved: 'Đã xử lý xong Track Changes (Accept/Reject All)',
+  word_track_changes_resolved:
+    'Đã xử lý xong Track Changes (Accept/Reject All)',
   word_smartart_text: 'Nội dung chữ trong SmartArt',
   word_smartart_alt_text: 'Alt Text của SmartArt',
   word_smartart_bevel: 'Hiệu ứng Bevel cho SmartArt',
