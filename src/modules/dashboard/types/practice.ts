@@ -34,6 +34,8 @@ export const PRACTICE_CRITERIA_TYPES = [
   'excel_chart_trendline',
   'excel_chart_secondary_axis',
   'excel_smartart_text',
+  'excel_smartart_alt_text',
+  'excel_smartart_bevel',
   // Word — dựa trên đọc XML thô (jszip).
   'word_line_spacing',
   'word_margins',
@@ -100,6 +102,8 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
   excel_chart_trendline: 'Đường xu hướng (Trendline)',
   excel_chart_secondary_axis: 'Trục phụ (Secondary Axis)',
   excel_smartart_text: 'Nội dung chữ trong SmartArt',
+  excel_smartart_alt_text: 'Alt Text của SmartArt',
+  excel_smartart_bevel: 'Hiệu ứng Bevel cho SmartArt',
   word_highlight_color: 'Tô sáng (Highlight)',
   word_paragraph_spacing: 'Khoảng cách đoạn văn (Before/After)',
   word_table_caption: 'Alt Text của bảng',

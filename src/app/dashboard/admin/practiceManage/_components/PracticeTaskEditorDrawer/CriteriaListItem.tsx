@@ -42,6 +42,8 @@ const EXCEL_TYPES: PracticeCriteriaType[] = [
   'excel_chart_trendline',
   'excel_chart_secondary_axis',
   'excel_smartart_text',
+  'excel_smartart_alt_text',
+  'excel_smartart_bevel',
 ];
 
 const WORD_TYPES: PracticeCriteriaType[] = [
@@ -683,6 +685,52 @@ const CriteriaListItem: React.FC<Props> = ({
               name={[name, 'params', 'mustContain']}
               rules={[{ required: true, message: 'Nhập nội dung cần có' }]}>
               <Input placeholder="VD: Bước 1" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_smartart_alt_text':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Title — không bắt buộc"
+              name={[name, 'params', 'title']}>
+              <Input placeholder="VD: Process diagram" />
+            </Form.Item>
+            <Form.Item
+              {...restField}
+              label="Description — không bắt buộc"
+              name={[name, 'params', 'description']}>
+              <Input placeholder="VD: Process flow" />
+            </Form.Item>
+          </>
+        );
+      case 'excel_smartart_bevel':
+        return (
+          <>
+            {sheetField}
+            <Form.Item
+              {...restField}
+              label="Kiểu Bevel"
+              name={[name, 'params', 'bevelType']}
+              rules={[{ required: true, message: 'Chọn kiểu Bevel' }]}>
+              <Select
+                options={[
+                  { value: 'circle', label: 'Circle' },
+                  { value: 'relaxedInset', label: 'Relaxed Inset' },
+                  { value: 'cross', label: 'Cross' },
+                  { value: 'angle', label: 'Angle' },
+                  { value: 'softRound', label: 'Soft Round' },
+                  { value: 'convex', label: 'Convex' },
+                  { value: 'coolSlant', label: 'Cool Slant' },
+                  { value: 'divot', label: 'Divot' },
+                  { value: 'riblet', label: 'Riblet' },
+                  { value: 'hardEdge', label: 'Hard Edge' },
+                  { value: 'artDeco', label: 'Art Deco' },
+                  { value: 'slope', label: 'Slope' },
+                ]}
+              />
             </Form.Item>
           </>
         );
