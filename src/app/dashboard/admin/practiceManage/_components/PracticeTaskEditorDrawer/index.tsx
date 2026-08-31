@@ -325,7 +325,7 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
           riêng trong 1 wrapper của chính Drawer này. */}
       <div
         style={{
-          height: 'calc(100vh - 55px)',
+          height: '100%',
           overflowY: 'auto',
           padding: 24,
         }}>
