@@ -505,8 +505,20 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                   borderRadius: 8,
                 }}>
                 {instructions.map((it, idx) => (
-                  <div key={it.criteriaId} style={{ marginBottom: 8 }}>
+                  <div key={it.criteriaId} style={{ marginBottom: 12 }}>
                     <b>Tiêu chí {idx + 1}:</b>
+                    <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                      Học viên thấy TRƯỚC khi nộp (Yêu cầu đề bài):
+                    </div>
+                    <div>{it.summary}</div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: '#888',
+                        marginTop: 4,
+                      }}>
+                      Học viên thấy SAU khi nộp sai (gợi ý sửa):
+                    </div>
                     <div style={{ whiteSpace: 'pre-line' }}>
                       {it.instruction}
                     </div>

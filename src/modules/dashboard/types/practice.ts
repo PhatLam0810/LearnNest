@@ -158,6 +158,12 @@ export interface PracticeTaskDetail {
 
 export interface PracticeInstructionItem {
   criteriaId: string;
+  // 1 câu mô tả KẾT QUẢ cần đạt (không phải thao tác UI) — hiện cho học
+  // viên NGAY TỪ ĐẦU trong "Yêu cầu đề bài", không lộ cách bấm.
+  summary: string;
+  // Hướng dẫn "Bước 1,2,3..." chi tiết — CHỈ hiện sau khi học viên nộp sai
+  // tiêu chí này (xem PracticeSubmissionResultItem.instruction), không
+  // dùng ở màn "Yêu cầu đề bài" trước khi nộp bài.
   instruction: string;
 }
 

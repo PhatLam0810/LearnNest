@@ -159,11 +159,11 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
             {instructions.map((it, idx) => (
               <li key={it.criteriaId}>
                 <span className="practice-content-instruction-label">
-                  Yêu cầu {idx + 1}
+                  Yêu cầu {idx + 1}:
+                </span>{' '}
+                <span className="practice-content-instruction-text">
+                  {it.summary}
                 </span>
-                <div className="practice-content-instruction-text">
-                  {it.instruction}
-                </div>
               </li>
             ))}
           </ol>

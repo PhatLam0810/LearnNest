@@ -47,7 +47,7 @@
   padding-left: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 
   li {
     padding-left: 4px;
@@ -57,15 +57,13 @@
 .practice-content-instruction-label {
   font-weight: 600;
   color: #1677ff;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .practice-content-instruction-text {
-  white-space: pre-line;
   color: #333;
   line-height: 1.6;
   font-size: 14px;
-  margin-top: 2px;
 }
 
 .practice-content-meta {
