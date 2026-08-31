@@ -1,7 +1,6 @@
 .practice-course-page {
   padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .practice-course-loading {
@@ -34,18 +33,26 @@
 }
 
 .practice-course-main {
-  flex: 1;
+  flex: 0 0 80%;
+  max-width: 80%;
   min-width: 0;
+
+  @media (max-width: 900px) {
+    flex: 1;
+    max-width: 100%;
+  }
 }
 
 .practice-course-side {
-  width: 320px;
-  flex-shrink: 0;
+  flex: 0 0 20%;
+  max-width: 20%;
   background: #fafafa;
   border-radius: 12px;
   padding: 16px;
 
   @media (max-width: 900px) {
+    flex: 1;
+    max-width: 100%;
     width: 100%;
   }
 }
