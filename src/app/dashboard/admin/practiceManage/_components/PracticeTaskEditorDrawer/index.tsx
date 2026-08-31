@@ -26,6 +26,7 @@ import { useAppSelector } from '@redux';
 import { adminQuery } from '~mdAdmin/redux';
 import {
   PracticeCriteria,
+  PracticeInstructionItem,
   PracticeSubject,
   PracticeSubmissionResultItem,
 } from '~mdDashboard/types/practice';
@@ -50,7 +51,7 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
   );
   const [subject, setSubject] = useState<PracticeSubject>('Excel');
   const [instructions, setInstructions] = useState<
-    { criteriaId: string; instruction: string }[] | null
+    PracticeInstructionItem[] | null
   >(null);
   // Modal.confirm (static call) không render ra bất kỳ DOM node nào trong
   // app này (đã kiểm chứng: gọi xong, criteria vẫn giữ giá trị cũ và
