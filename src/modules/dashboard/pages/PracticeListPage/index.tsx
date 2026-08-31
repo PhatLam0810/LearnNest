@@ -31,9 +31,11 @@ const PracticeListPage = () => {
   const filteredCourses = (courses || []).filter(
     c => !subject || c.subject === subject,
   );
-  const orphanTasks = (allTasks || []).filter(
-    t => !t.lessonId && (!subject || t.subject === subject),
-  );
+  // Toàn bộ đề (không gom theo khóa) — để học viên tìm nhanh 1 bài cụ thể mà
+  // không cần bấm vào từng thẻ khóa trước. Sắp theo tên cho dễ dò.
+  const allTasksFiltered = [...(allTasks || [])]
+    .filter(t => !subject || t.subject === subject)
+    .sort((a, b) => a.title.localeCompare(b.title));
 
   const isLoading = isLoadingCourses || isLoadingTasks;
 
@@ -54,7 +56,7 @@ const PracticeListPage = () => {
 
       {isLoading ? (
         <Spin />
-      ) : filteredCourses.length === 0 && orphanTasks.length === 0 ? (
+      ) : filteredCourses.length === 0 && allTasksFiltered.length === 0 ? (
         <Empty description="Chưa có đề thực hành nào" />
       ) : (
         <>
@@ -85,11 +87,13 @@ const PracticeListPage = () => {
             </div>
           )}
 
-          {orphanTasks.length > 0 && (
+          {allTasksFiltered.length > 0 && (
             <>
-              <h2 className="practice-list-subheading-2">Bài tập khác</h2>
+              <h2 className="practice-list-subheading-2">
+                Tất cả bài tập ({allTasksFiltered.length})
+              </h2>
               <div className="practice-task-grid">
-                {orphanTasks.map(task => (
+                {allTasksFiltered.map(task => (
                   <div
                     key={task._id}
                     className="practice-task-card"
@@ -101,6 +105,7 @@ const PracticeListPage = () => {
                     <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
                       {task.subject}
                     </Tag>
+                    {task.hasPassed && <Tag color="success">Đạt</Tag>}
                     <h3 className="practice-task-title">{task.title}</h3>
                     {task.description && (
                       <p className="practice-task-desc">{task.description}</p>
