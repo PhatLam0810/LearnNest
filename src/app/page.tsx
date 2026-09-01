@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Footer from '@components/Footer';
+import { lexend } from '@/styles/typography';
 import './landing.css';
 
 type PublicStats = {
@@ -59,7 +60,7 @@ export default async function HomePage() {
   const stats = await getPublicStats();
 
   return (
-    <div className="landing">
+    <div className={`landing ${lexend.className}`}>
       <header className="landing__header">
         <Link href="/" className="landing__brand">
           <img src="/images/LogoVhu.png" alt="LearnNest" />
