@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Footer from '@components/Footer';
 import { lexend } from '@/styles/typography';
+import Reveal from './Reveal';
 import './landing.css';
 
 type PublicStats = {
@@ -108,53 +109,61 @@ export default async function HomePage() {
       </section>
 
       {stats && (
-        <section className="landing__stats">
-          <div className="landing__stat">
-            <strong>{stats.totalLessons}+</strong>
-            <span>Khóa học</span>
-          </div>
-          <div className="landing__stat">
-            <strong>{stats.totalVideos}+</strong>
-            <span>Bài giảng video</span>
-          </div>
-          <div className="landing__stat">
-            <strong>{stats.totalPracticeTasks}+</strong>
-            <span>Bài thực hành</span>
-          </div>
-          <div className="landing__stat">
-            <strong>{stats.totalUsers}+</strong>
-            <span>Học viên tham gia</span>
-          </div>
-        </section>
+        <Reveal>
+          <section className="landing__stats">
+            <div className="landing__stat">
+              <strong>{stats.totalLessons}+</strong>
+              <span>Khóa học</span>
+            </div>
+            <div className="landing__stat">
+              <strong>{stats.totalVideos}+</strong>
+              <span>Bài giảng video</span>
+            </div>
+            <div className="landing__stat">
+              <strong>{stats.totalPracticeTasks}+</strong>
+              <span>Bài thực hành</span>
+            </div>
+            <div className="landing__stat">
+              <strong>{stats.totalUsers}+</strong>
+              <span>Học viên tham gia</span>
+            </div>
+          </section>
+        </Reveal>
       )}
 
       <section className="landing__section">
-        <div className="landing__section-head">
-          <h2>Mọi thứ bạn cần để học hiệu quả</h2>
-          <p>Được xây dựng riêng cho việc luyện thi MOS, CNTT và AI.</p>
-        </div>
+        <Reveal>
+          <div className="landing__section-head">
+            <h2>Mọi thứ bạn cần để học hiệu quả</h2>
+            <p>Được xây dựng riêng cho việc luyện thi MOS, CNTT và AI.</p>
+          </div>
+        </Reveal>
         <div className="landing__container">
           <div className="landing__features">
-            {FEATURES.map(f => (
-              <div className="landing__feature-card" key={f.title}>
-                <div className="landing__feature-icon">{f.icon}</div>
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
-              </div>
+            {FEATURES.map((f, i) => (
+              <Reveal key={f.title} delay={(i % 3) * 0.1}>
+                <div className="landing__feature-card">
+                  <div className="landing__feature-icon">{f.icon}</div>
+                  <h3>{f.title}</h3>
+                  <p>{f.desc}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="landing__cta">
-        <h2>Bắt đầu hành trình học tập hôm nay</h2>
-        <p>Đăng ký miễn phí và học ngay bài học đầu tiên.</p>
-        <Link
-          href="/signup"
-          className="landing__btn landing__btn--primary landing__btn--large">
-          Đăng ký miễn phí
-        </Link>
-      </section>
+      <Reveal>
+        <section className="landing__cta">
+          <h2>Bắt đầu hành trình học tập hôm nay</h2>
+          <p>Đăng ký miễn phí và học ngay bài học đầu tiên.</p>
+          <Link
+            href="/signup"
+            className="landing__btn landing__btn--primary landing__btn--large">
+            Đăng ký miễn phí
+          </Link>
+        </section>
+      </Reveal>
 
       <Footer />
     </div>

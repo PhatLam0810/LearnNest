@@ -66,27 +66,20 @@ const LoginPage = () => {
 
   return (
     <View style={styles.pageWrapper}>
+      <Link href="/" style={styles.backLink}>
+        ← Trang chủ
+      </Link>
       <View style={layoutStyle}>
         {!isMobile && !isTablet && (
           <View style={styles.heroDesktop}>
-            {/* <Image
-          src={logo}
-          style={{ width: '100%', height: 200, objectFit: 'contain' }}
-          alt=""
-        /> */}
             <Image
-              src="/images/login.webp"
-              alt="Login illustration (Đăng nhập học nhanh hơn)"
-              width={460}
-              height={360}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                borderRadius: 16,
-              }}
-              priority
+              src="/images/LogoVhu.png"
+              alt="LearnNest"
+              width={56}
+              height={56}
+              style={styles.heroLogo}
             />
+            <Text style={styles.heroTitle}>LearnNest</Text>
             <Text style={styles.heroSlogan}>
               Học thông minh hơn, tiến bộ nhanh hơn — Cá nhân hóa hành trình học
               tập của bạn.

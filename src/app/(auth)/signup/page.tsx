@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Card, Form, message } from 'antd';
 import { Text, View } from 'react-native-web';
+import Image from 'next/image';
 import Link from 'next/link';
 import Icon from '@components/icons';
 import { useRouter } from 'next/navigation';
@@ -67,72 +68,103 @@ const SignUpPage = () => {
 
   return (
     <View style={styles.pageWrapper}>
-      <Card style={containerStyle}>
-        {contextHolder}
-        <View>
-          <View style={styles.subContainer}>
-            <Text
-              style={isMobile ? typography.titleMMobile : typography.titleM}>
-              Đăng ký
-            </Text>
-            <Text style={isMobile ? typography.body2Mobile : typography.body2}>
-              Truy cập hàng nghìn bài học miễn phí ngay hôm nay.
+      <Link href="/" style={styles.backLink}>
+        ← Trang chủ
+      </Link>
+      <View
+        style={
+          isMobile || isTablet ? styles.layoutStacked : styles.layoutDesktop
+        }>
+        {!isMobile && !isTablet && (
+          <View style={styles.heroDesktop}>
+            <Image
+              src="/images/LogoVhu.png"
+              alt="LearnNest"
+              width={56}
+              height={56}
+              style={styles.heroLogo}
+            />
+            <Text style={styles.heroTitle}>LearnNest</Text>
+            <Text style={styles.heroSlogan}>
+              Tham gia miễn phí, học và luyện tập MOS - CNTT - AI đúng lộ trình
+              ngay hôm nay.
             </Text>
           </View>
-
-          <Form<FieldType>
-            name="signUp"
-            onFinish={data => handleSendOtp(data.email)}
-            layout="vertical"
-            requiredMark={false}
-            form={form}>
-            <Form.Item<FieldType>
-              label={
-                <Text style={styles.labelText}>
-                  <Text style={{ color: 'red' }}>*</Text> Email
-                </Text>
-              }
-              name={'email'}
-              labelCol={{ span: 24 }}
-              style={{ width: '100%', marginBottom: 16 }}
-              rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
-              <AppInput
-                placeholder="Nhập email của bạn"
-                style={{ width: '100%' }}
-              />
-            </Form.Item>
-
-            <Form.Item<FieldType> shouldUpdate>
-              {({ getFieldsValue }) => {
-                const { email } = getFieldsValue();
-                return (
-                  <AppButton type="primary" disabled={!email} htmlType="submit">
-                    Tiếp tục với Email
-                  </AppButton>
-                );
-              }}
-            </Form.Item>
-
-            <View style={styles.driverContainer}>
-              <View style={styles.driver}></View>
-              <Text style={styles.driverText}>hoặc</Text>
-              <View style={styles.driver}></View>
+        )}
+        <Card style={containerStyle}>
+          {contextHolder}
+          <View>
+            <View style={styles.subContainer}>
+              <Text
+                style={isMobile ? typography.titleMMobile : typography.titleM}>
+                Đăng ký
+              </Text>
+              <Text
+                style={isMobile ? typography.body2Mobile : typography.body2}>
+                Truy cập hàng nghìn bài học miễn phí ngay hôm nay.
+              </Text>
             </View>
 
-            <View style={styles.btnContainer}>
-              <AppButton onClick={handleLoginOauth} disabled={isGoogleLoading}>
-                <Icon name="google" />
-                Đăng nhập bằng Google
-              </AppButton>
-            </View>
-          </Form>
+            <Form<FieldType>
+              name="signUp"
+              onFinish={data => handleSendOtp(data.email)}
+              layout="vertical"
+              requiredMark={false}
+              form={form}>
+              <Form.Item<FieldType>
+                label={
+                  <Text style={styles.labelText}>
+                    <Text style={{ color: 'red' }}>*</Text> Email
+                  </Text>
+                }
+                name={'email'}
+                labelCol={{ span: 24 }}
+                style={{ width: '100%', marginBottom: 16 }}
+                rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
+                <AppInput
+                  placeholder="Nhập email của bạn"
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
 
-          <View style={styles.footer}>
-            <Text>Đã có tài khoản? </Text>
-            <Link href={`/login`}>Đăng nhập</Link>
+              <Form.Item<FieldType> shouldUpdate>
+                {({ getFieldsValue }) => {
+                  const { email } = getFieldsValue();
+                  return (
+                    <AppButton
+                      type="primary"
+                      disabled={!email}
+                      htmlType="submit"
+                      style={styles.primaryButton}>
+                      Tiếp tục với Email
+                    </AppButton>
+                  );
+                }}
+              </Form.Item>
+
+              <View style={styles.driverContainer}>
+                <View style={styles.driver}></View>
+                <Text style={styles.driverText}>hoặc</Text>
+                <View style={styles.driver}></View>
+              </View>
+
+              <View style={styles.btnContainer}>
+                <AppButton
+                  onClick={handleLoginOauth}
+                  disabled={isGoogleLoading}>
+                  <Icon name="google" />
+                  Đăng nhập bằng Google
+                </AppButton>
+              </View>
+            </Form>
+
+            <View style={styles.footer}>
+              <Text>Đã có tài khoản? </Text>
+              <Link href={`/login`}>Đăng nhập</Link>
+            </View>
           </View>
-        </View>
-      </Card>
+        </Card>
+      </View>
     </View>
   );
 };
