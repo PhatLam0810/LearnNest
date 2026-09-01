@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Card, Form, message } from 'antd';
-import { MailOutlined } from '@ant-design/icons';
+import { MailOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { Text, View } from 'react-native-web';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -69,9 +69,6 @@ const SignUpPage = () => {
 
   return (
     <View style={styles.pageWrapper}>
-      <Link href="/" style={styles.backLink}>
-        ← Trang chủ
-      </Link>
       <View
         style={
           isMobile || isTablet ? styles.layoutStacked : styles.layoutDesktop
@@ -95,6 +92,14 @@ const SignUpPage = () => {
         <Card style={containerStyle}>
           {contextHolder}
           <View>
+            <Link href="/" className="auth-back-btn">
+              <ArrowLeftOutlined /> Trang chủ
+            </Link>
+            <div className="auth-steps">
+              <span className="auth-steps__label">Bước 1/2</span>
+              <span className="auth-steps__dot auth-steps__dot--active" />
+              <span className="auth-steps__dot" />
+            </div>
             <View style={styles.subContainer}>
               <Text
                 style={isMobile ? typography.titleMMobile : typography.titleM}>
@@ -153,7 +158,8 @@ const SignUpPage = () => {
               <View style={styles.btnContainer}>
                 <AppButton
                   onClick={handleLoginOauth}
-                  disabled={isGoogleLoading}>
+                  disabled={isGoogleLoading}
+                  style={styles.googleButton}>
                   <Icon name="google" />
                   Đăng nhập bằng Google
                 </AppButton>

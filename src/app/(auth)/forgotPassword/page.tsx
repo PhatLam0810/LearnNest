@@ -2,6 +2,8 @@
 import { Card, Form, message } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
 import { Text, View } from 'react-native-web';
 import { AppButton, AppInput } from '@components';
 import { useAppDispatch } from '@redux';
@@ -44,64 +46,86 @@ const ForgotPasswordPage = () => {
       ? styles.containerTablet
       : styles.containerDesktop;
 
+  const layoutStyle =
+    isMobile || isTablet ? styles.layoutStacked : styles.layoutDesktop;
+
   return (
     <View style={styles.pageWrapper}>
-      <Card style={containerStyle}>
-        {contextHolder}
-        <View>
-          <AppButton
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            style={{ paddingLeft: 0, marginBottom: 8 }}
-            onClick={() => router.push('/login')}>
-            Quay lại đăng nhập
-          </AppButton>
-          <View style={styles.subContainer}>
-            <Text
-              style={isMobile ? typography.titleMMobile : typography.titleM}>
-              Quên mật khẩu
-            </Text>
-            <Text style={isMobile ? typography.body2Mobile : typography.body2}>
-              Nhập địa chỉ email của bạn, chúng tôi sẽ gửi mã OTP để đặt lại mật
-              khẩu
+      <View style={layoutStyle}>
+        {!isMobile && !isTablet && (
+          <View style={styles.heroDesktop}>
+            <Image
+              src="/images/LogoVhu.png"
+              alt="LearnNest"
+              width={56}
+              height={56}
+              style={styles.heroLogo}
+            />
+            <Text style={styles.heroTitle}>LearnNest</Text>
+            <Text style={styles.heroSlogan}>
+              Đừng lo, chuyện này thường xảy ra thôi. Nhập email để chúng tôi
+              giúp bạn lấy lại mật khẩu.
             </Text>
           </View>
+        )}
+        <Card style={containerStyle}>
+          {contextHolder}
+          <View>
+            <Link href="/login" className="auth-back-btn">
+              <ArrowLeftOutlined /> Quay lại đăng nhập
+            </Link>
+            <View style={styles.subContainer}>
+              <Text
+                style={isMobile ? typography.titleMMobile : typography.titleM}>
+                Quên mật khẩu
+              </Text>
+              <Text
+                style={isMobile ? typography.body2Mobile : typography.body2}>
+                Nhập địa chỉ email của bạn, chúng tôi sẽ gửi mã OTP để đặt lại
+                mật khẩu
+              </Text>
+            </View>
 
-          <Form<FieldType>
-            name="forgotPasswordForm"
-            onFinish={data => handleSendOtp(data.email)}
-            layout="vertical"
-            requiredMark={false}
-            form={form}>
-            <Form.Item<FieldType>
-              label={
-                <Text style={styles.labelText}>
-                  <Text style={{ color: 'red' }}>*</Text> Email
-                </Text>
-              }
-              name={'email'}
-              labelCol={{ span: 24 }}
-              style={{ width: '100%', marginBottom: 16 }}
-              rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
-              <AppInput
-                placeholder="Nhập email của bạn"
-                style={{ width: '100%' }}
-              />
-            </Form.Item>
+            <Form<FieldType>
+              name="forgotPasswordForm"
+              onFinish={data => handleSendOtp(data.email)}
+              layout="vertical"
+              requiredMark={false}
+              form={form}>
+              <Form.Item<FieldType>
+                label={
+                  <Text style={styles.labelText}>
+                    <Text style={{ color: 'red' }}>*</Text> Email
+                  </Text>
+                }
+                name={'email'}
+                labelCol={{ span: 24 }}
+                style={{ width: '100%', marginBottom: 16 }}
+                rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
+                <AppInput
+                  placeholder="Nhập email của bạn"
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
 
-            <Form.Item<FieldType> shouldUpdate>
-              {({ getFieldsValue }) => {
-                const { email } = getFieldsValue();
-                return (
-                  <AppButton type="primary" disabled={!email} htmlType="submit">
-                    Tiếp tục xác minh
-                  </AppButton>
-                );
-              }}
-            </Form.Item>
-          </Form>
-        </View>
-      </Card>
+              <Form.Item<FieldType> shouldUpdate>
+                {({ getFieldsValue }) => {
+                  const { email } = getFieldsValue();
+                  return (
+                    <AppButton
+                      type="primary"
+                      disabled={!email}
+                      style={styles.primaryButton}
+                      htmlType="submit">
+                      Tiếp tục xác minh
+                    </AppButton>
+                  );
+                }}
+              </Form.Item>
+            </Form>
+          </View>
+        </Card>
+      </View>
     </View>
   );
 };

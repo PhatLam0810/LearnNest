@@ -53,3 +53,14 @@
   width: 0;
   height: 0;
 }
+
+/* Hiệu ứng hover nút bấm giống các trang đăng nhập/đăng ký - nhấc nhẹ lên +
+   phóng to nhẹ. Không đổi layout/UI nào khác của dashboard. */
+.ant-btn {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.ant-btn:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.015);
+}

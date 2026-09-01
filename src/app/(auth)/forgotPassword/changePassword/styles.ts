@@ -55,6 +55,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: '100vh',
   },
+  primaryButton: {
+    backgroundColor: 'var(--color-vhu-primary)',
+    borderColor: 'var(--color-vhu-primary)',
+    color: '#ffffff',
+    borderRadius: 10,
+    fontWeight: '600',
+    boxShadow: '0 2px 8px rgba(29, 65, 138, 0.28)',
+  },
 
   containerDesktop: {
     width: '35%',

@@ -17,10 +17,12 @@ const Authentication = () => {
       // realTimeCommentService.start();
     } else if (!isPublicRoute) {
       // realTimeCommentService.stop();
-      router.replace('/login');
+      // Logout (hoặc chưa từng đăng nhập) từ 1 route /dashboard/** -> về
+      // thẳng trang chủ, không phải form /login trần.
+      router.replace('/');
     }
     if (accessTokenSignUp && !accessToken && !isPublicRoute) {
-      router.replace('/login');
+      router.replace('/');
     }
   }, [accessToken, accessTokenSignUp, isPublicRoute, router]);
   return null;

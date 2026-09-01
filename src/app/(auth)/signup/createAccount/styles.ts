@@ -56,21 +56,13 @@ const styles = StyleSheet.create({
     minHeight: '100vh',
     position: 'relative',
   },
-  backLink: {
-    position: 'absolute',
-    top: 24,
-    left: 24,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    color: 'var(--color-vhu-primary)',
-    cursor: 'pointer',
-  },
   primaryButton: {
     backgroundColor: 'var(--color-vhu-primary)',
     borderColor: 'var(--color-vhu-primary)',
     color: '#ffffff',
+    borderRadius: 10,
+    fontWeight: '600',
+    boxShadow: '0 2px 8px rgba(29, 65, 138, 0.28)',
   },
 
   containerDesktop: {

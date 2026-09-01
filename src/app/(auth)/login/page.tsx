@@ -2,7 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Card, Form } from 'antd';
-import { MailOutlined, LockOutlined } from '@ant-design/icons';
+import {
+  MailOutlined,
+  LockOutlined,
+  ArrowLeftOutlined,
+} from '@ant-design/icons';
 import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@utils';
@@ -67,9 +71,6 @@ const LoginPage = () => {
 
   return (
     <View style={styles.pageWrapper}>
-      <Link href="/" style={styles.backLink}>
-        ← Trang chủ
-      </Link>
       <View style={layoutStyle}>
         {!isMobile && !isTablet && (
           <View style={styles.heroDesktop}>
@@ -92,6 +93,9 @@ const LoginPage = () => {
           style={containerStyle}
           styles={{ body: { padding: isMobile ? 10 : 16 } }}>
           <View style={styles.formWrapper}>
+            <Link href="/" className="auth-back-btn">
+              <ArrowLeftOutlined /> Trang chủ
+            </Link>
             <View style={styles.subContainer}>
               <Text
                 style={isMobile ? typography.titleMMobile : typography.titleM}>

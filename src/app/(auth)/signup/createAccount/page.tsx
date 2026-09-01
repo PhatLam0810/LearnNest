@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
-import { Card, Form, Input, message } from 'antd';
+import { Card, Form, message } from 'antd';
 import { ArrowLeftOutlined, LockOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Text, View } from 'react-native-web';
@@ -45,12 +45,17 @@ const CreateAccountPage = () => {
 
   return (
     <View style={styles.pageWrapper}>
-      <Link href="/signup" style={styles.backLink}>
-        <ArrowLeftOutlined /> Quay lại
-      </Link>
       <Card style={containerStyle}>
         {contextHolder}
         <View>
+          <Link href="/signup" className="auth-back-btn">
+            <ArrowLeftOutlined /> Quay lại
+          </Link>
+          <div className="auth-steps">
+            <span className="auth-steps__label">Bước 2/2</span>
+            <span className="auth-steps__dot" />
+            <span className="auth-steps__dot auth-steps__dot--active" />
+          </div>
           <View style={styles.subContainer}>
             <Text
               style={isMobile ? typography.titleMMobile : typography.titleM}>
@@ -97,7 +102,7 @@ const CreateAccountPage = () => {
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 0 }}
               rules={[{ required: true, message: 'Vui lòng nhập mã OTP' }]}>
-              <Input.OTP length={6} style={{ width: '100%' }} />
+              <AppInput placeholder="Nhập mã OTP" style={{ width: '100%' }} />
             </Form.Item>
 
             <Form.Item<FieldType>

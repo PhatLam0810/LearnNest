@@ -4,6 +4,7 @@ import { Card, Form, message } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Text, View } from 'react-native-web';
+import Link from 'next/link';
 import styles from './styles';
 import { AppButton, AppInput } from '@components';
 import { useRouter } from 'next/navigation';
@@ -61,13 +62,9 @@ const ChangePasswordPage = () => {
       <Card style={containerStyle}>
         {contextHolder}
         <View>
-          <AppButton
-            type="text"
-            icon={<ArrowLeftOutlined />}
-            style={{ paddingLeft: 0, marginBottom: 8 }}
-            onClick={() => router.push('/forgotPassword')}>
-            Quay lại
-          </AppButton>
+          <Link href="/forgotPassword" className="auth-back-btn">
+            <ArrowLeftOutlined /> Quay lại
+          </Link>
           <View style={styles.subContainer}>
             <Text
               style={isMobile ? typography.titleMMobile : typography.titleM}>
@@ -157,6 +154,7 @@ const ChangePasswordPage = () => {
                   <AppButton
                     type="primary"
                     disabled={!otp || !newPassword || !confirmPassword}
+                    style={styles.primaryButton}
                     htmlType="submit">
                     Đặt lại mật khẩu
                   </AppButton>

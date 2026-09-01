@@ -118,7 +118,9 @@
 
 .landing__hero-text h1 span {
   color: var(--lp-secondary);
-  -webkit-text-stroke: 0.5px var(--lp-primary);
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
 }
 
 .landing__hero-text p {

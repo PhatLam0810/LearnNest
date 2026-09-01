@@ -75,3 +75,57 @@
     border-color 0.15s ease,
     box-shadow 0.15s ease;
 }
+
+.auth-back-btn {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px 9px 14px;
+  margin-bottom: 12px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: var(--color-vhu-primary);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.08);
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.auth-back-btn:hover {
+  background: #f4f7fd;
+  box-shadow: 0 6px 14px rgba(29, 65, 138, 0.18);
+  transform: translateY(-1px);
+}
+
+.auth-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.auth-steps__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-vhu-primary);
+  margin-right: 2px;
+}
+
+.auth-steps__dot {
+  height: 6px;
+  width: 8px;
+  border-radius: 999px;
+  background: #d8dee9;
+  transition: width 0.2s ease;
+}
+
+.auth-steps__dot--active {
+  width: 26px;
+  background: var(--color-vhu-primary);
+}
