@@ -64,3 +64,16 @@
 .ant-btn:hover:not(:disabled) {
   transform: translateY(-1px) scale(1.015);
 }
+
+.lesson-task-card {
+  transition:
+    box-shadow 0.15s ease,
+    transform 0.15s ease,
+    border-color 0.15s ease;
+  cursor: pointer;
+}
+.lesson-task-card:hover {
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+  transform: translateY(-1px);
+  border-color: #dbe4f5;
+}

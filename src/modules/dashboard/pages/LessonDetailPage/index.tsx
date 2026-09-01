@@ -293,36 +293,57 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     lessonSeq,
                     globalIdx,
                   );
+                  const isExcel = task.subject === 'Excel';
                   return (
                     <TouchableOpacity
                       key={task._id}
                       style={isTaskDisabled && styles.disabledButton}>
-                      <View
-                        style={styles.buttonModule}
-                        onClick={() => {
-                          if (isTaskDisabled) return;
-                          router.push(
-                            `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail?._id}&taskId=${task._id}`,
-                          );
-                        }}>
-                        <View style={styles.rowGap10}>
-                          <FileTextOutlined />
-                          <View style={styles.moduleItemContainer}>
-                            <Text
-                              numberOfLines={2}
-                              style={styles.moduleItemTitle}>
-                              {task.title}
-                            </Text>
-                            <Tag
-                              color={
-                                task.subject === 'Excel' ? 'green' : 'blue'
+                      {/* View không expose prop className trong type của
+                          react-native-web -> bọc 1 div trần chỉ để gắn class
+                          hover, không đổi style/layout gì khác. */}
+                      <div className="lesson-task-card">
+                        <View
+                          style={styles.buttonModule}
+                          onClick={() => {
+                            if (isTaskDisabled) return;
+                            router.push(
+                              `/dashboard/home/lesson/moduleDetail?lessonId=${lessonDetail?._id}&taskId=${task._id}`,
+                            );
+                          }}>
+                          <View style={styles.rowGap10}>
+                            <View
+                              style={
+                                isExcel
+                                  ? styles.taskIconBadgeExcel
+                                  : styles.taskIconBadgeWord
                               }>
-                              Bài thực hành {task.subject}
-                              {task.hasPassed ? ' · Đạt' : ''}
-                            </Tag>
+                              <FileTextOutlined
+                                style={{
+                                  fontSize: 18,
+                                  color: isExcel ? '#16a34a' : '#1d418a',
+                                }}
+                              />
+                            </View>
+                            <View style={styles.moduleItemContainer}>
+                              <Text
+                                numberOfLines={2}
+                                style={styles.moduleItemTitle}>
+                                {task.title}
+                              </Text>
+                              <View style={styles.taskTagRow}>
+                                <Tag color={isExcel ? 'green' : 'blue'}>
+                                  Bài thực hành {task.subject}
+                                </Tag>
+                                {task.hasPassed && (
+                                  <Tag color="success" icon={<CheckOutlined />}>
+                                    Đạt
+                                  </Tag>
+                                )}
+                              </View>
+                            </View>
                           </View>
                         </View>
-                      </View>
+                      </div>
                     </TouchableOpacity>
                   );
                 }

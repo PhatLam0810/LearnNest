@@ -148,9 +148,35 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     backgroundColor: 'white',
-    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Shadow
+    borderWidth: 1,
+    borderColor: '#eef0f5',
+    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.06)',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  taskIconBadgeWord: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#eaf2ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  taskIconBadgeExcel: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#eafaf0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  taskTagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 4,
   },
 
   moduleItemContainer: {
@@ -159,7 +185,7 @@ const styles = StyleSheet.create({
   },
   moduleItemTitle: {
     fontFamily: lexend.style.fontFamily,
-    fontWeight: '400',
+    fontWeight: '500',
     fontSize: 16,
     letterSpacing: 0.01,
   },
