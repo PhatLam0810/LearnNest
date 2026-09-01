@@ -40,8 +40,13 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const token = await user.getIdToken();
+      // Không push ngay ở đây — dispatch chỉ kích hoạt saga (async, gọi API
+      // xong mới set tokenInfo). Push liền lúc token chưa kịp set khiến
+      // Authentication guard thấy chưa đăng nhập và đá ngược về "/", rồi kẹt
+      // luôn ở đó vì "/" không tự theo dõi accessToken để vào lại. useEffect
+      // bên dưới đã theo dõi accessToken và tự push khi có, y hệt luồng
+      // email/password — cứ để nó lo, không cần push tay ở đây nữa.
       dispatch(authAction.loginOAuth({ token }));
-      router.push('/dashboard/home');
     } catch (error) {
       console.error('Login Error:', error);
     } finally {

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, Form, message } from 'antd';
 import { MailOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { Text, View } from 'react-native-web';
@@ -11,7 +11,7 @@ import { AppButton, AppInput } from '@components';
 import styles from './styles';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@utils';
-import { useAppDispatch } from '@redux';
+import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction, authQuery } from '~mdAuth/redux';
 import { useResponsive } from '@/styles/responsive';
 import typography from '@/styles/typography';
@@ -27,6 +27,16 @@ const SignUpPage = () => {
   const [sendOtp] = authQuery.useSendOtpMutation();
   const [messageApi, contextHolder] = message.useMessage();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
+
+  // Trang signup trước đây không theo dõi accessToken - đăng nhập Google ở
+  // đây thành công (token set) nhưng không tự chuyển vào dashboard, đứng
+  // yên tại chỗ. Thêm effect giống hệt trang login.
+  useEffect(() => {
+    if (accessToken) {
+      router.push('/dashboard/home');
+    }
+  }, [accessToken]);
 
   const handleLoginOauth = async () => {
     if (isGoogleLoading) return;
