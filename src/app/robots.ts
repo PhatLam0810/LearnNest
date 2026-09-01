@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://learnestvhu.com/sitemap.xml',
+    sitemap: 'https://www.learnestvhu.com/sitemap.xml',
   };
 }

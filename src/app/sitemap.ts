@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import fs from 'fs';
 import path from 'path';
 
-const BASE_URL = 'https://learnestvhu.com';
+const BASE_URL = 'https://www.learnestvhu.com'; // domain thật (apex redirect 308 sang đây)
 
 // Các route (hoặc tiền tố route) không nên xuất hiện trong sitemap công khai:
 // - '/dashboard': toàn bộ nằm sau đăng nhập, Google không truy cập được nếu chưa xác thực
