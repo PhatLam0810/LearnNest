@@ -17,6 +17,11 @@ export interface Lesson {
   totalDuration: number;
   totalLibraries: number;
   totalLearner: number;
+  // 'theory' (mặc định) = khóa học video thật. 'practice' = phần thực hành
+  // riêng (gom bài tập theo kỹ năng, không có video) — xem
+  // PracticeLessonManage. Optional để tương thích ngược với dữ liệu cũ
+  // chưa có field này.
+  type?: 'theory' | 'practice';
 }
 export interface LessonDetailDataResponse {
   _id: string;

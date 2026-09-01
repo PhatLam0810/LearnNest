@@ -4,7 +4,12 @@ import { Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { View } from 'react-native-web';
 import styles from './styles';
-import { ModuleManage, LessonManage, LibraryManage } from './_components';
+import {
+  ModuleManage,
+  LessonManage,
+  LibraryManage,
+  PracticeLessonManage,
+} from './_components';
 import PracticeManage from '../practiceManage';
 import './styles.scss';
 const onChange = (key: string) => {};
@@ -29,6 +34,11 @@ const items: TabsProps['items'] = [
     key: '5',
     label: 'Bài thực hành',
     children: <PracticeManage />,
+  },
+  {
+    key: '6',
+    label: 'Phần thực hành',
+    children: <PracticeLessonManage />,
   },
 ];
 

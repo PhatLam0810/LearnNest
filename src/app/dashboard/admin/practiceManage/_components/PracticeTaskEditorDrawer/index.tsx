@@ -20,10 +20,11 @@ import {
   RobotOutlined,
   UploadOutlined,
 } from '@ant-design/icons';
-import { messageApi } from '@hooks';
+import { messageApi, useAppPagination } from '@hooks';
 import api from '@services/api';
 import { useAppSelector } from '@redux';
 import { adminQuery } from '~mdAdmin/redux';
+import { dashboardQuery } from '~mdDashboard/redux';
 import {
   PracticeCriteria,
   PracticeInstructionItem,
@@ -31,6 +32,8 @@ import {
   PracticeSubmissionResultItem,
 } from '~mdDashboard/types/practice';
 import CriteriaListItem from './CriteriaListItem';
+
+type LessonOption = { _id: string; title: string };
 
 type Props = {
   open: boolean;
@@ -103,7 +106,22 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     adminQuery.useGenerateCriteriaMutation();
 
   // Gắn đề vào 1 khóa thực hành (Lesson) + 1 Phần (Module) đã có sẵn —
-  // tái dùng đúng khóa học/module admin đã tạo ở tab "Tạo Khóa Học".
+  // tái dùng đúng khóa học/module admin đã tạo ở tab "Tạo Khóa Học". Lấy CẢ
+  // khóa type='theory' lẫn 'practice' (getAllLesson mặc định loại
+  // 'practice' khỏi danh sách khóa học thật — ở đây cần thấy cả 2 loại vì
+  // đề có thể gắn vào khóa video thật hoặc vào "phần thực hành" riêng).
+  const { listItem: lessonOptions } = useAppPagination<LessonOption>({
+    apiUrl: 'lesson/getAllLesson',
+    params: {
+      pageSize: 100,
+      filter: { type: { $in: ['theory', 'practice'] } },
+    },
+  });
+  const selectedLessonId = Form.useWatch('lessonId', taskForm);
+  const { data: selectedLessonDetail } = dashboardQuery.useGetLessonIdQuery(
+    { id: selectedLessonId },
+    { skip: !selectedLessonId },
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -354,6 +372,38 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
             <Input.TextArea
               rows={5}
               placeholder="Mô tả tình huống và các yêu cầu học viên cần thực hiện..."
+            />
+          </Form.Item>
+          <Form.Item
+            label="Khóa thực hành (không bắt buộc)"
+            name="lessonId"
+            tooltip="Gắn đề vào 1 khóa (đã tạo ở tab Tạo Khóa Học, hoặc 1 phần thực hành riêng) để bài tập hiện trong khóa đó thay vì đứng riêng lẻ.">
+            <Select
+              allowClear
+              showSearch
+              placeholder="Chọn khóa thực hành"
+              optionFilterProp="label"
+              onChange={() => taskForm.setFieldsValue({ moduleId: undefined })}
+              options={lessonOptions.map(l => ({
+                value: l._id,
+                label: l.title,
+              }))}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Phần (không bắt buộc)"
+            name="moduleId"
+            tooltip="Chọn 1 Phần thuộc khóa thực hành ở trên để nhóm bài tập lại.">
+            <Select
+              allowClear
+              disabled={!selectedLessonId}
+              placeholder={
+                selectedLessonId ? 'Chọn phần' : 'Chọn khóa thực hành trước'
+              }
+              options={(selectedLessonDetail?.modules || []).map(m => ({
+                value: m._id,
+                label: m.title,
+              }))}
             />
           </Form.Item>
 

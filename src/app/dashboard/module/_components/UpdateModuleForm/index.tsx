@@ -15,6 +15,11 @@ type UpdateModuleFormProps = {
   setSelectedItem?: (data: Module) => void;
   setIsVisibleModalAdd?: (isVisible: boolean) => void;
   refresh: () => void;
+  // Mặc định antd Modal zIndex=1000 — bằng đúng z-index của Drawer, nên khi
+  // form này mở LỒNG bên trong 1 Drawer khác (VD PracticeLessonManage) thì
+  // bị Drawer đè lên, không thấy gì dù đã mở (đã kiểm chứng: DOM có mặt,
+  // opacity 1, nhưng nằm dưới). Cho phép caller tự nâng zIndex khi cần.
+  zIndex?: number;
 };
 
 const UpdateModuleForm: React.FC<UpdateModuleFormProps> = ({
@@ -24,6 +29,7 @@ const UpdateModuleForm: React.FC<UpdateModuleFormProps> = ({
   setIsVisibleModalAdd,
   setSelectedItem,
   refresh,
+  zIndex,
 }) => {
   const dispatch = useAppDispatch();
   const { width } = useWindowSize();
@@ -62,6 +68,7 @@ const UpdateModuleForm: React.FC<UpdateModuleFormProps> = ({
       footer={null}
       width={'80%'}
       centered
+      zIndex={zIndex}
       destroyOnClose>
       <ScrollView style={{ height: height }}>
         <AddModuleContent initialValues={data} onFinish={onFinish} />
