@@ -286,46 +286,51 @@ const PracticeLessonManage = () => {
         onClose={() => setSelectedLessonId(null)}
         width={560}
         destroyOnClose>
-        {selectedLesson && (
-          <View style={{ gap: 16 }}>
-            <Form
-              form={editForm}
-              layout="vertical"
-              onFinish={handleSaveLessonInfo}>
-              <Form.Item
-                label="Tên"
-                name="title"
-                rules={[{ required: true, message: 'Nhập tên' }]}>
-                <Input />
-              </Form.Item>
-              <Form.Item label="Mô tả" name="description">
-                <Input.TextArea rows={3} />
-              </Form.Item>
-              <Button htmlType="submit">Lưu thông tin</Button>
-            </Form>
+        {/* .ant-drawer-body có override toàn cục overflow-y:hidden !important;
+            padding:0 !important (src/app/dashboard/styles.css) — phải tự
+            quản lý padding riêng, giống PracticeTaskEditorDrawer. */}
+        <div style={{ height: '100%', overflowY: 'auto', padding: 24 }}>
+          {selectedLesson && (
+            <View style={{ gap: 16 }}>
+              <Form
+                form={editForm}
+                layout="vertical"
+                onFinish={handleSaveLessonInfo}>
+                <Form.Item
+                  label="Tên"
+                  name="title"
+                  rules={[{ required: true, message: 'Nhập tên' }]}>
+                  <Input />
+                </Form.Item>
+                <Form.Item label="Mô tả" name="description">
+                  <Input.TextArea rows={3} />
+                </Form.Item>
+                <Button htmlType="submit">Lưu thông tin</Button>
+              </Form>
 
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
-              <Text style={{ fontWeight: '600' }}>Các phần</Text>
-              <Button
-                icon={<PlusOutlined />}
-                onClick={() => setIsAddModuleOpen(true)}>
-                Thêm phần
-              </Button>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                <Text style={{ fontWeight: '600' }}>Các phần</Text>
+                <Button
+                  icon={<PlusOutlined />}
+                  onClick={() => setIsAddModuleOpen(true)}>
+                  Thêm phần
+                </Button>
+              </View>
+              <Table
+                rowKey="_id"
+                size="small"
+                columns={moduleColumns}
+                dataSource={selectedLesson.modules}
+                pagination={false}
+              />
             </View>
-            <Table
-              rowKey="_id"
-              size="small"
-              columns={moduleColumns}
-              dataSource={selectedLesson.modules}
-              pagination={false}
-            />
-          </View>
-        )}
+          )}
+        </div>
       </Drawer>
 
       {/* zIndex nâng lên trên Drawer (mặc định 1000, bằng z-index Drawer nên
