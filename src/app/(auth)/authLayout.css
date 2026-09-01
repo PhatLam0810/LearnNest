@@ -1,0 +1,77 @@
+.auth-bg {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: #f4f7fd;
+}
+
+.auth-bg::before,
+.auth-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.32;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.auth-bg::before {
+  width: 480px;
+  height: 480px;
+  background: var(--color-vhu-primary);
+  top: -140px;
+  left: -120px;
+  animation: authBlobFloat1 18s ease-in-out infinite;
+}
+
+.auth-bg::after {
+  width: 420px;
+  height: 420px;
+  background: var(--color-vhu-accent);
+  bottom: -150px;
+  right: -100px;
+  animation: authBlobFloat2 20s ease-in-out infinite;
+}
+
+@keyframes authBlobFloat1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(60px, 40px) scale(1.12);
+  }
+}
+
+@keyframes authBlobFloat2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-50px, -30px) scale(1.15);
+  }
+}
+
+.auth-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-bg .ant-btn {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.auth-bg .ant-btn:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.015);
+}
+
+.auth-bg .ant-input,
+.auth-bg .ant-input-affix-wrapper {
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}

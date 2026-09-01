@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { Card, Form, message } from 'antd';
+import { MailOutlined } from '@ant-design/icons';
 import { Text, View } from 'react-native-web';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -122,6 +123,7 @@ const SignUpPage = () => {
                 style={{ width: '100%', marginBottom: 16 }}
                 rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
                 <AppInput
+                  prefix={<MailOutlined style={{ color: '#9aa5b8' }} />}
                   placeholder="Nhập email của bạn"
                   style={{ width: '100%' }}
                 />

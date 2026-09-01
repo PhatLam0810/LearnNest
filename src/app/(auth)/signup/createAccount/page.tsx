@@ -1,8 +1,10 @@
 'use client';
 import React, { useEffect } from 'react';
-import { Card, Form, message } from 'antd';
+import { Card, Form, Input, message } from 'antd';
+import { ArrowLeftOutlined, LockOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Text, View } from 'react-native-web';
+import Link from 'next/link';
 import styles from './styles';
 import { AppButton, AppInput } from '@components';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -43,6 +45,9 @@ const CreateAccountPage = () => {
 
   return (
     <View style={styles.pageWrapper}>
+      <Link href="/signup" style={styles.backLink}>
+        <ArrowLeftOutlined /> Quay lại
+      </Link>
       <Card style={containerStyle}>
         {contextHolder}
         <View>
@@ -71,7 +76,8 @@ const CreateAccountPage = () => {
                   params: {
                     email: sendOtpInfo.email,
                     password: data.password,
-                    otp: data.otp,
+                    // Input.OTP trả về string ("123456"), BE cần number.
+                    otp: Number(data.otp),
                   },
                   callback() {
                     router.push('/login');
@@ -91,7 +97,7 @@ const CreateAccountPage = () => {
               labelCol={{ span: 24 }}
               style={{ width: '100%', marginBottom: 0 }}
               rules={[{ required: true, message: 'Vui lòng nhập mã OTP' }]}>
-              <AppInput placeholder="Nhập mã OTP" style={{ width: '100%' }} />
+              <Input.OTP length={6} style={{ width: '100%' }} />
             </Form.Item>
 
             <Form.Item<FieldType>
@@ -106,6 +112,7 @@ const CreateAccountPage = () => {
               rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}>
               <AppInput
                 type="Password"
+                prefix={<LockOutlined style={{ color: '#9aa5b8' }} />}
                 placeholder="Nhập mật khẩu của bạn"
                 style={{ width: '100%' }}
               />
@@ -136,6 +143,7 @@ const CreateAccountPage = () => {
               ]}>
               <AppInput
                 type="Password"
+                prefix={<LockOutlined style={{ color: '#9aa5b8' }} />}
                 placeholder="Xác nhận mật khẩu của bạn"
                 style={{ width: '100%' }}
               />
@@ -148,6 +156,7 @@ const CreateAccountPage = () => {
                   <AppButton
                     type="primary"
                     disabled={!otp || !password || !confirmPassword}
+                    style={styles.primaryButton}
                     htmlType="submit">
                     Đăng ký
                   </AppButton>

@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Card, Form } from 'antd';
+import { MailOutlined, LockOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@utils';
@@ -129,6 +130,7 @@ const LoginPage = () => {
                   style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
                   rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
                   <AppInput
+                    prefix={<MailOutlined style={{ color: '#9aa5b8' }} />}
                     placeholder="Nhập email của bạn"
                     style={{ width: '100%' }}
                   />
@@ -147,6 +149,7 @@ const LoginPage = () => {
                   ]}>
                   <AppInput
                     type="Password"
+                    prefix={<LockOutlined style={{ color: '#9aa5b8' }} />}
                     placeholder="Nhập mật khẩu của bạn"
                     style={{ width: '100%' }}
                   />
