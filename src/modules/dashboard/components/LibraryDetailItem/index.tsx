@@ -7,10 +7,9 @@ import React, {
   useState,
 } from 'react';
 import { ScrollView, Text, View } from 'react-native-web';
-import { Document, Page } from 'react-pdf';
-import { FullscreenOutlined } from '@ant-design/icons';
 import { Library } from '~mdDashboard/types';
 import styles from './styles';
+import PdfLessonViewer from '../PdfLessonViewer';
 import YouTube from 'react-youtube';
 import { Button, Modal, Radio, Spin } from 'antd';
 import api from '@/services/api';
@@ -49,10 +48,6 @@ const LibraryDetailItem = forwardRef<
   LibraryDetailItemHandle,
   LibraryDetailItemProps
 >(({ data, dataQuestion, lessonId, onWatchFinish, onClickSubmit }, ref) => {
-  const [numPages, setNumPages] = useState<number | null>(null);
-  const handleDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
-  };
   const playerRef = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const correctingSkipRef = useRef(false);
@@ -845,20 +840,17 @@ const LibraryDetailItem = forwardRef<
           </View>
         );
       case 'PDF':
+        // Trình xem PDF riêng (react-pdf) thay cho iframe gốc: cần biết
+        // trang hiện tại / tổng số trang để tính tiến độ và "đọc hết trang
+        // cuối = hoàn thành" giống như video — iframe không cho biết điều
+        // đó. Kèm nút chuyển trang / zoom / tải / in.
         return (
-          <View style={styles.pdfContainer}>
-            <Document
-              className="document"
-              file={data.url}
-              onLoadSuccess={handleDocumentLoadSuccess}>
-              {Array.from({ length: numPages || 0 }, (_i, index) => (
-                <Page key={`page-${index}`} pageNumber={index + 1} />
-              ))}
-            </Document>
-            <View style={styles.fullscreenButton}>
-              <FullscreenOutlined />
-            </View>
-          </View>
+          <PdfLessonViewer
+            data={data}
+            lessonId={lessonId}
+            userId={userId}
+            onComplete={() => onWatchFinish?.()}
+          />
         );
       case 'Text':
         return (

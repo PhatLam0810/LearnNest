@@ -5,6 +5,8 @@ export interface Library {
   type: string;
   tags: any[];
   url: string;
+  // Chỉ dùng cho type='PDF': cho phép học viên tải/in tài liệu. Mặc định true.
+  allowDownload?: boolean;
   bulkId: string;
   description: string;
   createdAt: string;

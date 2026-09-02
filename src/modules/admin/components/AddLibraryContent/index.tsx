@@ -7,6 +7,7 @@ import {
   InputNumber,
   Select,
   Space,
+  Switch,
   TimePickerProps,
   Upload,
 } from 'antd';
@@ -258,6 +259,44 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
           </Form.Item>
         );
       }
+      case 'pdf': {
+        // Upload file .pdf (không dò thời lượng như video). Cờ allowDownload
+        // quyết định học viên có nút Tải/In trong trình xem hay không.
+        return (
+          <>
+            <Form.Item
+              name="url"
+              label="File PDF"
+              required
+              rules={[
+                { required: true, message: 'Vui lòng tải lên file PDF' },
+              ]}>
+              <div>
+                <Upload
+                  maxCount={1}
+                  accept="application/pdf,.pdf"
+                  fileList={fileUpload}
+                  listType="picture-card"
+                  action={api.defaults.baseURL + '/upload'}
+                  data={() => ({ uploadId: getUploadId() })}
+                  beforeUpload={handleBeforeUpload}
+                  onRemove={() => setFileUpload([])}
+                  onChange={info => handleUploadChange(info)}>
+                  <Button type="text">Tải lên</Button>
+                </Upload>
+                {renderUploadStatus()}
+              </div>
+            </Form.Item>
+            <Form.Item
+              name="allowDownload"
+              label="Cho phép học viên tải / in"
+              valuePropName="checked"
+              initialValue={true}>
+              <Switch />
+            </Form.Item>
+          </>
+        );
+      }
       default: {
         return (
           <Form.Item
@@ -364,6 +403,7 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
             <Select.Option value="Youtube">Link YouTube</Select.Option>
             <Select.Option value="Video">Video</Select.Option>
             <Select.Option value="Text">Bài tập</Select.Option>
+            <Select.Option value="PDF">Tài liệu PDF</Select.Option>
           </Select>
         </Form.Item>
 
