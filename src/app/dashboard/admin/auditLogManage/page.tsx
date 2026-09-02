@@ -22,6 +22,7 @@ type AuditLogItem = {
 
 const ACTION_LABEL: Record<string, string> = {
   'user.create': 'Tạo người dùng',
+  'user.delete': 'Xóa người dùng',
   'user.role.grant': 'Cấp quyền admin',
   'user.role.revoke': 'Gỡ quyền admin',
 };
