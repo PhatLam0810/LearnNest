@@ -2,6 +2,10 @@
   "name": "webapp",
   "version": "0.1.0",
   "private": true,
+  "resolutions": {
+    "postcss": "^8.5.23",
+    "sharp": "^0.35.0"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "pro": "next build && next start",
@@ -36,7 +40,7 @@
     "framer-motion": "^12.1.0",
     "lodash": "^4.17.21",
     "lodash-es": "^4.17.21",
-    "next": "^15.2.8",
+    "next": "^15.5.25",
     "react": "18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-cropper": "^2.3.3",
