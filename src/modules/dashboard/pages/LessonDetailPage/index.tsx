@@ -11,6 +11,7 @@ import './styles.scss';
 
 import { useRouter } from 'next/navigation';
 import Icon from '@components/icons';
+import CommentCountBadge from '@components/CommentCountBadge';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { LessonItem, LessonThumbnail } from '~mdDashboard/components';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
@@ -340,6 +341,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                                   </Tag>
                                 )}
                               </View>
+                              <CommentCountBadge postId={task._id} />
                             </View>
                           </View>
                         </View>
@@ -378,6 +380,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                                 ? convertDurationToTime(subItem.duration)
                                 : 'Trắc nghiệm'}
                             </Text>
+                            <CommentCountBadge postId={subItem._id} />
                           </View>
                         </View>
                         {userProfile?.role?.level <= 2 &&

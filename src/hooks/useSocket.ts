@@ -1,6 +1,7 @@
 'use client';
 import { useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
+import { store } from '@redux';
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:9999';
@@ -9,7 +10,10 @@ let socketInstance: Socket | null = null;
 
 const getSocket = (): Socket => {
   if (!socketInstance) {
-    socketInstance = io(API_BASE_URL);
+    // Gửi kèm access token lúc connect - CommentGateway giờ yêu cầu xác
+    // thực (xem comment.gateway.ts), không chấp nhận kết nối ẩn danh nữa.
+    const token = store.getState()?.authReducer?.tokenInfo?.accessToken;
+    socketInstance = io(API_BASE_URL, { auth: { token } });
   }
   return socketInstance;
 };
