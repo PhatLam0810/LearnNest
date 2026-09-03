@@ -35,6 +35,12 @@ test.describe.serial('Chức năng bình luận "Hỏi đáp"', () => {
       return;
     const fab = page.getByText('Hỏi đáp', { exact: true });
     await fab.waitFor({ state: 'visible', timeout: 15_000 });
+    // Nút nằm inline dưới video, trong 1 pane có overflowY:auto RIÊNG (khác
+    // scroll của trang) - auto-scroll-into-view mặc định của Playwright
+    // không xử lý tốt scroll container lồng nhau kiểu này, click bị coi là
+    // "bị che" dù thực ra chỉ đang nằm ngoài vùng nhìn thấy của pane đó.
+    // scrollIntoView() JS xử lý đúng, bất kể lồng bao nhiêu lớp scroll.
+    await fab.evaluate(el => el.scrollIntoView({ block: 'center' }));
     await fab.click();
     await expect(drawer()).toBeVisible();
   };

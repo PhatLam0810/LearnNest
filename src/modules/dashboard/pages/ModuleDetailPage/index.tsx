@@ -1,6 +1,12 @@
 'use client';
 
-import React, { CSSProperties, useRef, useEffect, useState } from 'react';
+import React, {
+  CSSProperties,
+  useRef,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {
   ScrollView,
   Text,
@@ -26,6 +32,16 @@ import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
 import CommentSection from '@components/CommentSection';
 import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
 import { useSearchParams, useRouter } from 'next/navigation';
+
+// Style tĩnh, không phụ thuộc props/state gì - hoisted ra ngoài component để
+// không bị tạo mới mỗi lần render (autoloading object literal mới mỗi render
+// sẽ làm vô hiệu useMemo bên dưới, vì nó đứng trong danh sách phụ thuộc).
+const PANEL_STYLE: CSSProperties = {
+  marginBottom: 12,
+  background: '#f5f5f5',
+  borderRadius: 12,
+  border: 'none',
+};
 
 const ModuleDetailPage = () => {
   const router = useRouter();
@@ -324,18 +340,31 @@ const ModuleDetailPage = () => {
               })}
             </View>
           ),
-          style: panelStyle,
+          style: PANEL_STYLE,
         };
       }) || []
     );
   };
 
-  const panelStyle: React.CSSProperties = {
-    marginBottom: 12,
-    background: '#f5f5f5',
-    borderRadius: '#f5f5f5',
-    border: 'none',
-  };
+  // getItems() duyệt qua MỌI module × MỌI bài học/bài thực hành để dựng lại
+  // toàn bộ cây JSX sidebar "Nội dung bài học" - trước đây gọi thẳng trong
+  // JSX (getItems(panelStyle)) nên chạy lại ở MỌI lần ModuleDetailPage
+  // render, kể cả khi lý do render chẳng liên quan gì tới sidebar (vd mở
+  // modal kết quả trắc nghiệm, đổi dataQuestion...). useMemo chỉ tính lại
+  // khi 1 trong các dữ liệu THỰC SỰ ảnh hưởng tới sidebar đổi.
+  const sidebarItems = useMemo(
+    () => getItems(PANEL_STYLE),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      lessonDetail?.modules,
+      practiceTasksForLesson,
+      taskId,
+      selectedLibrary?._id,
+      videoCompletedBySubLesson,
+      quizPassedByLibrary,
+      isAdmin,
+    ],
+  );
 
   // Tìm mục kế tiếp trong TOÀN BỘ khóa học (video + bài thực hành trộn
   // chung 1 thứ tự) rồi mở khóa/chuyển sang đúng mục đó — dùng chung cho cả
@@ -590,7 +619,7 @@ const ModuleDetailPage = () => {
                     expandIcon={({ isActive }) => (
                       <CaretRightOutlined rotate={isActive ? 90 : 0} />
                     )}
-                    items={getItems(panelStyle)}
+                    items={sidebarItems}
                   />
                 </View>
               </View>
@@ -605,7 +634,7 @@ const ModuleDetailPage = () => {
                     expandIcon={({ isActive }) => (
                       <CaretRightOutlined rotate={isActive ? 90 : 0} />
                     )}
-                    items={getItems(panelStyle)}
+                    items={sidebarItems}
                   />
                 </View>
               </ScrollView>

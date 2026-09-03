@@ -59,22 +59,25 @@ const LibraryDetailItem = forwardRef<
   // all starts this cooldown, during which even a small forward seek is
   // blocked (must watch through in real time until it expires).
   const skipCooldownUntilRef = useRef(0);
-  const [lastPlayed, setLastPlayed] = useState(0);
-  const [maxWatched, setMaxWatched] = useState(0);
-  // Bản sao đồng bộ của maxWatched dùng riêng cho việc chống tua — interval
-  // chống tua chạy mỗi 1s và có thể đọc phải giá trị maxWatched CŨ (từ
-  // closure render trước) nếu nó tick đúng lúc React đang xử lý một cập
-  // nhật state khác (vd. vừa "Tiếp tục học" từ vị trí đã lưu) — currentTime
-  // đã nhảy tới vị trí resume thật sự nhưng maxWatched (closure cũ) vẫn còn
-  // là 0, khiến bị chấm nhầm là "tua" dù người dùng không hề động vào gì.
-  // Dùng ref để interval luôn đọc đúng giá trị mới nhất ngay khi cập nhật.
+  // lastPlayed/maxWatched KHÔNG render ra UI gì (chỉ dùng nội bộ cho logic
+  // chống tua trong interval bên dưới) — trước đây là useState, khiến toàn
+  // bộ component re-render + effect chứa interval bị teardown/tạo lại MỚI
+  // MỖI GIÂY (vì chính 2 state này nằm trong dependency array và bị chính
+  // interval đó cập nhật mỗi tick) — đo được ~12 lần tạo lại interval/6s
+  // (đáng lẽ 1 lần). Đổi hẳn sang ref vì không có gì đọc giá trị "render"
+  // của chúng — chỉ cần luôn mới nhất tại thời điểm interval tick, ref đã
+  // đủ và không kéo theo re-render nào.
+  const lastPlayedRef = useRef(0);
   const maxWatchedGuardRef = useRef(0);
   const setGuardedMaxWatched = (value: number | ((prev: number) => number)) => {
-    setMaxWatched(prev => {
-      const next = typeof value === 'function' ? value(prev) : value;
-      maxWatchedGuardRef.current = next;
-      return next;
-    });
+    const next =
+      typeof value === 'function'
+        ? (value as (prev: number) => number)(maxWatchedGuardRef.current)
+        : value;
+    maxWatchedGuardRef.current = next;
+  };
+  const setGuardedLastPlayed = (value: number) => {
+    lastPlayedRef.current = value;
   };
   const [visibleQuestion, setVisibleQuestion] = useState<any>(null);
   const [shownQuestionIds, setShownQuestionIds] = useState<string[]>([]);
@@ -319,164 +322,116 @@ const LibraryDetailItem = forwardRef<
   const videoStatus = useAppSelector(
     state => state.dashboardReducer.videoStatus,
   );
+  // Trước đây đây là 2 useEffect gần như y hệt nhau (1 cho YouTube qua
+  // playerRef, 1 cho HTML5 <video> qua videoRef) LUÔN CÙNG CHẠY bất kể loại
+  // media nào đang thật sự hiển thị — cái không dùng tới vẫn no-op mỗi giây
+  // nhưng cả 2 đều bị teardown/tạo lại (vì lastPlayed/maxWatched vốn là
+  // state, nằm trong dependency array, lại chính là 2 giá trị bị chính
+  // interval này cập nhật mỗi tick). Gộp làm 1, tự chọn ref đang có dữ liệu
+  // (player YouTube hay video HTML5) — giảm 1 nửa số interval, và với
+  // lastPlayed/maxWatched giờ đã là ref (không còn trigger re-render/teardown
+  // effect), interval chỉ còn được tạo 1 lần mỗi khi đổi bài học thay vì mỗi
+  // giây (đo được: 12 lần tạo lại/6s trước khi sửa → còn 1 lần sau khi sửa).
   useEffect(() => {
     const interval = setInterval(() => {
-      if (playerRef.current) {
-        const currentTime = Math.floor(playerRef.current.getCurrentTime());
-        const duration = playerRef.current.getDuration();
-        const percentWatched = (maxWatchedGuardRef.current / duration) * 100;
-        // So sánh "đã tới hoặc qua mốc" thay vì đúng bằng tuyệt đối — interval
-        // chạy mỗi 1s có thể trôi/nhảy qua đúng giây appearTime, khiến so
-        // sánh === bỏ lỡ mốc vĩnh viễn. shownQuestionIds đảm bảo không hiện
-        // lại câu đã trả lời.
-        const matchedQuestion = data.questionList?.find(
-          (q: any) =>
-            q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
-        );
+      const isYoutube = !!playerRef.current;
+      const isHtml5 = !!videoRef.current;
+      if (!isYoutube && !isHtml5) return;
 
-        const inCooldown = Date.now() < skipCooldownUntilRef.current;
-        const jumpsAhead =
-          currentTime - lastPlayed > SEEK_JUMP_THRESHOLD_SECONDS &&
-          currentTime > maxWatchedGuardRef.current;
-        const exceedsAllowance =
-          currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
-        // Decide up front whether the warning modal will fire this same
-        // tick — the question check must know this BEFORE it runs, not
-        // after, otherwise both modals can open together in the same tick.
-        const willWarn =
-          !isAdmin &&
-          jumpsAhead &&
-          (inCooldown || exceedsAllowance) &&
-          !correctingSkipRef.current;
+      const currentTime = isYoutube
+        ? Math.floor(playerRef.current.getCurrentTime())
+        : Math.floor(videoRef.current!.currentTime);
+      const duration = isYoutube
+        ? playerRef.current.getDuration()
+        : videoRef.current!.duration;
+      const percentWatched = (maxWatchedGuardRef.current / duration) * 100;
+      // So sánh "đã tới hoặc qua mốc" thay vì đúng bằng tuyệt đối — interval
+      // chạy mỗi 1s có thể trôi/nhảy qua đúng giây appearTime, khiến so
+      // sánh === bỏ lỡ mốc vĩnh viễn. shownQuestionIds đảm bảo không hiện
+      // lại câu đã trả lời.
+      const matchedQuestion = data.questionList?.find(
+        (q: any) =>
+          q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
+      );
 
-        if (matchedQuestion && !warningModalOpenRef.current && !willWarn) {
-          setVisibleQuestion(matchedQuestion);
-          player?.pauseVideo();
-          pauseTracking();
-        }
+      const inCooldown = Date.now() < skipCooldownUntilRef.current;
+      const jumpsAhead =
+        currentTime - lastPlayedRef.current > SEEK_JUMP_THRESHOLD_SECONDS &&
+        currentTime > maxWatchedGuardRef.current;
+      const exceedsAllowance =
+        currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
+      // Decide up front whether the warning modal will fire this same
+      // tick — the question check must know this BEFORE it runs, not
+      // after, otherwise both modals can open together in the same tick.
+      const willWarn =
+        !isAdmin &&
+        jumpsAhead &&
+        (inCooldown || exceedsAllowance) &&
+        !correctingSkipRef.current;
 
-        if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
-          if (!correctingSkipRef.current) {
-            correctingSkipRef.current = true;
-            if (exceedsAllowance) {
-              // Real violation (jumped past the free allowance) — (re)start
-              // the cooldown that blocks further seeking until it expires.
-              skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
-            }
-            warning();
+      if (matchedQuestion && !warningModalOpenRef.current && !willWarn) {
+        setVisibleQuestion(matchedQuestion);
+        // Đọc thẳng ref, không dùng biến player/video ở scope ngoài (chỉ
+        // được gán lại mỗi lần component render) - effect này giờ chỉ được
+        // tạo lại khi đổi bài học, không còn re-render/re-tạo mỗi giây nữa
+        // để "vô tình" giữ 2 biến đó luôn mới như trước khi sửa.
+        if (isYoutube) playerRef.current?.pauseVideo();
+        else videoRef.current?.pause();
+        pauseTracking();
+      }
+
+      if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
+        if (!correctingSkipRef.current) {
+          correctingSkipRef.current = true;
+          if (exceedsAllowance) {
+            // Real violation (jumped past the free allowance) — (re)start
+            // the cooldown that blocks further seeking until it expires.
+            skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
+          }
+          warning();
+          if (isYoutube) {
             playerRef.current.pauseVideo();
             // allowSeekAhead=true so YouTube fetches the target position
             // instead of silently freezing when it isn't buffered yet.
-            playerRef.current.seekTo(lastPlayed, true);
-            pauseTracking();
-            // Give the player time to actually complete the seek before
-            // re-checking — otherwise the still-stale currentTime on the
-            // next tick re-triggers this block and re-issues pause/seek,
-            // which is what produced the "stuck loading" symptom.
-            setTimeout(() => {
-              correctingSkipRef.current = false;
-            }, 2000);
+            playerRef.current.seekTo(lastPlayedRef.current, true);
+          } else {
+            videoRef.current!.pause();
+            videoRef.current!.currentTime = lastPlayedRef.current;
           }
-        } else {
-          // Forward seeks within the free allowance are accepted silently —
-          // no warning, no cooldown — the cooldown only starts on an actual
-          // violation above.
-          setLastPlayed(currentTime);
-          setGuardedMaxWatched(prevMax => Math.max(prevMax, currentTime));
-          updateProgress(currentTime, duration);
-        }
-        if (percentWatched >= 99) {
-          handleVideoEnd(duration);
-          onWatchFinish?.();
-        }
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [lastPlayed, data, shownQuestionIds, maxWatched, onWatchFinish, isAdmin]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (videoRef.current) {
-        const currentTime = Math.floor(videoRef.current.currentTime);
-        const duration = videoRef.current.duration;
-        const percentWatched = (maxWatchedGuardRef.current / duration) * 100;
-
-        const matchedQuestion = data.questionList?.find(
-          (q: any) =>
-            q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
-        );
-
-        const inCooldown = Date.now() < skipCooldownUntilRef.current;
-        const jumpsAhead =
-          currentTime - lastPlayed > SEEK_JUMP_THRESHOLD_SECONDS &&
-          currentTime > maxWatchedGuardRef.current;
-        const exceedsAllowance =
-          currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
-        // Decide up front whether the warning modal will fire this same
-        // tick — the question check must know this BEFORE it runs, not
-        // after, otherwise both modals can open together in the same tick.
-        const willWarn =
-          !isAdmin &&
-          jumpsAhead &&
-          (inCooldown || exceedsAllowance) &&
-          !correctingSkipRef.current;
-
-        if (matchedQuestion && !warningModalOpenRef.current && !willWarn) {
-          setVisibleQuestion(matchedQuestion);
-          video?.pause();
           pauseTracking();
+          // Give the player time to actually complete the seek before
+          // re-checking — otherwise the still-stale currentTime on the
+          // next tick re-triggers this block and re-issues pause/seek,
+          // which is what produced the "stuck loading" symptom.
+          setTimeout(() => {
+            correctingSkipRef.current = false;
+          }, 2000);
         }
+      } else {
+        // Forward seeks within the free allowance are accepted silently —
+        // no warning, no cooldown — the cooldown only starts on an actual
+        // violation above.
+        setGuardedLastPlayed(currentTime);
+        setGuardedMaxWatched(prevMax => Math.max(prevMax, currentTime));
+        updateProgress(currentTime, duration);
+      }
 
-        if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
-          if (!correctingSkipRef.current) {
-            correctingSkipRef.current = true;
-            if (exceedsAllowance) {
-              // Real violation (jumped past the free allowance) — (re)start
-              // the cooldown that blocks further seeking until it expires.
-              skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
-            }
-            warning();
-            videoRef.current.pause();
-            videoRef.current.currentTime = lastPlayed;
-            pauseTracking();
-            setTimeout(() => {
-              correctingSkipRef.current = false;
-            }, 2000);
-          }
-        } else {
-          // Forward seeks within the free allowance are accepted silently —
-          // no warning, no cooldown — the cooldown only starts on an actual
-          // violation above.
-          setLastPlayed(currentTime);
-          setGuardedMaxWatched(prevMax => Math.max(prevMax, currentTime));
-          updateProgress(currentTime, duration);
-        }
-
-        if (percentWatched >= 99) {
-          handleVideoEnd(duration);
-          onWatchFinish?.();
+      if (percentWatched >= 99) {
+        handleVideoEnd(duration);
+        onWatchFinish?.();
+        if (isHtml5) {
           setGuardedMaxWatched(0);
           clearInterval(interval);
         }
-        if (!videoStatus) {
-          video?.pause();
-          pauseTracking();
-        }
+      }
+      if (isHtml5 && !videoStatus) {
+        videoRef.current?.pause();
+        pauseTracking();
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [
-    lastPlayed,
-    data,
-    shownQuestionIds,
-    videoStatus,
-    maxWatched,
-    onWatchFinish,
-    isSwitchingContext,
-    isAdmin,
-  ]);
+  }, [data, shownQuestionIds, videoStatus, onWatchFinish, isAdmin]);
 
   useImperativeHandle(ref, () => ({
     pauseAll: () => {
@@ -549,7 +504,7 @@ const LibraryDetailItem = forwardRef<
         video.currentTime = rewindTo;
       }
 
-      setLastPlayed(rewindTo);
+      setGuardedLastPlayed(rewindTo);
       setShownQuestionIds(prev =>
         prev.filter(id => id !== visibleQuestion._id),
       );
@@ -597,7 +552,7 @@ const LibraryDetailItem = forwardRef<
       setGuardedMaxWatched(
         resumeInfo.watchedSeconds || resumeInfo.lastPosition,
       );
-      setLastPlayed(resumeInfo.lastPosition);
+      setGuardedLastPlayed(resumeInfo.lastPosition);
 
       if (data.type === 'Video' && videoRef.current) {
         videoRef.current.currentTime = resumeInfo.lastPosition;
@@ -614,7 +569,7 @@ const LibraryDetailItem = forwardRef<
   const handleRestartLesson = () => {
     setIsConfirmingResume(false);
     setGuardedMaxWatched(0);
-    setLastPlayed(0);
+    setGuardedLastPlayed(0);
     setPendingSeek(null);
     setIsSwitchingContext(false);
 
@@ -664,7 +619,7 @@ const LibraryDetailItem = forwardRef<
 
     pauseTracking();
 
-    setLastPlayed(0);
+    setGuardedLastPlayed(0);
     setGuardedMaxWatched(0);
     setVisibleQuestion(null);
     setShownQuestionIds([]);

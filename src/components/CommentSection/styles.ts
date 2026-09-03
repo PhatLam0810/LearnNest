@@ -9,24 +9,28 @@ const styles = StyleSheet.create({
   lexendFont: {
     fontFamily: font,
   },
-  // Nút nổi "Hỏi đáp" - đặt trên nút AI Tư Vấn (bottom:24) một khoảng để
-  // không đè lên nhau, chỉ mount trong ModuleDetailPage nên không cần lo va
-  // chạm với FeedbackWidget (chỉ hiện ở trang /dashboard/home).
-  fabWrapper: {
-    position: 'fixed',
-    bottom: 96,
-    right: 24,
-    zIndex: 9998,
+  // Nút "Hỏi đáp" nằm ngay trong luồng trang, ngay dưới video - KHÔNG còn là
+  // nút nổi position:fixed đứng chung góc màn hình với "AI Tư Vấn" nữa.
+  // videoSticky (khối video+tiêu đề+mô tả phía trên) dùng position:sticky
+  // kèm zIndex:3 - khi mô tả dài, phần dưới của khối đó có thể trùng vùng
+  // màn hình với nút này lúc đang cuộn, và do có z-index cao hơn nên sẽ đè
+  // lên, chặn mất click. position:relative + zIndex cao hơn (4) để nút luôn
+  // nổi lên trên, bấm được bất kể đang cuộn tới đâu.
+  inlineTriggerWrapper: {
+    marginTop: 4,
+    position: 'relative',
+    zIndex: 4,
   },
-  fab: {
+  inlineTrigger: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'flex-start',
     gap: 8,
     backgroundColor: 'var(--color-vhu-primary)',
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 18,
     borderRadius: 9999,
-    boxShadow: '0 8px 20px rgba(29, 65, 138, 0.35)',
+    boxShadow: '0 4px 14px rgba(29, 65, 138, 0.25)',
     cursor: 'pointer',
   },
   fabText: {
