@@ -1,28 +1,115 @@
 import { StyleSheet } from '@styles';
 import { lexend } from '@/styles/typography';
 
+const font = lexend.style.fontFamily;
+
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 24,
-    borderTopWidth: 1,
-    borderTopColor: '#eef0f5',
-    paddingTop: 20,
-    gap: 16,
+  // Dùng lại cho các ô input antd thường (không phải AppInput) để đồng bộ
+  // font Lexend trên toàn bộ khung bình luận.
+  lexendFont: {
+    fontFamily: font,
   },
-  header: {
+  // Nút nổi "Hỏi đáp" - đặt trên nút AI Tư Vấn (bottom:24) một khoảng để
+  // không đè lên nhau, chỉ mount trong ModuleDetailPage nên không cần lo va
+  // chạm với FeedbackWidget (chỉ hiện ở trang /dashboard/home).
+  fabWrapper: {
+    position: 'fixed',
+    bottom: 96,
+    right: 24,
+    zIndex: 9998,
+  },
+  fab: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    backgroundColor: 'var(--color-vhu-primary)',
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 9999,
+    boxShadow: '0 8px 20px rgba(29, 65, 138, 0.35)',
+    cursor: 'pointer',
+  },
+  fabText: {
+    fontFamily: font,
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  fabBadge: {
+    fontFamily: font,
+    backgroundColor: '#e74c3c',
+    color: '#fff',
+    fontSize: 11,
+    fontWeight: '700',
+    borderRadius: 9999,
+    minWidth: 18,
+    height: 18,
+    textAlign: 'center',
+    lineHeight: '18px',
+    paddingHorizontal: 4,
+  },
+  drawerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitle: {
-    fontFamily: lexend.style.fontFamily,
+    fontFamily: font,
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 17,
   },
   inputRow: {
     flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-end',
+  },
+  // Bọc textarea để icon ảnh "nằm trong" ô nhập bằng cách overlay tuyệt đối
+  // ở góc trên-phải (TextArea của antd không có prop suffix như Input).
+  textAreaWrap: {
+    position: 'relative',
+    flex: 1,
+  },
+  attachBtnOverlay: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    cursor: 'pointer',
+    color: '#9aa5b8',
+    fontSize: 18,
+    display: 'flex',
+    zIndex: 1,
+  },
+  attachBtnActiveIcon: {
+    color: 'var(--color-vhu-primary)',
+  },
+  attachBtnDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+  },
+  pendingImagesRow: {
+    flexDirection: 'row',
     gap: 8,
-    alignItems: 'center',
+    flexWrap: 'wrap',
+    marginBottom: 8,
+  },
+  pendingImageWrap: {
+    position: 'relative',
+    width: 56,
+    height: 56,
+  },
+  pendingImageRemove: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    backgroundColor: '#c0392b',
+    borderRadius: 9999,
+    width: 18,
+    height: 18,
+    color: '#fff',
+    fontSize: 11,
+    lineHeight: '18px',
+    textAlign: 'center',
+    cursor: 'pointer',
   },
   replyingBanner: {
     flexDirection: 'row',
@@ -30,74 +117,130 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#eaf2ff',
     borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
   },
   replyingText: {
+    fontFamily: font,
     fontSize: 13,
     color: '#1d418a',
   },
   list: {
-    gap: 4,
+    gap: 6,
   },
   empty: {
+    fontFamily: font,
     color: '#9aa5b8',
     fontSize: 14,
-    paddingVertical: 12,
+    paddingVertical: 16,
     textAlign: 'center',
   },
   commentRow: {
     flexDirection: 'row',
-    gap: 10,
-    paddingVertical: 10,
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 4,
   },
   replyRow: {
     flexDirection: 'row',
-    gap: 10,
-    paddingVertical: 8,
-    marginTop: 8,
+    gap: 12,
+    paddingVertical: 10,
+    marginTop: 10,
     marginLeft: 24,
     borderLeftWidth: 2,
     borderLeftColor: '#eef0f5',
-    paddingLeft: 12,
+    paddingLeft: 14,
   },
   commentBody: {
     flex: 1,
-    gap: 2,
+    gap: 3,
+    minWidth: 0,
+  },
+  commentHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   commentAuthor: {
-    fontFamily: lexend.style.fontFamily,
+    fontFamily: font,
     fontWeight: '600',
     fontSize: 13.5,
   },
+  commentAuthorOwn: {
+    color: '#1d418a',
+  },
   commentText: {
+    fontFamily: font,
     fontSize: 14,
     color: '#1c2536',
     lineHeight: 20,
   },
+  commentImagesRow: {
+    flexDirection: 'row',
+    gap: 6,
+    flexWrap: 'wrap',
+    marginTop: 6,
+  },
   commentActions: {
     flexDirection: 'row',
-    gap: 14,
-    marginTop: 4,
+    gap: 16,
+    marginTop: 6,
     alignItems: 'center',
   },
   commentTime: {
+    fontFamily: font,
     fontSize: 12,
     color: '#9aa5b8',
   },
   actionLink: {
+    fontFamily: font,
     fontSize: 12,
     color: '#5b6478',
     cursor: 'pointer',
     fontWeight: '500',
   },
+  likeActive: {
+    color: 'var(--color-vhu-primary)',
+    fontWeight: '700',
+  },
   deleteLink: {
     color: '#c0392b',
+  },
+  moreBtn: {
+    cursor: 'pointer',
+    color: '#9aa5b8',
+    fontSize: 16,
+    padding: '0 4px',
   },
   editRow: {
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
+  },
+  viewMoreReplies: {
+    fontFamily: font,
+    fontSize: 12.5,
+    color: '#1d418a',
+    fontWeight: '600',
+    cursor: 'pointer',
+    marginTop: 8,
+  },
+  reportPanel: {
+    gap: 10,
+    padding: 6,
+    width: 230,
+  },
+  reportOption: {
+    fontFamily: font,
+    fontSize: 13,
+    color: '#1c2536',
+    paddingVertical: 4,
+  },
+  reportActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 8,
+    marginTop: 4,
   },
 });
 

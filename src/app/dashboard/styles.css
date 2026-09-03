@@ -3,7 +3,6 @@
 }
 .ant-drawer-body {
   overflow-y: hidden !important;
-  padding: 0 !important;
 }
 .ant-menu-inline {
   border-inline-end: 0 !important;

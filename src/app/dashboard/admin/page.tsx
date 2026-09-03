@@ -12,6 +12,7 @@ import LessonAdmin from './lessonManage/page';
 import LessonLearnersOverview from './lessonLearnersOverview';
 import FeedbackManage from './feedbackManage/page';
 import AuditLogManage from './auditLogManage/page';
+import CommentReportsManage from './commentReportsManage/page';
 import { ADMIN_PRIMARY } from './adminTheme';
 
 const items: TabsProps['items'] = [
@@ -44,6 +45,11 @@ const items: TabsProps['items'] = [
     key: '6',
     label: 'Nhật Ký Thao Tác',
     children: <AuditLogManage />,
+  },
+  {
+    key: '7',
+    label: 'Báo Cáo Vi Phạm',
+    children: <CommentReportsManage />,
   },
 ];
 
