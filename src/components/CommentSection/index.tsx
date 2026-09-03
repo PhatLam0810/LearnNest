@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Avatar,
   Button,
@@ -76,6 +77,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, type }) => {
     state => state.authReducer.tokenInfo?.userProfile,
   );
   const isAdmin = (userProfile as any)?.role?.level <= 2;
+
+  // Nút "Hỏi đáp" portal thẳng ra document.body (xem cuối file) để
+  // position:fixed luôn neo theo viewport thật, không bị ancestor có
+  // overflow/transform trong ModuleDetailPage "giam" toạ độ - chỉ render
+  // portal sau khi mount ở client vì document chưa tồn tại lúc SSR.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<CommentItem[]>([]);
@@ -451,19 +459,23 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, type }) => {
 
   return (
     <>
-      {/* Nằm ngay trong luồng nội dung, ngay dưới video (nơi component này
-          được mount trong ModuleDetailPage) - trước đây là nút nổi
-          position:fixed portal ra document.body, đứng chung góc màn hình
-          với nút "AI Tư Vấn" gây rối mắt. */}
-      <View style={styles.inlineTriggerWrapper}>
-        <View style={styles.inlineTrigger} onClick={() => setOpen(true)}>
-          <MessageOutlined style={{ color: '#fff', fontSize: 16 }} />
-          <Text style={styles.fabText}>Hỏi đáp</Text>
-          {comments.length > 0 && (
-            <Text style={styles.fabBadge}>{comments.length}</Text>
-          )}
-        </View>
-      </View>
+      {/* Nút nổi góc TRÊN-phải màn hình - tách hẳn góc dưới-phải (nơi "AI Tư
+          Vấn" đứng) để không đè/lẫn với nhau, nhưng vẫn luôn hiện sẵn không
+          cần cuộn trang mới thấy như bản inline-dưới-video trước đó. */}
+      {mounted &&
+        !open &&
+        createPortal(
+          <View style={styles.fabWrapper}>
+            <View style={styles.fab} onClick={() => setOpen(true)}>
+              <MessageOutlined style={{ color: '#fff', fontSize: 16 }} />
+              <Text style={styles.fabText}>Hỏi đáp</Text>
+              {comments.length > 0 && (
+                <Text style={styles.fabBadge}>{comments.length}</Text>
+              )}
+            </View>
+          </View>,
+          document.body,
+        )}
 
       <Drawer
         title={

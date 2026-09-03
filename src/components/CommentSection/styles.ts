@@ -9,28 +9,24 @@ const styles = StyleSheet.create({
   lexendFont: {
     fontFamily: font,
   },
-  // Nút "Hỏi đáp" nằm ngay trong luồng trang, ngay dưới video - KHÔNG còn là
-  // nút nổi position:fixed đứng chung góc màn hình với "AI Tư Vấn" nữa.
-  // videoSticky (khối video+tiêu đề+mô tả phía trên) dùng position:sticky
-  // kèm zIndex:3 - khi mô tả dài, phần dưới của khối đó có thể trùng vùng
-  // màn hình với nút này lúc đang cuộn, và do có z-index cao hơn nên sẽ đè
-  // lên, chặn mất click. position:relative + zIndex cao hơn (4) để nút luôn
-  // nổi lên trên, bấm được bất kể đang cuộn tới đâu.
-  inlineTriggerWrapper: {
-    marginTop: 4,
-    position: 'relative',
-    zIndex: 4,
+  // Nút nổi "Hỏi đáp" - đặt góc TRÊN-phải màn hình, tách hẳn khỏi "AI Tư
+  // Vấn" (đứng ở góc dưới-phải), tránh vừa đè lẫn nhau vừa lộn xộn 2 nút
+  // chung 1 góc như bản gốc.
+  fabWrapper: {
+    position: 'fixed',
+    top: 96,
+    right: 24,
+    zIndex: 9998,
   },
-  inlineTrigger: {
+  fab: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
     gap: 8,
     backgroundColor: 'var(--color-vhu-primary)',
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 18,
     borderRadius: 9999,
-    boxShadow: '0 4px 14px rgba(29, 65, 138, 0.25)',
+    boxShadow: '0 8px 20px rgba(29, 65, 138, 0.35)',
     cursor: 'pointer',
   },
   fabText: {

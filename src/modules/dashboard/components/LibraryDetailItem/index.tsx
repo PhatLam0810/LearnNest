@@ -44,6 +44,99 @@ type LibraryDetailItemProps = {
 export interface LibraryDetailItemHandle {
   pauseAll: () => void;
 }
+
+// Tách riêng khỏi LibraryDetailItem để bấm chọn đáp án (selectedAnswer) chỉ
+// re-render đúng cái modal nhỏ này - trước đây selectedAnswer là state của
+// CHÍNH LibraryDetailItem, nên mỗi lần bấm 1 đáp án lại re-render kéo theo
+// renderMedia() (toàn bộ khối video/YouTube) dựng lại từ đầu dù chẳng liên
+// quan gì. Đo INP thật: ~90-130ms mỗi lần bấm trước khi tách (khớp báo cáo
+// người dùng 240-540ms lúc bấm dồn dập), do phải component đứng ở MODULE
+// SCOPE (không định nghĩa trong thân LibraryDetailItem) để giữ nguyên danh
+// tính component qua các lần render — nếu không React sẽ unmount/remount
+// lại modal mỗi lần cha render.
+type QuestionModalProps = {
+  question: any;
+  onSubmit: (answer: string) => void;
+};
+// Hoisted ra module scope - object literal mới mỗi render khiến antd Modal
+// (và trình duyệt) phải xử lý lại maskStyle (kèm backdropFilter: blur, vốn
+// tốn để repaint/composite) ở MỌI lần re-render dù giá trị y hệt nhau. Bấm
+// chọn đáp án re-render đúng QuestionModal (đã tách riêng ở trên) nên style
+// này bị tính toán lại mỗi click nếu không hoist.
+const QUESTION_MODAL_MASK_STYLE = {
+  backdropFilter: 'blur(6px)',
+  backgroundColor: 'rgba(0,0,0,0.6)',
+};
+const QUESTION_MODAL_CONTENT_STYLE = {
+  content: {
+    borderRadius: 16,
+    padding: 0,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+  },
+};
+const QuestionModal: React.FC<QuestionModalProps> = ({
+  question,
+  onSubmit,
+}) => {
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedAnswer(null);
+  }, [question?._id]);
+
+  return (
+    <Modal
+      open={!!question}
+      centered
+      closable={false}
+      footer={null}
+      maskStyle={QUESTION_MODAL_MASK_STYLE}
+      width={600}
+      styles={QUESTION_MODAL_CONTENT_STYLE}>
+      <div style={styles.modalWrapper}>
+        {/* HEADER */}
+        <div style={styles.modalHeader}>
+          <div style={styles.modalTitle}>Câu hỏi {question?.question}</div>
+        </div>
+
+        {/* BODY */}
+        <div style={styles.modalBody}>
+          {question?.answerList?.map((ans: any, idx: number) => {
+            const letter = String.fromCharCode(65 + idx);
+            const isSelected = selectedAnswer === letter;
+
+            return (
+              <div
+                key={idx}
+                onClick={() => setSelectedAnswer(letter)}
+                style={{
+                  ...styles.answerCard,
+                  ...(isSelected ? styles.answerCardSelected : {}),
+                }}>
+                <div style={styles.answerLetter}>{letter}</div>
+                <div style={styles.answerText}>{ans}</div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* FOOTER */}
+        <div style={styles.modalFooter}>
+          <Button
+            type="primary"
+            disabled={!selectedAnswer}
+            onClick={() => selectedAnswer && onSubmit(selectedAnswer)}
+            style={styles.submitButton}>
+            Xác nhận
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
 const LibraryDetailItem = forwardRef<
   LibraryDetailItemHandle,
   LibraryDetailItemProps
@@ -81,7 +174,6 @@ const LibraryDetailItem = forwardRef<
   };
   const [visibleQuestion, setVisibleQuestion] = useState<any>(null);
   const [shownQuestionIds, setShownQuestionIds] = useState<string[]>([]);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, any>>(
     {},
   );
@@ -453,8 +545,15 @@ const LibraryDetailItem = forwardRef<
     },
   }));
 
-  const handleClose = async () => {
-    if (!visibleQuestion || selectedAnswer === null) return;
+  // Nhận answer làm tham số (thay vì đọc selectedAnswer từ state của chính
+  // LibraryDetailItem) - selectedAnswer giờ là state RIÊNG của QuestionModal
+  // (component con tách ra bên dưới) để bấm chọn đáp án chỉ re-render đúng
+  // cái modal nhỏ đó, không kéo theo re-render + dựng lại toàn bộ
+  // renderMedia() (video/YouTube) mỗi lần bấm - đã đo INP mỗi click ~90-
+  // 130ms trước khi tách, đúng như DevTools báo (240-540ms lúc bấm dồn dập).
+  const handleAnswerSubmit = async (answer: string) => {
+    if (!visibleQuestion) return;
+    const selectedAnswer = answer;
     // Chấm điểm ở server — correctAnswer không còn được gửi về client nữa
     // (xem lesson.service.ts#getLessonData), nên phải hỏi server câu này
     // đúng hay sai thay vì so sánh tay như trước.
@@ -477,7 +576,6 @@ const LibraryDetailItem = forwardRef<
       video?.play?.();
       setShownQuestionIds(prev => [...prev, visibleQuestion._id]);
       setVisibleQuestion(null);
-      setSelectedAnswer(null);
 
       if (player) {
         const duration = player.getDuration();
@@ -509,7 +607,6 @@ const LibraryDetailItem = forwardRef<
         prev.filter(id => id !== visibleQuestion._id),
       );
       setVisibleQuestion(null);
-      setSelectedAnswer(null);
     }
   };
 
@@ -623,7 +720,6 @@ const LibraryDetailItem = forwardRef<
     setGuardedMaxWatched(0);
     setVisibleQuestion(null);
     setShownQuestionIds([]);
-    setSelectedAnswer(null);
     setSelectedAnswers({});
     setInvalidQuestions([]);
     setPendingSeek(null);
@@ -949,66 +1045,7 @@ const LibraryDetailItem = forwardRef<
     <View>
       {renderMedia()}
       {contextHolder}
-      <Modal
-        open={visibleQuestion}
-        centered
-        closable={false}
-        footer={null}
-        maskStyle={{
-          backdropFilter: 'blur(6px)',
-          backgroundColor: 'rgba(0,0,0,0.6)',
-        }}
-        width={600}
-        styles={{
-          content: {
-            borderRadius: 16,
-            padding: 0,
-            overflow: 'hidden',
-            backgroundColor: '#fff',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-          },
-        }}>
-        <div style={styles.modalWrapper}>
-          {/* HEADER */}
-          <div style={styles.modalHeader}>
-            <div style={styles.modalTitle}>
-              Câu hỏi {visibleQuestion?.question}
-            </div>
-          </div>
-
-          {/* BODY */}
-          <div style={styles.modalBody}>
-            {visibleQuestion?.answerList?.map((ans: any, idx: number) => {
-              const letter = String.fromCharCode(65 + idx);
-              const isSelected = selectedAnswer === letter;
-
-              return (
-                <div
-                  key={idx}
-                  onClick={() => setSelectedAnswer(letter)}
-                  style={{
-                    ...styles.answerCard,
-                    ...(isSelected ? styles.answerCardSelected : {}),
-                  }}>
-                  <div style={styles.answerLetter}>{letter}</div>
-                  <div style={styles.answerText}>{ans}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* FOOTER */}
-          <div style={styles.modalFooter}>
-            <Button
-              type="primary"
-              disabled={!selectedAnswer}
-              onClick={handleClose}
-              style={styles.submitButton}>
-              Xác nhận
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      <QuestionModal question={visibleQuestion} onSubmit={handleAnswerSubmit} />
       <ResumeLessonModal
         open={
           isConfirmingResume &&
