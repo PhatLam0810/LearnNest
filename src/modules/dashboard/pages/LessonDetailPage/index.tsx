@@ -1,5 +1,5 @@
 'use client';
-import React, { CSSProperties, useEffect, useState } from 'react';
+import React, { CSSProperties, useEffect, useMemo, useState } from 'react';
 import {
   CheckOutlined,
   PlayCircleOutlined,
@@ -31,6 +31,14 @@ import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/Ap
 import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
 import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
 import { useResponsive } from '@/styles/responsive';
+
+// Style tĩnh, hoisted ra ngoài component - object literal mới mỗi render sẽ
+// làm vô hiệu useMemo bên dưới (đứng trong danh sách phụ thuộc).
+const PANEL_STYLE: CSSProperties = {
+  background: '#f5f5f5',
+  borderRadius: 12,
+  border: 'none',
+};
 
 interface LessonDetailPageProps {
   id: string;
@@ -403,17 +411,30 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               })}
             </View>
           ),
-          style: panelStyle,
+          style: PANEL_STYLE,
         };
       }) || []
     );
   };
 
-  const panelStyle: React.CSSProperties = {
-    background: '#f5f5f5',
-    borderRadius: '#f5f5f5',
-    border: 'none',
-  };
+  // getItems() duyệt mọi module × mọi bài học/bài thực hành để dựng lại
+  // toàn bộ sidebar "Nội dung khóa học" - trước đây gọi thẳng trong JSX nên
+  // chạy lại ở MỌI lần trang render (giống lỗi hiệu năng đã tìm+sửa ở
+  // ModuleDetailPage). useMemo chỉ tính lại khi dữ liệu ảnh hưởng tới nó
+  // thật sự đổi.
+  const sidebarItems = useMemo(
+    () => getItems(PANEL_STYLE),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      lessonDetail?.modules,
+      practiceTasksOfLesson,
+      videoCompletedBySubLesson,
+      quizPassedByLibrary,
+      userProfile?.role?.level,
+      userProfile?._id,
+    ],
+  );
+
   const containerStyle = {
     ...styles.container,
     paddingLeft: isMobile ? 12 : isTablet ? 16 : 20,
@@ -549,7 +570,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     onChange={keys =>
                       setActivePanelKeys(Array.isArray(keys) ? keys : [keys])
                     }
-                    items={getItems(panelStyle)}
+                    items={sidebarItems}
                   />
                 </View>
               </View>
@@ -634,7 +655,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                             Array.isArray(keys) ? keys : [keys],
                           )
                         }
-                        items={getItems(panelStyle)}
+                        items={sidebarItems}
                       />
                     </View>
                   </View>
