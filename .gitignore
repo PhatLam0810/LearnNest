@@ -43,3 +43,6 @@ src/services/contracts/
 .env.production
 .env
 .env.local
+# Playwright
+test-results/
+playwright-report/
