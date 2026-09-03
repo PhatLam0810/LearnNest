@@ -182,7 +182,15 @@ const styles = StyleSheet.create({
   layoutTitleContainer: {
     width: '100%',
     display: 'flex',
-    gap: 24,
+    gap: 8,
+    flexDirection: 'column',
+  },
+  // Hàng chứa tiêu đề bài học + nút "Hỏi đáp" cạnh nhau - mô tả (nếu có)
+  // đứng riêng bên dưới, full width, không bị kéo vào chung hàng này.
+  titleRow: {
+    width: '100%',
+    display: 'flex',
+    gap: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

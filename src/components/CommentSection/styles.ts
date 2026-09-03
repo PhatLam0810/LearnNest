@@ -9,24 +9,18 @@ const styles = StyleSheet.create({
   lexendFont: {
     fontFamily: font,
   },
-  // Nút nổi "Hỏi đáp" - đặt góc TRÊN-phải màn hình, tách hẳn khỏi "AI Tư
-  // Vấn" (đứng ở góc dưới-phải), tránh vừa đè lẫn nhau vừa lộn xộn 2 nút
-  // chung 1 góc như bản gốc.
-  fabWrapper: {
-    position: 'fixed',
-    top: 96,
-    right: 24,
-    zIndex: 9998,
-  },
-  fab: {
+  // Nút "Hỏi đáp" nằm ngay trong hàng tiêu đề bài học (cạnh title, bên
+  // phải) - không còn nổi/portal, chỉ là 1 nút gọn trong luồng trang.
+  inlineTrigger: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    flexShrink: 0,
+    gap: 6,
     backgroundColor: 'var(--color-vhu-primary)',
-    paddingVertical: 12,
-    paddingHorizontal: 18,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     borderRadius: 9999,
-    boxShadow: '0 8px 20px rgba(29, 65, 138, 0.35)',
+    boxShadow: '0 2px 8px rgba(29, 65, 138, 0.25)',
     cursor: 'pointer',
   },
   fabText: {

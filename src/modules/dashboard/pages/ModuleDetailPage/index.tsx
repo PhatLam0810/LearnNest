@@ -536,6 +536,14 @@ const ModuleDetailPage = () => {
     isMobile && { paddingBottom: 0 },
   ] as any;
 
+  // Mobile: xếp tiêu đề và nút "Hỏi đáp" chồng lên nhau theo cột thay vì
+  // cùng 1 hàng - title dài (vd "Word - Giới thiệu Tổng quan Bài thi MOS
+  // 2019") kèm nút cạnh nhau trên màn hình hẹp sẽ bị bóp chật, khó đọc.
+  const titleRowStyle = [
+    styles.titleRow,
+    isMobile && { flexDirection: 'column', alignItems: 'flex-start', gap: 8 },
+  ] as any;
+
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
       {contextHolder}
@@ -551,14 +559,22 @@ const ModuleDetailPage = () => {
           ) : selectedLibrary?.type === 'Text' ? (
             <View style={videoStickyStyle}>
               <View style={styles.layoutTitleContainer}>
-                <View style={styles.fullWidthFlex}>
-                  <Text
-                    style={[
-                      styles.layoutTitle,
-                      isMobile && styles.layoutTitleMobile,
-                    ]}>
-                    {selectedLibrary?.title}
-                  </Text>
+                <View style={titleRowStyle}>
+                  <View style={styles.fullWidthFlex}>
+                    <Text
+                      style={[
+                        styles.layoutTitle,
+                        isMobile && styles.layoutTitleMobile,
+                      ]}>
+                      {selectedLibrary?.title}
+                    </Text>
+                  </View>
+                  {!taskId && selectedLibrary && (
+                    <CommentSection
+                      postId={selectedLibrary._id}
+                      type={selectedLibrary.type}
+                    />
+                  )}
                 </View>
               </View>
               <LibraryDetailItem
@@ -579,22 +595,24 @@ const ModuleDetailPage = () => {
                 onWatchFinish={onWatchFinish}
               />
               <View style={styles.layoutTitleContainer}>
-                <View style={styles.fullWidthFlex}>
-                  <Text style={styles.layoutTitle}>
-                    {selectedLibrary?.title}
-                  </Text>
-                  <Text style={styles.description}>
-                    {selectedLibrary?.description}
-                  </Text>
+                <View style={titleRowStyle}>
+                  <View style={styles.fullWidthFlex}>
+                    <Text style={styles.layoutTitle}>
+                      {selectedLibrary?.title}
+                    </Text>
+                  </View>
+                  {!taskId && selectedLibrary && (
+                    <CommentSection
+                      postId={selectedLibrary._id}
+                      type={selectedLibrary.type}
+                    />
+                  )}
                 </View>
+                <Text style={styles.description}>
+                  {selectedLibrary?.description}
+                </Text>
               </View>
             </View>
-          )}
-          {!taskId && selectedLibrary && (
-            <CommentSection
-              postId={selectedLibrary._id}
-              type={selectedLibrary.type}
-            />
           )}
         </View>
 

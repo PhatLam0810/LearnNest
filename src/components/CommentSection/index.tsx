@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import {
   Avatar,
   Button,
@@ -77,13 +76,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, type }) => {
     state => state.authReducer.tokenInfo?.userProfile,
   );
   const isAdmin = (userProfile as any)?.role?.level <= 2;
-
-  // Nút "Hỏi đáp" portal thẳng ra document.body (xem cuối file) để
-  // position:fixed luôn neo theo viewport thật, không bị ancestor có
-  // overflow/transform trong ModuleDetailPage "giam" toạ độ - chỉ render
-  // portal sau khi mount ở client vì document chưa tồn tại lúc SSR.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<CommentItem[]>([]);
@@ -459,23 +451,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, type }) => {
 
   return (
     <>
-      {/* Nút nổi góc TRÊN-phải màn hình - tách hẳn góc dưới-phải (nơi "AI Tư
-          Vấn" đứng) để không đè/lẫn với nhau, nhưng vẫn luôn hiện sẵn không
-          cần cuộn trang mới thấy như bản inline-dưới-video trước đó. */}
-      {mounted &&
-        !open &&
-        createPortal(
-          <View style={styles.fabWrapper}>
-            <View style={styles.fab} onClick={() => setOpen(true)}>
-              <MessageOutlined style={{ color: '#fff', fontSize: 16 }} />
-              <Text style={styles.fabText}>Hỏi đáp</Text>
-              {comments.length > 0 && (
-                <Text style={styles.fabBadge}>{comments.length}</Text>
-              )}
-            </View>
-          </View>,
-          document.body,
+      {/* Inline ngay trong hàng tiêu đề bài học, cạnh title - không còn là
+          nút nổi/portal nữa, mount tại đúng chỗ ModuleDetailPage đặt. */}
+      <View style={styles.inlineTrigger} onClick={() => setOpen(true)}>
+        <MessageOutlined style={{ color: '#fff', fontSize: 14 }} />
+        <Text style={styles.fabText}>Hỏi đáp</Text>
+        {comments.length > 0 && (
+          <Text style={styles.fabBadge}>{comments.length}</Text>
         )}
+      </View>
 
       <Drawer
         title={
