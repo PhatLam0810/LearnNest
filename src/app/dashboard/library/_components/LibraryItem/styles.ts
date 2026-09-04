@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   placeholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#d9d9d9',
+    backgroundColor: '#eef0f5',
     alignItems: 'center',
     justifyContent: 'center',
     display: 'flex',
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   placeholderText: {
     ...typography.subTitle1,
     fontWeight: '500',
-    color: '#666',
+    color: '#8D8D8D',
     textAlign: 'center',
     alignSelf: 'center',
     paddingTop: 12,

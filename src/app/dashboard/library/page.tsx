@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { LibraryItem } from './_components';
 import { FlatList, Image, Modal, Text, View } from 'react-native-web';
-import { Modal as AntdModal, Button } from 'antd';
+import { Modal as AntdModal } from 'antd';
 import {
   CloseOutlined,
   FilePdfOutlined,
@@ -11,6 +11,7 @@ import {
   PlayCircleOutlined,
 } from '@ant-design/icons';
 import styles from './styles';
+import AppButton from '@components/AppButton';
 import { useAppPagination } from '@hooks';
 import { messageApi } from '@hooks';
 import ReactPlayer from 'react-player';
@@ -56,7 +57,11 @@ const sx = {
     flex: 1,
     minWidth: 0,
   } as const,
-  headerIcon: { fontSize: 18, color: '#2563eb', display: 'flex' } as const,
+  headerIcon: {
+    fontSize: 18,
+    color: 'var(--color-vhu-primary)',
+    display: 'flex',
+  } as const,
   headerTitle: {
     fontSize: 15,
     fontWeight: '600',
@@ -65,22 +70,20 @@ const sx = {
   } as const,
   badge: {
     fontSize: 12,
-    color: '#2563eb',
+    color: 'var(--color-vhu-primary)',
     backgroundColor: '#eff6ff',
     borderRadius: 999,
     padding: '2px 10px',
     whiteSpace: 'nowrap',
   } as const,
   closeBtn: {
-    border: 'none',
-    background: '#f3f4f6',
-    borderRadius: 8,
     width: 32,
     height: 32,
-    cursor: 'pointer',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    minWidth: 32,
+    padding: 0,
+    borderRadius: 8,
+    border: 'none',
+    background: '#f3f4f6',
     color: '#374151',
     fontSize: 14,
   } as const,
@@ -275,13 +278,13 @@ const LibraryList = () => {
                 </Text>
                 {meta ? <span style={sx.badge}>{meta.label}</span> : null}
               </View>
-              <button
-                type="button"
-                style={sx.closeBtn}
+              <AppButton
+                shape="circle"
+                icon={<CloseOutlined />}
                 onClick={closeModal}
-                aria-label="Đóng">
-                <CloseOutlined />
-              </button>
+                aria-label="Đóng"
+                style={sx.closeBtn}
+              />
             </View>
 
             <View style={sx.body}>{renderModalContent()}</View>
@@ -297,12 +300,17 @@ const LibraryList = () => {
           quizResult?.isPass ? 'Hoàn thành bài tập 🎉' : 'Chưa đạt, thử lại nhé'
         }
         footer={[
-          <Button
+          <AppButton
             key="close"
-            type="primary"
+            style={{
+              width: 'auto',
+              backgroundColor: 'var(--color-vhu-primary)',
+              borderColor: 'var(--color-vhu-primary)',
+              color: '#fff',
+            }}
             onClick={() => setQuizResult(null)}>
             Đóng
-          </Button>,
+          </AppButton>,
         ]}>
         {quizResult ? (
           <View style={{ gap: 8 }}>
