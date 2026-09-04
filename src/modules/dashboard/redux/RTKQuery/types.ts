@@ -29,6 +29,8 @@ export interface Recommend {
   updatedAt: string;
   isPremium: boolean;
   price: number;
+  averageRating?: number;
+  ratingCount?: number;
   __v: number;
 }
 
@@ -84,4 +86,35 @@ export interface LearningInsight {
   reminderSubject: string;
   reminderBody: string;
   emailSent: boolean;
+}
+
+// Trang Chủ - 3 thẻ thống kê (giờ học tuần này, bài đã hoàn thành, chuỗi
+// ngày học). Xem LessonService.getStudyStats (BE).
+export interface StudyStats {
+  weeklyMinutes: number;
+  weeklyMinutesLastWeek: number;
+  completedLessonsCount: number;
+  streakDays: number;
+}
+
+export interface CourseRatingUser {
+  _id: string;
+  fullName?: string;
+  avatar?: string;
+}
+
+export interface CourseRatingItem {
+  _id: string;
+  lessonId: string;
+  userId: string | CourseRatingUser;
+  stars: number;
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CourseRatingSummary {
+  averageRating: number;
+  ratingCount: number;
+  myRating: CourseRatingItem | null;
 }

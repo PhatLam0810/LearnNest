@@ -27,7 +27,10 @@ export const persistor = {
 export type RootState = any;
 export type AppDispatch = any;
 
-export const useAppDispatch = () => (..._args: any[]) => undefined;
+export const useAppDispatch =
+  () =>
+  (..._args: any[]) =>
+    undefined;
 export const useAppSelector = (selector: (state: any) => any) => {
   try {
     return selector({});

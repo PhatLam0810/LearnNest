@@ -1,14 +1,16 @@
 # design-sync notes for LearnNest (webapp)
 
 ## Repo shape
+
 - This repo is a private Next.js **app** (`package.json` has no `main`/`module`/`exports`,
   no `dist/` build) — not a publishable component library. The converter runs in
   **synth-entry mode**, building directly from `src/components/` (`cfg.srcDir`).
 - No Storybook exists (confirmed with the user) — package shape, no generated preview tier.
 
 ## Package resolution workaround (Windows)
+
 - `package-build.mjs` requires `PKG_DIR = <node-modules>/<pkg>` unless `--entry` is passed,
-  but passing `--entry` *also* forces that path to be treated as the literal bundle entry
+  but passing `--entry` _also_ forces that path to be treated as the literal bundle entry
   (short-circuits synth-entry). So for a self-hosted app repo like this one, `--entry`
   cannot be used to hint the package dir.
 - Fix: created a **Windows junction** `node_modules/webapp` → repo root
@@ -36,6 +38,7 @@
     next sync.
 
 ## next/font/google shim
+
 - `src/styles/typography/index.ts` calls `Lexend(...)`/`Inter(...)`/etc. from `next/font/google`
   at module scope. That package is a Next.js SWC/webpack build-time macro with no real JS
   exports outside the Next compiler; plain esbuild resolves it but gets `undefined`, so calling
@@ -58,12 +61,13 @@
   tsconfig auto-discovery already resolves `@redux`/`@styles`/etc. correctly on its own when no
   custom plugin intercepts them. A shim tsconfig that repeats those wildcard aliases hits the
   same corruption and returns bogus bare-directory resolutions (`Cannot read file ...: Incorrect
-  function` on Windows). Keeping the shim to ONLY the one exact (non-wildcard) `next/font/google`
+function` on Windows). Keeping the shim to ONLY the one exact (non-wildcard) `next/font/google`
   entry avoids the bug entirely and leaves every other alias to esbuild's native resolution,
   which already works. Since `lib/bundle.mjs` must not be forked, this constraint stands until
   upstream fixes the regex (worth reporting).
 
 ## Known render-check false positive: `[RENDER] root empty` on react-native-web components
+
 - `package-validate.mjs`'s `rootEmpty` check selects `document.querySelectorAll('#root, [id^="r"]')`
   and inspects `roots[0]`. react-native-web's `StyleSheet` module self-injects
   `<style id="react-native-stylesheet">` into the document the first time any
@@ -94,6 +98,7 @@
   `[RENDER] root empty`. Don't trust the flag blindly - open the actual screenshot first.
 
 ## redux/services shim
+
 - `@redux` (`src/redux/index.ts`) bootstraps a REAL store at import time (redux-saga running
   real sagas, redux-persist writing to localStorage) and transitively imports
   `redux/RTKQuery/index.ts`, whose `baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL` is a bare
@@ -114,6 +119,7 @@
   see "next/font/google shim" above for why wildcard paths corrupt this plugin's parsing).
 
 ## Known gap: `next/navigation` (and other next/* runtime imports) crash the whole bundle
+
 - Any component importing `next/navigation` (`useRouter`/`usePathname`) or `next/image` pulls
   in real Next.js app-router runtime internals (saw `forbidden()`/`unauthorized()` from
   `next/dist/.../http-access-fallback`, and scheduling code referencing bare `process.nextTick`/
@@ -132,6 +138,7 @@
   `usePathname` behind a hook this bundle can stub) - not something to silently source-edit.
 
 ## componentSrcMap key mismatch: directory name vs. declared export name
+
 - The fork's synth-entry directory exclusion (see below) matches by PATH SEGMENT (the
   component's folder name), while the unforked step-3 name exclusion matches by the
   DISCOVERED/DECLARED export name - usually identical, but `ChatboxAi/index.tsx` declares
@@ -141,8 +148,9 @@
   `componentSrcMap`. Watch for this mismatch on any future exclusion.
 
 ## Known gap: SCSS imports unsupported by the package-shape bundle
+
 - `lib/bundle.mjs`'s main IIFE bundle (`sharedBuildOptions`) has no `.scss` loader (only the
-  *storybook preview* path stubs `.scss`→`empty`, see `lib/story-imports.mjs`). Per the
+  _storybook preview_ path stubs `.scss`→`empty`, see `lib/story-imports.mjs`). Per the
   skill's own rule, `lib/bundle.mjs`/`lib/emit.mjs` must never be forked.
 - Excluded via `componentSrcMap: null` for now (real components, real SCSS, not a mistake —
   action required if the user wants them synced): `CourseItem`, `ResumeLessonModal`,
@@ -155,12 +163,14 @@
   something to do silently as part of a sync.
 
 ## Excluded (non-visual / logic-only, not design-system material)
+
 - `MessageProvider` — renders an antd message-context host, no visual output outside the app.
 - `PageViewTracker` — analytics side-effect only, returns `null`, needs router+redux context.
 - `SearchProvider` (from `SearchContext/index.tsx`) — a bare React context provider, no
   visual output. `SearchBar` (the actual visual component in the same folder) is NOT excluded.
 
 ## Re-sync risks (read before the next sync)
+
 - The `node_modules/webapp` junction and `types/index.d.ts` placeholder are both required
   for the build to run at all on this repo — if either is missing, re-follow the steps above
   rather than debugging from scratch.

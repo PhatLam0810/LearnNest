@@ -20,7 +20,7 @@ Two idioms coexist, both real:
    - `--color-vhu-primary` (`#1d418a`, deep blue — primary actions, headers, links)
    - `--color-vhu-secondary` (`#f0c356`, gold — accents, highlights)
    - `--color-vhu-accent` (`#88c1e9`, light blue — secondary accents)
-   Use these `var(--...)` strings for brand color, not new hex literals.
+     Use these `var(--...)` strings for brand color, not new hex literals.
 3. **antd components** (`Button`, `Input`, `Image`, etc., and the `AppButton`/`AppInput`
    wrappers around them) carry their own built-in styling — pass antd props (`type="primary"`,
    `danger`, `size`, `status`) rather than overriding with custom CSS.
@@ -55,14 +55,33 @@ import { AppButton, AppInput } from 'webapp';
 
 function ConfirmDialog() {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 16 }}>
-      <span style={{ fontFamily: 'Lexend, sans-serif', fontSize: 16, fontWeight: 600 }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        padding: 16,
+      }}>
+      <span
+        style={{
+          fontFamily: 'Lexend, sans-serif',
+          fontSize: 16,
+          fontWeight: 600,
+        }}>
         Xác nhận thay đổi
       </span>
       <AppInput placeholder="Nhập lý do (không bắt buộc)" />
-      <div style={{ display: 'flex', flexDirection: 'row', gap: 8, justifyContent: 'flex-end' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 8,
+          justifyContent: 'flex-end',
+        }}>
         <AppButton>Hủy</AppButton>
-        <AppButton type="primary" style={{ backgroundColor: 'var(--color-vhu-primary)' }}>
+        <AppButton
+          type="primary"
+          style={{ backgroundColor: 'var(--color-vhu-primary)' }}>
           Xác nhận
         </AppButton>
       </div>

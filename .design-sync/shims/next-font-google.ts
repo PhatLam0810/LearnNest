@@ -11,7 +11,11 @@
 function fontLoader(family: string) {
   return (opts: { variable?: string } = {}) => ({
     className: '',
-    style: { fontFamily: `'${family}', sans-serif`, fontWeight: 'normal', fontStyle: 'normal' },
+    style: {
+      fontFamily: `'${family}', sans-serif`,
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+    },
     variable: opts.variable ?? '',
   });
 }

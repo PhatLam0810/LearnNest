@@ -29,6 +29,8 @@ export const baseQuery = createApi({
   // KHÔNG dùng cho video/quiz progress hay bài nộp thực hành vì các luồng đó
   // ghi dữ liệu qua axios/antd Upload thô, không qua RTK mutation, nên tag
   // không có gì để bắt — vẫn phải refetch() thủ công như cũ.
-  tagTypes: ['PracticeTask', 'ReminderLog'],
+  // CourseRating: submitCourseRating (mutation) cần tự làm getCourseRating
+  // (query) refetch lại điểm trung bình mới ngay sau khi gửi đánh giá.
+  tagTypes: ['PracticeTask', 'ReminderLog', 'CourseRating'],
   endpoints: () => ({}),
 });

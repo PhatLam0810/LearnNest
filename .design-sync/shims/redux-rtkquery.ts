@@ -13,7 +13,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const baseQueryFetch = fetchBaseQuery({
   baseUrl: '',
-  prepareHeaders: async (headers) => headers,
+  prepareHeaders: async headers => headers,
 });
 
 export const baseQuery = createApi({

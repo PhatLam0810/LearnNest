@@ -18,6 +18,21 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
   scrollView: { gap: 16 },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 16,
+    width: '100%',
+  },
+  statIcon: {
+    color: 'var(--color-vhu-primary)',
+    fontSize: 16,
+  },
+  seeAllBtn: {
+    color: 'var(--color-vhu-primary)',
+    fontWeight: '600',
+    padding: 0,
+    height: 'auto',
+  },
   section: {
     width: '100%',
     alignSelf: 'center',
@@ -30,6 +45,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
     marginBottom: 16,
   },

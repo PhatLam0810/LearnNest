@@ -1,121 +1,107 @@
 'use client';
-import React, { useEffect } from 'react';
-import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
-import { LessonItem } from '~mdDashboard/components';
-import { useAppDispatch } from '@redux';
+import React from 'react';
+import {
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  FireOutlined,
+} from '@ant-design/icons';
+import { dashboardQuery } from '~mdDashboard/redux';
+import { useAppSelector } from '@redux';
 import { useRouter } from 'next/navigation';
-import { Banner, Tags } from './_components';
+import { AppButton } from '@components';
 import styles from './styles';
-import { View, ScrollView, Text } from 'react-native-web';
-import { AnimatePresence, motion } from 'framer-motion';
-import { authAction } from '~mdAuth/redux';
-import { messageApi } from '@hooks';
+import { View, Text } from 'react-native-web';
+import { useMyCourses } from '@/hooks/useMyCourses';
 import { useResponsive } from '@/styles/responsive';
+import ContinueLearningBanner from './_components/ContinueLearningBanner';
+import StatCard from './_components/StatCard';
+import ContinuingCourses from './_components/ContinuingCourses';
+import RoadmapCard from './_components/RoadmapCard';
 
+// Trang Chủ - dashboard cá nhân hóa: banner "tiếp tục học", 3 thẻ thống kê
+// (giờ học tuần này / bài đã hoàn thành / chuỗi ngày học), danh sách khóa
+// đang học, gợi ý AI. Trước đây trang này là 1 catalog chung (banner
+// marketing cố định + lưới toàn bộ khóa học) - catalog đầy đủ đó vẫn còn
+// nguyên ở /dashboard/lesson, Trang Chủ chỉ còn nút "Xem tất cả khóa học"
+// trỏ sang đó.
 const HomeOverview = () => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
-
-  const { data, isLoading } = dashboardQuery.useGetLessonRecommendQuery();
-  const [getLessonId] = dashboardQuery.useGetLessonByIdMutation();
-  const onClickLesson = async (id: string) => {
-    try {
-      dispatch(authAction.setIsShowLoading(true));
-      const response = await getLessonId({ id: id });
-
-      if (response.data) {
-        dispatch(dashboardAction.setLessonDetail(response.data));
-        router.push(`/dashboard/home/lesson/${id}`);
-      }
-    } catch (error) {
-      messageApi.error(error.message || 'Failed to get Lesson .');
-    } finally {
-      dispatch(authAction.setIsShowLoading(false));
-    }
-  };
-
-  useEffect(() => {
-    if (isLoading) {
-      dispatch(authAction.setIsShowLoading(true));
-    } else {
-      dispatch(authAction.setIsShowLoading(false));
-    }
-  }, [isLoading]);
-
   const { isMobile, isTablet } = useResponsive();
+  const userId = useAppSelector(
+    state => state.authReducer.tokenInfo?.userProfile?._id,
+  );
+
+  const { myCourses, loadingCourses, formatRelativeTime } = useMyCourses(
+    userId || null,
+  );
+  const { data: studyStats } = dashboardQuery.useGetStudyStatsQuery(
+    userId || '',
+    { skip: !userId },
+  );
 
   const containerStyle = {
     ...styles.container,
     padding: isMobile ? 12 : isTablet ? 16 : 20,
   };
 
-  const recommendGridStyle = {
-    ...styles.recommendGrid,
-    gridTemplateColumns: isMobile
-      ? 'repeat(1, minmax(0, 1fr))'
-      : isTablet
-        ? 'repeat(2, minmax(0, 1fr))'
-        : 'repeat(5, minmax(0, 1fr))',
-    columnGap: isMobile ? 12 : 16,
-    rowGap: isMobile ? 16 : 20,
-  };
+  const statsRowStyle = [
+    styles.statsRow,
+    isMobile ? { flexDirection: 'column' as const } : null,
+  ];
 
-  // Banner text ("MOS WORD", "HỌC REACT", "HỌC AI") không trùng tuyệt đối
-  // với title thật của lesson trong DB ("Khóa học Mos", "Khóa Học React"...),
-  // nên dùng từ khóa để dò gần đúng thay vì so sánh bằng tuyệt đối.
-  const COURSE_KEYWORDS: Record<string, string> = {
-    'MOS WORD': 'mos',
-    'HỌC REACT': 'react',
-    'HỌC AI': 'ai',
-  };
-
-  const handleBannerClick = (buttonText: string) => {
-    const keyword = COURSE_KEYWORDS[buttonText];
-    if (!keyword) return;
-
-    const foundItem = data?.recommend.find(item =>
-      item.title?.toLowerCase().includes(keyword),
-    );
-
-    if (!foundItem) {
-      messageApi.info('Khóa học này sẽ sớm ra mắt, mời bạn đón chờ nhé!');
-      return;
-    }
-    onClickLesson(foundItem._id);
-  };
+  const weeklyHours = (studyStats?.weeklyMinutes || 0) / 60;
+  const weeklyHoursLastWeek = (studyStats?.weeklyMinutesLastWeek || 0) / 60;
+  const weeklyDelta = weeklyHours - weeklyHoursLastWeek;
 
   return (
     <View style={containerStyle} aria-label="Home dashboard overview">
       <View style={styles.content}>
-        <AnimatePresence mode="popLayout">
-          <motion.div key={2}>
-            <View style={styles.section}>
-              <Banner onButtonClick={handleBannerClick} />
-            </View>
+        <ContinueLearningBanner courses={myCourses} loading={loadingCourses} />
 
-            <View style={[styles.section, styles.sectionSpacing]}>
-              <View style={styles.titleContainer}>
-                <Text
-                  style={{
-                    ...styles.title,
-                    fontSize: isMobile ? 18 : 20,
-                  }}>
-                  Khóa Học
-                </Text>
-                <Tags title="Mới" backgroundColor="#0059C7" />
-              </View>
-              <View style={recommendGridStyle}>
-                {(data?.recommend || []).map(item => (
-                  <LessonItem
-                    key={item._id}
-                    data={item}
-                    onClick={() => onClickLesson(item._id)}
-                  />
-                ))}
-              </View>
-            </View>
-          </motion.div>
-        </AnimatePresence>
+        <View style={statsRowStyle}>
+          <StatCard
+            icon={<ClockCircleOutlined style={styles.statIcon} />}
+            label="Giờ học tuần này"
+            value={`${weeklyHours.toFixed(1)} giờ`}
+            caption={
+              studyStats
+                ? `${weeklyDelta >= 0 ? '+' : ''}${weeklyDelta.toFixed(1)} giờ so với tuần trước`
+                : undefined
+            }
+            captionColor={weeklyDelta >= 0 ? '#389e0d' : undefined}
+          />
+          <StatCard
+            icon={<CheckCircleOutlined style={styles.statIcon} />}
+            label="Bài đã hoàn thành"
+            value={`${studyStats?.completedLessonsCount ?? 0}`}
+          />
+          <StatCard
+            icon={<FireOutlined style={styles.statIcon} />}
+            label="Chuỗi ngày học"
+            value={`${studyStats?.streakDays ?? 0} ngày`}
+          />
+        </View>
+
+        <View style={[styles.section, styles.sectionSpacing]}>
+          <View style={styles.titleContainer}>
+            <Text style={{ ...styles.title, fontSize: isMobile ? 18 : 20 }}>
+              Đang học
+            </Text>
+            <AppButton
+              type="text"
+              style={styles.seeAllBtn}
+              onClick={() => router.push('/dashboard/lesson')}>
+              Xem tất cả
+            </AppButton>
+          </View>
+          <ContinuingCourses
+            courses={myCourses}
+            loading={loadingCourses}
+            formatRelativeTime={formatRelativeTime}
+          />
+        </View>
+
+        <RoadmapCard />
       </View>
     </View>
   );

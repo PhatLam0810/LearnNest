@@ -12,8 +12,22 @@ const SAMPLE =
       '</svg>',
   );
 
-export const Default = () => <AppImage source={SAMPLE} width={320} height={200} />;
-export const Rounded = () => (
-  <AppImage source={SAMPLE} width={200} height={200} style={{ borderRadius: 12, overflow: 'hidden' }} />
+export const Default = () => (
+  <AppImage source={SAMPLE} width={320} height={200} />
 );
-export const Thumbnail = () => <AppImage source={SAMPLE} width={96} height={96} style={{ borderRadius: 8 }} />;
+export const Rounded = () => (
+  <AppImage
+    source={SAMPLE}
+    width={200}
+    height={200}
+    style={{ borderRadius: 12, overflow: 'hidden' }}
+  />
+);
+export const Thumbnail = () => (
+  <AppImage
+    source={SAMPLE}
+    width={96}
+    height={96}
+    style={{ borderRadius: 8 }}
+  />
+);

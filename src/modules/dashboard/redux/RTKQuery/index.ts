@@ -1,12 +1,15 @@
 import { baseQuery } from '@redux/RTKQuery';
 import {
   Category,
+  CourseRatingItem,
+  CourseRatingSummary,
   GetLessonProgressParams,
   LearningInsight,
   LessonProgressResponse,
   LessonRecommendRes,
   LibraryType,
   RoadmapStep,
+  StudyStats,
 } from './types';
 import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
@@ -265,6 +268,46 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+
+    // Trang Chủ - 3 thẻ thống kê. Controller trả object thô (không bọc
+    // trong {data:...}), giống getMyRoadmap - không dùng transformResponse.
+    getStudyStats: builder.query<StudyStats, string>({
+      query: userId => `/lesson/user/${userId}/study-stats`,
+    }),
+
+    // ---- Đánh giá khóa học ----
+    getCourseRating: builder.query<CourseRatingSummary, string>({
+      query: lessonId => `/lesson/${lessonId}/rating`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, lessonId) => [
+        { type: 'CourseRating', id: lessonId },
+      ],
+    }),
+    submitCourseRating: builder.mutation<
+      CourseRatingItem,
+      { lessonId: string; stars: number; comment?: string }
+    >({
+      query: ({ lessonId, ...body }) => ({
+        url: `/lesson/${lessonId}/rating`,
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, { lessonId }) => [
+        { type: 'CourseRating', id: lessonId },
+      ],
+    }),
+    getCourseRatings: builder.mutation<
+      { items: CourseRatingItem[]; totalRecords: number; totalPages: number },
+      { lessonId: string; pageNum?: number; pageSize?: number }
+    >({
+      query: ({ lessonId, ...body }) => ({
+        url: `/lesson/${lessonId}/ratings`,
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });
@@ -278,4 +321,8 @@ export const {
   useGetMyPracticeSubmissionsQuery,
   useGetPracticeCoursesQuery,
   useGetPracticeTaskInstructionsQuery,
+  useGetStudyStatsQuery,
+  useGetCourseRatingQuery,
+  useSubmitCourseRatingMutation,
+  useGetCourseRatingsMutation,
 } = dashboardQuery;
