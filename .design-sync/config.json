@@ -1,0 +1,30 @@
+{
+  "projectId": "83f9f1c4-4812-48ca-bda8-376d3edc4b7b",
+  "shape": "package",
+  "pkg": "webapp",
+  "globalName": "LearnNestDS",
+  "srcDir": "src/components",
+  "tsconfig": ".design-sync/shims/tsconfig.json",
+  "cssEntry": ".design-sync/shims/tokens.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "componentSrcMap": {
+    "MessageProvider": null,
+    "PageViewTracker": null,
+    "SearchProvider": null,
+    "CourseItem": null,
+    "ResumeLessonModal": null,
+    "Footer": null,
+    "AppModalSuccess": null,
+    "HeaderLayout": null,
+    "CommentSection": null,
+    "AiAdvisorWidget": null,
+    "AppHeader": null,
+    "ChatboxAi": null,
+    "Chatbox": null,
+    "FeedbackWidget": null,
+    "LessonContent": null
+  },
+  "libOverrides": {
+    "source-kit.mjs": "package-shape synth entry bundles every src file regardless of componentSrcMap; fork also excludes componentSrcMap:null dirs from the raw synth-entry file list (works around no .scss loader in lib/bundle.mjs, which must not be forked)"
+  }
+}

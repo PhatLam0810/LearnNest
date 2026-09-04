@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "baseUrl": "../..",
+    "paths": {
+      "next/font/google": ["./.design-sync/shims/next-font-google.ts"],
+      "@redux": ["./.design-sync/shims/redux.ts"],
+      "@services/api": ["./.design-sync/shims/services-api.ts"],
+      "@/redux": ["./.design-sync/shims/redux.ts"],
+      "@/services/api": ["./.design-sync/shims/services-api.ts"],
+      "@redux/RTKQuery": ["./.design-sync/shims/redux-rtkquery.ts"],
+      "@/redux/RTKQuery": ["./.design-sync/shims/redux-rtkquery.ts"]
+    }
+  }
+}

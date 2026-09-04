@@ -1,0 +1,16 @@
+/* Used ONLY by the /design-sync bundle build (cfg.cssEntry) - see
+   .design-sync/NOTES.md "next/font/google shim". Duplicates
+   src/styles/variables.css's tokens (design-sync's cssEntry is a single
+   file appended verbatim, so a relative @import back to the real file
+   isn't reliable here) plus a Google Fonts @import standing in for the
+   families next/font/google would otherwise self-host at Next.js build
+   time. Keep the :root block in sync with src/styles/variables.css by
+   hand if the brand colors change. */
+
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Inter:wght@100;200;300;400;500;600;700;800;900&family=DM+Sans:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-vhu-primary: #1d418a;
+  --color-vhu-secondary: #f0c356;
+  --color-vhu-accent: #88c1e9;
+}
