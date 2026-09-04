@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Avatar, Button, Card, Form, Upload } from 'antd';
+import { Avatar, Card, Form, Upload } from 'antd';
 import { CameraOutlined, UserOutlined } from '@ant-design/icons';
 import styles from './styles';
 import { AppButton, AppInput, AppUploadToServer } from '@components';
@@ -92,9 +92,9 @@ const ChangePassword = () => {
             </Form.Item>
           </View>
           {/* Nút lưu */}
-          <Button type="primary" htmlType="submit" style={styles.saveButton}>
+          <AppButton htmlType="submit" style={styles.saveButton}>
             Xác nhận
-          </Button>
+          </AppButton>
         </Form>
       </View>
     </Card>
