@@ -195,6 +195,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  // Nhóm 2 nút bên phải titleRow (Đánh giá khóa học + Hỏi đáp) lại với nhau
+  // để justify-content:space-between của titleRow chỉ tách title/nhóm nút,
+  // không tách rời 2 nút ra xa nhau.
+  titleRowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 0,
+  },
   layoutTitle: {
     ...typography.titleM,
     fontSize: 28,

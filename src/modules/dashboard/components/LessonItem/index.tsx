@@ -1,7 +1,12 @@
 'use client';
 import React, { useState } from 'react';
 import { Card } from 'antd';
-import { BookOutlined, DollarOutlined, TeamOutlined } from '@ant-design/icons';
+import {
+  BookOutlined,
+  DollarOutlined,
+  StarFilled,
+  TeamOutlined,
+} from '@ant-design/icons';
 import './styles.css';
 import styles from './styles';
 import { Text, View } from 'react-native-web';
@@ -18,6 +23,8 @@ type LessonItemData = {
   price: number;
   totalLibraries?: number;
   totalLearners?: number;
+  averageRating?: number;
+  ratingCount?: number;
 };
 
 type LessonItemProps = {
@@ -38,6 +45,8 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
     price,
     totalLibraries,
     totalLearners,
+    averageRating,
+    ratingCount,
   } = data || {};
   const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
   const [accessLesson, setAccessLesson] = useState(true);
@@ -83,6 +92,16 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
               <TeamOutlined style={styles.statIcon} />
               <Text style={styles.statValue}>{totalLearners}</Text>
             </View>
+            {!!ratingCount && (
+              <View style={styles.statItem}>
+                <StarFilled
+                  style={{ ...styles.statIcon, ...styles.ratingStarIcon }}
+                />
+                <Text style={styles.statValue}>
+                  {averageRating?.toFixed(1)} ({ratingCount})
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </View>

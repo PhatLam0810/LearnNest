@@ -62,6 +62,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1d418a',
   },
+  ratingStarIcon: {
+    color: '#f0c356',
+  },
   statValue: {
     ...typography.subTitle1,
     color: '#000',
