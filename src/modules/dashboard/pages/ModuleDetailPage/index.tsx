@@ -30,7 +30,6 @@ import LibraryDetailItem, {
 } from '~mdDashboard/components/LibraryDetailItem';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
 import CommentSection from '@components/CommentSection';
-import CourseRating from '@components/CourseRating';
 import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -572,7 +571,6 @@ const ModuleDetailPage = () => {
                   </View>
                   {!taskId && selectedLibrary && (
                     <View style={styles.titleRowActions}>
-                      <CourseRating lessonId={lessonDetail?._id} />
                       <CommentSection
                         postId={selectedLibrary._id}
                         type={selectedLibrary.type}
@@ -607,7 +605,6 @@ const ModuleDetailPage = () => {
                   </View>
                   {!taskId && selectedLibrary && (
                     <View style={styles.titleRowActions}>
-                      <CourseRating lessonId={lessonDetail?._id} />
                       <CommentSection
                         postId={selectedLibrary._id}
                         type={selectedLibrary.type}

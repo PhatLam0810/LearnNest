@@ -117,4 +117,5 @@ export interface CourseRatingSummary {
   averageRating: number;
   ratingCount: number;
   myRating: CourseRatingItem | null;
+  breakdown?: Record<'5' | '4' | '3' | '2' | '1', number>;
 }

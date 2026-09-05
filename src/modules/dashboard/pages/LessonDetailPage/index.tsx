@@ -31,6 +31,7 @@ import AppVideoWatchersButton from '~mdDashboard/components/VideoWatchersList/Ap
 import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
 import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
 import { useResponsive } from '@/styles/responsive';
+import CourseRatingSection from '@components/CourseRatingSection';
 
 // Style tĩnh, hoisted ra ngoài component - object literal mới mỗi render sẽ
 // làm vô hiệu useMemo bên dưới (đứng trong danh sách phụ thuộc).
@@ -731,6 +732,8 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
           </View>
         </View>
       </View>
+
+      <CourseRatingSection lessonId={lessonDetail?._id} />
 
       <Modal
         title={selectedSubLessonTitle}
