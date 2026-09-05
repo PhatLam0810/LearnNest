@@ -1,40 +1,28 @@
 'use client';
 import React from 'react';
-import { Tabs } from 'antd';
-import type { TabsProps } from 'antd';
-import { View } from 'react-native-web';
+import { View, Text } from 'react-native-web';
 import styles from './styles';
-import { ChangePassword, EditProfile, TransactionHistory } from './components';
-import './styles.scss';
-import { useRouter, useSearchParams } from 'next/navigation';
-
-const items: TabsProps['items'] = [
-  {
-    key: '1',
-    label: 'Thông tin tài khoản',
-    children: <EditProfile />,
-  },
-  {
-    key: '3',
-    label: 'Đổi mật khẩu',
-    children: <ChangePassword />,
-  },
-];
+import {
+  ChangePassword,
+  EditProfile,
+  ProfileSidebar,
+  StudyPreferences,
+} from './components';
 
 const ProfilePage: React.FC = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const tab = searchParams.get('tab') || '1'; // Lấy `tab` từ URL, mặc định là '1'
   return (
     <View style={styles.container}>
-      <View style={{ marginBottom: 12 }}>
-        <h1 style={{ margin: 0 }}>Thông tin tài khoản</h1>
+      <Text style={styles.title}>Cài Đặt</Text>
+      <View style={styles.contentRow}>
+        <View style={styles.sideCol}>
+          <ProfileSidebar />
+        </View>
+        <View style={styles.mainCol}>
+          <EditProfile />
+          <ChangePassword />
+          <StudyPreferences />
+        </View>
       </View>
-      <Tabs
-        aria-label="Profile settings tabs"
-        defaultActiveKey={tab}
-        items={items}
-      />
     </View>
   );
 };

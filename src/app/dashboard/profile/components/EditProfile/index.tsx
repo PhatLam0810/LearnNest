@@ -1,158 +1,71 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native-web';
-import { Avatar, Card, Form, Modal, Space, Upload } from 'antd';
-import { CameraOutlined, UserOutlined } from '@ant-design/icons';
-import styles from './styles';
-import { AppButton, AppInput, AppUploadToServer } from '@components';
+import React from 'react';
+import { View, Text } from 'react-native-web';
+import { Form } from 'antd';
+import { AppButton, AppInput } from '@components';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { authAction, authQuery } from '~mdAuth/redux';
-import './styles.scss';
-import { useRouter } from 'next/navigation';
+import { authAction } from '~mdAuth/redux';
+import styles from './styles';
 
+// Card "Thông tin cá nhân" trong trang Cài Đặt - chỉ giữ 4 trường theo
+// design (Họ và tên/Email/Số điện thoại/Mã sinh viên), bỏ username/bio/
+// avatar khỏi form này - avatar giờ nằm ở card hồ sơ bên sidebar.
 const EditProfile = () => {
   const dispatch = useAppDispatch();
+  const [form] = Form.useForm();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const [deleteAccount] = authQuery.useDeleteAccountMutation();
-  const [avatar, setAvatar] = useState(userProfile?.avatar);
-  const router = useRouter();
-  const [modelDelete, setModalDelete] = useState(false);
 
-  const onCloseDelete = () => {
-    setModalDelete(false);
-  };
   return (
-    <Card style={styles.container}>
-      <View style={{ flex: 1 }}>
-        <Form
-          style={styles.formContainer}
-          initialValues={userProfile}
-          onFinish={values => dispatch(authAction.updateCurrentInfo(values))}>
-          <View style={styles.formItemLayout}>
-            <Form.Item name="avatar" noStyle>
-              <AppUploadToServer showUploadList={false} onChange={setAvatar}>
-                <View>
-                  <Avatar
-                    src={avatar}
-                    size={100}
-                    icon={<UserOutlined />}
-                    style={{
-                      borderWidth: 1,
-                      borderColor: '#000',
-                      backgroundColor: 'var(--color-vhu-primary)',
-                    }}
-                  />
-                  <View style={styles.cameraWrap}>
-                    <CameraOutlined />
-                  </View>
-                </View>
-              </AppUploadToServer>
-            </Form.Item>
-            <View>
-              <Text style={styles.labelText}>{userProfile?.fullName}</Text>
-            </View>
-            <Form.Item
-              label={<Text style={styles.labelText}>User Name</Text>}
-              name="username"
-              labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-              style={{ width: '100%', margin: 0 }} // Đảm bảo Form.Item full width
-            >
-              <AppInput placeholder="Username" style={{ width: '100%' }} />
-            </Form.Item>
-            <Space
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                width: '100%',
-              }}>
-              <Form.Item
-                label={<Text style={styles.labelText}>Họ và Tên</Text>}
-                name="fullName"
-                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-                style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
-              >
-                <AppInput disabled style={{ width: '100%' }} />
-              </Form.Item>
-              <Form.Item
-                label={<Text style={styles.labelText}>Email</Text>}
-                name="email"
-                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-                style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
-              >
-                <AppInput
-                  disabled
-                  placeholder="Email"
-                  style={{ width: '100%' }}
-                />
-              </Form.Item>
-            </Space>
-            <Space
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                width: '100%',
-              }}>
-              <Form.Item
-                label={<Text style={styles.labelText}>Mã số sinh viên</Text>}
-                name="studentId"
-                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-                style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
-              >
-                <AppInput disabled style={{ width: '100%' }} />
-              </Form.Item>
-              <Form.Item
-                label={<Text style={styles.labelText}>Số điện thoại</Text>}
-                name="phoneNumber"
-                labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-                style={{ width: '100%', margin: 0, flex: 1 }} // Đảm bảo Form.Item full width
-              >
-                <AppInput style={{ width: '100%' }} />
-              </Form.Item>
-            </Space>
-            <Form.Item
-              label={<Text style={styles.labelText}>Mô tả</Text>}
-              name="bio"
-              labelCol={{ span: 24 }} // Đặt label chiếm toàn bộ hàng
-              style={{ width: '100%', margin: 0 }} // Đảm bảo Form.Item full width
-            >
-              <AppInput
-                style={{ flex: 1, minHeight: '150px', width: '100%' }}
-                type="TextArea"
-                maxLength={250}
-                placeholder="Mô tả ngắn gọn"
-              />
-            </Form.Item>
-            {/* <View style={styles.buttonDeleteContainer}>
-              <Button
-                onClick={() => {
-                  setModalDelete(true);
-                }}
-                style={styles.buttonDelete}>
-                Delete Account
-              </Button>
-            </View> */}
-          </View>
-          {/* Nút lưu */}
-          <AppButton htmlType="submit" style={styles.saveButton}>
-            Lưu cài đặt
+    <View style={styles.container}>
+      <Text style={styles.title}>Thông tin cá nhân</Text>
+      <Form
+        form={form}
+        style={styles.formContainer}
+        initialValues={userProfile}
+        onFinish={values => dispatch(authAction.updateCurrentInfo(values))}>
+        <View style={styles.fieldGrid}>
+          <Form.Item
+            label={<Text style={styles.labelText}>Họ và tên</Text>}
+            name="fullName"
+            labelCol={{ span: 24 }}
+            style={styles.fieldItem}>
+            <AppInput style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item
+            label={<Text style={styles.labelText}>Email</Text>}
+            name="email"
+            labelCol={{ span: 24 }}
+            style={styles.fieldItem}>
+            <AppInput disabled style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item
+            label={<Text style={styles.labelText}>Số điện thoại</Text>}
+            name="phoneNumber"
+            labelCol={{ span: 24 }}
+            style={styles.fieldItem}>
+            <AppInput style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item
+            label={<Text style={styles.labelText}>Mã sinh viên</Text>}
+            name="studentId"
+            labelCol={{ span: 24 }}
+            style={styles.fieldItem}>
+            <AppInput disabled style={{ width: '100%' }} />
+          </Form.Item>
+        </View>
+        <View style={styles.actionsRow}>
+          <AppButton
+            style={styles.cancelButton}
+            onClick={() => form.resetFields()}>
+            Hủy
           </AppButton>
-        </Form>
-      </View>
-      <Modal
-        title="Delete Lesson"
-        open={modelDelete}
-        onCancel={onCloseDelete}
-        onOk={() => {
-          deleteAccount({ Userid: userProfile?._id })
-            .unwrap()
-            .then(res => {
-              router.replace('/login');
-            });
-        }}>
-        <Text>Do you want delete this account ?</Text>
-      </Modal>
-    </Card>
+          <AppButton htmlType="submit" style={styles.saveButton}>
+            Lưu thay đổi
+          </AppButton>
+        </View>
+      </Form>
+    </View>
   );
 };
 

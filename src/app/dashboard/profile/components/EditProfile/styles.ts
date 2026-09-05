@@ -1,74 +1,57 @@
-import { StyleSheet, typography } from '@styles';
+import { StyleSheet } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    padding: 20,
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 8,
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: '#eef0f5',
+    boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
+    padding: 24,
+  },
+  title: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#1c2536',
+    marginBottom: 16,
   },
   formContainer: {
+    width: '100%',
+  },
+  fieldGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    columnGap: 20,
+  },
+  fieldItem: {
     flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    height: '100%',
-    justifyContent: 'space-between',
-    gap: 16,
-  },
-  formItemLayout: {
-    width: '100%',
-    alignItems: 'center',
-    gap: 16,
-  },
-  cameraWrap: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: '#F9F9F9',
-    borderRadius: 100,
-    width: 32,
-    height: 32,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  inputContainer: {
-    width: '100%',
-  },
-  label: {
-    ...typography.titleS,
-    marginTop: 10,
-    marginBottom: 10,
-    display: 'block',
-  },
-  saveButton: {
-    width: '100%',
-    height: 48,
-    ...typography.button,
-    backgroundColor: 'var(--color-vhu-primary)',
-    color: '#FFF',
-  },
-  buttonDeleteContainer: {
-    position: 'absolute',
-    right: 0,
-  },
-  buttonDelete: {
-    width: '100%',
-    ...typography.button,
-    backgroundColor: 'var(--color-vhu-primary)',
-    color: '#FFF',
+    minWidth: 220,
+    margin: 0,
+    marginBottom: 16,
   },
   labelText: {
-    ...typography.button,
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#5b6478',
   },
-  fullNameText: {
-    ...typography.subTitle1,
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: 4,
+  },
+  cancelButton: {
+    width: 'auto',
+    backgroundColor: '#fff',
+    borderColor: '#d7dbe4',
+    color: '#212121',
+  },
+  saveButton: {
+    width: 'auto',
+    backgroundColor: 'var(--color-vhu-primary)',
+    borderColor: 'var(--color-vhu-primary)',
+    color: '#fff',
   },
 });
 export default styles;
