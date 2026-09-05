@@ -188,6 +188,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#000',
   },
+  contentListCard: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
+  },
   disabledButton: {
     opacity: 0.5,
   },
@@ -263,6 +270,63 @@ const styles = StyleSheet.create({
   premiumIcon: {
     color: '#FFF',
     // fontSize: isMobile ? 20 : 24, // Handled dynamically
+  },
+  // "table1" = thẻ ảnh + tiêu đề + đánh giá + mô tả khóa học, gộp chung 1
+  // card theo design - trước đây ảnh nằm riêng ở sidebar, tiêu đề/mô tả
+  // đứng ngoài row 2 cột, tách rời trông không giống design.
+  table1Card: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
+    marginBottom: 24,
+  },
+  table1Thumbnail: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: 'gray',
+    marginBottom: 16,
+  },
+  // "table2" = % tiến độ + nút tiếp tục, "table3" = kỹ năng đạt được - 2
+  // card riêng trong sidebar theo design (trước đây gộp chung 1 khối
+  // không viền/không nền với ảnh khóa học).
+  table2Card: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
+  },
+  table3Card: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
+    gap: 12,
+  },
+  table3SkillList: {
+    gap: 10,
+  },
+  table3SkillRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  premiumInline: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f05123',
+    borderRadius: 8,
+    width: 32,
+    height: 32,
+    marginBottom: 12,
+  },
+  premiumIconInline: {
+    color: '#fff',
+    fontSize: 18,
   },
 });
 

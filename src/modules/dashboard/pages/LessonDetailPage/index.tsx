@@ -622,6 +622,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               <View
                 style={{
                   ...styles.lessonContent,
+                  ...styles.contentListCard,
                   maxWidth: isMobile ? '100%' : '90%',
                 }}>
                 <Text
@@ -648,85 +649,134 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               </View>
             </>
           )}
-          <Text
-            style={{
-              ...styles.title,
-              fontSize: isMobile ? 18 : isTablet ? 24 : 32,
-            }}>
-            {lessonDetail?.title.trim()}
-          </Text>
-          <View style={styles.metaRow}>
-            <Text style={styles.metaText}>
-              {lessonDetail?.totalLibraries} bài
-            </Text>
-            {!!ratingSummary?.ratingCount && (
-              <>
-                <Text style={styles.metaDot}>·</Text>
-                <StarFilled style={styles.metaStarIcon} />
-                <Text style={styles.metaText}>
-                  {ratingSummary.averageRating.toFixed(1)} (
-                  {ratingSummary.ratingCount} đánh giá)
-                </Text>
-              </>
-            )}
-          </View>
-          <View style={contentRowStyle}>
-            <View style={mainColumnStyle}>
+          {isMobile && (
+            <>
               <Text
                 style={{
-                  ...styles.description,
-                  maxWidth: isMobile ? '100%' : '90%',
-                  marginTop: 12,
-                  fontSize: isMobile ? 16 : 18,
+                  ...styles.title,
+                  fontSize: 18,
                 }}>
-                {lessonDetail?.description}
+                {lessonDetail?.title.trim()}
               </Text>
-              <View style={styles.paddingBottom10}>
+              <View style={styles.metaRow}>
+                <Text style={styles.metaText}>
+                  {lessonDetail?.totalLibraries} bài
+                </Text>
+                {!!ratingSummary?.ratingCount && (
+                  <>
+                    <Text style={styles.metaDot}>·</Text>
+                    <StarFilled style={styles.metaStarIcon} />
+                    <Text style={styles.metaText}>
+                      {ratingSummary.averageRating.toFixed(1)} (
+                      {ratingSummary.ratingCount} đánh giá)
+                    </Text>
+                  </>
+                )}
+              </View>
+            </>
+          )}
+          <View style={contentRowStyle}>
+            <View style={mainColumnStyle}>
+              {!isMobile && (
+                <View style={styles.table1Card}>
+                  <View style={styles.table1Thumbnail}>
+                    <LessonThumbnail thumbnail={lessonDetail.thumbnail} />
+                  </View>
+                  <Text
+                    style={{
+                      ...styles.title,
+                      fontSize: isTablet ? 24 : 32,
+                    }}>
+                    {lessonDetail?.title.trim()}
+                  </Text>
+                  <View style={styles.metaRow}>
+                    <Text style={styles.metaText}>
+                      {lessonDetail?.totalLibraries} bài
+                    </Text>
+                    {!!ratingSummary?.ratingCount && (
+                      <>
+                        <Text style={styles.metaDot}>·</Text>
+                        <StarFilled style={styles.metaStarIcon} />
+                        <Text style={styles.metaText}>
+                          {ratingSummary.averageRating.toFixed(1)} (
+                          {ratingSummary.ratingCount} đánh giá)
+                        </Text>
+                      </>
+                    )}
+                  </View>
+                  <Text
+                    style={{
+                      ...styles.description,
+                      marginTop: 12,
+                      fontSize: 18,
+                    }}>
+                    {lessonDetail?.description}
+                  </Text>
+                </View>
+              )}
+              {isMobile && (
                 <Text
                   style={{
-                    ...styles.whatLearnTitle,
-                    fontSize: isMobile ? 18 : 24,
-                  }}>
-                  Kỹ năng đạt được:
-                </Text>
-                <FlatList
-                  data={lessonDetail?.learnedSkills}
-                  numColumns={numColumns}
-                  key={numColumns}
-                  keyExtractor={(item, index) => index.toString()}
-                  style={{
-                    maxWidth: isMobile ? '100%' : '90%',
+                    ...styles.description,
+                    maxWidth: '100%',
                     marginTop: 12,
-                  }}
-                  renderItem={({ item }) => (
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        margin: 5,
-                        flex: 1,
-                      }}>
-                      <CheckOutlined
+                    fontSize: 16,
+                  }}>
+                  {lessonDetail?.description}
+                </Text>
+              )}
+              {isMobile && (
+                <View style={styles.paddingBottom10}>
+                  <Text
+                    style={{
+                      ...styles.whatLearnTitle,
+                      fontSize: 18,
+                    }}>
+                    Kỹ năng đạt được:
+                  </Text>
+                  <FlatList
+                    data={lessonDetail?.learnedSkills}
+                    numColumns={numColumns}
+                    key={numColumns}
+                    keyExtractor={(item, index) => index.toString()}
+                    style={{
+                      maxWidth: '100%',
+                      marginTop: 12,
+                    }}
+                    renderItem={({ item }) => (
+                      <View
                         style={{
-                          marginRight: 8,
-                          color: '#f05123',
-                          fontWeight: '500',
-                        }}
-                      />
-                      <Text style={styles.learnedSkillText}>
-                        {item.replace(/\n+/g, '\n')}
-                      </Text>
-                    </View>
-                  )}
-                />
-              </View>
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          margin: 5,
+                          flex: 1,
+                        }}>
+                        <CheckOutlined
+                          style={{
+                            marginRight: 8,
+                            color: '#f05123',
+                            fontWeight: '500',
+                          }}
+                        />
+                        <Text style={styles.learnedSkillText}>
+                          {item.replace(/\n+/g, '\n')}
+                        </Text>
+                      </View>
+                    )}
+                  />
+                </View>
+              )}
               {!isMobile && (
                 <>
-                  <View style={styles.lessonContent}>
+                  <View
+                    style={{
+                      ...styles.lessonContent,
+                      ...styles.contentListCard,
+                    }}>
                     <Text
                       style={{
                         ...styles.lessonContentTitle,
-                        fontSize: isMobile ? 16 : 24,
+                        fontSize: 24,
                       }}>
                       Nội dung khóa học
                     </Text>
@@ -751,25 +801,13 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
             </View>
             {!isMobile && (
               <View style={{ ...sideColumnStyle, ...styles.sideColumnGap }}>
-                <View
-                  style={{
-                    ...styles.thumbnailCard,
-                    minHeight: isMobile ? 200 : 260,
-                  }}>
-                  {!accessLesson && (
-                    <View style={styles.premium}>
-                      <DollarOutlined
-                        style={{
-                          ...styles.premiumIcon,
-                          fontSize: isMobile ? 20 : 24,
-                        }}
-                      />
-                    </View>
-                  )}
-                  <LessonThumbnail thumbnail={lessonDetail.thumbnail} />
-                </View>
                 {!accessLesson ? (
-                  <View>
+                  <View style={styles.table2Card}>
+                    {!accessLesson && (
+                      <View style={styles.premiumInline}>
+                        <DollarOutlined style={styles.premiumIconInline} />
+                      </View>
+                    )}
                     <button
                       className="button lesson-pill-button"
                       onClick={() => {
@@ -787,7 +825,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     </Text>
                   </View>
                 ) : (
-                  <View>
+                  <View style={styles.table2Card}>
                     {hasContent && totalContentCount > 0 && (
                       <View style={styles.progressWrap}>
                         <View style={styles.progressRow}>
@@ -832,6 +870,29 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                     <Text style={styles.totalLibrary}>
                       Tổng số bài học: {lessonDetail.totalLibraries}
                     </Text>
+                  </View>
+                )}
+                {!!lessonDetail?.learnedSkills?.length && (
+                  <View style={styles.table3Card}>
+                    <Text style={styles.whatLearnTitle}>Kỹ năng đạt được:</Text>
+                    <View style={styles.table3SkillList}>
+                      {lessonDetail.learnedSkills.map(
+                        (item: string, idx: number) => (
+                          <View key={idx} style={styles.table3SkillRow}>
+                            <CheckOutlined
+                              style={{
+                                marginRight: 8,
+                                color: '#f05123',
+                                fontWeight: '500',
+                              }}
+                            />
+                            <Text style={styles.learnedSkillText}>
+                              {item.replace(/\n+/g, '\n')}
+                            </Text>
+                          </View>
+                        ),
+                      )}
+                    </View>
                   </View>
                 )}
               </View>
