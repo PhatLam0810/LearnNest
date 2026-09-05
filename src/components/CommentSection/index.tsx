@@ -65,12 +65,21 @@ type CommentItem = {
 interface CommentSectionProps {
   postId: string;
   type: string;
+  // true = mount thẳng nội dung bình luận vào chỗ gọi (dùng cho tab "Thảo
+  // luận" trên ModuleDetailPage) - không có nút nổi/Drawer, luôn "mở".
+  // false/undefined (mặc định) = giữ nguyên hành vi cũ: nút "Hỏi đáp" +
+  // Drawer trượt từ phải.
+  inline?: boolean;
 }
 
 const displayName = (u: CommentUser | undefined, myId?: string) =>
   u?._id === myId ? 'Bạn' : `${u?.firstName ?? ''} ${u?.lastName ?? ''}`.trim();
 
-const CommentSection: React.FC<CommentSectionProps> = ({ postId, type }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({
+  postId,
+  type,
+  inline,
+}) => {
   const socket = useSocket();
   const userProfile = useAppSelector(
     state => state.authReducer.tokenInfo?.userProfile,
@@ -449,10 +458,112 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, type }) => {
     );
   };
 
+  const bodyContent = (
+    <View style={{ gap: 18 }}>
+      {replyTo && (
+        <View style={styles.replyingBanner}>
+          <Text style={styles.replyingText}>
+            Đang trả lời {displayName(replyTo.user, userProfile?._id)}
+          </Text>
+          <Text style={styles.actionLink} onPress={() => setReplyTo(null)}>
+            Hủy
+          </Text>
+        </View>
+      )}
+
+      {pendingImages.length > 0 && (
+        <View style={styles.pendingImagesRow}>
+          {pendingImages.map(img => (
+            <View key={img.url} style={styles.pendingImageWrap}>
+              <AntImage
+                src={img.url}
+                width={56}
+                height={56}
+                preview={false}
+                style={{ objectFit: 'cover', borderRadius: 8 }}
+              />
+              <Text
+                style={styles.pendingImageRemove}
+                onPress={() => handleRemovePendingImage(img.url)}>
+                ×
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      <View style={styles.inputRow}>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          onChange={handleFilesSelected}
+        />
+        <View style={styles.textAreaWrap}>
+          <AppInput
+            type="TextArea"
+            autoSize={{ minRows: 1, maxRows: 6 }}
+            placeholder="Nhập bình luận mới của bạn"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            style={{ height: 'auto', minHeight: 56, paddingRight: 40 }}
+          />
+          <Text
+            style={[
+              styles.attachBtnOverlay,
+              (uploadingImages || pendingImages.length >= MAX_COMMENT_IMAGES) &&
+                styles.attachBtnDisabled,
+            ]}
+            onPress={handlePickImages}>
+            {uploadingImages ? (
+              <LoadingOutlined />
+            ) : (
+              <PictureOutlined
+                style={
+                  pendingImages.length > 0
+                    ? styles.attachBtnActiveIcon
+                    : undefined
+                }
+              />
+            )}
+          </Text>
+        </View>
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<SendOutlined />}
+          disabled={!text.trim()}
+          onClick={handleSend}
+        />
+      </View>
+
+      <View style={styles.list}>
+        {!loading && topLevel.length === 0 && (
+          <Text style={styles.empty}>
+            Chưa có bình luận nào — hãy là người đầu tiên.
+          </Text>
+        )}
+        {topLevel.map(c => renderComment(c))}
+      </View>
+    </View>
+  );
+
+  if (inline) {
+    return bodyContent;
+  }
+
   return (
     <>
-      {/* Inline ngay trong hàng tiêu đề bài học, cạnh title - không còn là
-          nút nổi/portal nữa, mount tại đúng chỗ ModuleDetailPage đặt. */}
+      {/* Nút nổi cạnh tiêu đề bài học, mở Drawer trượt từ phải - hành vi cũ
+          khi KHÔNG dùng dạng tab (vd màn quiz vẫn dùng nút này). */}
       <View style={styles.inlineTrigger} onClick={() => setOpen(true)}>
         <MessageOutlined style={{ color: '#fff', fontSize: 14 }} />
         <Text style={styles.fabText}>Hỏi đáp</Text>
@@ -474,102 +585,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, type }) => {
           header: { padding: '18px 24px' },
           body: { padding: '20px 24px 24px' },
         }}>
-        <View style={{ gap: 18 }}>
-          {replyTo && (
-            <View style={styles.replyingBanner}>
-              <Text style={styles.replyingText}>
-                Đang trả lời {displayName(replyTo.user, userProfile?._id)}
-              </Text>
-              <Text style={styles.actionLink} onPress={() => setReplyTo(null)}>
-                Hủy
-              </Text>
-            </View>
-          )}
-
-          {pendingImages.length > 0 && (
-            <View style={styles.pendingImagesRow}>
-              {pendingImages.map(img => (
-                <View key={img.url} style={styles.pendingImageWrap}>
-                  <AntImage
-                    src={img.url}
-                    width={56}
-                    height={56}
-                    preview={false}
-                    style={{ objectFit: 'cover', borderRadius: 8 }}
-                  />
-                  <Text
-                    style={styles.pendingImageRemove}
-                    onPress={() => handleRemovePendingImage(img.url)}>
-                    ×
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-
-          <View style={styles.inputRow}>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handleFilesSelected}
-            />
-            <View style={styles.textAreaWrap}>
-              <AppInput
-                type="TextArea"
-                autoSize={{ minRows: 1, maxRows: 6 }}
-                placeholder="Nhập bình luận mới của bạn"
-                value={text}
-                onChange={e => setText(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSend();
-                  }
-                }}
-                style={{ height: 'auto', minHeight: 56, paddingRight: 40 }}
-              />
-              <Text
-                style={[
-                  styles.attachBtnOverlay,
-                  (uploadingImages ||
-                    pendingImages.length >= MAX_COMMENT_IMAGES) &&
-                    styles.attachBtnDisabled,
-                ]}
-                onPress={handlePickImages}>
-                {uploadingImages ? (
-                  <LoadingOutlined />
-                ) : (
-                  <PictureOutlined
-                    style={
-                      pendingImages.length > 0
-                        ? styles.attachBtnActiveIcon
-                        : undefined
-                    }
-                  />
-                )}
-              </Text>
-            </View>
-            <Button
-              type="primary"
-              shape="circle"
-              icon={<SendOutlined />}
-              disabled={!text.trim()}
-              onClick={handleSend}
-            />
-          </View>
-
-          <View style={styles.list}>
-            {!loading && topLevel.length === 0 && (
-              <Text style={styles.empty}>
-                Chưa có bình luận nào — hãy là người đầu tiên.
-              </Text>
-            )}
-            {topLevel.map(c => renderComment(c))}
-          </View>
-        </View>
+        {bodyContent}
       </Drawer>
     </>
   );

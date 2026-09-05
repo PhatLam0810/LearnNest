@@ -17,11 +17,13 @@ import {
 import styles from './styles';
 import {
   CaretRightOutlined,
+  FilePdfOutlined,
   FileTextOutlined,
+  PictureOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { Button, Collapse, CollapseProps, Modal, Tag } from 'antd';
+import { Button, Collapse, CollapseProps, Modal, Tabs, Tag } from 'antd';
 import { convertDurationToTime } from '@utils';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { useResponsive } from '@/styles/responsive';
@@ -600,6 +602,18 @@ const ModuleDetailPage = () => {
     ? Math.round(selectedLibrary.duration / 60)
     : 0;
 
+  // Tab "Tài liệu" - các mục PDF/Image nằm CÙNG MODULE với video đang xem
+  // (vd slide bài giảng đính kèm) - dữ liệu thật sẵn có trong
+  // lessonDetail.modules, không phải khái niệm riêng cần API mới.
+  const currentModule = lessonDetail?.modules?.find((m: any) =>
+    (m.libraries || []).some((l: any) => l._id === selectedLibrary?._id),
+  );
+  const moduleDocuments = (currentModule?.libraries || []).filter(
+    (l: any) =>
+      l._id !== selectedLibrary?._id &&
+      (l.type === 'PDF' || l.type === 'Image'),
+  );
+
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
       {contextHolder}
@@ -666,25 +680,74 @@ const ModuleDetailPage = () => {
                       {selectedLibrary?.title}
                     </Text>
                   </View>
-                  {!taskId && selectedLibrary && (
-                    <View style={styles.titleRowActions}>
-                      <CommentSection
-                        postId={selectedLibrary._id}
-                        type={selectedLibrary.type}
-                      />
-                    </View>
-                  )}
                 </View>
                 <Text style={styles.description}>
                   {selectedLibrary?.description}
                 </Text>
-                {!!selectedLibrary?.note && (
-                  <View style={styles.noteBox}>
-                    <Text style={styles.noteBoxTitle}>Ghi chú bài học</Text>
-                    <Text style={styles.noteBoxText}>
-                      {selectedLibrary.note}
-                    </Text>
-                  </View>
+                {!taskId && selectedLibrary && (
+                  <Tabs
+                    style={styles.contentTabs}
+                    items={[
+                      {
+                        key: 'note',
+                        label: 'Ghi chú bài học',
+                        children: selectedLibrary.note ? (
+                          <Text style={styles.noteBoxText}>
+                            {selectedLibrary.note}
+                          </Text>
+                        ) : (
+                          <Text style={styles.tabEmptyText}>
+                            Bài học này chưa có ghi chú.
+                          </Text>
+                        ),
+                      },
+                      {
+                        key: 'documents',
+                        label: `Tài liệu${moduleDocuments.length ? ` (${moduleDocuments.length})` : ''}`,
+                        children:
+                          moduleDocuments.length > 0 ? (
+                            <View style={styles.documentList}>
+                              {moduleDocuments.map((doc: any) => (
+                                <View
+                                  key={doc._id}
+                                  onClick={() => handleSelectLibrary(doc)}
+                                  style={styles.documentRow}>
+                                  {doc.type === 'PDF' ? (
+                                    <FilePdfOutlined
+                                      style={styles.documentIcon}
+                                    />
+                                  ) : (
+                                    <PictureOutlined
+                                      style={styles.documentIcon}
+                                    />
+                                  )}
+                                  <Text
+                                    style={styles.documentTitle}
+                                    numberOfLines={1}>
+                                    {doc.title}
+                                  </Text>
+                                </View>
+                              ))}
+                            </View>
+                          ) : (
+                            <Text style={styles.tabEmptyText}>
+                              Bài học này chưa có tài liệu đính kèm.
+                            </Text>
+                          ),
+                      },
+                      {
+                        key: 'discussion',
+                        label: 'Thảo luận',
+                        children: (
+                          <CommentSection
+                            postId={selectedLibrary._id}
+                            type={selectedLibrary.type}
+                            inline
+                          />
+                        ),
+                      },
+                    ]}
+                  />
                 )}
                 {totalContentCount > 0 && (
                   <View style={styles.contentNavRow}>
