@@ -130,6 +130,54 @@ const styles = StyleSheet.create({
     marginTop: 16,
     textAlign: 'center',
   },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 4,
+  },
+  metaText: {
+    ...typography.body2,
+    color: '#8D8D8D',
+  },
+  metaDot: {
+    ...typography.body2,
+    color: '#8D8D8D',
+  },
+  metaStarIcon: {
+    color: '#f0c356',
+    fontSize: 13,
+  },
+  progressWrap: {
+    width: '100%',
+    gap: 8,
+    marginBottom: 12,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  progressLabel: {
+    ...typography.body2,
+    color: '#212121',
+  },
+  progressPercent: {
+    ...typography.subTitle1,
+    color: 'var(--color-vhu-primary)',
+  },
+  progressTrack: {
+    width: '100%',
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: '#f0f0f0',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: '#FFA726',
+  },
   lessonContent: {
     gap: 12,
     width: '100%',

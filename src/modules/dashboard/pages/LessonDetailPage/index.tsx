@@ -6,6 +6,7 @@ import {
   CaretRightOutlined,
   DollarOutlined,
   FileTextOutlined,
+  StarFilled,
 } from '@ant-design/icons';
 import './styles.scss';
 
@@ -56,6 +57,12 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     id: id,
   });
   const [isVisibleModalSuccess, setIsVisibleModalSuccess] = useState(false);
+  // Dùng chung cache với CourseRatingSection (cùng 1 lessonId) - RTK Query
+  // gộp lại thành 1 request, không gọi API 2 lần.
+  const { data: ratingSummary } = dashboardQuery.useGetCourseRatingQuery(
+    id || '',
+    { skip: !id },
+  );
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [triggerAccessLesson] = dashboardQuery.useAccessLessonMutation();
   const [checkRegistrationLesson] =
@@ -168,6 +175,17 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     }
   };
 
+  // Đã học xong mục này chưa - cùng logic với isTaskAccessible (dùng
+  // videoCompletedBySubLesson/quizPassedByLibrary), tách riêng vì cần dùng
+  // độc lập để tính % tiến độ + tìm "bài tiếp theo", không chỉ để khoá/mở.
+  const isItemCompleted = (item: { kind: 'library' | 'task'; data: any }) => {
+    if (item.kind === 'task') return !!item.data.hasPassed;
+    if (item.data.type === 'Text') {
+      return !!quizPassedByLibrary?.[item.data._id];
+    }
+    return !!videoCompletedBySubLesson?.[item.data._id];
+  };
+
   const handleStartLesson = async () => {
     if (!userProfile?._id || !lessonDetail?._id) {
       messageApi.open({
@@ -199,16 +217,31 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       // nên hễ phần học đầu tiên không có video nào (toàn bài thực hành) là
       // báo nhầm "chưa có nội dung", dù chính module đó (hoặc module sau)
       // thật ra có bài tập để làm ngay.
+      // "Tiếp tục" (nút đổi tên khi đã học dở) phải nhảy tới mục CHƯA HOÀN
+      // THÀNH đầu tiên, không phải luôn về mục đầu khóa - fallback về mục
+      // đầu nếu đã xong hết hoặc chưa có dữ liệu tiến độ nào.
       let firstModuleWithContent: any = null;
       let firstContentItem: { kind: 'library' | 'task'; data: any } | null =
         null;
+      let fallbackModule: any = null;
+      let fallbackItem: { kind: 'library' | 'task'; data: any } | null = null;
       for (const m of modules) {
         const items = getModuleContentItems(m);
-        if (items.length > 0) {
+        if (items.length === 0) continue;
+        if (!fallbackModule) {
+          fallbackModule = m;
+          fallbackItem = items[0];
+        }
+        const incomplete = items.find(it => !isItemCompleted(it));
+        if (incomplete) {
           firstModuleWithContent = m;
-          firstContentItem = items[0];
+          firstContentItem = incomplete;
           break;
         }
+      }
+      if (!firstContentItem) {
+        firstModuleWithContent = fallbackModule;
+        firstContentItem = fallbackItem;
       }
 
       if (!firstModuleWithContent || !firstContentItem) {
@@ -260,6 +293,23 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   // ModuleDetailPage.
   const getLessonContentItems = () =>
     (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
+
+  // % tiến độ khóa học + nhãn nút "Bắt đầu"/"Tiếp tục bài N" trên thẻ khóa
+  // học - theo đúng thiết kế mới (banner "Đã hoàn thành X/Y bài Z%").
+  const lessonSeq = getLessonContentItems();
+  const totalContentCount = lessonSeq.length;
+  const completedContentCount = lessonSeq.filter(isItemCompleted).length;
+  const progressPercent =
+    totalContentCount > 0
+      ? Math.round((completedContentCount / totalContentCount) * 100)
+      : 0;
+  const firstIncompleteContentIndex = lessonSeq.findIndex(
+    it => !isItemCompleted(it),
+  );
+  const continueButtonLabel =
+    completedContentCount > 0 && firstIncompleteContentIndex >= 0
+      ? `Tiếp tục bài ${firstIncompleteContentIndex + 1}`
+      : 'Bắt đầu khóa học';
 
   // Logic thật nằm ở utils/isTaskAccessible.ts (dùng chung với
   // ModuleDetailPage, có test riêng) — wrapper này chỉ khép kín state của
@@ -522,6 +572,27 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   </View>
                 ) : (
                   <View>
+                    {hasContent && totalContentCount > 0 && (
+                      <View style={styles.progressWrap}>
+                        <View style={styles.progressRow}>
+                          <Text style={styles.progressLabel}>
+                            Đã hoàn thành {completedContentCount}/
+                            {totalContentCount} bài
+                          </Text>
+                          <Text style={styles.progressPercent}>
+                            {progressPercent}%
+                          </Text>
+                        </View>
+                        <View style={styles.progressTrack}>
+                          <View
+                            style={{
+                              ...styles.progressFill,
+                              width: `${progressPercent}%`,
+                            }}
+                          />
+                        </View>
+                      </View>
+                    )}
                     <button
                       className="button lesson-pill-button"
                       disabled={!hasContent}
@@ -534,7 +605,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <Icon name="liveTV" className="button-icon" />
                       <span className="label">
                         {hasContent
-                          ? 'Bắt đầu khóa học'
+                          ? continueButtonLabel
                           : 'Sẽ có trong tương lai'}
                       </span>
                     </button>
@@ -584,6 +655,21 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
             }}>
             {lessonDetail?.title.trim()}
           </Text>
+          <View style={styles.metaRow}>
+            <Text style={styles.metaText}>
+              {lessonDetail?.totalLibraries} bài
+            </Text>
+            {!!ratingSummary?.ratingCount && (
+              <>
+                <Text style={styles.metaDot}>·</Text>
+                <StarFilled style={styles.metaStarIcon} />
+                <Text style={styles.metaText}>
+                  {ratingSummary.averageRating.toFixed(1)} (
+                  {ratingSummary.ratingCount} đánh giá)
+                </Text>
+              </>
+            )}
+          </View>
           <View style={contentRowStyle}>
             <View style={mainColumnStyle}>
               <Text
@@ -702,6 +788,27 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                   </View>
                 ) : (
                   <View>
+                    {hasContent && totalContentCount > 0 && (
+                      <View style={styles.progressWrap}>
+                        <View style={styles.progressRow}>
+                          <Text style={styles.progressLabel}>
+                            Đã hoàn thành {completedContentCount}/
+                            {totalContentCount} bài
+                          </Text>
+                          <Text style={styles.progressPercent}>
+                            {progressPercent}%
+                          </Text>
+                        </View>
+                        <View style={styles.progressTrack}>
+                          <View
+                            style={{
+                              ...styles.progressFill,
+                              width: `${progressPercent}%`,
+                            }}
+                          />
+                        </View>
+                      </View>
+                    )}
                     <button
                       className="button lesson-pill-button"
                       disabled={!hasContent}
@@ -714,7 +821,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                       <Icon name="liveTV" className="button-icon" />
                       <span className="label">
                         {hasContent
-                          ? 'Bắt đầu khóa học'
+                          ? continueButtonLabel
                           : 'Sẽ có trong tương lai'}
                       </span>
                     </button>
