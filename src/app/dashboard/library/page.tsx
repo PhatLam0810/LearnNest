@@ -131,6 +131,17 @@ const LibraryList = () => {
     (s: any) => s.authReducer?.tokenInfo?.userProfile,
   );
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
+  // getAllLibrary (danh sách) cố tình bỏ questionList để bảng nhẹ hơn - bài
+  // trắc nghiệm (type Text) phải gọi riêng lấy đủ câu hỏi khi mở xem trước,
+  // nếu không form làm bài luôn trống dù DB có câu hỏi thật.
+  const { data: libraryDetail } = dashboardQuery.useGetLibraryDetailQuery(
+    selectedItem?._id || '',
+    { skip: !open || !selectedItem?._id || selectedItem?.type !== 'Text' },
+  );
+  const activeItem =
+    libraryDetail && libraryDetail._id === selectedItem?._id
+      ? libraryDetail
+      : selectedItem;
 
   useEffect(() => {
     const filter = TYPE_FILTERS.find(t => t.key === activeType)?.filter;
@@ -188,7 +199,7 @@ const LibraryList = () => {
             <LibraryDetailItem
               key={selectedItem._id}
               data={selectedItem}
-              dataQuestion={selectedItem.questionList}
+              dataQuestion={activeItem?.questionList}
               onClickSubmit={handleQuizSubmit}
             />
           </View>

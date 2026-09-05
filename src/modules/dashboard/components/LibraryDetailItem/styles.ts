@@ -201,6 +201,82 @@ const styles = StyleSheet.create({
     padding: 12,
   },
 
+  quizInfoCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+  },
+
+  quizInfoTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#111827',
+  },
+
+  quizInfoSubtitle: {
+    fontSize: 13,
+    color: '#8D8D8D',
+    marginTop: 4,
+  },
+
+  quizProgressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+
+  quizProgressLabel: {
+    fontSize: 13,
+    color: '#374151',
+    fontWeight: '500',
+  },
+
+  quizProgressTrack: {
+    width: '100%',
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: '#e5e7eb',
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+
+  quizProgressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: '#1d418a',
+  },
+
+  quizNavButton: {
+    height: 46,
+    borderRadius: 14,
+    paddingLeft: 20,
+    paddingRight: 20,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+
+  quizFlagButtonActive: {
+    color: '#b45309',
+    borderColor: '#f0c356',
+    backgroundColor: '#fffbeb',
+  },
+
+  emptyQuizWrap: {
+    height: '100%',
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f5f7fb',
+    padding: 24,
+  },
+
+  emptyQuizText: {
+    fontSize: 15,
+    color: '#8D8D8D',
+  },
+
   quizHeader: {
     marginBottom: 28,
     borderBottom: '1px solid #f3f4f6',
@@ -367,13 +443,17 @@ const styles = StyleSheet.create({
   quizFooter: {
     marginTop: 36,
     display: 'flex',
-    alignItems: 'flex-end',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
     paddingBottom: 24,
   },
 
   quizFooterMobile: {
     marginTop: 20,
     paddingBottom: 12,
+    flexWrap: 'wrap',
   },
 
   submitQuizButton: {
@@ -389,7 +469,8 @@ const styles = StyleSheet.create({
   },
 
   submitQuizButtonMobile: {
-    width: '100%',
+    flex: 1,
+    minWidth: 140,
     height: 42,
     paddingLeft: 16,
     paddingRight: 16,

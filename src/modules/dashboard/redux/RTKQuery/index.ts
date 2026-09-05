@@ -72,6 +72,13 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<Library[]>) => res.data,
     }),
+    // getAllLibrary (danh sách) cố tình bỏ questionList để bảng nhẹ hơn -
+    // trang xem trước 1 tài liệu type Text phải gọi riêng cái này để có đủ
+    // câu hỏi trước khi hiện form làm bài.
+    getLibraryDetail: builder.query<Library, string>({
+      query: libraryId => `library/${libraryId}`,
+      transformResponse: (res: AxiosResponse<Library>) => res.data,
+    }),
 
     getTodaySelfCare: builder.query<SelfCareItem, void>({
       query: () => 'user/getTodaySelfCare',

@@ -178,6 +178,12 @@ const LibraryDetailItem = forwardRef<
   );
   const [invalidQuestions, setInvalidQuestions] = useState<string[]>([]);
   const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
+  // Bài trắc nghiệm hiện theo TỪNG CÂU một (không cuộn hết 1 lần) - đúng
+  // theo design. currentQuestionIndex là vị trí đang xem; flaggedQuestionIds
+  // chỉ để tô sáng nút "Đánh dấu xem lại" - không có màn tổng hợp riêng nên
+  // chỉ là trạng thái hiển thị cục bộ, không gửi lên server.
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<string[]>([]);
   const [modal, contextHolder] = Modal.useModal();
   const [pendingSeek, setPendingSeek] = useState<number | null>(null);
   const [resumeInfo, setResumeInfo] = useState<any>(null);
@@ -629,7 +635,16 @@ const LibraryDetailItem = forwardRef<
 
     if (unansweredIds.length > 0) {
       setInvalidQuestions(unansweredIds);
-      messageApi.error('You must select all the questions!');
+      // Nhảy tới câu chưa trả lời ĐẦU TIÊN theo đúng thứ tự đang hiển thị
+      // (shuffledQuestions) - vì giờ chỉ xem 1 câu/lần, báo lỗi suông không
+      // đủ, phải đưa học viên tới đúng chỗ cần làm tiếp.
+      const firstUnansweredIndex = shuffledQuestions.findIndex(q =>
+        unansweredIds.includes(q._id),
+      );
+      if (firstUnansweredIndex >= 0) {
+        setCurrentQuestionIndex(firstUnansweredIndex);
+      }
+      messageApi.error('Vui lòng trả lời hết tất cả các câu hỏi.');
       return;
     }
 
@@ -690,6 +705,8 @@ const LibraryDetailItem = forwardRef<
 
       const shuffled = shuffleArray(questionsWithShuffledAnswers);
       setShuffledQuestions(shuffled);
+      setCurrentQuestionIndex(0);
+      setFlaggedQuestionIds([]);
     }
   }, [dataQuestion]);
   useEffect(() => {
@@ -903,119 +920,157 @@ const LibraryDetailItem = forwardRef<
           />
         );
       case 'Text':
+        if (shuffledQuestions.length === 0) {
+          return (
+            <View style={styles.emptyQuizWrap}>
+              <Text style={styles.emptyQuizText}>
+                Bài tập này chưa có câu hỏi.
+              </Text>
+            </View>
+          );
+        }
+        // Hiện TỪNG CÂU một (không cuộn hết 1 lần) - đúng theo màn "Kiểm tra
+        // giữa khóa" trong design: thẻ thông tin bài kiểm tra + thanh tiến
+        // độ "Câu X/N" + 1 câu hỏi + Câu trước/Đánh dấu xem lại/Câu tiếp
+        // theo. KHÔNG hiện đồng hồ đếm ngược/"làm một lần"/"cần 70% để qua"
+        // như bản gốc vì dữ liệu thật không có thời hạn hay giới hạn số lần
+        // làm - ngưỡng đạt thật là ≥2/3 số câu (xem lesson.service.ts).
+        const totalQuestions = shuffledQuestions.length;
+        const answeredCount = Object.keys(selectedAnswers).filter(qId =>
+          shuffledQuestions.some(q => q._id === qId),
+        ).length;
+        const currentQuestion =
+          shuffledQuestions[currentQuestionIndex] || shuffledQuestions[0];
+        const isCurrentInvalid = invalidQuestions.includes(currentQuestion._id);
+        const isFlagged = flaggedQuestionIds.includes(currentQuestion._id);
+        const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
+
         return (
           <ScrollView
             style={{
               ...styles.quizContainer,
               ...(isMobile ? styles.quizContainerMobile : {}),
             }}>
-            <View style={styles.quizContent}>
-              {shuffledQuestions.map((question: any, index: number) => {
-                const isInvalid = invalidQuestions.includes(question._id);
-                return (
-                  <View
-                    key={question._id}
-                    style={{
-                      ...styles.questionCard,
-                      ...(isMobile ? styles.questionCardMobile : {}),
-                      ...(isInvalid ? styles.questionCardInvalid : {}),
-                    }}>
-                    <div
-                      style={{
-                        ...styles.questionTop,
-                        ...(isMobile ? styles.questionTopMobile : {}),
-                      }}>
-                      <div
-                        style={{
-                          ...styles.questionNumber,
-                          ...(isMobile ? styles.questionNumberMobile : {}),
-                        }}>
-                        {index + 1}
-                      </div>
-                      <div
-                        style={{
-                          ...styles.questionText,
-                          ...(isMobile ? styles.questionTextMobile : {}),
-                          color: isInvalid ? '#ef4444' : '#111827',
-                        }}>
-                        {question.question}
-                      </div>
-                    </div>
-                    <Radio.Group
-                      className="customQuizRadio"
-                      onChange={e => {
-                        const selectedValue = e.target.value;
-                        const questionId = question._id;
+            <View style={styles.quizInfoCard}>
+              <Text style={styles.quizInfoTitle}>{data?.title}</Text>
+              <Text style={styles.quizInfoSubtitle}>
+                {totalQuestions} câu · cần đúng ít nhất 2/3 số câu để đạt
+              </Text>
+            </View>
 
-                        setSelectedAnswers((prev: any) => ({
-                          ...prev,
-                          [questionId]: selectedValue,
-                        }));
-                        setInvalidQuestions(prevInvalid => {
-                          if (prevInvalid.includes(questionId)) {
-                            return prevInvalid.filter(id => id !== questionId);
-                          }
-                          return prevInvalid;
-                        });
-                      }}
-                      value={selectedAnswers[question._id]}
-                      style={styles.answerGroup}>
-                      {question.answerList.map((ans: any, idx: number) => {
-                        const optionLetter = String.fromCharCode(65 + idx);
-                        const isSelected =
-                          selectedAnswers[question._id] === optionLetter;
-                        return (
+            <View style={styles.quizProgressRow}>
+              <Text style={styles.quizProgressLabel}>
+                Câu {currentQuestionIndex + 1}/{totalQuestions}
+              </Text>
+              <Text style={styles.quizProgressLabel}>
+                Đã trả lời {answeredCount} câu
+              </Text>
+            </View>
+            <View style={styles.quizProgressTrack}>
+              <View
+                style={{
+                  ...styles.quizProgressFill,
+                  width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
+                }}
+              />
+            </View>
+
+            <View style={styles.quizContent}>
+              <View
+                key={currentQuestion._id}
+                style={{
+                  ...styles.questionCard,
+                  ...(isMobile ? styles.questionCardMobile : {}),
+                  ...(isCurrentInvalid ? styles.questionCardInvalid : {}),
+                }}>
+                <div
+                  style={{
+                    ...styles.questionTop,
+                    ...(isMobile ? styles.questionTopMobile : {}),
+                  }}>
+                  <div
+                    style={{
+                      ...styles.questionNumber,
+                      ...(isMobile ? styles.questionNumberMobile : {}),
+                    }}>
+                    {currentQuestionIndex + 1}
+                  </div>
+                  <div
+                    style={{
+                      ...styles.questionText,
+                      ...(isMobile ? styles.questionTextMobile : {}),
+                      color: isCurrentInvalid ? '#ef4444' : '#111827',
+                    }}>
+                    {currentQuestion.question}
+                  </div>
+                </div>
+                <Radio.Group
+                  className="customQuizRadio"
+                  onChange={e => {
+                    const selectedValue = e.target.value;
+                    const questionId = currentQuestion._id;
+
+                    setSelectedAnswers((prev: any) => ({
+                      ...prev,
+                      [questionId]: selectedValue,
+                    }));
+                    setInvalidQuestions(prevInvalid => {
+                      if (prevInvalid.includes(questionId)) {
+                        return prevInvalid.filter(id => id !== questionId);
+                      }
+                      return prevInvalid;
+                    });
+                  }}
+                  value={selectedAnswers[currentQuestion._id]}
+                  style={styles.answerGroup}>
+                  {currentQuestion.answerList.map((ans: any, idx: number) => {
+                    const optionLetter = String.fromCharCode(65 + idx);
+                    const isSelected =
+                      selectedAnswers[currentQuestion._id] === optionLetter;
+                    return (
+                      <div
+                        key={idx}
+                        style={{
+                          ...styles.answerOption,
+                          ...(isMobile ? styles.answerOptionMobile : {}),
+                          ...(isSelected ? styles.answerOptionSelected : {}),
+                        }}>
+                        <Radio
+                          rootClassName="hide-default-radio"
+                          className="customQuizRadioItem"
+                          value={optionLetter}
+                          style={styles.radioButton}>
                           <div
-                            key={idx}
                             style={{
-                              ...styles.answerOption,
-                              ...(isMobile ? styles.answerOptionMobile : {}),
-                              ...(isSelected
-                                ? styles.answerOptionSelected
-                                : {}),
+                              ...styles.answerContent,
+                              ...(isMobile ? styles.answerContentMobile : {}),
                             }}>
-                            <Radio
-                              rootClassName="hide-default-radio"
-                              className="customQuizRadioItem"
-                              value={optionLetter}
-                              style={styles.radioButton}>
-                              <div
-                                style={{
-                                  ...styles.answerContent,
-                                  ...(isMobile
-                                    ? styles.answerContentMobile
-                                    : {}),
-                                }}>
-                                <div
-                                  style={{
-                                    ...styles.answerLetterBox,
-                                    ...(isMobile
-                                      ? styles.answerLetterBoxMobile
-                                      : {}),
-                                    ...(isSelected
-                                      ? styles.answerLetterBoxSelected
-                                      : {}),
-                                  }}>
-                                  {optionLetter}
-                                </div>
-                                <div
-                                  style={{
-                                    ...styles.answerLabel,
-                                    ...(isMobile
-                                      ? styles.answerLabelMobile
-                                      : {}),
-                                  }}>
-                                  {ans}
-                                </div>
-                              </div>
-                            </Radio>
+                            <div
+                              style={{
+                                ...styles.answerLetterBox,
+                                ...(isMobile
+                                  ? styles.answerLetterBoxMobile
+                                  : {}),
+                                ...(isSelected
+                                  ? styles.answerLetterBoxSelected
+                                  : {}),
+                              }}>
+                              {optionLetter}
+                            </div>
+                            <div
+                              style={{
+                                ...styles.answerLabel,
+                                ...(isMobile ? styles.answerLabelMobile : {}),
+                              }}>
+                              {ans}
+                            </div>
                           </div>
-                        );
-                      })}
-                    </Radio.Group>
-                  </View>
-                );
-              })}
+                        </Radio>
+                      </div>
+                    );
+                  })}
+                </Radio.Group>
+              </View>
             </View>
 
             {/* FOOTER */}
@@ -1025,14 +1080,50 @@ const LibraryDetailItem = forwardRef<
                 ...(isMobile ? styles.quizFooterMobile : {}),
               }}>
               <Button
-                onClick={handleSubmit}
-                style={{
-                  color: '#fff',
-                  ...styles.submitQuizButton,
-                  ...(isMobile ? styles.submitQuizButtonMobile : {}),
-                }}>
-                Nộp bài
+                disabled={currentQuestionIndex === 0}
+                onClick={() => setCurrentQuestionIndex(i => Math.max(0, i - 1))}
+                style={styles.quizNavButton}>
+                ← Câu trước
               </Button>
+              <Button
+                onClick={() =>
+                  setFlaggedQuestionIds(prev =>
+                    isFlagged
+                      ? prev.filter(id => id !== currentQuestion._id)
+                      : [...prev, currentQuestion._id],
+                  )
+                }
+                style={{
+                  ...styles.quizNavButton,
+                  ...(isFlagged ? styles.quizFlagButtonActive : {}),
+                }}>
+                {isFlagged ? '★ Đã đánh dấu' : '☆ Đánh dấu xem lại'}
+              </Button>
+              {isLastQuestion ? (
+                <Button
+                  onClick={handleSubmit}
+                  style={{
+                    color: '#fff',
+                    ...styles.submitQuizButton,
+                    ...(isMobile ? styles.submitQuizButtonMobile : {}),
+                  }}>
+                  Nộp bài
+                </Button>
+              ) : (
+                <Button
+                  onClick={() =>
+                    setCurrentQuestionIndex(i =>
+                      Math.min(totalQuestions - 1, i + 1),
+                    )
+                  }
+                  style={{
+                    color: '#fff',
+                    ...styles.submitQuizButton,
+                    ...(isMobile ? styles.submitQuizButtonMobile : {}),
+                  }}>
+                  Câu tiếp theo →
+                </Button>
+              )}
             </View>
           </ScrollView>
         );
