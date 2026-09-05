@@ -623,7 +623,7 @@ const LibraryDetailItem = forwardRef<
   };
 
   const handleSubmit = () => {
-    const unansweredIds = data.questionList
+    const unansweredIds = (dataQuestion || [])
       .filter((q: any) => !selectedAnswers[q._id])
       .map((q: any) => q._id);
 
