@@ -125,7 +125,6 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
         {/* FOOTER */}
         <div style={styles.modalFooter}>
           <Button
-            type="primary"
             disabled={!selectedAnswer}
             onClick={() => selectedAnswer && onSubmit(selectedAnswer)}
             style={styles.submitButton}>
@@ -1026,9 +1025,9 @@ const LibraryDetailItem = forwardRef<
                 ...(isMobile ? styles.quizFooterMobile : {}),
               }}>
               <Button
-                type="primary"
                 onClick={handleSubmit}
                 style={{
+                  color: '#fff',
                   ...styles.submitQuizButton,
                   ...(isMobile ? styles.submitQuizButtonMobile : {}),
                 }}>

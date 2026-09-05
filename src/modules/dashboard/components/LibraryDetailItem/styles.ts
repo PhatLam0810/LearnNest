@@ -148,10 +148,10 @@ const styles = StyleSheet.create({
   },
 
   answerCardSelected: {
-    border: '1px solid #1677ff',
+    border: '1px solid #1d418a',
     backgroundColor: '#e6f4ff',
     transform: 'scale(1.01)',
-    boxShadow: '0 6px 18px rgba(22,119,255,0.15)',
+    boxShadow: '0 6px 18px rgba(29,65,138,0.15)',
   },
 
   answerLetter: {
@@ -180,7 +180,9 @@ const styles = StyleSheet.create({
   },
 
   submitButton: {
-    color: '#f0f0f0',
+    color: '#fff',
+    backgroundColor: '#1d418a',
+    borderColor: '#1d418a',
     height: 40,
     borderRadius: 10,
     paddingLeft: 20,

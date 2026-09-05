@@ -712,10 +712,14 @@ const ModuleDetailPage = () => {
 
           {/* Custom Buttons */}
           <Button
-            type="primary"
             block
             size="large"
-            style={{ backgroundColor: '#002766', marginBottom: '8px' }}
+            style={{
+              backgroundColor: 'var(--color-vhu-primary)',
+              borderColor: 'var(--color-vhu-primary)',
+              color: '#fff',
+              marginBottom: '8px',
+            }}
             onClick={handleClose}>
             {resultData.isPass ? 'Tiếp tục bài học' : 'Làm lại bài tập'}
           </Button>
