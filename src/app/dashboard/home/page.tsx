@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ClockCircleOutlined,
   CheckCircleOutlined,
@@ -17,6 +17,7 @@ import ContinueLearningBanner from './_components/ContinueLearningBanner';
 import StatCard from './_components/StatCard';
 import ContinuingCourses from './_components/ContinuingCourses';
 import RoadmapCard from './_components/RoadmapCard';
+import AllCoursesGrid from './_components/AllCoursesGrid';
 
 // Trang Chủ - dashboard cá nhân hóa: banner "tiếp tục học", 3 thẻ thống kê
 // (giờ học tuần này / bài đã hoàn thành / chuỗi ngày học), danh sách khóa
@@ -37,6 +38,10 @@ const HomeOverview = () => {
   const { data: studyStats } = dashboardQuery.useGetStudyStatsQuery(
     userId || '',
     { skip: !userId },
+  );
+  const enrolledIds = useMemo(
+    () => new Set(myCourses.map(c => c.lessonId)),
+    [myCourses],
   );
 
   const containerStyle = {
@@ -106,6 +111,19 @@ const HomeOverview = () => {
             <RoadmapCard />
           </View>
         </View>
+
+        <View style={styles.titleContainer}>
+          <Text style={{ ...styles.title, fontSize: isMobile ? 18 : 20 }}>
+            Tất cả khóa học
+          </Text>
+          <AppButton
+            type="text"
+            style={styles.seeAllBtn}
+            onClick={() => router.push('/dashboard/lesson')}>
+            Xem tất cả
+          </AppButton>
+        </View>
+        <AllCoursesGrid enrolledIds={enrolledIds} />
       </View>
     </View>
   );
