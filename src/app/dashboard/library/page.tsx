@@ -1,7 +1,6 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
-import { LibraryItem } from './_components';
-import { FlatList, Image, Modal, Text, View } from 'react-native-web';
+import React, { useEffect, useState } from 'react';
+import { Image, Modal, ScrollView, Text, View } from 'react-native-web';
 import { Modal as AntdModal } from 'antd';
 import {
   CloseOutlined,
@@ -23,13 +22,32 @@ import { useAppSelector } from '@redux';
 import { useResponsive } from '@/styles/responsive';
 import { useSearchContext } from '@components/SearchContext';
 
-// Nhãn + icon theo loại nội dung — dùng cho header modal xem trước.
+// Nhãn + icon theo loại nội dung — dùng cho header modal xem trước lẫn cột
+// "Loại" trên bảng danh sách.
 const TYPE_META: Record<string, { label: string; icon: React.ReactNode }> = {
   Video: { label: 'Video', icon: <PlayCircleOutlined /> },
   Youtube: { label: 'Video', icon: <PlayCircleOutlined /> },
   PDF: { label: 'Tài liệu PDF', icon: <FilePdfOutlined /> },
   Text: { label: 'Bài tập ôn tập', icon: <FileTextOutlined /> },
   Image: { label: 'Hình ảnh', icon: <PictureOutlined /> },
+};
+
+// Các pill lọc theo loại nội dung thật (Library.type) — không dùng
+// LibraryType (bảng riêng, hiện chưa có dữ liệu seed nào trong DB).
+const TYPE_FILTERS: { key: string; label: string; filter?: any }[] = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'pdf', label: 'PDF', filter: { type: 'PDF' } },
+  { key: 'exercise', label: 'Bài tập', filter: { type: 'Text' } },
+  {
+    key: 'recorded',
+    label: 'Ghi hình lớp học',
+    filter: { type: { $in: ['Video', 'Youtube'] } },
+  },
+];
+
+const formatDate = (dateString?: string) => {
+  if (!dateString) return '—';
+  return new Date(dateString).toLocaleDateString('vi-VN');
 };
 
 const sx = {
@@ -98,13 +116,14 @@ const sx = {
 };
 
 const LibraryList = () => {
-  const { listItem, fetchData, changeParams } = useAppPagination<Library>({
-    apiUrl: '/library/getAllLibrary',
-  });
+  const { listItem, fetchData, changeParams, currentData } =
+    useAppPagination<Library>({
+      apiUrl: '/library/getAllLibrary',
+    });
 
   const { isMobile, isTablet } = useResponsive();
-  const numColumns = isMobile ? 1 : isTablet ? 2 : 4;
   const { keyword, sortBy } = useSearchContext();
+  const [activeType, setActiveType] = useState('all');
   const [selectedItem, setSelectedItem] = useState<Library>();
   const [open, setOpen] = useState(false);
   const [quizResult, setQuizResult] = useState<any>(null);
@@ -113,17 +132,10 @@ const LibraryList = () => {
   );
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
 
-  const layoutHeight = useRef(0);
-  const contentHeight = useRef(0);
-  const lastFetchAt = useRef(0);
-
   useEffect(() => {
-    fetchData();
-  }, []); // Chỉ gọi 1 lần khi load trang
-
-  useEffect(() => {
-    changeParams({ search: keyword, sortBy });
-  }, [keyword, sortBy]);
+    const filter = TYPE_FILTERS.find(t => t.key === activeType)?.filter;
+    changeParams({ search: keyword, sortBy, filter });
+  }, [keyword, sortBy, activeType]);
 
   const openItem = (item: Library) => {
     setSelectedItem(item);
@@ -208,46 +220,87 @@ const LibraryList = () => {
   };
 
   const meta = selectedItem ? TYPE_META[selectedItem.type] : undefined;
+  const hasMore = !!currentData && currentData.pageNum < currentData.totalPages;
 
   return (
     <View style={styles.container}>
-      <FlatList
-        key={numColumns} // Force re-render when numColumns changes
-        data={listItem}
-        stickyHeaderHiddenOnScroll
-        keyExtractor={(item, index) => item._id + index}
-        numColumns={numColumns}
-        contentContainerStyle={{
-          gap: isMobile ? 12 : 16,
-          paddingBottom: 48,
-          padding: 20,
-          overflow: 'visible',
-        }}
-        columnWrapperStyle={
-          numColumns > 1 ? { gap: isMobile ? 12 : 16 } : undefined
-        }
-        onLayout={e => {
-          layoutHeight.current = e.nativeEvent.layout.height;
-        }}
-        onEndReachedThreshold={0.5}
-        onEndReached={() => {
-          fetchData();
-        }}
-        onContentSizeChange={(w, h) => {
-          contentHeight.current = h;
-          if (h <= layoutHeight.current && lastFetchAt.current === 0) {
-            lastFetchAt.current = Date.now();
-            fetchData();
-          }
-        }}
-        renderItem={({ item }) => (
-          <LibraryItem
-            key={item._id}
-            data={item}
-            onClick={() => openItem(item)}
-          />
+      <View style={styles.header}>
+        <Text style={styles.pageTitle}>Thư Viện</Text>
+        <Text style={styles.pageSubtitle}>
+          {currentData?.totalRecords ?? listItem.length} tài liệu
+        </Text>
+      </View>
+
+      <View style={styles.filterRow}>
+        {TYPE_FILTERS.map(f => (
+          <View
+            key={f.key}
+            onClick={() => setActiveType(f.key)}
+            style={
+              activeType === f.key ? styles.filterPillActive : styles.filterPill
+            }>
+            <Text
+              style={
+                activeType === f.key
+                  ? styles.filterPillTextActive
+                  : styles.filterPillText
+              }>
+              {f.label}
+            </Text>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.table}>
+        {!isMobile && (
+          <View style={styles.tableHeaderRow}>
+            <Text style={[styles.tableHeaderCell, styles.colDoc]}>
+              Tài liệu
+            </Text>
+            <Text style={[styles.tableHeaderCell, styles.colType]}>Loại</Text>
+            <Text style={[styles.tableHeaderCell, styles.colDate]}>
+              Cập nhật
+            </Text>
+          </View>
         )}
-      />
+        <ScrollView>
+          {listItem.map(item => {
+            const itemMeta = TYPE_META[item.type];
+            return (
+              <View
+                key={item._id}
+                onClick={() => openItem(item)}
+                style={styles.tableRow}>
+                <View style={[styles.tableCell, styles.colDoc]}>
+                  <span style={styles.rowIcon}>{itemMeta?.icon}</span>
+                  <Text style={styles.rowTitle} numberOfLines={1}>
+                    {item.title}
+                  </Text>
+                </View>
+                {!isMobile && (
+                  <View style={[styles.tableCell, styles.colType]}>
+                    <Text style={styles.typeBadge}>
+                      {itemMeta?.label || item.type}
+                    </Text>
+                  </View>
+                )}
+                <View style={[styles.tableCell, styles.colDate]}>
+                  <Text style={styles.rowDate}>
+                    {formatDate(item.updatedAt)}
+                  </Text>
+                </View>
+              </View>
+            );
+          })}
+          {hasMore && (
+            <View style={styles.loadMoreWrap}>
+              <AppButton style={{ width: 'auto' }} onClick={() => fetchData()}>
+                Xem thêm
+              </AppButton>
+            </View>
+          )}
+        </ScrollView>
+      </View>
 
       <Modal
         visible={open}
