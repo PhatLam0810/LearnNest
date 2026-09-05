@@ -15,6 +15,10 @@ export interface MyCourseItem {
   progress: number;
   lastStudiedAt: string;
   lastSubLessonId: string;
+  totalItems?: number;
+  completedItems?: number;
+  lastSubLessonTitle?: string;
+  lastSubLessonRemainingSeconds?: number;
 }
 
 export const useMyCourses = (userId: string | null) => {

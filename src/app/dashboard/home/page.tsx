@@ -96,7 +96,7 @@ const HomeOverview = () => {
               <AppButton
                 type="text"
                 style={styles.seeAllBtn}
-                onClick={() => router.push('/dashboard/lesson')}>
+                onClick={() => router.push('/dashboard/my-courses')}>
                 Xem tất cả
               </AppButton>
             </View>

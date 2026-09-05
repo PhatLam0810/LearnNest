@@ -34,6 +34,10 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: '#fff',
   },
+  subtitle: {
+    ...typography.body2,
+    color: 'rgba(255,255,255,0.75)',
+  },
   actionsRow: {
     flexDirection: 'row',
     gap: 12,
@@ -41,20 +45,30 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   rightCol: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
+    alignItems: 'flex-end',
+    gap: 8,
+    minWidth: 160,
   },
-  thumbWrap: {
-    width: 120,
-    height: 68,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.1)',
-  },
-  progressText: {
-    color: '#fff',
+  progressPercent: {
+    fontSize: 32,
     fontWeight: '700',
+    color: 'var(--color-vhu-secondary)',
+  },
+  progressTrack: {
+    width: 160,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.25)',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 999,
+    backgroundColor: 'var(--color-vhu-secondary)',
+  },
+  progressCaption: {
+    ...typography.body2,
+    color: 'rgba(255,255,255,0.75)',
   },
   // AppButton mặc định width:100% (styles.container trong AppButton), hợp
   // cho nút submit form nhưng không hợp ở đây - 2 nút cần đứng cạnh nhau,

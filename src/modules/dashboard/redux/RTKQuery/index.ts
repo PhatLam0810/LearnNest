@@ -8,6 +8,7 @@ import {
   LessonProgressResponse,
   LessonRecommendRes,
   LibraryType,
+  MyOverview,
   RoadmapStep,
   StudyStats,
 } from './types';
@@ -282,6 +283,12 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       query: userId => `/lesson/user/${userId}/study-stats`,
     }),
 
+    // Trang "Tổng Quan" (/dashboard/my-courses) - giờ học 4 tuần + bài kiểm
+    // tra gần đây. Cùng convention không bọc {data:...} như getStudyStats.
+    getMyOverview: builder.query<MyOverview, string>({
+      query: userId => `/lesson/user/${userId}/overview`,
+    }),
+
     // ---- Đánh giá khóa học ----
     getCourseRating: builder.query<CourseRatingSummary, string>({
       query: lessonId => `/lesson/${lessonId}/rating`,
@@ -329,6 +336,7 @@ export const {
   useGetPracticeCoursesQuery,
   useGetPracticeTaskInstructionsQuery,
   useGetStudyStatsQuery,
+  useGetMyOverviewQuery,
   useGetCourseRatingQuery,
   useSubmitCourseRatingMutation,
   useGetCourseRatingsMutation,

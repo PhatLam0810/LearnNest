@@ -97,6 +97,27 @@ export interface StudyStats {
   streakDays: number;
 }
 
+// Trang "Tổng Quan" (/dashboard/my-courses). Xem LessonService.getMyOverview
+// (BE).
+export interface WeeklyStudyHour {
+  label: string;
+  hours: number;
+}
+
+export interface RecentTestResult {
+  _id: string;
+  name: string;
+  score: number;
+  isPass: boolean;
+  createdAt: string;
+}
+
+export interface MyOverview {
+  weeklyHours: WeeklyStudyHour[];
+  totalHours: number;
+  recentResults: RecentTestResult[];
+}
+
 export interface CourseRatingUser {
   _id: string;
   fullName?: string;

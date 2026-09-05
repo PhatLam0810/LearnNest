@@ -1,11 +1,9 @@
 import React, { useMemo } from 'react';
 import { Text, View } from 'react-native-web';
-import { Progress } from 'antd';
 import { useRouter } from 'next/navigation';
 import { AppButton } from '@components';
 import { useAppSelector } from '@redux';
 import { MyCourseItem } from '@/hooks/useMyCourses';
-import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
 import styles from './styles';
 
 type ContinueLearningBannerProps = {
@@ -72,6 +70,18 @@ const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
   }
 
   const progress = Math.round(latestCourse.progress || 0);
+  const remainingMinutes = latestCourse.lastSubLessonRemainingSeconds
+    ? Math.ceil(latestCourse.lastSubLessonRemainingSeconds / 60)
+    : 0;
+  // Chỉ hiện "còn N phút nữa xong bài X" khi thật sự có bài đang dở (còn
+  // thời lượng chưa xem) - nếu không, giữ nguyên câu "Tiếp tục học" chung
+  // chung thay vì bịa ra số phút/tên bài không có thật.
+  const headline =
+    remainingMinutes > 0 && latestCourse.lastSubLessonTitle
+      ? `Bạn còn ${remainingMinutes} phút nữa là xong bài "${latestCourse.lastSubLessonTitle}"`
+      : `Tiếp tục học "${latestCourse.lessonName}"`;
+  const hasLessonCount =
+    !!latestCourse.totalItems && latestCourse.totalItems > 0;
 
   return (
     <View style={styles.banner}>
@@ -80,9 +90,13 @@ const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
           {greetingByHour()}
           {firstName ? `, ${firstName}` : ''}
         </Text>
-        <Text style={styles.headline}>
-          Tiếp tục học &ldquo;{latestCourse.lessonName}&rdquo;
-        </Text>
+        <Text style={styles.headline}>{headline}</Text>
+        {hasLessonCount && (
+          <Text style={styles.subtitle}>
+            {latestCourse.lessonName} · đã hoàn thành{' '}
+            {latestCourse.completedItems || 0}/{latestCourse.totalItems} bài
+          </Text>
+        )}
         <View style={styles.actionsRow}>
           <AppButton
             style={styles.ctaButton}
@@ -101,21 +115,11 @@ const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
         </View>
       </View>
       <View style={styles.rightCol}>
-        <View style={styles.thumbWrap}>
-          <LessonThumbnail
-            thumbnail={latestCourse.thumbnail}
-            width={120}
-            height={68}
-          />
+        <Text style={styles.progressPercent}>{progress}%</Text>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
-        <Progress
-          type="circle"
-          percent={progress}
-          size={72}
-          strokeColor="#fff"
-          trailColor="rgba(255,255,255,0.25)"
-          format={p => <Text style={styles.progressText}>{p}%</Text>}
-        />
+        <Text style={styles.progressCaption}>Tiến độ khóa học hiện tại</Text>
       </View>
     </View>
   );
