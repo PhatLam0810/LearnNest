@@ -10,10 +10,11 @@ import { dashboardQuery } from '~mdDashboard/redux';
 import { AppButton } from '@components';
 import styles from './styles';
 
-// Trang "Tổng Quan" - theo design mới: biểu đồ giờ học 4 tuần gần nhất, kết
-// quả bài kiểm tra gần đây, gợi ý từ Lộ Trình AI (dùng lại đúng dữ liệu của
-// RoadmapCard ở Trang Chủ, không tạo insight riêng), và bảng "Khóa học của
-// tôi" (thay cho danh sách card đơn giản trước đây).
+// Trang "Tổng Quan" - theo design mới: biểu đồ giờ học từng ngày trong tuần
+// này (Thứ 2 - Chủ nhật), kết quả bài kiểm tra gần đây, gợi ý từ Lộ Trình AI
+// (dùng lại đúng dữ liệu của RoadmapCard ở Trang Chủ, không tạo insight
+// riêng), và bảng "Khóa học của tôi" (thay cho danh sách card đơn giản
+// trước đây).
 const scoreStyle = (score: number) => {
   if (score >= 8) return styles.scoreGood;
   if (score >= 5) return styles.scoreOk;

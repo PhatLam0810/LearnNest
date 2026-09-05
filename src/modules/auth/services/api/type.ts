@@ -37,6 +37,7 @@ export interface UserProfile {
   email: string;
   bio: string;
   avatar?: string;
+  studyReminderEnabled?: boolean;
   role: {
     level: number;
     name: string;

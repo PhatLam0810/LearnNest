@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GetProp, Grid, Layout, Menu, MenuProps } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -38,6 +38,20 @@ export default function DashboardLayout({
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const isAdmin = userProfile?.role?.level <= 2;
+
+  // Trước đây các trang /dashboard/admin/* chỉ ẩn link trong menu chứ không
+  // chặn truy cập trực tiếp bằng URL - học viên thường gõ thẳng link vẫn
+  // vào được (dữ liệu rỗng vì BE từ chối, nhưng khung trang admin vẫn hiện
+  // ra). Chờ userProfile tải xong (tránh đá nhầm admin thật lúc mới load
+  // trang) rồi mới quyết định chặn.
+  const isBlockedAdminRoute =
+    pathname.startsWith('/dashboard/admin') && !!userProfile && !isAdmin;
+
+  useEffect(() => {
+    if (isBlockedAdminRoute) {
+      router.replace('/dashboard/home');
+    }
+  }, [isBlockedAdminRoute, router]);
 
   const menuItems: MenuItem[] = [
     {
@@ -140,7 +154,9 @@ export default function DashboardLayout({
             {sidebarContent}
           </Sider>
         )}
-        <Content style={styles.content}>{children}</Content>
+        <Content style={styles.content}>
+          {isBlockedAdminRoute ? null : children}
+        </Content>
       </Layout>
     </Layout>
   );
