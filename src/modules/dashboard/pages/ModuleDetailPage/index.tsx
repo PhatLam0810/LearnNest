@@ -86,6 +86,21 @@ const ModuleDetailPage = () => {
       { userId: userProfile?._id || '', lessonId },
       { skip: !userProfile?._id || !lessonId },
     );
+  // "Đã xem N phút" dưới tiêu đề bài học - lastPosition tính bằng giây, chỉ
+  // gọi khi đang xem video thật (không phải quiz/bài thực hành).
+  const { data: videoProgress } = dashboardQuery.useGetLessonProgressQuery(
+    {
+      userId: userProfile?._id || '',
+      subLessonId: selectedLibrary?._id || '',
+      lessonId,
+    },
+    {
+      skip:
+        !userProfile?._id ||
+        !selectedLibrary?._id ||
+        selectedLibrary?.type === 'Text',
+    },
+  );
   const libraryRef = useRef<LibraryDetailItemHandle>(null);
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
@@ -397,6 +412,30 @@ const ModuleDetailPage = () => {
     }
   };
 
+  // Nút "← Bài trước" / "Bài tiếp theo →" dưới tiêu đề - điều hướng thủ
+  // công qua lại giữa các mục, khác goToNextContentItem (chỉ chạy khi VỪA
+  // hoàn thành 1 mục) - ở đây không đánh dấu hoàn thành gì cả, chỉ đơn
+  // thuần chuyển màn. Lùi về mục trước luôn được phép; tới mục sau chỉ khi
+  // đã mở khóa (hasAccess) - không cho nhảy cóc qua nội dung chưa tới lượt.
+  const goToRelativeContentItem = (delta: 1 | -1) => {
+    const seq = getLessonContentItems();
+    const currentId = taskId || selectedLibrary?._id;
+    const currentKind: 'library' | 'task' = taskId ? 'task' : 'library';
+    const currentIndex = seq.findIndex(
+      it => it.kind === currentKind && it.data._id === currentId,
+    );
+    if (currentIndex === -1) return;
+    const target = seq[currentIndex + delta];
+    if (!target) return;
+    if (delta > 0 && !isTaskAccessible(seq, currentIndex + delta)) return;
+
+    if (target.kind === 'library') {
+      handleSelectLibrary(target.data);
+    } else {
+      handleSelectTask(target.data);
+    }
+  };
+
   const onWatchFinish = async () => {
     if (!selectedLibrary) return;
     // Tải lại tiến độ xem/làm bài NGAY sau khi mục này báo đã xong — nếu
@@ -544,6 +583,23 @@ const ModuleDetailPage = () => {
     isMobile && { flexDirection: 'column', alignItems: 'flex-start', gap: 8 },
   ] as any;
 
+  // "Bài N/M" dưới tiêu đề - vị trí mục đang xem trong TOÀN BỘ nội dung
+  // khóa (video + bài thực hành trộn theo đúng thứ tự), không chỉ trong 1
+  // module - khớp với cách LessonDetailPage đếm tiến độ.
+  const currentContentSeq = getLessonContentItems();
+  const currentContentKind: 'library' | 'task' = taskId ? 'task' : 'library';
+  const currentContentId = taskId || selectedLibrary?._id;
+  const currentContentIndex = currentContentSeq.findIndex(
+    it => it.kind === currentContentKind && it.data._id === currentContentId,
+  );
+  const totalContentCount = currentContentSeq.length;
+  const watchedMinutes = videoProgress
+    ? Math.floor((videoProgress.lastPosition || 0) / 60)
+    : 0;
+  const durationMinutes = selectedLibrary?.duration
+    ? Math.round(selectedLibrary.duration / 60)
+    : 0;
+
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
       {contextHolder}
@@ -597,6 +653,13 @@ const ModuleDetailPage = () => {
                 onWatchFinish={onWatchFinish}
               />
               <View style={styles.layoutTitleContainer}>
+                {currentContentIndex >= 0 && (
+                  <Text style={styles.contentMetaText}>
+                    Bài {currentContentIndex + 1}/{totalContentCount}
+                    {!!durationMinutes && ` · ${durationMinutes} phút`}
+                    {!!watchedMinutes && ` · đã xem ${watchedMinutes} phút`}
+                  </Text>
+                )}
                 <View style={titleRowStyle}>
                   <View style={styles.fullWidthFlex}>
                     <Text style={styles.layoutTitle}>
@@ -615,6 +678,56 @@ const ModuleDetailPage = () => {
                 <Text style={styles.description}>
                   {selectedLibrary?.description}
                 </Text>
+                {!!selectedLibrary?.note && (
+                  <View style={styles.noteBox}>
+                    <Text style={styles.noteBoxTitle}>Ghi chú bài học</Text>
+                    <Text style={styles.noteBoxText}>
+                      {selectedLibrary.note}
+                    </Text>
+                  </View>
+                )}
+                {totalContentCount > 0 && (
+                  <View style={styles.contentNavRow}>
+                    <View
+                      onClick={() =>
+                        currentContentIndex > 0 && goToRelativeContentItem(-1)
+                      }
+                      style={
+                        currentContentIndex <= 0
+                          ? styles.contentNavButtonDisabled
+                          : styles.contentNavButton
+                      }>
+                      <Text
+                        style={styles.contentNavButtonText}
+                        numberOfLines={1}>
+                        {currentContentIndex > 0
+                          ? `← Bài ${currentContentIndex}: ${currentContentSeq[currentContentIndex - 1]?.data?.title || ''}`
+                          : '← Bài trước'}
+                      </Text>
+                    </View>
+                    <View
+                      onClick={() =>
+                        currentContentIndex >= 0 &&
+                        currentContentIndex < totalContentCount - 1 &&
+                        goToRelativeContentItem(1)
+                      }
+                      style={
+                        currentContentIndex < 0 ||
+                        currentContentIndex >= totalContentCount - 1
+                          ? styles.contentNavButtonDisabled
+                          : styles.contentNavButton
+                      }>
+                      <Text
+                        style={styles.contentNavButtonText}
+                        numberOfLines={1}>
+                        {currentContentIndex >= 0 &&
+                        currentContentIndex < totalContentCount - 1
+                          ? `Bài ${currentContentIndex + 2}: ${currentContentSeq[currentContentIndex + 1]?.data?.title || ''} →`
+                          : 'Bài tiếp theo →'}
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
             </View>
           )}

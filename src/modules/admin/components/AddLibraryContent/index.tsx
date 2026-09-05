@@ -388,6 +388,13 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
         <Form.Item label="Mô tả bài học" name="description">
           <Input.TextArea placeholder="Nhập mô tả bài học" />
         </Form.Item>
+
+        <Form.Item label="Ghi chú bài học" name="note">
+          <Input.TextArea
+            rows={4}
+            placeholder="Ghi chú/tóm tắt nội dung bài học cho học viên (hiện ở tab Ghi chú bài học)"
+          />
+        </Form.Item>
         <Form.Item name="Thời lượng" noStyle></Form.Item>
 
         <Form.Item

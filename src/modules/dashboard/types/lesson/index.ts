@@ -7,6 +7,9 @@ export interface Library {
   url: string;
   // Chỉ dùng cho type='PDF': cho phép học viên tải/in tài liệu. Mặc định true.
   allowDownload?: boolean;
+  // Ghi chú bài học do admin soạn - hiện ở tab "Ghi chú bài học" trên trang
+  // xem video, khác với description (mô tả ngắn hiện dưới tiêu đề).
+  note?: string;
   bulkId: string;
   description: string;
   createdAt: string;
