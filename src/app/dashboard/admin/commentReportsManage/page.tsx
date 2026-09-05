@@ -1,16 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import {
-  Table,
-  TableProps,
-  Modal,
-  Tag,
-  Image,
-  Space,
-  Segmented,
-  Button,
-} from 'antd';
+import { Button, Image, Pagination, Segmented, Space } from 'antd';
 import dayjs from 'dayjs';
 import { useAppPagination } from '@hooks';
 import { messageApi } from '@hooks';
@@ -41,20 +32,26 @@ type CommentReportItem = {
   reason: 'spam' | 'inappropriate' | 'misinformation' | 'other';
   note?: string;
   status: 'pending' | 'resolved' | 'dismissed';
+  warnedAt?: string;
   createdAt: string;
 };
 
-const REASON_LABEL: Record<string, string> = {
-  spam: 'Spam / quảng cáo',
-  inappropriate: 'Ngôn từ không phù hợp',
-  misinformation: 'Nội dung sai lệch',
-  other: 'Khác',
-};
-
-const STATUS_LABEL: Record<string, { text: string; color: string }> = {
-  pending: { text: 'Chờ xử lý', color: 'orange' },
-  resolved: { text: 'Đã xóa bình luận', color: 'red' },
-  dismissed: { text: 'Đã bỏ qua', color: 'default' },
+const REASON_META: Record<
+  string,
+  { label: string; color: string; bg: string }
+> = {
+  spam: { label: 'Spam', color: '#b45309', bg: '#fef3e2' },
+  inappropriate: {
+    label: 'Ngôn từ không phù hợp',
+    color: '#c0392b',
+    bg: '#fdeceb',
+  },
+  misinformation: {
+    label: 'Nội dung sai lệch',
+    color: '#7c3aed',
+    bg: '#f3ecff',
+  },
+  other: { label: 'Khác', color: '#5b6478', bg: '#eef0f5' },
 };
 
 const userLabel = (u?: ReportUser | null) =>
@@ -71,213 +68,170 @@ const CommentReportsManage: React.FC = () => {
       apiUrl: 'comments/admin/reports/list',
       params: { filter: { status: 'pending' } },
     });
-  const [selected, setSelected] = useState<CommentReportItem | null>(null);
-  const [resolving, setResolving] = useState(false);
+  const [actingId, setActingId] = useState<string | null>(null);
 
   const changeStatus = (v: 'pending' | 'resolved' | 'dismissed') => {
     setStatus(v);
     filter({ status: v });
   };
 
-  const resolve = async (action: 'delete' | 'dismiss') => {
-    if (!selected) return;
-    setResolving(true);
+  const handleHide = async (item: CommentReportItem) => {
+    setActingId(item._id);
     try {
-      await api.post(`/comments/admin/reports/${selected._id}/resolve`, {
-        action,
+      await api.post(`/comments/admin/reports/${item._id}/resolve`, {
+        action: 'hide',
       });
-      messageApi.success(
-        action === 'delete' ? 'Đã xóa bình luận' : 'Đã bỏ qua báo cáo',
-      );
-      setSelected(null);
+      messageApi.success('Đã ẩn bình luận');
       refresh();
     } catch (e: any) {
       messageApi.error(e?.response?.data?.message || 'Không xử lý được');
     } finally {
-      setResolving(false);
+      setActingId(null);
     }
   };
 
-  const columns: TableProps<CommentReportItem>['columns'] = [
-    {
-      title: 'Người bị báo cáo',
-      key: 'target',
-      render: (_: unknown, r: CommentReportItem) => (
-        <Text>{userLabel(r.commentId?.user)}</Text>
-      ),
-    },
-    {
-      title: 'Nội dung bình luận',
-      key: 'content',
-      render: (_: unknown, r: CommentReportItem) =>
-        r.commentId ? (
-          <View>
-            <Text style={{ maxWidth: 280 }} numberOfLines={2}>
-              {r.commentId.commentText}
-            </Text>
-            {!!r.commentId.images?.length && (
-              <Text style={{ color: '#6b7280', fontSize: 12 }}>
-                {r.commentId.images.length} ảnh đính kèm
-              </Text>
-            )}
-          </View>
-        ) : (
-          <Text style={{ color: '#9ca3af' }}>Bình luận đã bị xóa</Text>
-        ),
-    },
-    {
-      title: 'Lý do báo cáo',
-      dataIndex: 'reason',
-      key: 'reason',
-      render: (v: string) => <Tag>{REASON_LABEL[v] || v}</Tag>,
-    },
-    {
-      title: 'Người báo cáo',
-      key: 'reporter',
-      render: (_: unknown, r: CommentReportItem) => (
-        <Text>{userLabel(r.reportedBy)}</Text>
-      ),
-    },
-    {
-      title: 'Thời gian',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (v: string) => <Text>{dayjs(v).format('DD/MM/YYYY HH:mm')}</Text>,
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      render: (v: string) => (
-        <Tag color={STATUS_LABEL[v]?.color}>{STATUS_LABEL[v]?.text || v}</Tag>
-      ),
-    },
-  ];
+  const handleDismiss = async (item: CommentReportItem) => {
+    setActingId(item._id);
+    try {
+      await api.post(`/comments/admin/reports/${item._id}/resolve`, {
+        action: 'dismiss',
+      });
+      messageApi.success('Đã bỏ qua báo cáo');
+      refresh();
+    } catch (e: any) {
+      messageApi.error(e?.response?.data?.message || 'Không xử lý được');
+    } finally {
+      setActingId(null);
+    }
+  };
+
+  const handleWarn = async (item: CommentReportItem) => {
+    setActingId(item._id);
+    try {
+      const res = await api.post(`/comments/admin/reports/${item._id}/warn`);
+      messageApi.success(
+        res.data?.data?.sent
+          ? 'Đã gửi email cảnh báo cho người dùng.'
+          : 'Đã ghi nhận nhưng gửi email thất bại.',
+      );
+      refresh();
+    } catch (e: any) {
+      messageApi.error(e?.response?.data?.message || 'Không gửi được cảnh báo');
+    } finally {
+      setActingId(null);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 16,
-        }}>
-        <h1 style={{ margin: 0 }}>Báo cáo vi phạm</h1>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Báo Cáo Vi Phạm</Text>
         <Segmented
           value={status}
           onChange={v => changeStatus(v as typeof status)}
           options={[
             { label: 'Chờ xử lý', value: 'pending' },
-            { label: 'Đã xóa', value: 'resolved' },
+            { label: 'Đã ẩn', value: 'resolved' },
             { label: 'Đã bỏ qua', value: 'dismissed' },
           ]}
         />
       </View>
 
-      <Table
-        columns={columns}
-        dataSource={listItem}
-        rowKey={record => record._id}
-        scroll={{ x: 'max-content' }}
-        onRow={record => ({
-          onClick: () => setSelected(record),
-          style: { cursor: 'pointer' },
-        })}
-        onChange={res => {
-          fetchData({ pageNum: res.current });
-        }}
-        pagination={{
-          current: currentData?.pageNum,
-          pageSize: currentData?.pageSize,
-          total: currentData?.totalRecords,
-        }}
-      />
+      {!listItem.length && (
+        <Text style={styles.emptyText}>Không có báo cáo nào.</Text>
+      )}
 
-      <Modal
-        title="Chi tiết báo cáo vi phạm"
-        open={!!selected}
-        onCancel={() => setSelected(null)}
-        footer={
-          selected?.status === 'pending'
-            ? [
-                <Button
-                  key="dismiss"
-                  onClick={() => resolve('dismiss')}
-                  loading={resolving}>
-                  Bỏ qua báo cáo
-                </Button>,
-                <Button
-                  key="delete"
-                  danger
-                  type="primary"
-                  onClick={() => resolve('delete')}
-                  loading={resolving}>
-                  Xóa bình luận
-                </Button>,
-              ]
-            : null
-        }
-        width={600}>
-        {selected && (
-          <View style={{ gap: 10 }}>
-            <Text>
-              <b>Người bị báo cáo:</b> {userLabel(selected.commentId?.user)}
-            </Text>
-            <Text>
-              <b>Người báo cáo:</b> {userLabel(selected.reportedBy)} (
-              {selected.reportedBy?.email || '—'})
-            </Text>
-            <Text>
-              <b>Lý do:</b> {REASON_LABEL[selected.reason] || selected.reason}
-            </Text>
-            {selected.note && (
-              <Text style={{ whiteSpace: 'pre-wrap' }}>
-                <b>Ghi chú:</b> {selected.note}
-              </Text>
-            )}
-            <Text>
-              <b>Thời gian báo cáo:</b>{' '}
-              {dayjs(selected.createdAt).format('DD/MM/YYYY HH:mm')}
-            </Text>
-            <View
-              style={{
-                borderTopWidth: 1,
-                borderTopColor: '#eef0f5',
-                paddingTop: 10,
-                marginTop: 4,
-              }}>
-              <Text style={{ fontWeight: '600', marginBottom: 6 }}>
-                Nội dung bình luận bị báo cáo
-              </Text>
-              {selected.commentId ? (
-                <>
-                  <Text style={{ whiteSpace: 'pre-wrap' }}>
-                    {selected.commentId.commentText}
+      <View style={styles.list}>
+        {listItem.map(item => {
+          const meta = REASON_META[item.reason] || REASON_META.other;
+          const isPending = item.status === 'pending';
+          return (
+            <View key={item._id} style={styles.card}>
+              <View style={styles.headerLine}>
+                <Text
+                  style={[
+                    styles.reasonTag,
+                    { color: meta.color, backgroundColor: meta.bg },
+                  ]}>
+                  {meta.label}
+                </Text>
+                <Text style={styles.metaText}>
+                  Báo cáo bởi {userLabel(item.reportedBy)} ·{' '}
+                  {dayjs(item.createdAt).fromNow()}
+                </Text>
+              </View>
+
+              <View style={styles.commentBox}>
+                <Text style={styles.commentContext}>
+                  Bình luận bởi {userLabel(item.commentId?.user)}
+                </Text>
+                {item.commentId ? (
+                  <>
+                    <Text style={styles.commentText}>
+                      {item.commentId.commentText}
+                    </Text>
+                    {!!item.commentId.images?.length && (
+                      <Space wrap style={{ marginTop: 4 }}>
+                        {item.commentId.images.map((url, idx) => (
+                          <Image
+                            key={idx}
+                            src={url}
+                            width={64}
+                            height={64}
+                            style={{ objectFit: 'cover', borderRadius: 8 }}
+                          />
+                        ))}
+                      </Space>
+                    )}
+                  </>
+                ) : (
+                  <Text style={styles.commentText}>
+                    Bình luận này đã bị ẩn/xóa trước đó.
                   </Text>
-                  {!!selected.commentId.images?.length && (
-                    <Space wrap style={{ marginTop: 8 }}>
-                      {selected.commentId.images.map((url, idx) => (
-                        <Image
-                          key={idx}
-                          src={url}
-                          width={100}
-                          height={100}
-                          style={{ objectFit: 'cover', borderRadius: 8 }}
-                        />
-                      ))}
-                    </Space>
-                  )}
-                </>
-              ) : (
-                <Text style={{ color: '#9ca3af' }}>
-                  Bình luận này đã bị xóa trước đó.
+                )}
+              </View>
+
+              {isPending && (
+                <View style={styles.actionsRow}>
+                  <Button
+                    style={styles.hideButton}
+                    loading={actingId === item._id}
+                    disabled={!item.commentId}
+                    onClick={() => handleHide(item)}>
+                    Ẩn bình luận
+                  </Button>
+                  <Button
+                    loading={actingId === item._id}
+                    disabled={!!item.warnedAt || !item.commentId?.user}
+                    onClick={() => handleWarn(item)}>
+                    {item.warnedAt ? 'Đã cảnh báo' : 'Cảnh báo người dùng'}
+                  </Button>
+                  <Button
+                    loading={actingId === item._id}
+                    onClick={() => handleDismiss(item)}>
+                    Bỏ qua
+                  </Button>
+                </View>
+              )}
+              {!isPending && item.warnedAt && (
+                <Text style={styles.warnedText}>
+                  Đã cảnh báo lúc{' '}
+                  {dayjs(item.warnedAt).format('DD/MM/YYYY HH:mm')}
                 </Text>
               )}
             </View>
-          </View>
-        )}
-      </Modal>
+          );
+        })}
+      </View>
+
+      {!!currentData?.totalRecords && (
+        <Pagination
+          current={currentData?.pageNum}
+          pageSize={currentData?.pageSize}
+          total={currentData?.totalRecords}
+          onChange={pageNum => fetchData({ pageNum })}
+        />
+      )}
     </View>
   );
 };

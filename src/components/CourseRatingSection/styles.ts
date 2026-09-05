@@ -16,6 +16,7 @@ const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
     marginTop: 28,
+    paddingBottom: 20,
     gap: 20,
   },
   // "Đánh giá của bạn" — tablet riêng, tách khỏi khối tổng kết/danh sách

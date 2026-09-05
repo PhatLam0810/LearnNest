@@ -66,6 +66,20 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
 
+    // Card "Tổng người dùng" + "Hoạt động hôm nay" - Quản Trị Người Dùng.
+    getUserActivitySummary: builder.query<
+      {
+        totalUsers: number;
+        newUsersLast7Days: number;
+        activeToday: number;
+        activeTodayPercent: number;
+      },
+      void
+    >({
+      query: () => '/analytics/user-activity-summary',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
     getLibraryById: builder.query<any, string>({
       query: (id: string) => ({
         url: `library/${id}`,

@@ -374,7 +374,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       <View key={c._id} style={rowStyle}>
         <Avatar
           size={32}
-          src={c.user?.avatar}
+          src={c.user?.avatar || undefined}
           style={
             !c.user?.avatar
               ? {
@@ -521,7 +521,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   };
 
   const bodyContent = (
-    <View style={{ gap: 18 }}>
+    <View style={{ gap: 18, flex: 1 }}>
       {replyTo && (
         <View style={styles.replyingBanner}>
           <Text style={styles.replyingText}>
@@ -566,7 +566,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         <View style={styles.composerRow}>
           <Avatar
             size={36}
-            src={(userProfile as any)?.avatar}
+            src={(userProfile as any)?.avatar || undefined}
             style={
               !(userProfile as any)?.avatar
                 ? {

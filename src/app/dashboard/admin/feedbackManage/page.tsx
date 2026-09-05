@@ -1,122 +1,209 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Table, TableProps, Modal, Image, Space } from 'antd';
+import { Avatar, Button, Image, Modal, Space, Input, Pagination } from 'antd';
 import dayjs from 'dayjs';
 import { useAppPagination } from '@hooks';
+import { messageApi } from '@hooks';
+import api from '@services/api';
 import { FeedbackItem } from '~mdDashboard/types';
 import styles from './styles';
 
-const FeedbackManage: React.FC = () => {
-  const { listItem, currentData, fetchData } = useAppPagination<FeedbackItem>({
-    apiUrl: 'feedback/getAllFeedback',
-  });
-  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(
-    null,
-  );
+const CATEGORY_META: Record<
+  string,
+  { label: string; color: string; bg: string }
+> = {
+  content: { label: 'Nội dung', color: '#1d418a', bg: '#e8f0ff' },
+  bug: { label: 'Lỗi hệ thống', color: '#c0392b', bg: '#fdeceb' },
+  suggestion: { label: 'Đề xuất', color: '#16a34a', bg: '#eafaf0' },
+  grading: { label: 'Chấm điểm', color: '#b45309', bg: '#fef3e2' },
+  other: { label: 'Khác', color: '#5b6478', bg: '#eef0f5' },
+};
 
-  const columns: TableProps<FeedbackItem>['columns'] = [
-    {
-      title: 'Họ và tên',
-      dataIndex: 'fullName',
-      key: 'fullName',
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: 'Nội dung',
-      dataIndex: 'content',
-      key: 'content',
-      render: (value: string) => (
-        <Text style={{ maxWidth: 320 }} numberOfLines={2}>
-          {value}
-        </Text>
-      ),
-    },
-    {
-      title: 'Ảnh đính kèm',
-      dataIndex: 'images',
-      key: 'images',
-      render: (images: string[]) => <Text>{images?.length || 0} ảnh</Text>,
-    },
-    {
-      title: 'Ngày gửi',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (value: string) => (
-        <Text>{dayjs(value).format('DD/MM/YYYY HH:mm')}</Text>
-      ),
-    },
-  ];
+const getInitials = (fullName?: string) => {
+  const words = (fullName || '').trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '?';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (
+    words[words.length - 2][0] + words[words.length - 1][0]
+  ).toUpperCase();
+};
+
+const AVATAR_COLORS = ['#1d418a', '#c2860a', '#16a34a', '#dc2626', '#7c3aed'];
+const getAvatarColor = (seed?: string) => {
+  if (!seed) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+};
+
+const FeedbackManage: React.FC = () => {
+  const { listItem, setListItem, currentData, fetchData } =
+    useAppPagination<FeedbackItem>({
+      apiUrl: 'feedback/getAllFeedback',
+    });
+  const [replyTarget, setReplyTarget] = useState<FeedbackItem | null>(null);
+  const [replyText, setReplyText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  const handleToggleResolve = async (item: FeedbackItem) => {
+    setTogglingId(item._id);
+    try {
+      const res = await api.post(`/feedback/${item._id}/resolve`);
+      const updated = res.data?.data;
+      setListItem(prev =>
+        prev.map(f => (f._id === item._id ? { ...f, ...updated } : f)),
+      );
+    } catch (e: any) {
+      messageApi.error(
+        e?.response?.data?.message || 'Không cập nhật được trạng thái',
+      );
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyTarget || !replyText.trim()) return;
+    setSending(true);
+    try {
+      const res = await api.post(`/feedback/${replyTarget._id}/reply`, {
+        message: replyText.trim(),
+      });
+      const updated = res.data?.data;
+      setListItem(prev =>
+        prev.map(f => (f._id === replyTarget._id ? { ...f, ...updated } : f)),
+      );
+      messageApi.success(
+        updated?.sent
+          ? 'Đã gửi email trả lời cho người dùng.'
+          : 'Đã lưu trả lời nhưng gửi email thất bại.',
+      );
+      setReplyTarget(null);
+      setReplyText('');
+    } catch (e: any) {
+      messageApi.error(e?.response?.data?.message || 'Không gửi được trả lời');
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          marginBottom: 16,
-        }}>
-        <h1 style={{ margin: 0 }}>Phản hồi người dùng</h1>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Phản Hồi Người Dùng</Text>
       </View>
 
-      <Table
-        columns={columns}
-        dataSource={listItem}
-        rowKey={record => record._id}
-        scroll={{ x: 'max-content' }}
-        onRow={record => ({
-          onClick: () => setSelectedFeedback(record),
-          style: { cursor: 'pointer' },
+      {!listItem.length && (
+        <Text style={styles.emptyText}>Chưa có phản hồi nào.</Text>
+      )}
+
+      <View style={styles.list}>
+        {listItem.map(item => {
+          const meta = CATEGORY_META[item.category || 'other'];
+          const isResolved = item.status === 'resolved';
+          return (
+            <View key={item._id} style={styles.card}>
+              <Avatar
+                size={40}
+                style={{
+                  backgroundColor: getAvatarColor(item.fullName),
+                  fontWeight: 600,
+                }}>
+                {getInitials(item.fullName)}
+              </Avatar>
+              <View style={styles.cardBody}>
+                <View style={styles.headerLine}>
+                  <Text style={styles.name}>{item.fullName}</Text>
+                  <Text style={styles.time}>
+                    {dayjs(item.createdAt).fromNow()}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.tag,
+                      { color: meta.color, backgroundColor: meta.bg },
+                    ]}>
+                    {meta.label}
+                  </Text>
+                </View>
+                <Text style={styles.content}>{item.content}</Text>
+                {!!item.images?.length && (
+                  <Space wrap style={styles.imagesRow}>
+                    {item.images.map((url, idx) => (
+                      <Image
+                        key={idx}
+                        src={url}
+                        width={64}
+                        height={64}
+                        style={{ objectFit: 'cover', borderRadius: 8 }}
+                      />
+                    ))}
+                  </Space>
+                )}
+                {!!item.replyMessage && (
+                  <View style={styles.replyBox}>
+                    <Text style={styles.replyLabel}>
+                      Đã trả lời qua email
+                      {item.repliedAt
+                        ? ` · ${dayjs(item.repliedAt).format('DD/MM/YYYY HH:mm')}`
+                        : ''}
+                    </Text>
+                    <Text style={styles.replyText}>{item.replyMessage}</Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.actionsCol}>
+                <Button
+                  onClick={() => {
+                    setReplyTarget(item);
+                    setReplyText('');
+                  }}>
+                  Trả lời
+                </Button>
+                <Button
+                  type={isResolved ? 'default' : 'primary'}
+                  loading={togglingId === item._id}
+                  onClick={() => handleToggleResolve(item)}>
+                  {isResolved ? 'Đã xử lý' : 'Đánh dấu xử lý'}
+                </Button>
+              </View>
+            </View>
+          );
         })}
-        onChange={res => {
-          fetchData({ pageNum: res.current });
-        }}
-        pagination={{
-          current: currentData?.pageNum,
-          pageSize: currentData?.pageSize,
-          total: currentData?.totalRecords,
-        }}
-      />
+      </View>
+
+      {!!currentData?.totalRecords && (
+        <Pagination
+          current={currentData?.pageNum}
+          pageSize={currentData?.pageSize}
+          total={currentData?.totalRecords}
+          onChange={pageNum => fetchData({ pageNum })}
+        />
+      )}
 
       <Modal
-        title="Chi tiết phản hồi"
-        open={!!selectedFeedback}
-        onCancel={() => setSelectedFeedback(null)}
-        footer={null}
-        width={600}>
-        {selectedFeedback && (
-          <View style={{ gap: 12 }}>
-            <Text>
-              <b>Họ và tên:</b> {selectedFeedback.fullName}
-            </Text>
-            <Text>
-              <b>Email:</b> {selectedFeedback.email}
-            </Text>
-            <Text>
-              <b>Ngày gửi:</b>{' '}
-              {dayjs(selectedFeedback.createdAt).format('DD/MM/YYYY HH:mm')}
-            </Text>
-            <Text style={{ whiteSpace: 'pre-wrap' }}>
-              <b>Nội dung:</b> {selectedFeedback.content}
-            </Text>
-            {selectedFeedback.images?.length > 0 && (
-              <Space wrap>
-                {selectedFeedback.images.map((url, idx) => (
-                  <Image
-                    key={idx}
-                    src={url}
-                    width={100}
-                    height={100}
-                    style={{ objectFit: 'cover', borderRadius: 8 }}
-                  />
-                ))}
-              </Space>
-            )}
+        title={`Trả lời ${replyTarget?.fullName || ''}`}
+        open={!!replyTarget}
+        onCancel={() => setReplyTarget(null)}
+        onOk={handleSendReply}
+        confirmLoading={sending}
+        okText="Gửi email trả lời"
+        cancelText="Hủy">
+        {replyTarget && (
+          <View style={{ gap: 10 }}>
+            <View style={styles.replyBox}>
+              <Text style={styles.replyLabel}>Nội dung gốc</Text>
+              <Text style={styles.replyText}>{replyTarget.content}</Text>
+            </View>
+            <Input.TextArea
+              rows={4}
+              placeholder="Nhập nội dung trả lời - sẽ gửi qua email cho người dùng..."
+              value={replyText}
+              onChange={e => setReplyText(e.target.value)}
+            />
           </View>
         )}
       </Modal>

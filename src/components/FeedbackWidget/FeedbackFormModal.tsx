@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Modal, Upload, UploadFile } from 'antd';
+import { Form, Input, Modal, Select, Upload, UploadFile } from 'antd';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { adminAction } from '~mdAdmin/redux';
 import api from '@services/api';
@@ -9,10 +9,19 @@ const { TextArea } = Input;
 const MAX_WORDS = 200;
 const MAX_IMAGES = 5;
 
+const CATEGORY_OPTIONS = [
+  { value: 'content', label: 'Nội dung' },
+  { value: 'bug', label: 'Lỗi hệ thống' },
+  { value: 'suggestion', label: 'Đề xuất' },
+  { value: 'grading', label: 'Chấm điểm' },
+  { value: 'other', label: 'Khác' },
+];
+
 type FeedbackFormValues = {
   fullName: string;
   email: string;
   content: string;
+  category: string;
 };
 
 const countWords = (text: string) =>
@@ -44,6 +53,7 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({
       fullName: userProfile?.fullName || '',
       email: userProfile?.email || '',
       content: '',
+      category: 'other',
     });
     setFileList([]);
     setWordCount(0);
@@ -62,6 +72,7 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({
           fullName: values.fullName,
           email: values.email,
           content: values.content,
+          category: values.category as any,
           images,
         },
         callback: () => {
@@ -105,6 +116,13 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({
             { type: 'email', message: 'Email không đúng định dạng' },
           ]}>
           <Input placeholder="Nhập email" />
+        </Form.Item>
+
+        <Form.Item
+          label="Loại phản hồi"
+          name="category"
+          rules={[{ required: true, message: 'Vui lòng chọn loại phản hồi' }]}>
+          <Select options={CATEGORY_OPTIONS} placeholder="Chọn loại phản hồi" />
         </Form.Item>
 
         <Form.Item

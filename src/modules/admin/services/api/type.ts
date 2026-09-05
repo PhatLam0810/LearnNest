@@ -70,6 +70,7 @@ export interface CreateFeedbackParams {
   email: string;
   content: string;
   images: string[];
+  category?: 'content' | 'bug' | 'suggestion' | 'grading' | 'other';
 }
 
 export interface CreateSubModuleParams {

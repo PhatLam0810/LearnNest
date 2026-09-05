@@ -12,7 +12,6 @@ import {
   Form,
   Input,
   Card,
-  Progress,
 } from 'antd';
 import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
@@ -122,43 +121,71 @@ const UserManage = () => {
       ),
     },
   ];
+  const { data: activitySummary } = adminQuery.useGetUserActivitySummaryQuery();
+
   return (
     <View style={styles.container}>
       {contextHolder}
-      <Card
+      <View
         style={{
-          width: 280,
-          padding: 20,
-          borderRadius: 12,
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          gap: 16,
           marginBottom: 16,
-          border: '1px solid #eef1f6',
-          boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
-        }}
-        styles={{ body: { padding: 0 } }}>
-        <View
+        }}>
+        <Card
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 16,
+            flex: 1,
+            minWidth: 220,
+            borderRadius: 12,
+            border: '1px solid #eef1f6',
+            boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
           }}>
-          <Progress
-            type="circle"
-            percent={100}
-            size={72}
-            format={() => currentData?.totalRecords ?? 0}
-            strokeColor="#1d418a"
-            trailColor="#eef3fb"
-          />
+          <Text style={{ fontSize: 13, color: '#6b7280' }}>
+            Tổng người dùng
+          </Text>
           <Text
             style={{
               display: 'block',
-              fontSize: 14,
-              color: '#6b7280',
+              fontSize: 28,
+              fontWeight: 700,
+              color: '#1c2536',
+              marginTop: 4,
             }}>
-            Tổng số học viên
+            {activitySummary?.totalUsers ?? currentData?.totalRecords ?? 0}
           </Text>
-        </View>
-      </Card>
+          {!!activitySummary?.newUsersLast7Days && (
+            <Text style={{ fontSize: 13, color: '#16a34a', marginTop: 4 }}>
+              +{activitySummary.newUsersLast7Days} trong 7 ngày
+            </Text>
+          )}
+        </Card>
+        <Card
+          style={{
+            flex: 1,
+            minWidth: 220,
+            borderRadius: 12,
+            border: '1px solid #eef1f6',
+            boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
+          }}>
+          <Text style={{ fontSize: 13, color: '#6b7280' }}>
+            Hoạt động hôm nay
+          </Text>
+          <Text
+            style={{
+              display: 'block',
+              fontSize: 28,
+              fontWeight: 700,
+              color: '#1c2536',
+              marginTop: 4,
+            }}>
+            {activitySummary?.activeToday ?? 0}
+          </Text>
+          <Text style={{ fontSize: 13, color: '#8D8D8D', marginTop: 4 }}>
+            {activitySummary?.activeTodayPercent ?? 0}% tổng người dùng
+          </Text>
+        </Card>
+      </View>
       <TrafficChart />
       <View
         style={{
