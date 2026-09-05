@@ -25,6 +25,7 @@ type LessonItemData = {
   totalLearners?: number;
   averageRating?: number;
   ratingCount?: number;
+  isInProgress?: boolean;
 };
 
 type LessonItemProps = {
@@ -47,6 +48,7 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
     totalLearners,
     averageRating,
     ratingCount,
+    isInProgress,
   } = data || {};
   const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
   const [accessLesson, setAccessLesson] = useState(true);
@@ -68,6 +70,11 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
 
         <View style={styles.cardThumbnail}>
           <LessonThumbnail thumbnail={thumbnail} />
+          {isInProgress && (
+            <View style={styles.inProgressBadge}>
+              <Text style={styles.inProgressBadgeText}>Đang học</Text>
+            </View>
+          )}
         </View>
 
         <View style={[styles.content, { flex: 1 }]}>
