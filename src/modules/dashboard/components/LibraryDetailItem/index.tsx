@@ -1125,6 +1125,45 @@ const LibraryDetailItem = forwardRef<
                 </Button>
               )}
             </View>
+
+            {/* Danh sách câu hỏi - bấm số để nhảy thẳng tới câu bất kỳ,
+                không cần đi tuần tự qua Câu trước/tiếp theo. */}
+            <View style={styles.quizNavGridCard}>
+              <Text style={styles.quizNavGridTitle}>Danh sách câu hỏi</Text>
+              <View style={styles.quizNavGrid}>
+                {shuffledQuestions.map((q, idx) => {
+                  const isAnswered = !!selectedAnswers[q._id];
+                  const isCurrent = idx === currentQuestionIndex;
+                  return (
+                    <View
+                      key={q._id}
+                      onClick={() => setCurrentQuestionIndex(idx)}
+                      style={{
+                        ...styles.quizNavGridItem,
+                        ...(isAnswered ? styles.quizNavGridItemAnswered : {}),
+                        ...(isCurrent ? styles.quizNavGridItemCurrent : {}),
+                      }}>
+                      <Text
+                        style={
+                          isAnswered
+                            ? styles.quizNavGridItemTextAnswered
+                            : styles.quizNavGridItemText
+                        }>
+                        {idx + 1}
+                      </Text>
+                    </View>
+                  );
+                })}
+              </View>
+              <Button
+                onClick={handleSubmit}
+                style={{
+                  color: '#1c2536',
+                  ...styles.quizSubmitFromGridButton,
+                }}>
+                Nộp bài
+              </Button>
+            </View>
           </ScrollView>
         );
       default:

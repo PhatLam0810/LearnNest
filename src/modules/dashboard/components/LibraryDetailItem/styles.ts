@@ -257,6 +257,74 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 
+  quizNavGridCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    marginBottom: 24,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+  },
+
+  quizNavGridTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 12,
+  },
+
+  quizNavGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+
+  quizNavGridItem: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: '#f9fafb',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+
+  quizNavGridItemAnswered: {
+    backgroundColor: '#1d418a',
+    borderColor: '#1d418a',
+  },
+
+  quizNavGridItemCurrent: {
+    borderColor: '#f0c356',
+    borderWidth: 2,
+    backgroundColor: '#fffbeb',
+  },
+
+  quizNavGridItemText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#6b7280',
+  },
+
+  quizNavGridItemTextAnswered: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#ffffff',
+  },
+
+  quizSubmitFromGridButton: {
+    height: 42,
+    borderRadius: 12,
+    paddingLeft: 24,
+    paddingRight: 24,
+    fontWeight: '600',
+    backgroundColor: '#f0c356',
+    border: 'none',
+  },
+
   quizFlagButtonActive: {
     color: '#b45309',
     borderColor: '#f0c356',
