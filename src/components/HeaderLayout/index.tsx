@@ -5,7 +5,6 @@ import {
   Layout,
   Button,
   Dropdown,
-  Avatar,
   Space,
   Drawer,
   Grid,
@@ -26,6 +25,7 @@ import { usePathname, useRouter } from 'next/navigation';
 
 import { authAction } from '~mdAuth/redux';
 import { useAppSelector } from '@redux';
+import UserAvatar from '@components/UserAvatar';
 import SearchBar from '@components/SearchContext/SearchBar';
 import { useMyCourses } from '@/hooks/useMyCourses';
 import CourseItem from '@/components/CourseItem';
@@ -187,10 +187,11 @@ const HeaderLayout: React.FC = ({}) => {
               </Dropdown>
             )}
             <Dropdown trigger={['hover']} menu={{ items: menuItemsUser }}>
-              <Avatar
+              <UserAvatar
                 size={screens.md ? 42 : 36}
-                src={userProfile?.avatar || undefined}
-                icon={<UserOutlined />}
+                avatar={userProfile?.avatar}
+                fullName={userProfile?.fullName}
+                seed={userProfile?._id}
                 className="header-avatar"
               />
             </Dropdown>

@@ -1,14 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Avatar,
-  Button,
-  Drawer,
-  Image as AntImage,
-  Input,
-  Popover,
-  Radio,
-} from 'antd';
+import { Button, Drawer, Image as AntImage, Input, Popover, Radio } from 'antd';
 import {
   CloseOutlined,
   DeleteOutlined,
@@ -28,6 +20,7 @@ import { messageApi } from '@hooks';
 import { useAppSelector } from '@redux';
 import { useSocket } from '@hooks/useSocket';
 import { AppInput } from '@components';
+import UserAvatar from '@components/UserAvatar';
 import styles from './styles';
 
 const REPLIES_PREVIEW_COUNT = 4;
@@ -44,8 +37,7 @@ const REPORT_REASONS: { value: string; label: string }[] = [
 
 type CommentUser = {
   _id: string;
-  firstName?: string;
-  lastName?: string;
+  fullName?: string;
   avatar?: string;
   role?: { level?: number; name?: string };
 };
@@ -73,42 +65,7 @@ interface CommentSectionProps {
 }
 
 const displayName = (u: CommentUser | undefined, myId?: string) =>
-  u?._id === myId ? 'Bạn' : `${u?.firstName ?? ''} ${u?.lastName ?? ''}`.trim();
-
-// Avatar chữ cái đầu khi user chưa có ảnh đại diện - lấy chữ cái đầu của 2
-// từ CUỐI trong họ tên (vd "Lê Quốc Toàn" -> "QT") vì tên đệm+tên chính mới
-// là phần mọi người quen gọi nhau, không phải họ.
-const AVATAR_COLORS = [
-  '#1d418a',
-  '#c2860a',
-  '#16a34a',
-  '#dc2626',
-  '#7c3aed',
-  '#0891b2',
-  '#ea580c',
-  '#0d9488',
-];
-
-const getInitials = (u?: CommentUser) => {
-  const words = `${u?.firstName ?? ''} ${u?.lastName ?? ''}`
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-  if (words.length === 0) return '?';
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (
-    words[words.length - 2][0] + words[words.length - 1][0]
-  ).toUpperCase();
-};
-
-const getAvatarColor = (seed?: string) => {
-  if (!seed) return AVATAR_COLORS[0];
-  let hash = 0;
-  for (let i = 0; i < seed.length; i += 1) {
-    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-};
+  u?._id === myId ? 'Bạn' : (u?.fullName ?? '').trim();
 
 const isTeacher = (u?: CommentUser) => (u?.role?.level ?? 99) <= 2;
 
@@ -372,22 +329,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
     return (
       <View key={c._id} style={rowStyle}>
-        <Avatar
+        <UserAvatar
           size={32}
-          src={c.user?.avatar || undefined}
+          avatar={c.user?.avatar}
+          fullName={c.user?.fullName}
+          seed={c.user?._id}
           style={
-            !c.user?.avatar
-              ? {
-                  backgroundColor: teacher
-                    ? '#f0c356'
-                    : getAvatarColor(c.user?._id),
-                  fontSize: 12,
-                  fontWeight: 600,
-                }
-              : undefined
-          }>
-          {!c.user?.avatar && getInitials(c.user)}
-        </Avatar>
+            teacher && !c.user?.avatar
+              ? { backgroundColor: '#f0c356', fontSize: 12 }
+              : { fontSize: 12 }
+          }
+        />
         <View style={styles.commentBody}>
           <View style={styles.commentHeaderRow}>
             <View style={styles.commentAuthorRow}>
@@ -564,19 +516,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       />
       {inline ? (
         <View style={styles.composerRow}>
-          <Avatar
+          <UserAvatar
             size={36}
-            src={(userProfile as any)?.avatar || undefined}
-            style={
-              !(userProfile as any)?.avatar
-                ? {
-                    backgroundColor: getAvatarColor(userProfile?._id),
-                    fontWeight: 600,
-                  }
-                : undefined
-            }>
-            {!(userProfile as any)?.avatar && getInitials(userProfile as any)}
-          </Avatar>
+            avatar={(userProfile as any)?.avatar}
+            fullName={(userProfile as any)?.fullName}
+            seed={userProfile?._id}
+          />
           <View style={styles.composerCol}>
             <View style={styles.textAreaWrap}>
               <AppInput

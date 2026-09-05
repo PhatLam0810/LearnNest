@@ -6,3 +6,4 @@ export * from './(Form)';
 export { default as AppButton } from './AppButton';
 export { default as AppUploadToServer } from './AppUploadToServer';
 export { default as HeaderLayout } from './HeaderLayout';
+export { default as UserAvatar } from './UserAvatar';

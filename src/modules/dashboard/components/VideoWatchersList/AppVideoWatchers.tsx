@@ -2,18 +2,8 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { Tag, Button, Popconfirm, Spin, Empty, Progress, message } from 'antd';
 import {
-  Avatar,
-  Tag,
-  Button,
-  Popconfirm,
-  Spin,
-  Empty,
-  Progress,
-  message,
-} from 'antd';
-import {
-  UserOutlined,
   CheckCircleFilled,
   ArrowLeftOutlined,
   ArrowRightOutlined,
@@ -22,6 +12,7 @@ import axios from 'axios';
 import { View, Text } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
 import { ReminderHistory } from '~mdAdmin/components';
+import { UserAvatar } from '@components';
 import styles from './styles';
 
 interface WatcherItem {
@@ -296,19 +287,20 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
               const totalTimeStr = formatSecondsToTime(item.duration);
               const displayName = getDisplayName(item);
               const isCurrentUser = item.userId === userId;
-              const initials = displayName.charAt(0).toUpperCase();
 
               return (
                 <View key={item._id} style={styles.card}>
-                  <Avatar
-                    src={item.avatar}
-                    icon={!item.avatar && <UserOutlined />}
+                  <UserAvatar
+                    avatar={item.avatar}
+                    fullName={displayName}
+                    seed={item.userId}
                     style={{
                       ...styles.avatar,
-                      backgroundColor: isCurrentUser ? '#1d418a' : '#f56a00',
-                    }}>
-                    {!item.avatar && initials}
-                  </Avatar>
+                      ...(isCurrentUser && !item.avatar
+                        ? { backgroundColor: '#1d418a' }
+                        : undefined),
+                    }}
+                  />
                   <View style={styles.cardBody}>
                     <View style={styles.nameRow}>
                       <Text style={styles.name} numberOfLines={1}>

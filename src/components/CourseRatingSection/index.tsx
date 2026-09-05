@@ -1,10 +1,9 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { StarFilled, StarOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar } from 'antd';
+import { StarFilled, StarOutlined } from '@ant-design/icons';
 import AppButton from '@components/AppButton';
-import { AppInput } from '@components';
+import { AppInput, UserAvatar } from '@components';
 import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { CourseRatingUser } from '~mdDashboard/redux/RTKQuery/types';
@@ -171,9 +170,10 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
             return (
               <View key={review._id} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
-                  <Avatar
-                    src={user?.avatar}
-                    icon={<UserOutlined />}
+                  <UserAvatar
+                    avatar={user?.avatar}
+                    fullName={user?.fullName}
+                    seed={user?._id}
                     size={40}
                   />
                   <View style={{ flex: 1, minWidth: 0 }}>

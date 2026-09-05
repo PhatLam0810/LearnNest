@@ -1,11 +1,12 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Avatar, Button, Image, Modal, Space, Input, Pagination } from 'antd';
+import { Button, Image, Modal, Space, Input, Pagination } from 'antd';
 import dayjs from 'dayjs';
 import { useAppPagination } from '@hooks';
 import { messageApi } from '@hooks';
 import api from '@services/api';
+import { UserAvatar } from '@components';
 import { FeedbackItem } from '~mdDashboard/types';
 import styles from './styles';
 
@@ -18,25 +19,6 @@ const CATEGORY_META: Record<
   suggestion: { label: 'Đề xuất', color: '#16a34a', bg: '#eafaf0' },
   grading: { label: 'Chấm điểm', color: '#b45309', bg: '#fef3e2' },
   other: { label: 'Khác', color: '#5b6478', bg: '#eef0f5' },
-};
-
-const getInitials = (fullName?: string) => {
-  const words = (fullName || '').trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return '?';
-  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (
-    words[words.length - 2][0] + words[words.length - 1][0]
-  ).toUpperCase();
-};
-
-const AVATAR_COLORS = ['#1d418a', '#c2860a', '#16a34a', '#dc2626', '#7c3aed'];
-const getAvatarColor = (seed?: string) => {
-  if (!seed) return AVATAR_COLORS[0];
-  let hash = 0;
-  for (let i = 0; i < seed.length; i += 1) {
-    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 };
 
 const FeedbackManage: React.FC = () => {
@@ -107,14 +89,11 @@ const FeedbackManage: React.FC = () => {
           const isResolved = item.status === 'resolved';
           return (
             <View key={item._id} style={styles.card}>
-              <Avatar
+              <UserAvatar
                 size={40}
-                style={{
-                  backgroundColor: getAvatarColor(item.fullName),
-                  fontWeight: 600,
-                }}>
-                {getInitials(item.fullName)}
-              </Avatar>
+                fullName={item.fullName}
+                seed={item.userId || item.fullName}
+              />
               <View style={styles.cardBody}>
                 <View style={styles.headerLine}>
                   <Text style={styles.name}>{item.fullName}</Text>
