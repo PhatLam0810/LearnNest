@@ -16,6 +16,7 @@ import {
   PracticeSubmitResponse,
   PracticeSubmissionResultItem,
 } from '~mdDashboard/types/practice';
+import CommentSection from '@components/CommentSection';
 import './styles.scss';
 
 type Props = {
@@ -224,6 +225,11 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
           ))}
         </div>
       )}
+
+      <div className="practice-discussion">
+        <h3>Thảo luận</h3>
+        <CommentSection postId={taskId} type="PracticeTask" inline />
+      </div>
     </div>
   );
 };

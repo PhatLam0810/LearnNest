@@ -140,7 +140,8 @@ const UserManage = () => {
             borderRadius: 12,
             border: '1px solid #eef1f6',
             boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
-          }}>
+          }}
+          styles={{ body: { padding: 20 } }}>
           <Text style={{ fontSize: 13, color: '#6b7280' }}>
             Tổng người dùng
           </Text>
@@ -167,7 +168,8 @@ const UserManage = () => {
             borderRadius: 12,
             border: '1px solid #eef1f6',
             boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
-          }}>
+          }}
+          styles={{ body: { padding: 20 } }}>
           <Text style={{ fontSize: 13, color: '#6b7280' }}>
             Hoạt động hôm nay
           </Text>
