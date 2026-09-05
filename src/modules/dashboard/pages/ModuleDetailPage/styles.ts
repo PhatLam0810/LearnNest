@@ -257,7 +257,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f0f0f0',
   },
-  contentNavButton: {
+  contentNavButtonBack: {
     flex: 1,
     minWidth: 0,
     paddingTop: 10,
@@ -265,7 +265,20 @@ const styles = StyleSheet.create({
     paddingLeft: 14,
     paddingRight: 14,
     borderRadius: 8,
-    backgroundColor: '#f5f5f7',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#d7dbe4',
+    cursor: 'pointer',
+  },
+  contentNavButtonForward: {
+    flex: 1,
+    minWidth: 0,
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 14,
+    paddingRight: 14,
+    borderRadius: 8,
+    backgroundColor: 'var(--color-vhu-primary)',
     cursor: 'pointer',
   },
   contentNavButtonDisabled: {
@@ -279,10 +292,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f7',
     opacity: 0.4,
   },
-  contentNavButtonText: {
+  contentNavButtonTextBack: {
     ...typography.body2,
     color: '#212121',
     fontWeight: '500',
+  },
+  contentNavButtonTextForward: {
+    ...typography.body2,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  contentNavButtonTextDisabled: {
+    ...typography.body2,
+    color: '#8D8D8D',
+    fontWeight: '500',
+  },
+  backBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    cursor: 'pointer',
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  backBarIcon: {
+    fontSize: 12,
+    color: 'var(--color-vhu-primary)',
+  },
+  backBarText: {
+    ...typography.body2,
+    color: 'var(--color-vhu-primary)',
+    fontWeight: '600',
   },
   layoutTitle: {
     ...typography.titleM,

@@ -119,8 +119,57 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#1d418a',
   },
+  // Khung nhập dạng "hỏi đáp" dùng riêng cho tab Thảo luận (inline) - có
+  // avatar người dùng hiện tại bên trái, hint + nút "Gửi bình luận" dạng
+  // chữ bên dưới ô nhập, khác nút tròn icon của Drawer cũ.
+  composerRow: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'flex-start',
+  },
+  composerCol: {
+    flex: 1,
+    minWidth: 0,
+    gap: 8,
+  },
+  composerFooterRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  composerHint: {
+    fontFamily: font,
+    fontSize: 12.5,
+    color: '#9aa5b8',
+  },
+  sendTextButton: {
+    backgroundColor: 'var(--color-vhu-primary)',
+    borderColor: 'var(--color-vhu-primary)',
+    color: '#fff',
+    borderRadius: 999,
+    height: 36,
+    paddingLeft: 20,
+    paddingRight: 20,
+    fontWeight: 600,
+    flexShrink: 0,
+  },
   list: {
     gap: 6,
+  },
+  // Mỗi thread (câu hỏi + trả lời) đứng trong 1 khung riêng ở tab Thảo luận
+  // - khác kiểu ngăn cách bằng border mờ trước đây.
+  listInline: {
+    gap: 14,
+  },
+  commentCard: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#eef0f5',
+    borderRadius: 12,
+    padding: 16,
+    boxShadow: '0 4px 12px rgba(15, 23, 42, 0.05)',
   },
   empty: {
     fontFamily: font,
@@ -145,6 +194,16 @@ const styles = StyleSheet.create({
     borderLeftColor: '#eef0f5',
     paddingLeft: 14,
   },
+  // Highlight riêng cho trả lời của giảng viên - nền xanh nhạt để nổi bật
+  // giữa các trả lời thường.
+  teacherReplyRow: {
+    backgroundColor: '#f2f6ff',
+    borderLeftColor: '#c7d6f2',
+    borderRadius: 10,
+    paddingRight: 12,
+    paddingTop: 10,
+    paddingBottom: 10,
+  },
   commentBody: {
     flex: 1,
     gap: 3,
@@ -155,6 +214,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  commentAuthorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   commentAuthor: {
     fontFamily: font,
     fontWeight: '600',
@@ -162,6 +226,16 @@ const styles = StyleSheet.create({
   },
   commentAuthorOwn: {
     color: '#1d418a',
+  },
+  teacherBadge: {
+    fontFamily: font,
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#8a5d00',
+    backgroundColor: '#fdf1d9',
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
   commentText: {
     fontFamily: font,

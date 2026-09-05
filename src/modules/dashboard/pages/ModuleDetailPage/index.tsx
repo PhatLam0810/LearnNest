@@ -19,6 +19,7 @@ import {
   CaretRightOutlined,
   FilePdfOutlined,
   FileTextOutlined,
+  LeftOutlined,
   PictureOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
@@ -546,7 +547,11 @@ const ModuleDetailPage = () => {
     styles.mainColumn,
     { display: 'flex', gap: 24 },
     isMobile && { width: '100%' },
-    !isMobile && { overflowY: 'auto', maxHeight: '100%' },
+    !isMobile && {
+      overflowY: 'auto',
+      maxHeight: '100%',
+      scrollbarWidth: 'none',
+    },
   ] as any;
 
   const videoStickyStyle = [
@@ -569,6 +574,7 @@ const ModuleDetailPage = () => {
 
   const lessonScrollStyle = [
     styles.lessonScroll,
+    { scrollbarWidth: 'none' },
     isMobile && { maxHeight: 'none', overflowY: 'visible', padding: 0 },
   ] as any;
 
@@ -614,11 +620,24 @@ const ModuleDetailPage = () => {
       (l.type === 'PDF' || l.type === 'Image'),
   );
 
+  // Nút quay lại trang tổng quan khóa học - đứng đầu cột nội dung (không
+  // nằm trong videoStickyStyle) nên luôn là thứ đầu tiên nhìn thấy, kể cả
+  // trước khi cuộn.
+  const backToLessonBar = lessonId ? (
+    <View
+      style={styles.backBar}
+      onClick={() => router.push(`/dashboard/home/lesson/${lessonId}`)}>
+      <LeftOutlined style={styles.backBarIcon} />
+      <Text style={styles.backBarText}>Quay lại chi tiết khóa học</Text>
+    </View>
+  ) : null;
+
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
       {contextHolder}
       <View style={layoutRowStyle}>
         <View style={mainColumnStyle}>
+          {backToLessonBar}
           {taskId ? (
             <View style={videoStickyStyle}>
               <PracticeTaskContent
@@ -758,10 +777,14 @@ const ModuleDetailPage = () => {
                       style={
                         currentContentIndex <= 0
                           ? styles.contentNavButtonDisabled
-                          : styles.contentNavButton
+                          : styles.contentNavButtonBack
                       }>
                       <Text
-                        style={styles.contentNavButtonText}
+                        style={
+                          currentContentIndex <= 0
+                            ? styles.contentNavButtonTextDisabled
+                            : styles.contentNavButtonTextBack
+                        }
                         numberOfLines={1}>
                         {currentContentIndex > 0
                           ? `← Bài ${currentContentIndex}: ${currentContentSeq[currentContentIndex - 1]?.data?.title || ''}`
@@ -778,10 +801,15 @@ const ModuleDetailPage = () => {
                         currentContentIndex < 0 ||
                         currentContentIndex >= totalContentCount - 1
                           ? styles.contentNavButtonDisabled
-                          : styles.contentNavButton
+                          : styles.contentNavButtonForward
                       }>
                       <Text
-                        style={styles.contentNavButtonText}
+                        style={
+                          currentContentIndex < 0 ||
+                          currentContentIndex >= totalContentCount - 1
+                            ? styles.contentNavButtonTextDisabled
+                            : styles.contentNavButtonTextForward
+                        }
                         numberOfLines={1}>
                         {currentContentIndex >= 0 &&
                         currentContentIndex < totalContentCount - 1

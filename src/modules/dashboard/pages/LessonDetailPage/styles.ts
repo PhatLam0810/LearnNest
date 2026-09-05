@@ -284,11 +284,13 @@ const styles = StyleSheet.create({
   },
   table1Thumbnail: {
     width: '100%',
+    maxWidth: 720,
     aspectRatio: 16 / 9,
     borderRadius: 12,
     overflow: 'hidden',
     backgroundColor: 'gray',
     marginBottom: 16,
+    alignSelf: 'center',
   },
   // "table2" = % tiến độ + nút tiếp tục, "table3" = kỹ năng đạt được - 2
   // card riêng trong sidebar theo design (trước đây gộp chung 1 khối

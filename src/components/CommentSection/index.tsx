@@ -20,7 +20,6 @@ import {
   MoreOutlined,
   PictureOutlined,
   SendOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
 import { Text, View } from 'react-native-web';
 import dayjs from 'dayjs';
@@ -48,6 +47,7 @@ type CommentUser = {
   firstName?: string;
   lastName?: string;
   avatar?: string;
+  role?: { level?: number; name?: string };
 };
 
 type CommentItem = {
@@ -74,6 +74,43 @@ interface CommentSectionProps {
 
 const displayName = (u: CommentUser | undefined, myId?: string) =>
   u?._id === myId ? 'Bạn' : `${u?.firstName ?? ''} ${u?.lastName ?? ''}`.trim();
+
+// Avatar chữ cái đầu khi user chưa có ảnh đại diện - lấy chữ cái đầu của 2
+// từ CUỐI trong họ tên (vd "Lê Quốc Toàn" -> "QT") vì tên đệm+tên chính mới
+// là phần mọi người quen gọi nhau, không phải họ.
+const AVATAR_COLORS = [
+  '#1d418a',
+  '#c2860a',
+  '#16a34a',
+  '#dc2626',
+  '#7c3aed',
+  '#0891b2',
+  '#ea580c',
+  '#0d9488',
+];
+
+const getInitials = (u?: CommentUser) => {
+  const words = `${u?.firstName ?? ''} ${u?.lastName ?? ''}`
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) return '?';
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (
+    words[words.length - 2][0] + words[words.length - 1][0]
+  ).toUpperCase();
+};
+
+const getAvatarColor = (seed?: string) => {
+  if (!seed) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+};
+
+const isTeacher = (u?: CommentUser) => (u?.role?.level ?? 99) <= 2;
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   postId,
@@ -326,18 +363,43 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       : allReplies.slice(0, REPLIES_PREVIEW_COUNT);
     const hiddenCount = allReplies.length - visibleReplies.length;
 
+    const teacher = isTeacher(c.user);
+    const rowStyle = isReply
+      ? teacher
+        ? [styles.replyRow, styles.teacherReplyRow]
+        : styles.replyRow
+      : styles.commentRow;
+
     return (
-      <View key={c._id} style={isReply ? styles.replyRow : styles.commentRow}>
-        <Avatar size={32} src={c.user?.avatar} icon={<UserOutlined />} />
+      <View key={c._id} style={rowStyle}>
+        <Avatar
+          size={32}
+          src={c.user?.avatar}
+          style={
+            !c.user?.avatar
+              ? {
+                  backgroundColor: teacher
+                    ? '#f0c356'
+                    : getAvatarColor(c.user?._id),
+                  fontSize: 12,
+                  fontWeight: 600,
+                }
+              : undefined
+          }>
+          {!c.user?.avatar && getInitials(c.user)}
+        </Avatar>
         <View style={styles.commentBody}>
           <View style={styles.commentHeaderRow}>
-            <Text
-              style={[
-                styles.commentAuthor,
-                canEdit && styles.commentAuthorOwn,
-              ]}>
-              {displayName(c.user, userProfile?._id)}
-            </Text>
+            <View style={styles.commentAuthorRow}>
+              <Text
+                style={[
+                  styles.commentAuthor,
+                  canEdit && styles.commentAuthorOwn,
+                ]}>
+                {displayName(c.user, userProfile?._id)}
+              </Text>
+              {teacher && <Text style={styles.teacherBadge}>Giảng viên</Text>}
+            </View>
             {!canEdit && (
               <Popover
                 trigger={['hover', 'click']}
@@ -492,66 +554,137 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         </View>
       )}
 
-      <View style={styles.inputRow}>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          hidden
-          onChange={handleFilesSelected}
-        />
-        <View style={styles.textAreaWrap}>
-          <AppInput
-            type="TextArea"
-            autoSize={{ minRows: 1, maxRows: 6 }}
-            placeholder="Nhập bình luận mới của bạn"
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            style={{ height: 'auto', minHeight: 56, paddingRight: 40 }}
-          />
-          <Text
-            style={[
-              styles.attachBtnOverlay,
-              (uploadingImages || pendingImages.length >= MAX_COMMENT_IMAGES) &&
-                styles.attachBtnDisabled,
-            ]}
-            onPress={handlePickImages}>
-            {uploadingImages ? (
-              <LoadingOutlined />
-            ) : (
-              <PictureOutlined
-                style={
-                  pendingImages.length > 0
-                    ? styles.attachBtnActiveIcon
-                    : undefined
-                }
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={handleFilesSelected}
+      />
+      {inline ? (
+        <View style={styles.composerRow}>
+          <Avatar
+            size={36}
+            src={(userProfile as any)?.avatar}
+            style={
+              !(userProfile as any)?.avatar
+                ? {
+                    backgroundColor: getAvatarColor(userProfile?._id),
+                    fontWeight: 600,
+                  }
+                : undefined
+            }>
+            {!(userProfile as any)?.avatar && getInitials(userProfile as any)}
+          </Avatar>
+          <View style={styles.composerCol}>
+            <View style={styles.textAreaWrap}>
+              <AppInput
+                type="TextArea"
+                autoSize={{ minRows: 2, maxRows: 6 }}
+                placeholder="Đặt câu hỏi cho giảng viên hoặc chia sẻ cách bạn hiểu bài này..."
+                value={text}
+                onChange={e => setText(e.target.value)}
+                style={{ height: 'auto', minHeight: 64, paddingRight: 40 }}
               />
-            )}
-          </Text>
+              <Text
+                style={[
+                  styles.attachBtnOverlay,
+                  (uploadingImages ||
+                    pendingImages.length >= MAX_COMMENT_IMAGES) &&
+                    styles.attachBtnDisabled,
+                ]}
+                onPress={handlePickImages}>
+                {uploadingImages ? (
+                  <LoadingOutlined />
+                ) : (
+                  <PictureOutlined
+                    style={
+                      pendingImages.length > 0
+                        ? styles.attachBtnActiveIcon
+                        : undefined
+                    }
+                  />
+                )}
+              </Text>
+            </View>
+            <View style={styles.composerFooterRow}>
+              <Text style={styles.composerHint}>
+                Câu hỏi được giảng viên trả lời trong 24 giờ.
+              </Text>
+              <Button
+                type="primary"
+                style={styles.sendTextButton}
+                disabled={!text.trim()}
+                onClick={handleSend}>
+                Gửi bình luận
+              </Button>
+            </View>
+          </View>
         </View>
-        <Button
-          type="primary"
-          shape="circle"
-          icon={<SendOutlined />}
-          disabled={!text.trim()}
-          onClick={handleSend}
-        />
-      </View>
+      ) : (
+        <View style={styles.inputRow}>
+          <View style={styles.textAreaWrap}>
+            <AppInput
+              type="TextArea"
+              autoSize={{ minRows: 1, maxRows: 6 }}
+              placeholder="Nhập bình luận mới của bạn"
+              value={text}
+              onChange={e => setText(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSend();
+                }
+              }}
+              style={{ height: 'auto', minHeight: 56, paddingRight: 40 }}
+            />
+            <Text
+              style={[
+                styles.attachBtnOverlay,
+                (uploadingImages ||
+                  pendingImages.length >= MAX_COMMENT_IMAGES) &&
+                  styles.attachBtnDisabled,
+              ]}
+              onPress={handlePickImages}>
+              {uploadingImages ? (
+                <LoadingOutlined />
+              ) : (
+                <PictureOutlined
+                  style={
+                    pendingImages.length > 0
+                      ? styles.attachBtnActiveIcon
+                      : undefined
+                  }
+                />
+              )}
+            </Text>
+          </View>
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<SendOutlined />}
+            disabled={!text.trim()}
+            onClick={handleSend}
+          />
+        </View>
+      )}
 
-      <View style={styles.list}>
+      <View style={inline ? styles.listInline : styles.list}>
         {!loading && topLevel.length === 0 && (
           <Text style={styles.empty}>
             Chưa có bình luận nào — hãy là người đầu tiên.
           </Text>
         )}
-        {topLevel.map(c => renderComment(c))}
+        {topLevel.map(c =>
+          inline ? (
+            <View key={c._id} style={styles.commentCard}>
+              {renderComment(c)}
+            </View>
+          ) : (
+            renderComment(c)
+          ),
+        )}
       </View>
     </View>
   );

@@ -74,52 +74,8 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Đánh giá khóa học</Text>
-      {ratingCount > 0 && (
-        <Text style={styles.countLabel}>{ratingCount} đánh giá</Text>
-      )}
-
-      <View style={styles.summaryRow}>
-        <View style={styles.averageBlock}>
-          <Text style={styles.averageNumber}>{averageRating.toFixed(1)}</Text>
-          <View style={styles.averageStarsRow}>
-            {[1, 2, 3, 4, 5].map(n =>
-              n <= Math.round(averageRating) ? (
-                <StarFilled key={n} style={styles.starFilledIcon} />
-              ) : (
-                <StarOutlined key={n} style={styles.starOutlineIcon} />
-              ),
-            )}
-          </View>
-          <Text style={styles.countLabel}>{ratingCount} đánh giá</Text>
-        </View>
-
-        {ratingCount > 0 && breakdown && (
-          <View style={styles.breakdownBlock}>
-            {STAR_LEVELS.map(level => {
-              const count = breakdown[String(level) as '5'] || 0;
-              const pct = ratingCount > 0 ? (count / ratingCount) * 100 : 0;
-              return (
-                <View key={level} style={styles.breakdownRow}>
-                  <Text style={styles.breakdownLabel}>{level} ★</Text>
-                  <View style={styles.breakdownTrack}>
-                    <View
-                      style={{
-                        ...styles.breakdownFill,
-                        width: `${pct}%`,
-                      }}
-                    />
-                  </View>
-                  <Text style={styles.breakdownPct}>{Math.round(pct)}%</Text>
-                </View>
-              );
-            })}
-          </View>
-        )}
-      </View>
-
-      <View style={styles.formBlock}>
+    <View style={styles.wrapper}>
+      <View style={styles.formCard}>
         <Text style={styles.formTitle}>
           {data?.myRating ? 'Sửa đánh giá của bạn' : 'Đánh giá của bạn'}
         </Text>
@@ -150,17 +106,59 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
           onChange={e => setComment(e.target.value)}
         />
         <AppButton
-          style={{
-            width: 'auto',
-            alignSelf: 'flex-start',
-            backgroundColor: 'var(--color-vhu-primary)',
-            borderColor: 'var(--color-vhu-primary)',
-            color: '#fff',
-          }}
+          style={styles.submitButton}
           loading={submitting}
           onClick={handleSubmit}>
           Gửi đánh giá
         </AppButton>
+      </View>
+
+      <View style={styles.summaryCard}>
+        <View style={styles.summaryHeaderRow}>
+          <Text style={styles.title}>Đánh giá khóa học</Text>
+          {ratingCount > 0 && (
+            <Text style={styles.countLabel}>{ratingCount} đánh giá</Text>
+          )}
+        </View>
+
+        <View style={styles.summaryRow}>
+          <View style={styles.averageBlock}>
+            <Text style={styles.averageNumber}>{averageRating.toFixed(1)}</Text>
+            <View style={styles.averageStarsRow}>
+              {[1, 2, 3, 4, 5].map(n =>
+                n <= Math.round(averageRating) ? (
+                  <StarFilled key={n} style={styles.starFilledIcon} />
+                ) : (
+                  <StarOutlined key={n} style={styles.starOutlineIcon} />
+                ),
+              )}
+            </View>
+            <Text style={styles.countLabel}>{ratingCount} đánh giá</Text>
+          </View>
+
+          {ratingCount > 0 && breakdown && (
+            <View style={styles.breakdownBlock}>
+              {STAR_LEVELS.map(level => {
+                const count = breakdown[String(level) as '5'] || 0;
+                const pct = ratingCount > 0 ? (count / ratingCount) * 100 : 0;
+                return (
+                  <View key={level} style={styles.breakdownRow}>
+                    <Text style={styles.breakdownLabel}>{level} ★</Text>
+                    <View style={styles.breakdownTrack}>
+                      <View
+                        style={{
+                          ...styles.breakdownFill,
+                          width: `${pct}%`,
+                        }}
+                      />
+                    </View>
+                    <Text style={styles.breakdownPct}>{Math.round(pct)}%</Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </View>
       </View>
 
       {!loadingRatings && (ratingsData?.items?.length ?? 0) > 0 && (
@@ -176,7 +174,7 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
                   <Avatar
                     src={user?.avatar}
                     icon={<UserOutlined />}
-                    size={36}
+                    size={40}
                   />
                   <View style={{ flex: 1, minWidth: 0 }}>
                     <Text style={styles.reviewName} numberOfLines={1}>

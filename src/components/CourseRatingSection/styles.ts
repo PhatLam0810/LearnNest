@@ -3,23 +3,88 @@ import { lexend } from '@/styles/typography';
 
 const font = lexend.style.fontFamily;
 
+const CARD_BASE = {
+  width: '100%',
+  backgroundColor: '#fff',
+  borderRadius: 14,
+  borderWidth: 1,
+  borderColor: '#eef0f5',
+  boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
+} as const;
+
 const styles = StyleSheet.create({
-  container: {
+  wrapper: {
     width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    marginTop: 24,
+    marginTop: 28,
     gap: 20,
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
+  },
+  // "Đánh giá của bạn" — tablet riêng, tách khỏi khối tổng kết/danh sách
+  // nhận xét theo đúng yêu cầu, cho phép sửa lại đánh giá cũ (title đổi
+  // thành "Sửa đánh giá của bạn" khi đã có myRating).
+  formCard: {
+    ...CARD_BASE,
+    padding: 24,
+    gap: 12,
+  },
+  formTitle: {
+    fontFamily: font,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1c2536',
+  },
+  formHint: {
+    fontFamily: font,
+    fontSize: 14,
+    color: '#8D8D8D',
+  },
+  starsRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  starPick: {
+    cursor: 'pointer',
+  },
+  starFilledIconLarge: {
+    color: '#f0c356',
+    fontSize: 30,
+  },
+  starOutlineIconLarge: {
+    color: '#c7ccd6',
+    fontSize: 30,
+  },
+  submitButton: {
+    width: '100%',
+    marginTop: 4,
+    borderRadius: 999,
+    height: 48,
+    backgroundColor: 'var(--color-vhu-primary)',
+    borderColor: 'var(--color-vhu-primary)',
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  // "Đánh giá khóa học" — tổng kết điểm trung bình + phân bố theo sao,
+  // cũng là 1 tablet riêng.
+  summaryCard: {
+    ...CARD_BASE,
+    padding: 24,
+    gap: 20,
+  },
+  summaryHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
   },
   title: {
     ...typography.titleS,
-    fontSize: 20,
+    fontSize: 22,
+    fontWeight: '700',
   },
   countLabel: {
     fontFamily: font,
-    fontSize: 13,
+    fontSize: 14,
     color: '#8D8D8D',
   },
   summaryRow: {
@@ -30,12 +95,12 @@ const styles = StyleSheet.create({
   },
   averageBlock: {
     alignItems: 'flex-start',
-    gap: 4,
+    gap: 6,
     minWidth: 140,
   },
   averageNumber: {
     fontFamily: font,
-    fontSize: 40,
+    fontSize: 44,
     fontWeight: '700',
     color: 'var(--color-vhu-primary)',
   },
@@ -45,16 +110,16 @@ const styles = StyleSheet.create({
   },
   starFilledIcon: {
     color: '#f0c356',
-    fontSize: 16,
+    fontSize: 18,
   },
   starOutlineIcon: {
     color: '#c7ccd6',
-    fontSize: 16,
+    fontSize: 18,
   },
   breakdownBlock: {
     flex: 1,
     minWidth: 260,
-    gap: 6,
+    gap: 8,
   },
   breakdownRow: {
     flexDirection: 'row',
@@ -63,9 +128,9 @@ const styles = StyleSheet.create({
   },
   breakdownLabel: {
     fontFamily: font,
-    fontSize: 12,
+    fontSize: 13,
     color: '#8D8D8D',
-    width: 28,
+    width: 30,
   },
   breakdownTrack: {
     flex: 1,
@@ -81,54 +146,20 @@ const styles = StyleSheet.create({
   },
   breakdownPct: {
     fontFamily: font,
-    fontSize: 12,
-    color: '#8D8D8D',
-    width: 36,
-    textAlign: 'right' as const,
-  },
-  formBlock: {
-    gap: 10,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-  },
-  formTitle: {
-    fontFamily: font,
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#1c2536',
-  },
-  formHint: {
-    fontFamily: font,
     fontSize: 13,
     color: '#8D8D8D',
+    width: 38,
+    textAlign: 'right' as const,
   },
-  starsRow: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  starPick: {
-    cursor: 'pointer',
-  },
-  starFilledIconLarge: {
-    color: '#f0c356',
-    fontSize: 26,
-  },
-  starOutlineIconLarge: {
-    color: '#c7ccd6',
-    fontSize: 26,
-  },
+  // Danh sách nhận xét - mỗi review 1 khung riêng (nền/viền/bo góc rõ ràng),
+  // không còn chỉ ngăn cách bằng border-bottom mờ nhạt như trước.
   reviewList: {
-    gap: 16,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    gap: 14,
   },
   reviewCard: {
-    gap: 8,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    ...CARD_BASE,
+    padding: 18,
+    gap: 10,
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -137,32 +168,33 @@ const styles = StyleSheet.create({
   },
   reviewName: {
     fontFamily: font,
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     color: '#1c2536',
   },
   reviewStarsRow: {
     flexDirection: 'row',
-    gap: 1,
+    gap: 2,
+    marginTop: 2,
   },
   reviewStarIcon: {
     color: '#f0c356',
-    fontSize: 12,
+    fontSize: 13,
   },
   reviewStarOutlineIcon: {
     color: '#c7ccd6',
-    fontSize: 12,
+    fontSize: 13,
   },
   reviewDate: {
     fontFamily: font,
-    fontSize: 12,
+    fontSize: 13,
     color: '#8D8D8D',
     flexShrink: 0,
   },
   reviewComment: {
     fontFamily: font,
-    fontSize: 14,
-    lineHeight: '20px',
+    fontSize: 15,
+    lineHeight: '22px',
     color: '#333',
   },
 });
