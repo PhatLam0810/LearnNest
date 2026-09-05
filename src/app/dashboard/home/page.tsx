@@ -82,26 +82,30 @@ const HomeOverview = () => {
           />
         </View>
 
-        <View style={[styles.section, styles.sectionSpacing]}>
-          <View style={styles.titleContainer}>
-            <Text style={{ ...styles.title, fontSize: isMobile ? 18 : 20 }}>
-              Đang học
-            </Text>
-            <AppButton
-              type="text"
-              style={styles.seeAllBtn}
-              onClick={() => router.push('/dashboard/lesson')}>
-              Xem tất cả
-            </AppButton>
+        <View style={[styles.mainRow, isMobile ? styles.mainRowMobile : null]}>
+          <View style={styles.continuingCol}>
+            <View style={styles.titleContainer}>
+              <Text style={{ ...styles.title, fontSize: isMobile ? 18 : 20 }}>
+                Đang học
+              </Text>
+              <AppButton
+                type="text"
+                style={styles.seeAllBtn}
+                onClick={() => router.push('/dashboard/lesson')}>
+                Xem tất cả
+              </AppButton>
+            </View>
+            <ContinuingCourses
+              courses={myCourses}
+              loading={loadingCourses}
+              formatRelativeTime={formatRelativeTime}
+            />
           </View>
-          <ContinuingCourses
-            courses={myCourses}
-            loading={loadingCourses}
-            formatRelativeTime={formatRelativeTime}
-          />
-        </View>
 
-        <RoadmapCard />
+          <View style={styles.roadmapCol}>
+            <RoadmapCard />
+          </View>
+        </View>
       </View>
     </View>
   );

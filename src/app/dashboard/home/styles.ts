@@ -42,6 +42,24 @@ const styles = StyleSheet.create({
   sectionSpacing: {
     marginTop: 24,
   },
+  mainRow: {
+    flexDirection: 'row',
+    gap: 24,
+    alignItems: 'flex-start',
+    marginTop: 24,
+  },
+  mainRowMobile: {
+    flexDirection: 'column',
+  },
+  continuingCol: {
+    flex: 2,
+    minWidth: 0,
+    gap: 12,
+  },
+  roadmapCol: {
+    flex: 1,
+    minWidth: 260,
+  },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
