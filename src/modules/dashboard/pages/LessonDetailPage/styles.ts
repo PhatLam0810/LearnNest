@@ -5,6 +5,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingLeft: 20,
     paddingRight: 20,
+    backgroundColor: '#f5f5f5',
   },
   pageWrapper: {
     gap: 16,

@@ -77,7 +77,9 @@
   border-radius: 999px;
   font-weight: 700;
 }
-
+.ant-collapse-content-box {
+  background-color: #fff;
+}
 /* Responsive styles */
 @media (max-width: 600px) {
   .lesson-pill-button {

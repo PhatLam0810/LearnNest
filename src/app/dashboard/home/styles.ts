@@ -31,6 +31,7 @@ const styles = StyleSheet.create({
     color: 'var(--color-vhu-primary)',
     fontWeight: '600',
     padding: 0,
+    width: 120,
     height: 'auto',
   },
   section: {
