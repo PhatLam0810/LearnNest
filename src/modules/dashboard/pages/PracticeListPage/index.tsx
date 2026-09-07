@@ -1,11 +1,29 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Empty, Input, Select, Spin, Tabs, Tag } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import {
+  Button,
+  Empty,
+  Input,
+  Popconfirm,
+  Select,
+  Spin,
+  Tabs,
+  Tag,
+} from 'antd';
+import { SearchOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PracticeSubject } from '~mdDashboard/types/practice';
 import './styles.scss';
+
+// Màu thanh tiến độ theo tỉ lệ đạt — khớp quy ước đỏ/vàng/xanh đã dùng ở
+// LessonContentOverview (admin) cho cùng ý nghĩa "yếu/trung bình/tốt".
+const weakSkillColor = (passRate: number) => {
+  if (passRate >= 80) return '#16a34a';
+  if (passRate >= 40) return '#d97706';
+  return '#dc2626';
+};
 
 // Chuẩn hóa chuỗi trước khi so khớp tìm kiếm - bỏ dấu tiếng Việt để "bao
 // cao" vẫn tìm ra "Báo cáo..." (gõ tiếng Việt không dấu là thói quen phổ
@@ -67,6 +85,22 @@ const PracticeListPage = () => {
   // riêng bên dưới để không "mất" đề cũ nếu admin chưa kịp gán khóa/phần.
   const { data: allTasks, isFetching: isLoadingTasks } =
     dashboardQuery.useGetPracticeTasksStudentQuery();
+  const { data: weakSkills } = dashboardQuery.useGetMyWeakSkillsQuery();
+  const { data: mockExams, isFetching: isLoadingExams } =
+    dashboardQuery.useGetMockExamsQuery();
+  const [startMockExam, { isLoading: isStarting }] =
+    dashboardQuery.useStartMockExamMutation();
+
+  const handleStartExam = async (examId: string) => {
+    try {
+      const attempt = await startMockExam(examId).unwrap();
+      router.push(`/dashboard/mock-exam/${attempt._id}`);
+    } catch (e: any) {
+      messageApi.error(
+        e?.data?.message || 'Không bắt đầu được đề thi thử, thử lại sau',
+      );
+    }
+  };
 
   const normalizedKeyword = normalize(keyword.trim());
   const matchesKeyword = (...texts: (string | undefined)[]) =>
@@ -103,6 +137,76 @@ const PracticeListPage = () => {
         thống tự động chấm điểm và hướng dẫn sửa lỗi. Bạn có thể nộp lại bao
         nhiêu lần tuỳ ý.
       </p>
+
+      {!!weakSkills?.length && (
+        <div className="practice-weak-skills-card">
+          <h2 className="practice-weak-skills-title">Điểm yếu của bạn</h2>
+          {weakSkills.slice(0, 5).map(w => (
+            <div key={w.group} className="practice-weak-skill-row">
+              <span className="practice-weak-skill-name">{w.group}</span>
+              <div className="practice-weak-skill-bar-track">
+                <div
+                  className="practice-weak-skill-bar-fill"
+                  style={{
+                    width: `${w.passRate}%`,
+                    backgroundColor: weakSkillColor(w.passRate),
+                  }}
+                />
+              </div>
+              <span
+                className="practice-weak-skill-pct"
+                style={{ color: weakSkillColor(w.passRate) }}>
+                {w.passRate.toFixed(0)}%
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!isLoadingExams && !!mockExams?.length && (
+        <>
+          <h2 className="practice-list-subheading-2">Đề Thi Thử</h2>
+          <p className="practice-list-subheading">
+            Thi có tính giờ, mô phỏng đúng áp lực thời gian của đề MOS thật.
+          </p>
+          <div className="practice-task-grid" style={{ marginBottom: 24 }}>
+            {mockExams.map(exam => (
+              <div key={exam._id} className="practice-task-card">
+                <Tag
+                  color={
+                    exam.subject === 'Excel'
+                      ? 'green'
+                      : exam.subject === 'Word'
+                        ? 'blue'
+                        : 'purple'
+                  }>
+                  {exam.subject === 'Mixed' ? 'Word + Excel' : exam.subject}
+                </Tag>
+                <h3 className="practice-task-title">{exam.title}</h3>
+                <div className="practice-mock-exam-meta">
+                  <span>
+                    <ClockCircleOutlined /> {exam.durationMinutes} phút
+                  </span>
+                  <span>{exam.taskCount} bài</span>
+                </div>
+                <Popconfirm
+                  title="Bắt đầu đề thi thử?"
+                  description="Sẽ tính giờ ngay từ lúc này, không tạm dừng được. Tiếp tục?"
+                  okText="Bắt đầu"
+                  cancelText="Huỷ"
+                  onConfirm={() => handleStartExam(exam._id)}>
+                  <Button
+                    type="primary"
+                    loading={isStarting}
+                    style={{ marginTop: 12 }}>
+                    Bắt đầu
+                  </Button>
+                </Popconfirm>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <Tabs
         activeKey={activeTab}

@@ -239,6 +239,15 @@ export interface CreatePracticeTaskPayload {
 
 export type UpdatePracticeTaskPayload = CreatePracticeTaskPayload;
 
+// ---- Đề thi thử (mock exam) ----
+export interface CreateMockExamPayload {
+  title: string;
+  subject: 'Word' | 'Excel' | 'Mixed';
+  durationMinutes: number;
+  taskIds: string[];
+  isPublished?: boolean;
+}
+
 export interface UpdatePracticeTaskParams {
   taskId: string;
   body: UpdatePracticeTaskPayload;

@@ -21,11 +21,15 @@ import {
 import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
 import {
+  MockExamAttemptDetail,
+  MockExamAttemptResult,
+  MockExamSummary,
   PracticeCourseSummary,
   PracticeInstructionItem,
   PracticeSubmission,
   PracticeTask,
   PracticeTaskDetail,
+  WeakSkillGroup,
 } from '~mdDashboard/types/practice';
 import { LessonDetailDataResponse } from '../saga/type';
 
@@ -255,6 +259,40 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    // "Điểm yếu của bạn" - gộp lịch sử làm bài theo nhóm kỹ năng, yếu nhất
+    // lên đầu. Xem PracticeSubmissionService.getMyWeakSkills (BE).
+    getMyWeakSkills: builder.query<WeakSkillGroup[], void>({
+      query: () => '/practice/my-weak-skills',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
+    // ---- Đề thi thử (mock exam) ----
+    getMockExams: builder.query<MockExamSummary[], void>({
+      query: () => '/practice/mock-exams',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    startMockExam: builder.mutation<{ _id: string }, string>({
+      query: examId => ({
+        url: `/practice/mock-exams/${examId}/start`,
+        method: 'POST',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getMockExamAttempt: builder.query<MockExamAttemptDetail, string>({
+      query: attemptId => `/practice/mock-exams/attempts/${attemptId}`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    submitMockExamAttempt: builder.mutation<{ status: string }, string>({
+      query: attemptId => ({
+        url: `/practice/mock-exams/attempts/${attemptId}/submit`,
+        method: 'POST',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getMockExamResult: builder.query<MockExamAttemptResult, string>({
+      query: attemptId => `/practice/mock-exams/attempts/${attemptId}/result`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
     // Tiến độ xem TOÀN BỘ video trong 1 lesson của chính user đang đăng
     // nhập, 1 lần gọi — {[subLessonId]: đã xem xong (completed) hay chưa}.
     // Dùng để khoá bài thực hành đứng ngay sau 1 video theo đúng "đã xem
@@ -400,6 +438,12 @@ export const {
   useGetMyPracticeSubmissionsQuery,
   useGetPracticeCoursesQuery,
   useGetPracticeTaskInstructionsQuery,
+  useGetMyWeakSkillsQuery,
+  useGetMockExamsQuery,
+  useStartMockExamMutation,
+  useGetMockExamAttemptQuery,
+  useSubmitMockExamAttemptMutation,
+  useGetMockExamResultQuery,
   useGetStudyStatsQuery,
   useGetMyOverviewQuery,
   useGetMyResultsQuery,

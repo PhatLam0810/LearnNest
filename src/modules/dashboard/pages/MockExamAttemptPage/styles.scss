@@ -1,0 +1,146 @@
+.mock-exam-loading {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.mock-exam-page {
+  padding: 24px;
+}
+
+.mock-exam-title {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.mock-exam-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+}
+
+.mock-exam-header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.mock-exam-body {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.mock-exam-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: sticky;
+  top: 16px;
+}
+
+.mock-exam-task-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 13px;
+}
+
+.mock-exam-task-item:last-child {
+  border-bottom: none;
+}
+
+.mock-exam-task-item:hover {
+  background: #fafafa;
+}
+
+.mock-exam-task-item--active {
+  background: #e6f4ff;
+  font-weight: 600;
+}
+
+.mock-exam-task-item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mock-exam-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mock-exam-result-summary {
+  color: #666;
+  margin: 0 0 20px;
+}
+
+.mock-exam-result-score-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.mock-exam-result-score {
+  font-size: 40px;
+  font-weight: 800;
+  color: #1c2536;
+}
+
+.mock-exam-result-score-max {
+  font-size: 18px;
+  font-weight: 500;
+  color: #999;
+}
+
+.mock-exam-result-task {
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.mock-exam-result-task-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.mock-exam-result-task-score {
+  color: #666;
+  font-weight: 500;
+}
+
+.mock-exam-result-failed-list {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mock-exam-result-failed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}

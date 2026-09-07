@@ -215,3 +215,84 @@ export interface PracticeSubmission {
   maxScore: number;
   results: PracticeSubmissionResultItem[];
 }
+
+// ---- Đề thi thử (mock exam) — thi có tính giờ, gộp nhiều bài thực hành
+// đơn lẻ đã có sẵn vào 1 phiên thi, mô phỏng áp lực thời gian đề MOS thật. ----
+
+export type MockExamSubject = 'Word' | 'Excel' | 'Mixed';
+
+export interface MockExam {
+  _id: string;
+  title: string;
+  subject: MockExamSubject;
+  durationMinutes: number;
+  taskIds: string[];
+  isPublished: boolean;
+  createdBy?: string;
+  createdAt?: string;
+}
+
+// Danh sách cho học viên chọn đề - không cần taskIds đầy đủ, chỉ cần đếm.
+export interface MockExamSummary {
+  _id: string;
+  title: string;
+  subject: MockExamSubject;
+  durationMinutes: number;
+  taskCount: number;
+}
+
+export type MockExamAttemptStatus = 'in_progress' | 'submitted' | 'expired';
+
+export interface MockExamAttemptTask {
+  taskId: string;
+  title: string;
+  subject: PracticeSubject;
+  submitted: boolean;
+  score: number | null;
+}
+
+// Trạng thái + danh sách bài của 1 phiên thi đang/đã làm - dùng ở trang thi.
+export interface MockExamAttemptDetail {
+  attemptId: string;
+  examId: string;
+  title: string;
+  subject: MockExamSubject;
+  status: MockExamAttemptStatus;
+  startedAt: string;
+  durationMinutes: number;
+  deadline: string;
+  tasks: MockExamAttemptTask[];
+}
+
+export interface MockExamResultTask {
+  taskId: string;
+  title: string;
+  subject: PracticeSubject;
+  attempted: boolean;
+  score: number | null;
+  isPass: boolean;
+  failedCriteria: { instruction?: string }[];
+}
+
+// Kết quả tổng hợp sau khi nộp/hết giờ 1 phiên thi thử.
+export interface MockExamAttemptResult {
+  attemptId: string;
+  title: string;
+  subject: MockExamSubject;
+  status: MockExamAttemptStatus;
+  startedAt: string;
+  submittedAt?: string;
+  totalTasks: number;
+  attemptedTasks: number;
+  overallScore: number;
+  overallIsPass: boolean;
+  tasks: MockExamResultTask[];
+}
+
+// ---- Điểm yếu theo kỹ năng ----
+export interface WeakSkillGroup {
+  group: string;
+  attempts: number;
+  passed: number;
+  passRate: number;
+}

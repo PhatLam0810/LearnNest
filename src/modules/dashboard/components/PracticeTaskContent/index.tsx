@@ -25,6 +25,14 @@ type Props = {
   // ModuleDetailPage) dùng để mở khóa + có thể tự chuyển sang nội dung tiếp
   // theo trong khóa học, y hệt cách video/trắc nghiệm hoạt động.
   onPassed?: () => void;
+  // Có giá trị khi bài này đang được làm TRONG 1 phiên thi thử đang diễn ra
+  // (xem MockExamAttemptPage) — gắn kèm vào request nộp bài để BE biết tính
+  // vào kết quả thi thử nào, và validate còn hợp lệ (đúng đề, chưa hết giờ).
+  mockExamAttemptId?: string;
+  // Gọi sau MỖI lần nộp bài thành công (đạt hay không) — khác onPassed (chỉ
+  // gọi khi đạt) — trang thi thử dùng để cập nhật ngay badge "đã nộp" ở
+  // sidebar mà không cần đợi học viên tự refresh.
+  onSubmitted?: () => void;
 };
 
 // Quy đổi điểm thô (total/max, max tùy số tiêu chí từng đề) về thang 10
@@ -38,7 +46,12 @@ const toScore10 = (total: number, max: number) =>
 // nộp bài + chấm điểm, kết quả, lịch sử nộp. Tách riêng khỏi trang để dùng
 // lại được ở cả 2 chỗ: trang chi tiết đứng riêng (/dashboard/practice/[id])
 // và bên phải trang khóa thực hành dạng sidebar Phần > Bài tập.
-const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
+const PracticeTaskContent: React.FC<Props> = ({
+  taskId,
+  onPassed,
+  mockExamAttemptId,
+  onSubmitted,
+}) => {
   const accessToken = useAppSelector(
     state => state.authReducer.tokenInfo?.accessToken,
   );
@@ -119,6 +132,7 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
     headers: accessToken
       ? { Authorization: `Bearer ${accessToken}` }
       : undefined,
+    data: mockExamAttemptId ? { mockExamAttemptId } : undefined,
     beforeUpload: () => {
       setIsSubmitting(true);
       setLatestResult(null);
@@ -141,6 +155,7 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
             );
           }
           refetchSubmissions();
+          onSubmitted?.();
         }
       }
       if (info.file.status === 'error') {

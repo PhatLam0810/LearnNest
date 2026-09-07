@@ -9,6 +9,7 @@ import {
   ImportUserPreviewRequest,
   ImportUsersRequest,
   ImportUsersResponse,
+  CreateMockExamPayload,
   CreatePracticeClassPayload,
   CreatePracticeClassResponse,
   CreatePracticeTaskPayload,
@@ -31,6 +32,7 @@ import {
   UpdatePracticeTaskParams,
 } from './type';
 import {
+  MockExam,
   PracticeCriteria,
   PracticeInstructionItem,
   PracticeSubmission,
@@ -535,6 +537,49 @@ export const adminQuery = baseQuery.injectEndpoints({
       invalidatesTags: (_result, _error, taskId) => [
         { type: 'PracticeTask', id: taskId },
         { type: 'PracticeTask', id: 'LIST' },
+      ],
+    }),
+
+    // ---- Đề thi thử (mock exam, admin soạn đề) ----
+    getMockExamsAdmin: builder.query<MockExam[], void>({
+      query: () => ({ url: 'practice/mock-exams/admin/all', method: 'GET' }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: result =>
+        result
+          ? [
+              ...result.map(e => ({ type: 'MockExam' as const, id: e._id })),
+              { type: 'MockExam' as const, id: 'LIST' },
+            ]
+          : [{ type: 'MockExam' as const, id: 'LIST' }],
+    }),
+    createMockExam: builder.mutation<MockExam, CreateMockExamPayload>({
+      query: body => ({ url: 'practice/mock-exams', method: 'POST', body }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [{ type: 'MockExam', id: 'LIST' }],
+    }),
+    updateMockExam: builder.mutation<
+      MockExam,
+      { examId: string; body: Partial<CreateMockExamPayload> }
+    >({
+      query: ({ examId, body }) => ({
+        url: `practice/mock-exams/${examId}`,
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_result, _error, { examId }) => [
+        { type: 'MockExam', id: examId },
+        { type: 'MockExam', id: 'LIST' },
+      ],
+    }),
+    deleteMockExam: builder.mutation<void, string>({
+      query: examId => ({
+        url: `practice/mock-exams/${examId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, examId) => [
+        { type: 'MockExam', id: examId },
+        { type: 'MockExam', id: 'LIST' },
       ],
     }),
     setPracticeCriteria: builder.mutation<

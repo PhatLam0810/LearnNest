@@ -15,6 +15,7 @@ import AuditLogManage from './auditLogManage/page';
 import CommentReportsManage from './commentReportsManage/page';
 import QaInbox from './qaInbox/page';
 import PassRateReport from './passRateReport/page';
+import MockExamManage from './mockExamManage/page';
 import { ADMIN_PRIMARY } from './adminTheme';
 
 const items: TabsProps['items'] = [
@@ -62,6 +63,11 @@ const items: TabsProps['items'] = [
     key: '9',
     label: 'Báo Cáo Ngưỡng Đạt',
     children: <PassRateReport />,
+  },
+  {
+    key: '10',
+    label: 'Đề Thi Thử',
+    children: <MockExamManage />,
   },
 ];
 

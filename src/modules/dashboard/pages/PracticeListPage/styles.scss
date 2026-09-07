@@ -62,3 +62,61 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+.practice-weak-skills-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  background: #fff;
+  margin-bottom: 20px;
+}
+
+.practice-weak-skills-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.practice-weak-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.practice-weak-skill-name {
+  width: 200px;
+  min-width: 140px;
+  font-size: 13px;
+  color: #333;
+  flex-shrink: 0;
+}
+
+.practice-weak-skill-bar-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #f0f0f0;
+  overflow: hidden;
+}
+
+.practice-weak-skill-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.practice-weak-skill-pct {
+  width: 48px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.practice-mock-exam-meta {
+  display: flex;
+  gap: 12px;
+  color: #666;
+  font-size: 13px;
+  margin-top: 4px;
+}
