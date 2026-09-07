@@ -100,10 +100,30 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#f2f3f6',
   },
+  resultNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   resultName: {
     fontSize: 14,
     fontWeight: '600',
     color: '#1c2536',
+  },
+  resultTypeTag: {
+    fontSize: 11,
+    fontWeight: '600',
+    borderRadius: 999,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+  },
+  resultTypeTagQuiz: {
+    color: '#1d4ed8',
+    backgroundColor: '#eef2ff',
+  },
+  resultTypeTagPractice: {
+    color: '#c2410c',
+    backgroundColor: '#fff3e8',
   },
   resultDate: {
     fontSize: 12,

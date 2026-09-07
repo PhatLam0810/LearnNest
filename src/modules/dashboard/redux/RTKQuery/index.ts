@@ -9,6 +9,12 @@ import {
   LessonRecommendRes,
   LibraryType,
   MyOverview,
+  MyResultsParams,
+  MyResultsResponse,
+  NotificationListResponse,
+  PassRateReport,
+  QuizResultAdminItem,
+  RecentTestResult,
   RoadmapStep,
   StudyStats,
 } from './types';
@@ -264,7 +270,7 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
     // Tương tự getMyLessonVideoProgress nhưng cho quiz — {[libraryId]: đã
-    // ĐẠT (isPass, >= 2/3 số câu) hay chưa. Dùng để khoá bài thực hành đứng
+    // ĐẠT (isPass, >= 80% số câu) hay chưa. Dùng để khoá bài thực hành đứng
     // ngay sau 1 quiz, xem ModuleDetailPage/LessonDetailPage.isTaskAccessible.
     getMyLessonQuizProgress: builder.query<
       Record<string, boolean>,
@@ -287,6 +293,42 @@ export const dashboardQuery = baseQuery.injectEndpoints({
     // tra gần đây. Cùng convention không bọc {data:...} như getStudyStats.
     getMyOverview: builder.query<MyOverview, string>({
       query: userId => `/lesson/user/${userId}/overview`,
+    }),
+
+    // Trang "Toàn bộ lịch sử kiểm tra" (/dashboard/results) - phân trang +
+    // lọc theo loại/khóa học/đạt-chưa đạt.
+    getMyResults: builder.query<
+      MyResultsResponse,
+      { userId: string } & MyResultsParams
+    >({
+      query: ({ userId, ...params }) => ({
+        url: `/lesson/user/${userId}/results`,
+        method: 'GET',
+        params,
+      }),
+    }),
+
+    // Dữ liệu biểu đồ "Điểm theo thời gian" cạnh "Giờ học theo tuần".
+    getMyScoreHistory: builder.query<
+      RecentTestResult[],
+      { userId: string; limit?: number }
+    >({
+      query: ({ userId, limit }) => ({
+        url: `/lesson/user/${userId}/score-history`,
+        method: 'GET',
+        params: { limit },
+      }),
+    }),
+
+    // Báo cáo tỉ lệ đạt/chưa đạt theo từng bài cho admin.
+    getPassRateReport: builder.query<PassRateReport, void>({
+      query: () => '/lesson/admin/pass-rate-report',
+    }),
+
+    // Toàn bộ lượt làm 1 bài trắc nghiệm cho modal "Kết quả trắc nghiệm"
+    // (admin) - xem lesson.service.ts getResultsForLibrary.
+    getResultsForLibrary: builder.query<QuizResultAdminItem[], string>({
+      query: libraryId => `/lesson/admin/library/${libraryId}/results`,
     }),
 
     // ---- Đánh giá khóa học ----
@@ -322,6 +364,29 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    getNotifications: builder.query<
+      NotificationListResponse,
+      { page?: number; limit?: number } | void
+    >({
+      query: params => {
+        const p = params || {};
+        return {
+          url: '/notification',
+          params: { page: p.page || 1, limit: p.limit || 20 },
+        };
+      },
+      transformResponse: (res: AxiosResponse<NotificationListResponse>) =>
+        res.data,
+      providesTags: ['Notification'],
+    }),
+    markNotificationRead: builder.mutation<void, string>({
+      query: id => ({ url: `/notification/${id}/read`, method: 'POST' }),
+      invalidatesTags: ['Notification'],
+    }),
+    markAllNotificationsRead: builder.mutation<void, void>({
+      query: () => ({ url: '/notification/read-all', method: 'POST' }),
+      invalidatesTags: ['Notification'],
+    }),
   }),
   overrideExisting: true,
 });
@@ -337,7 +402,14 @@ export const {
   useGetPracticeTaskInstructionsQuery,
   useGetStudyStatsQuery,
   useGetMyOverviewQuery,
+  useGetMyResultsQuery,
+  useGetMyScoreHistoryQuery,
+  useGetPassRateReportQuery,
+  useGetResultsForLibraryQuery,
   useGetCourseRatingQuery,
   useSubmitCourseRatingMutation,
   useGetCourseRatingsMutation,
+  useGetNotificationsQuery,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
 } = dashboardQuery;

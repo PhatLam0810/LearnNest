@@ -934,7 +934,8 @@ const LibraryDetailItem = forwardRef<
         // độ "Câu X/N" + 1 câu hỏi + Câu trước/Đánh dấu xem lại/Câu tiếp
         // theo. KHÔNG hiện đồng hồ đếm ngược/"làm một lần"/"cần 70% để qua"
         // như bản gốc vì dữ liệu thật không có thời hạn hay giới hạn số lần
-        // làm - ngưỡng đạt thật là ≥2/3 số câu (xem lesson.service.ts).
+        // làm - ngưỡng đạt thật là ≥80% số câu (khớp với ngưỡng đạt bài
+        // thực hành PRACTICE_PASS_RATIO, xem lesson.service.ts).
         const totalQuestions = shuffledQuestions.length;
         const answeredCount = Object.keys(selectedAnswers).filter(qId =>
           shuffledQuestions.some(q => q._id === qId),
@@ -954,7 +955,7 @@ const LibraryDetailItem = forwardRef<
             <View style={styles.quizInfoCard}>
               <Text style={styles.quizInfoTitle}>{data?.title}</Text>
               <Text style={styles.quizInfoSubtitle}>
-                {totalQuestions} câu · cần đúng ít nhất 2/3 số câu để đạt
+                {totalQuestions} câu · cần đúng tối thiểu 80% số câu để đạt
               </Text>
             </View>
 

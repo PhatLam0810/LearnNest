@@ -420,6 +420,23 @@ export const adminQuery = baseQuery.injectEndpoints({
         { type: 'ReminderLog', id: reminderLogTagId(lessonId, 'task', taskId) },
       ],
     }),
+    // Đối xứng remindNotPassedTask nhưng cho bài trắc nghiệm.
+    remindNotPassedQuiz: builder.mutation<
+      RemindLearnersBulkResponse,
+      { lessonId: string; libraryId: string }
+    >({
+      query: ({ lessonId, libraryId }) => ({
+        url: `admin/lessons/${lessonId}/quizzes/${libraryId}/remind-not-passed`,
+        method: 'POST',
+      }),
+      transformResponse: (res: any) => res.data,
+      invalidatesTags: (_result, _error, { lessonId, libraryId }) => [
+        {
+          type: 'ReminderLog',
+          id: reminderLogTagId(lessonId, 'quiz', libraryId),
+        },
+      ],
+    }),
     // Lịch sử các đợt nhắc gần đây — hiện ngay dưới từng nút nhắc tương ứng
     // để admin biết "đã nhắc chưa, lúc nào, bao nhiêu người" thay vì chỉ
     // thấy kết quả thoáng qua lúc bấm xong rồi mất.

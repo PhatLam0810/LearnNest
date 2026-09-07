@@ -37,6 +37,11 @@ const styles = StyleSheet.create({
     color: '#8D8D8D',
     marginTop: 2,
   },
+  notifList: {
+    flexDirection: 'column',
+    gap: 10,
+    marginTop: 12,
+  },
   logoutLink: {
     fontSize: 14,
     fontWeight: '600',

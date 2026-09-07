@@ -115,7 +115,7 @@ export interface RemindLearnersBulkResponse {
   failed: number;
 }
 
-export type ReminderLogType = 'inactivity' | 'video' | 'task';
+export type ReminderLogType = 'inactivity' | 'video' | 'task' | 'quiz';
 
 export interface ReminderLogItem {
   _id: string;
@@ -287,10 +287,18 @@ export interface LessonContentOverviewTask {
   totalLearners: number;
 }
 
+export interface LessonContentOverviewQuiz {
+  libraryId: string;
+  title: string;
+  passedCount: number;
+  totalLearners: number;
+}
+
 export interface LessonContentOverviewModule {
   moduleId: string;
   title: string;
   videos: LessonContentOverviewVideo[];
+  quizzes: LessonContentOverviewQuiz[];
   tasks: LessonContentOverviewTask[];
 }
 

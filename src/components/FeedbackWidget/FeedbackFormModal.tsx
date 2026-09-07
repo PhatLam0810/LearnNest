@@ -40,7 +40,7 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({
   onOpenChange,
 }) => {
   const dispatch = useAppDispatch();
-  const { userProfile } =
+  const { userProfile, accessToken } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [form] = Form.useForm<FeedbackFormValues>();
   const [submitting, setSubmitting] = useState(false);
@@ -153,6 +153,11 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({
             maxCount={MAX_IMAGES}
             fileList={fileList}
             action={api.defaults.baseURL + '/upload'}
+            headers={
+              accessToken
+                ? { Authorization: `Bearer ${accessToken}` }
+                : undefined
+            }
             onChange={({ fileList: newFileList }) => setFileList(newFileList)}>
             {fileList.length >= MAX_IMAGES ? null : <div>+ Tải ảnh</div>}
           </Upload>

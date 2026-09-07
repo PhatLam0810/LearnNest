@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Layout,
   Button,
@@ -10,6 +10,8 @@ import {
   Grid,
   GetProp,
   MenuProps,
+  Badge,
+  Empty,
 } from 'antd';
 import Icon, {
   MenuOutlined,
@@ -17,7 +19,10 @@ import Icon, {
   LogoutOutlined,
   ControlOutlined,
   BookOutlined,
+  BellOutlined,
 } from '@ant-design/icons';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import './styles.scss';
 import { useDispatch } from 'react-redux';
 import Image from 'next/image';
@@ -30,6 +35,11 @@ import SearchBar from '@components/SearchContext/SearchBar';
 import { useMyCourses } from '@/hooks/useMyCourses';
 import CourseItem from '@/components/CourseItem';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
+import { useSocket } from '@hooks/useSocket';
+import { dashboardQuery } from '~mdDashboard/redux';
+import { NotificationItem } from '~mdDashboard/redux/RTKQuery/types';
+
+dayjs.extend(relativeTime);
 
 const { Header } = Layout;
 const { useBreakpoint } = Grid;
@@ -55,12 +65,111 @@ const HeaderLayout: React.FC = ({}) => {
   const { myCourses, loadingCourses, fetchMyCourses, formatRelativeTime } =
     useMyCourses(userId);
 
+  const socket = useSocket();
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  // Chuông chỉ hiện tối đa 10 thông báo mới nhất - xem đầy đủ (mọi thông báo,
+  // phân trang) thì qua trang riêng /dashboard/notifications (nút "Xem tất
+  // cả" bên dưới), không tải thêm ngay trong dropdown nữa.
+  const { data: notifData, refetch: refetchNotifications } =
+    dashboardQuery.useGetNotificationsQuery({ limit: 10 }, { skip: !userId });
+  const [markNotificationRead] =
+    dashboardQuery.useMarkNotificationReadMutation();
+  const [markAllNotificationsRead] =
+    dashboardQuery.useMarkAllNotificationsReadMutation();
+  const notifItems = notifData?.items || [];
+  const unreadCount = notifData?.unreadCount || 0;
+
+  useEffect(() => {
+    if (!userId) return;
+    const handleNewNotification = () => refetchNotifications();
+    socket.on('NewNotification', handleNewNotification);
+    return () => {
+      socket.off('NewNotification', handleNewNotification);
+    };
+  }, [socket, userId, refetchNotifications]);
+
   const handleNavigate = useCallback(
     (url: string) => {
       setIsCoursesDropdownOpen(false);
       router.push(url);
     },
     [router],
+  );
+
+  const handleNotificationClick = useCallback(
+    async (item: NotificationItem) => {
+      setIsNotifOpen(false);
+      if (!item.isRead) {
+        try {
+          await markNotificationRead(item._id).unwrap();
+        } catch {}
+      }
+      if (item.link) router.push(item.link);
+    },
+    [markNotificationRead, router],
+  );
+
+  const handleMarkAllRead = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      try {
+        await markAllNotificationsRead().unwrap();
+      } catch {}
+    },
+    [markAllNotificationsRead],
+  );
+
+  const handleSeeAllNotifications = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      setIsNotifOpen(false);
+      router.push('/dashboard/notifications');
+    },
+    [router],
+  );
+
+  const renderNotificationDropdown = () => (
+    <div className="notification-dropdown-panel">
+      <div className="dropdown-header">
+        <h3>Thông báo</h3>
+        {unreadCount > 0 && (
+          <span className="see-all-btn" onClick={handleMarkAllRead}>
+            Đánh dấu tất cả đã đọc
+          </span>
+        )}
+      </div>
+      <div className="dropdown-body">
+        {notifItems.length === 0 ? (
+          <Empty
+            description="Chưa có thông báo nào"
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            style={{ padding: '24px 0' }}
+          />
+        ) : (
+          notifItems.map(item => (
+            <div
+              key={item._id}
+              className={`notification-item${item.isRead ? '' : ' unread'}`}
+              onClick={() => handleNotificationClick(item)}>
+              <div className="notification-title">{item.title}</div>
+              {item.body && (
+                <div className="notification-body">{item.body}</div>
+              )}
+              <div className="notification-time">
+                {dayjs(item.createdAt).fromNow()}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+      {!!notifItems.length && (
+        <div
+          className="notification-see-all"
+          onClick={handleSeeAllNotifications}>
+          Xem tất cả
+        </div>
+      )}
+    </div>
   );
 
   const handleDropdownOpenChange = (visible: boolean) => {
@@ -184,6 +293,22 @@ const HeaderLayout: React.FC = ({}) => {
                   }>
                   Khóa học của tôi
                 </Button>
+              </Dropdown>
+            )}
+            {userId && (
+              <Dropdown
+                open={isNotifOpen}
+                trigger={['click']}
+                popupRender={renderNotificationDropdown}
+                placement="bottomRight"
+                onOpenChange={setIsNotifOpen}>
+                <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+                  <Button
+                    type="text"
+                    icon={<BellOutlined style={{ fontSize: 20 }} />}
+                    className="notification-bell-btn"
+                  />
+                </Badge>
               </Dropdown>
             )}
             <Dropdown trigger={['hover']} menu={{ items: menuItemsUser }}>

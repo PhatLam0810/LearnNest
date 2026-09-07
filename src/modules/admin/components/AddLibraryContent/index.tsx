@@ -30,6 +30,7 @@ import debounce from 'lodash-es/debounce';
 import { TimePicker } from 'antd';
 import dayjs from 'dayjs';
 import { dashboardQuery } from '~mdDashboard/redux';
+import { useAppSelector } from '@redux';
 import './styles.scss';
 
 type AddLibraryContentProps = {
@@ -47,6 +48,9 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
   isSubmitDisabled,
 }) => {
   const [form] = Form.useForm();
+  const accessToken = useAppSelector(
+    state => state.authReducer.tokenInfo?.accessToken,
+  );
 
   const [addLibrary] = adminQuery.useAddLibraryMutation();
   const [generateQuestion] = dashboardQuery.useGenerateQuestionMutation();
@@ -230,6 +234,11 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 fileList={fileUpload}
                 listType="picture-card"
                 action={api.defaults.baseURL + '/upload'}
+                headers={
+                  accessToken
+                    ? { Authorization: `Bearer ${accessToken}` }
+                    : undefined
+                }
                 data={() => ({ uploadId: getUploadId() })}
                 beforeUpload={handleBeforeUpload}
                 onRemove={() => setFileUpload([])}
@@ -278,6 +287,11 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                   fileList={fileUpload}
                   listType="picture-card"
                   action={api.defaults.baseURL + '/upload'}
+                  headers={
+                    accessToken
+                      ? { Authorization: `Bearer ${accessToken}` }
+                      : undefined
+                  }
                   data={() => ({ uploadId: getUploadId() })}
                   beforeUpload={handleBeforeUpload}
                   onRemove={() => setFileUpload([])}
@@ -315,6 +329,11 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
                 fileList={fileUpload}
                 listType="picture-card"
                 action={api.defaults.baseURL + '/upload'}
+                headers={
+                  accessToken
+                    ? { Authorization: `Bearer ${accessToken}` }
+                    : undefined
+                }
                 data={() => ({ uploadId: getUploadId() })}
                 beforeUpload={handleBeforeUpload}
                 onRemove={() => setFileUpload([])}

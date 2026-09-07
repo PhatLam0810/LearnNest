@@ -8,7 +8,8 @@
 // - Mục đầu tiên trong toàn bộ nội dung: luôn qua (không có gì đứng trước).
 // - Mục trước là bài thực hành: dựa thẳng vào hasPassed (đạt >= 80%).
 // - Mục trước là trắc nghiệm (Library type Text): dựa vào ResultTest.isPass
-//   (đạt >= 2/3 số câu, lấy qua getMyLessonQuizProgress).
+//   (đạt >= 80% số câu, khớp ngưỡng đạt bài thực hành, lấy qua
+//   getMyLessonQuizProgress).
 // - Mục trước là video: dựa vào VideoTracking.completed (đã xem >= 95%, lấy
 //   qua getMyLessonVideoProgress) — KHÔNG dùng usersCanPlay, vì đó chỉ là
 //   "đã tới lượt xem" (mở khoá), không xác nhận đã xem hết.

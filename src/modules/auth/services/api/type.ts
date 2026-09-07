@@ -38,6 +38,7 @@ export interface UserProfile {
   bio: string;
   avatar?: string;
   studyReminderEnabled?: boolean;
+  disabledNotificationTypes?: string[];
   role: {
     level: number;
     name: string;

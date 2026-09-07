@@ -110,12 +110,78 @@ export interface RecentTestResult {
   score: number;
   isPass: boolean;
   createdAt: string;
+  type: 'quiz' | 'practice';
+  // Đường dẫn để làm lại bài này - null nếu không tra được (VD library mồ
+  // côi, không gắn module nào). Xem LessonService.getMergedResults (BE).
+  lessonId: string | null;
+  link: string | null;
 }
 
 export interface MyOverview {
   weeklyHours: WeeklyStudyHour[];
   totalHours: number;
   recentResults: RecentTestResult[];
+}
+
+// Trang "Toàn bộ lịch sử kiểm tra" (/dashboard/results). Xem
+// LessonService.getMyResults (BE).
+export interface MyResultsResponse {
+  items: RecentTestResult[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface MyResultsParams {
+  page?: number;
+  limit?: number;
+  type?: 'quiz' | 'practice';
+  isPass?: boolean;
+  lessonId?: string;
+}
+
+// Báo cáo tỉ lệ đạt/chưa đạt cho admin. Xem LessonService.getPassRateReport
+// (BE).
+export interface PassRateReportRow {
+  id: string;
+  name: string;
+  type: 'quiz' | 'practice';
+  attempts: number;
+  passCount: number;
+  passRate: number;
+  avgScore: number;
+}
+
+export interface PassRateReport {
+  rows: PassRateReportRow[];
+  summary: {
+    totalAttempts: number;
+    overallPassRate: number;
+    currentThresholdPct: number;
+  };
+}
+
+// 1 lượt làm bài trắc nghiệm, cho modal "Kết quả trắc nghiệm" (admin). Xem
+// LessonService.getResultsForLibrary (BE) - `user` là null nếu không tra
+// được (dữ liệu rác/tài khoản đã xoá).
+export interface QuizResultAdminItem {
+  _id: string;
+  libraryId: string;
+  userId: string;
+  userName: string;
+  name: string;
+  correctCount: number;
+  totalQuestions: number;
+  score: number;
+  isPass: boolean;
+  createdAt: string;
+  user: {
+    _id: string;
+    fullName?: string;
+    email?: string;
+    studentId?: string;
+    class?: string;
+  } | null;
 }
 
 export interface CourseRatingUser {
@@ -139,4 +205,36 @@ export interface CourseRatingSummary {
   ratingCount: number;
   myRating: CourseRatingItem | null;
   breakdown?: Record<'5' | '4' | '3' | '2' | '1', number>;
+}
+
+// Thông báo chuông trên HeaderLayout - dùng chung cho học viên lẫn admin,
+// chỉ khác `type`/nội dung theo vai trò người nhận. Xem BE
+// notification.schema.ts.
+export type NotificationType =
+  | 'COMMENT_REPLY'
+  | 'NEW_QUESTION'
+  | 'FEEDBACK_REPLIED'
+  | 'VIOLATION_REPORT'
+  | 'NEW_COURSE'
+  | 'COURSE_COMPLETED'
+  | 'STUDY_REMINDER'
+  | 'RETRY_REMINDER';
+
+export interface NotificationItem {
+  _id: string;
+  recipientId: string;
+  actorId?: string;
+  type: NotificationType;
+  title: string;
+  body?: string;
+  link?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface NotificationListResponse {
+  items: NotificationItem[];
+  unreadCount: number;
+  hasMore: boolean;
+  total: number;
 }

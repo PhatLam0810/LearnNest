@@ -1,10 +1,17 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Empty, Select, Spin, Tabs, Tag } from 'antd';
+import { Empty, Input, Select, Spin, Tabs, Tag } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PracticeSubject } from '~mdDashboard/types/practice';
 import './styles.scss';
+
+// Chuẩn hóa chuỗi trước khi so khớp tìm kiếm - bỏ dấu tiếng Việt để "bao
+// cao" vẫn tìm ra "Báo cáo..." (gõ tiếng Việt không dấu là thói quen phổ
+// biến khi tìm kiếm nhanh), lowercase để không phân biệt hoa/thường.
+const normalize = (s: string) =>
+  s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').toLowerCase();
 
 const SUBJECT_TABS: {
   key: string;
@@ -47,6 +54,11 @@ const PracticeListPage = () => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('all');
   const [sortKey, setSortKey] = useState<SortKey>('name');
+  // 82+ bài tập dồn hết vào 1 danh sách phẳng (xem allTasksFiltered) không
+  // có cách nào tìm nhanh 1 bài cụ thể ngoài cuộn tay - ô tìm kiếm lọc ngay
+  // trên dữ liệu đã tải sẵn ở client (không gọi API riêng), vì trang này
+  // vốn đã tải toàn bộ đề 1 lần.
+  const [keyword, setKeyword] = useState('');
   const subject = SUBJECT_TABS.find(t => t.key === activeTab)?.subject;
 
   const { data: courses, isFetching: isLoadingCourses } =
@@ -56,14 +68,23 @@ const PracticeListPage = () => {
   const { data: allTasks, isFetching: isLoadingTasks } =
     dashboardQuery.useGetPracticeTasksStudentQuery();
 
+  const normalizedKeyword = normalize(keyword.trim());
+  const matchesKeyword = (...texts: (string | undefined)[]) =>
+    !normalizedKeyword ||
+    texts.some(t => t && normalize(t).includes(normalizedKeyword));
+
   const filteredCourses = (courses || []).filter(
-    c => !subject || c.subject === subject,
+    c => (!subject || c.subject === subject) && matchesKeyword(c.title),
   );
   // Toàn bộ đề (không gom theo khóa) — để học viên tìm nhanh 1 bài cụ thể mà
   // không cần bấm vào từng thẻ khóa trước. Mặc định sắp theo tên cho dễ dò,
   // hoặc theo độ khó Dễ → Khó nếu chọn.
   const allTasksFiltered = [...(allTasks || [])]
-    .filter(t => !subject || t.subject === subject)
+    .filter(
+      t =>
+        (!subject || t.subject === subject) &&
+        matchesKeyword(t.title, t.description),
+    )
     .sort((a, b) =>
       sortKey === 'difficulty'
         ? DIFFICULTY_ORDER[getDifficulty(a.title)] -
@@ -89,10 +110,25 @@ const PracticeListPage = () => {
         items={SUBJECT_TABS.map(t => ({ key: t.key, label: t.label }))}
       />
 
+      <Input
+        allowClear
+        prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+        placeholder="Tìm bài tập theo tên..."
+        value={keyword}
+        onChange={e => setKeyword(e.target.value)}
+        style={{ maxWidth: 360, marginBottom: 16 }}
+      />
+
       {isLoading ? (
         <Spin />
       ) : filteredCourses.length === 0 && allTasksFiltered.length === 0 ? (
-        <Empty description="Chưa có đề thực hành nào" />
+        <Empty
+          description={
+            keyword.trim()
+              ? `Không tìm thấy bài tập nào khớp "${keyword.trim()}"`
+              : 'Chưa có đề thực hành nào'
+          }
+        />
       ) : (
         <>
           {filteredCourses.length > 0 && (

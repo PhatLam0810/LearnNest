@@ -13,6 +13,8 @@ import LessonLearnersOverview from './lessonLearnersOverview';
 import FeedbackManage from './feedbackManage/page';
 import AuditLogManage from './auditLogManage/page';
 import CommentReportsManage from './commentReportsManage/page';
+import QaInbox from './qaInbox/page';
+import PassRateReport from './passRateReport/page';
 import { ADMIN_PRIMARY } from './adminTheme';
 
 const items: TabsProps['items'] = [
@@ -50,6 +52,16 @@ const items: TabsProps['items'] = [
     key: '7',
     label: 'Báo Cáo Vi Phạm',
     children: <CommentReportsManage />,
+  },
+  {
+    key: '8',
+    label: 'Hộp Thư Hỏi Đáp',
+    children: <QaInbox />,
+  },
+  {
+    key: '9',
+    label: 'Báo Cáo Ngưỡng Đạt',
+    children: <PassRateReport />,
   },
 ];
 

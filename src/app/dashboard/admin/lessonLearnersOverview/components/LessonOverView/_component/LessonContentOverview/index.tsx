@@ -2,12 +2,17 @@
 
 import React, { useState } from 'react';
 import { Empty, Modal, Progress, Spin, Tag } from 'antd';
-import { FileTextOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import {
+  FileTextOutlined,
+  PlayCircleOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
 import { View, Text } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
 import { useAppSelector } from '@redux';
 import AppVideoWatchers from '~mdDashboard/components/VideoWatchersList/AppVideoWatchers';
 import PracticeSubmissionsModal from '@/app/dashboard/admin/practiceManage/_components/PracticeSubmissionsModal';
+import QuizResultsModal from './QuizResultsModal';
 import styles from './styles';
 
 type Props = { lessonId: string };
@@ -31,6 +36,9 @@ const LessonContentOverview: React.FC<Props> = ({ lessonId }) => {
   const [submissionsTaskId, setSubmissionsTaskId] = useState<
     string | undefined
   >(undefined);
+  const [quizLibraryId, setQuizLibraryId] = useState<string | undefined>(
+    undefined,
+  );
 
   if (isFetching) {
     return (
@@ -59,7 +67,10 @@ const LessonContentOverview: React.FC<Props> = ({ lessonId }) => {
   return (
     <View>
       {modules.map(mod => {
-        const isEmpty = mod.videos.length === 0 && mod.tasks.length === 0;
+        const isEmpty =
+          mod.videos.length === 0 &&
+          mod.quizzes.length === 0 &&
+          mod.tasks.length === 0;
         return (
           <View key={mod.moduleId} style={styles.moduleCard}>
             <View style={styles.moduleHeader}>
@@ -103,6 +114,39 @@ const LessonContentOverview: React.FC<Props> = ({ lessonId }) => {
                       />
                       <Text style={styles.itemCountText}>
                         {v.completedCount}/{v.totalLearners} đã xem
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+                {mod.quizzes.map(q => (
+                  <View
+                    key={q.libraryId}
+                    style={styles.itemRow}
+                    onClick={() => setQuizLibraryId(q.libraryId)}>
+                    <View style={styles.itemInfo}>
+                      <QuestionCircleOutlined
+                        style={{ color: 'var(--color-vhu-primary)' }}
+                      />
+                      <Text style={styles.itemTitle} numberOfLines={1}>
+                        {q.title}
+                      </Text>
+                    </View>
+                    <View style={styles.itemCountWrap}>
+                      <Progress
+                        percent={
+                          q.totalLearners
+                            ? Math.round(
+                                (q.passedCount / q.totalLearners) * 100,
+                              )
+                            : 0
+                        }
+                        size="small"
+                        showInfo={false}
+                        strokeColor={countColor(q.passedCount, q.totalLearners)}
+                        style={{ flex: 1 }}
+                      />
+                      <Text style={styles.itemCountText}>
+                        {q.passedCount}/{q.totalLearners} đã đạt
                       </Text>
                     </View>
                   </View>
@@ -170,6 +214,14 @@ const LessonContentOverview: React.FC<Props> = ({ lessonId }) => {
         <PracticeSubmissionsModal
           taskId={submissionsTaskId}
           onClose={() => setSubmissionsTaskId(undefined)}
+        />
+      )}
+
+      {quizLibraryId && (
+        <QuizResultsModal
+          lessonId={lessonId}
+          libraryId={quizLibraryId}
+          onClose={() => setQuizLibraryId(undefined)}
         />
       )}
     </View>

@@ -26,6 +26,7 @@ import {
 import './styles.scss';
 import api from '@services/api';
 import { useAppPagination } from '@hooks';
+import { useAppSelector } from '@redux';
 
 const { Text } = Typography;
 
@@ -66,6 +67,9 @@ const mapPreviewResponse = (rows: ImportUserItem[]) =>
   }));
 
 const ImportUserManage = () => {
+  const accessToken = useAppSelector(
+    state => state.authReducer.tokenInfo?.accessToken,
+  );
   const [fileUrl, setFileUrl] = useState('');
   const [previewRows, setPreviewRows] = useState<PreviewUserRow[]>([]);
   const [importResult, setImportResult] = useState<ImportUsersResponse | null>(
@@ -303,6 +307,11 @@ const ImportUserManage = () => {
             maxCount={1}
             listType="picture-card"
             action={api.defaults.baseURL + '/upload'}
+            headers={
+              accessToken
+                ? { Authorization: `Bearer ${accessToken}` }
+                : undefined
+            }
             onChange={info => {
               if (info.file.status === 'done') {
                 const responseUrl = info.file.response?.data;

@@ -416,6 +416,11 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
               accept=".xlsx,.docx"
               fileList={starterFileList}
               action={api.defaults.baseURL + '/upload'}
+              headers={
+                accessToken
+                  ? { Authorization: `Bearer ${accessToken}` }
+                  : undefined
+              }
               onRemove={() => {
                 setStarterFileList([]);
                 taskForm.setFieldsValue({ starterFileUrl: undefined });

@@ -27,6 +27,13 @@ type Props = {
   onPassed?: () => void;
 };
 
+// Quy đổi điểm thô (total/max, max tùy số tiêu chí từng đề) về thang 10
+// chung cho MỌI bài kiểm tra (trắc nghiệm lẫn thực hành) - chỉ đổi lúc HIỂN
+// THỊ, dữ liệu gốc total/max vẫn giữ nguyên ở DB/response để nơi khác (vd
+// liệt kê từng tiêu chí) vẫn biết đúng điểm thô thật.
+const toScore10 = (total: number, max: number) =>
+  max ? Number(((total / max) * 10).toFixed(1)) : 0;
+
 // Toàn bộ nội dung "làm 1 bài tập thực hành": mô tả yêu cầu, tải đề gốc,
 // nộp bài + chấm điểm, kết quả, lịch sử nộp. Tách riêng khỏi trang để dùng
 // lại được ở cả 2 chỗ: trang chi tiết đứng riêng (/dashboard/practice/[id])
@@ -125,12 +132,12 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
           setLatestResult(result);
           if (result.isPass) {
             messageApi.success(
-              `Đã đạt ${result.totalScore}/${result.maxScore} điểm — bạn có thể qua nội dung tiếp theo.`,
+              `Đã đạt ${toScore10(result.totalScore, result.maxScore)}/10 điểm — bạn có thể qua nội dung tiếp theo.`,
             );
             onPassed?.();
           } else {
             messageApi.warning(
-              `Được ${result.totalScore}/${result.maxScore} điểm — cần đạt tối thiểu 80% số điểm mới được qua nội dung tiếp theo, hãy làm lại.`,
+              `Được ${toScore10(result.totalScore, result.maxScore)}/10 điểm — cần đạt tối thiểu 8 điểm mới được qua nội dung tiếp theo, hãy làm lại.`,
             );
           }
           refetchSubmissions();
@@ -193,14 +200,15 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
       {latestResult && (
         <div className="practice-result-panel">
           <h3>
-            Kết quả: {latestResult.totalScore}/{latestResult.maxScore} điểm
+            Kết quả: {toScore10(latestResult.totalScore, latestResult.maxScore)}
+            /10 điểm
             {latestResult.isPass ? (
               <span className="practice-result-status practice-result-status--pass">
                 Đạt
               </span>
             ) : (
               <span className="practice-result-status practice-result-status--fail">
-                Chưa đạt (cần ≥ 80%)
+                Chưa đạt (cần ≥ 8 điểm)
               </span>
             )}
           </h3>
@@ -215,9 +223,7 @@ const PracticeTaskContent: React.FC<Props> = ({ taskId, onPassed }) => {
           <h3>Lịch sử nộp bài ({submissions.length} lần)</h3>
           {submissions.map(s => (
             <div key={s._id} className="practice-history-row">
-              <span>
-                {s.totalScore}/{s.maxScore} điểm
-              </span>
+              <span>{toScore10(s.totalScore, s.maxScore)}/10 điểm</span>
               <span className="practice-history-time">
                 {dayjs(s.submittedAt).format('HH:mm DD/MM/YYYY')}
               </span>

@@ -4,9 +4,19 @@ import React from 'react';
 import { View, Text } from 'react-native-web';
 import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { useAppSelector } from '@redux';
 import { useMyCourses } from '@/hooks/useMyCourses';
 import { dashboardQuery } from '~mdDashboard/redux';
+import { RecentTestResult } from '~mdDashboard/redux/RTKQuery/types';
 import { AppButton } from '@components';
 import styles from './styles';
 
@@ -37,15 +47,28 @@ const MyCoursesPage = () => {
   const { data: insights } = dashboardQuery.useGetMyRoadmapQuery(userId || '', {
     skip: !userId,
   });
+  const { data: scoreHistory } = dashboardQuery.useGetMyScoreHistoryQuery(
+    { userId: userId || '', limit: 10 },
+    { skip: !userId },
+  );
 
   const latestInsight = Array.isArray(insights) ? insights[0] : null;
   const weeklyHours = overview?.weeklyHours || [];
   const maxHours = Math.max(1, ...weeklyHours.map(w => w.hours));
+  const scoreChartData = (scoreHistory || []).map(r => ({
+    label: dayjs(r.createdAt).format('DD/MM'),
+    score: r.score,
+    name: r.name,
+  }));
 
   const handleOpenCourse = (course: (typeof myCourses)[number]) => {
     router.push(
       `/dashboard/home/lesson/moduleDetail?lessonId=${course.lessonId}&subLessonId=${course.lastSubLessonId || 'first-lesson'}`,
     );
+  };
+
+  const handleOpenResult = (result: RecentTestResult) => {
+    if (result.link) router.push(result.link);
   };
 
   return (
@@ -88,14 +111,35 @@ const MyCoursesPage = () => {
         </View>
 
         <View style={styles.resultsCard}>
-          <Text style={styles.cardTitle}>Kết quả bài kiểm tra</Text>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardTitle}>Kết quả bài kiểm tra</Text>
+            <Text
+              style={styles.viewAllLink}
+              onClick={() => router.push('/dashboard/results')}>
+              Xem tất cả
+            </Text>
+          </View>
           {!overview?.recentResults?.length && (
             <Text style={styles.emptyText}>Chưa có bài kiểm tra nào.</Text>
           )}
           {overview?.recentResults?.map(r => (
-            <View key={r._id} style={styles.resultRow}>
+            <View
+              key={r._id}
+              style={[styles.resultRow, r.link && { cursor: 'pointer' }]}
+              onClick={() => handleOpenResult(r)}>
               <View>
-                <Text style={styles.resultName}>{r.name}</Text>
+                <View style={styles.resultNameRow}>
+                  <Text style={styles.resultName}>{r.name}</Text>
+                  <Text
+                    style={[
+                      styles.resultTypeTag,
+                      r.type === 'practice'
+                        ? styles.resultTypeTagPractice
+                        : styles.resultTypeTagQuiz,
+                    ]}>
+                    {r.type === 'practice' ? 'Thực hành' : 'Trắc nghiệm'}
+                  </Text>
+                </View>
                 <Text style={styles.resultDate}>
                   {dayjs(r.createdAt).format('DD/MM/YYYY')}
                 </Text>
@@ -107,6 +151,59 @@ const MyCoursesPage = () => {
           ))}
         </View>
       </View>
+
+      {scoreChartData.length > 1 && (
+        <View style={styles.chartCard}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.cardTitle}>Điểm số theo thời gian</Text>
+            <Text style={styles.cardMeta}>
+              {scoreChartData.length} lần làm gần nhất
+            </Text>
+          </View>
+          <div style={{ width: '100%', height: 220 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={scoreChartData}
+                margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#eef1f6"
+                  vertical={false}
+                />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
+                  tickMargin={10}
+                  axisLine={{ stroke: '#eef1f6' }}
+                  tickLine={false}
+                />
+                <YAxis
+                  domain={[0, 10]}
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
+                  tickMargin={8}
+                  axisLine={false}
+                  tickLine={false}
+                  width={28}
+                />
+                <Tooltip
+                  formatter={(value: number, _key, item) => [
+                    value,
+                    item?.payload?.name || 'Điểm',
+                  ]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="score"
+                  stroke="var(--color-vhu-primary)"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </View>
+      )}
 
       {latestInsight && (
         <View style={styles.aiSuggestionBox}>

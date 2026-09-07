@@ -31,6 +31,6 @@ export const baseQuery = createApi({
   // không có gì để bắt — vẫn phải refetch() thủ công như cũ.
   // CourseRating: submitCourseRating (mutation) cần tự làm getCourseRating
   // (query) refetch lại điểm trung bình mới ngay sau khi gửi đánh giá.
-  tagTypes: ['PracticeTask', 'ReminderLog', 'CourseRating'],
+  tagTypes: ['PracticeTask', 'ReminderLog', 'CourseRating', 'Notification'],
   endpoints: () => ({}),
 });
