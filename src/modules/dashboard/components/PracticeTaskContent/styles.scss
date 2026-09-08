@@ -90,6 +90,16 @@
   }
 }
 
+.practice-result-panel--hidden {
+  background: #fafafa;
+  color: #888;
+  font-size: 13px;
+
+  p {
+    margin: 0;
+  }
+}
+
 .practice-result-status {
   font-size: 12px;
   font-weight: 600;

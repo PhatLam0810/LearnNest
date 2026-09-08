@@ -1,12 +1,13 @@
-.ant-card-body {
-  padding: 0px !important;
-}
-
 .lesson-card {
   overflow: hidden;
 }
 
+/* Bug thật đã gặp: rule này trước đây KHÔNG được scope theo .lesson-card
+   (viết nhầm .ant-card-body trần), nên xoá padding của MỌI antd Card trong
+   cả app (kể cả các Card không liên quan như ở PassRateReport) chứ không
+   chỉ riêng lesson-card như ý định ban đầu. */
 .lesson-card .ant-card-body {
+  padding: 0px !important;
 }
 
 .lesson-card.ant-card-hoverable:hover {

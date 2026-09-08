@@ -1,0 +1,22 @@
+.pass-rate-report-page {
+  width: 100%;
+
+  // antd tô nền xám cho CẢ CỘT (header lẫn từng ô) khi đang là cột sort hiện
+  // hành - nhìn rối/xấu ở bảng này vì đã tự tô màu chữ theo tỉ lệ đạt rồi.
+  // Scope trong class riêng của trang này (bài học từ lỗi
+  // .ant-card-body { padding:0 !important } trước đó lỡ set toàn cục) chứ
+  // không đụng tới các bảng antd khác trong dự án.
+  .ant-table-column-sort,
+  th.ant-table-column-sort,
+  td.ant-table-column-sort {
+    background: transparent !important;
+  }
+}
+
+.pass-rate-report-summary-row {
+  width: 100%;
+
+  .pass-rate-report-summary-card {
+    flex: 1 1 200px;
+  }
+}

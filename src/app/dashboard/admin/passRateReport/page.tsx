@@ -4,6 +4,7 @@ import { Text, View } from 'react-native-web';
 import { Table, TableProps, Tag, Statistic, Card } from 'antd';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PassRateReportRow } from '~mdDashboard/redux/RTKQuery/types';
+import './styles.scss';
 
 // Báo cáo tỉ lệ đạt/chưa đạt theo TỪNG bài (trắc nghiệm + thực hành), sắp
 // theo tỉ lệ đạt TĂNG DẦN (bài "kẹt" học viên nhiều nhất lên đầu) - giúp
@@ -68,48 +69,58 @@ const PassRateReport: React.FC = () => {
   ];
 
   return (
-    <View style={{ padding: 8, gap: 16 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          gap: 16,
-        }}>
-        <Card style={{ minWidth: 200 }}>
-          <Statistic
-            title="Tổng lượt làm bài"
-            value={data?.summary.totalAttempts ?? 0}
-          />
-        </Card>
-        <Card style={{ minWidth: 200 }}>
-          <Statistic
-            title="Tỉ lệ đạt chung"
-            value={data?.summary.overallPassRate ?? 0}
-            suffix="%"
-          />
-        </Card>
-        <Card style={{ minWidth: 200 }}>
-          <Statistic
-            title="Ngưỡng đạt hiện tại"
-            value={data?.summary.currentThresholdPct ?? 80}
-            suffix="%"
-          />
-        </Card>
+    <div className="pass-rate-report-page">
+      <View style={{ padding: 8, gap: 16 }}>
+        <div className="pass-rate-report-summary-row">
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: 16,
+            }}>
+            <Card
+              className="pass-rate-report-summary-card"
+              style={{ minWidth: 200 }}>
+              <Statistic
+                title="Tổng lượt làm bài"
+                value={data?.summary.totalAttempts ?? 0}
+              />
+            </Card>
+            <Card
+              className="pass-rate-report-summary-card"
+              style={{ minWidth: 200 }}>
+              <Statistic
+                title="Tỉ lệ đạt chung"
+                value={data?.summary.overallPassRate ?? 0}
+                suffix="%"
+              />
+            </Card>
+            <Card
+              className="pass-rate-report-summary-card"
+              style={{ minWidth: 200 }}>
+              <Statistic
+                title="Ngưỡng đạt hiện tại"
+                value={data?.summary.currentThresholdPct ?? 80}
+                suffix="%"
+              />
+            </Card>
+          </View>
+        </div>
+        <Text style={{ fontSize: 13, color: '#8D8D8D' }}>
+          Tỉ lệ đạt tính trên toàn bộ lịch sử - bài trắc nghiệm làm trước khi
+          đổi ngưỡng (2/3 số câu) vẫn giữ nguyên kết quả đã chấm lúc đó, không
+          tính lại theo ngưỡng 80% mới.
+        </Text>
+        <Table
+          loading={isFetching}
+          columns={columns}
+          dataSource={data?.rows}
+          rowKey={r => `${r.type}-${r.id}`}
+          scroll={{ x: 'max-content' }}
+          pagination={{ pageSize: 20, showSizeChanger: true }}
+        />
       </View>
-      <Text style={{ fontSize: 13, color: '#8D8D8D' }}>
-        Tỉ lệ đạt tính trên toàn bộ lịch sử - bài trắc nghiệm làm trước khi đổi
-        ngưỡng (2/3 số câu) vẫn giữ nguyên kết quả đã chấm lúc đó, không tính
-        lại theo ngưỡng 80% mới.
-      </Text>
-      <Table
-        loading={isFetching}
-        columns={columns}
-        dataSource={data?.rows}
-        rowKey={r => `${r.type}-${r.id}`}
-        scroll={{ x: 'max-content' }}
-        pagination={{ pageSize: 20, showSizeChanger: true }}
-      />
-    </View>
+    </div>
   );
 };
 

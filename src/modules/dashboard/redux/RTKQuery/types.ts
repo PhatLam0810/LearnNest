@@ -110,7 +110,9 @@ export interface RecentTestResult {
   score: number;
   isPass: boolean;
   createdAt: string;
-  type: 'quiz' | 'practice';
+  // 'mock_exam' - 1 dòng TỔNG cho cả đề thi thử đã nộp/hết giờ (không phải
+  // từng bài lẻ trong đề) - xem LessonService.getMergedResults (BE).
+  type: 'quiz' | 'practice' | 'mock_exam';
   // Đường dẫn để làm lại bài này - null nếu không tra được (VD library mồ
   // côi, không gắn module nào). Xem LessonService.getMergedResults (BE).
   lessonId: string | null;
@@ -135,7 +137,7 @@ export interface MyResultsResponse {
 export interface MyResultsParams {
   page?: number;
   limit?: number;
-  type?: 'quiz' | 'practice';
+  type?: 'quiz' | 'practice' | 'mock_exam';
   isPass?: boolean;
   lessonId?: string;
 }

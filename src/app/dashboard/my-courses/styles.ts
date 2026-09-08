@@ -125,6 +125,10 @@ const styles = StyleSheet.create({
     color: '#c2410c',
     backgroundColor: '#fff3e8',
   },
+  resultTypeTagMockExam: {
+    color: '#7c3aed',
+    backgroundColor: '#f3ecff',
+  },
   resultDate: {
     fontSize: 12,
     color: '#8D8D8D',
@@ -153,6 +157,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: 'var(--color-vhu-primary)',
     marginTop: 4,
+    cursor: 'pointer',
   },
   aiSuggestionBox: {
     backgroundColor: '#eaf2ff',

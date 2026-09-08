@@ -101,6 +101,14 @@ const PracticeTaskContent: React.FC<Props> = ({
 
   const { task, criteria } = detail;
   const accept = task.subject === 'Excel' ? '.xlsx' : '.docx';
+  // Đang làm bài TRONG 1 phiên thi thử: giấu kết quả/điểm ngay sau khi nộp
+  // từng bài (mô phỏng đúng áp lực thi thật - không biết đúng/sai giữa
+  // chừng), ẩn cả lịch sử nộp bài và khung thảo luận (tránh "hỏi bài" giữa
+  // giờ thi). Kết quả chỉ lộ ra ở trang kết quả sau khi bấm "Nộp bài thi"
+  // (MockExamResultView) - xem yêu cầu người dùng, không áp dụng khi làm bài
+  // thực hành bình thường (ngoài thi thử vẫn xem kết quả/lịch sử/thảo luận
+  // như cũ).
+  const isMockExam = !!mockExamAttemptId;
 
   const handleDownloadStarter = async () => {
     try {
@@ -144,7 +152,11 @@ const PracticeTaskContent: React.FC<Props> = ({
         const result: PracticeSubmitResponse = info.file.response?.data;
         if (result) {
           setLatestResult(result);
-          if (result.isPass) {
+          if (isMockExam) {
+            // Không hé lộ điểm/đạt-hay-chưa giữa giờ thi thử - chỉ báo đã
+            // nhận bài, kết quả thật chờ ở trang kết quả sau khi nộp bài thi.
+            messageApi.success('Đã nộp bài làm cho bài này.');
+          } else if (result.isPass) {
             messageApi.success(
               `Đã đạt ${toScore10(result.totalScore, result.maxScore)}/10 điểm — bạn có thể qua nội dung tiếp theo.`,
             );
@@ -212,7 +224,13 @@ const PracticeTaskContent: React.FC<Props> = ({
         </Upload>
       </div>
 
-      {latestResult && (
+      {isMockExam && latestResult && (
+        <div className="practice-result-panel practice-result-panel--hidden">
+          <p>Đã nộp bài làm. Kết quả sẽ hiển thị sau khi bạn nộp bài thi.</p>
+        </div>
+      )}
+
+      {!isMockExam && latestResult && (
         <div className="practice-result-panel">
           <h3>
             Kết quả: {toScore10(latestResult.totalScore, latestResult.maxScore)}
@@ -233,7 +251,7 @@ const PracticeTaskContent: React.FC<Props> = ({
         </div>
       )}
 
-      {submissions && submissions.length > 0 && (
+      {!isMockExam && submissions && submissions.length > 0 && (
         <div className="practice-history">
           <h3>Lịch sử nộp bài ({submissions.length} lần)</h3>
           {submissions.map(s => (
@@ -247,15 +265,19 @@ const PracticeTaskContent: React.FC<Props> = ({
         </div>
       )}
 
-      <div className="practice-discussion">
-        <h3>Thảo luận</h3>
-        <CommentSection postId={taskId} type="PracticeTask" inline />
-      </div>
+      {!isMockExam && (
+        <div className="practice-discussion">
+          <h3>Thảo luận</h3>
+          <CommentSection postId={taskId} type="PracticeTask" inline />
+        </div>
+      )}
     </div>
   );
 };
 
-const ResultItemRow: React.FC<{
+// Xuất ra ngoài để tái dùng đúng y hệt cách hiển thị "Yêu cầu N" ở trang kết
+// quả thi thử (MockExamResultView) - tránh viết lại cùng 1 UI 2 lần.
+export const ResultItemRow: React.FC<{
   item: PracticeSubmissionResultItem;
   index: number;
 }> = ({ item, index }) => (

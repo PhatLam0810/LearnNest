@@ -139,7 +139,7 @@ const MockExamEditorModal: React.FC<Props> = ({ open, exam, onClose }) => {
             options={availableOptions}
             onChange={(id: string) => setTaskIds(prev => [...prev, id])}
           />
-          <View style={{ marginTop: 8, gap: 6 }}>
+          <View style={{ marginTop: 10, gap: 8 }}>
             {taskIds.map((id, idx) => {
               const task = taskById.get(id);
               return (
@@ -148,8 +148,8 @@ const MockExamEditorModal: React.FC<Props> = ({ open, exam, onClose }) => {
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    gap: 8,
-                    padding: '6px 10px',
+                    gap: 10,
+                    padding: '10px 14px',
                     border: '1px solid #f0f0f0',
                     borderRadius: 8,
                   }}>

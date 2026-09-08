@@ -141,6 +141,10 @@ const PracticeListPage = () => {
       {!!weakSkills?.length && (
         <div className="practice-weak-skills-card">
           <h2 className="practice-weak-skills-title">Điểm yếu của bạn</h2>
+          <p className="practice-weak-skills-desc">
+            Tỉ lệ làm đúng qua các lần nộp bài cho từng kỹ năng — thấp nghĩa là
+            bạn hay sai ở kỹ năng đó, nên ưu tiên luyện lại trước.
+          </p>
           {weakSkills.slice(0, 5).map(w => (
             <div key={w.group} className="practice-weak-skill-row">
               <span className="practice-weak-skill-name">{w.group}</span>
@@ -156,7 +160,7 @@ const PracticeListPage = () => {
               <span
                 className="practice-weak-skill-pct"
                 style={{ color: weakSkillColor(w.passRate) }}>
-                {w.passRate.toFixed(0)}%
+                {w.passRate.toFixed(0)}% ({w.passed}/{w.attempts} lần đạt)
               </span>
             </div>
           ))}

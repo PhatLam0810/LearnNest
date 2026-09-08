@@ -169,6 +169,12 @@ const LibraryList = () => {
         userName: userProfile?.fullName,
         selectedAnswers,
       }).unwrap();
+      // Bug thật đã gặp: trước đây chỉ set quizResult (mở modal kết quả) mà
+      // KHÔNG đóng modal xem nội dung (open vẫn true) - modal làm bài vẫn
+      // che nguyên màn hình phía sau, nhìn như bấm "Nộp bài" không có phản
+      // ứng gì. Đóng modal làm bài lại, modal kết quả (điều khiển riêng bởi
+      // quizResult, không phụ thuộc `open`) vẫn hiện đè lên bình thường.
+      setOpen(false);
       setQuizResult(res);
     } catch {
       messageApi.error('Nộp bài thất bại, vui lòng thử lại.');

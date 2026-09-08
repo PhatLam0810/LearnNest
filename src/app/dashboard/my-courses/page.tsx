@@ -135,9 +135,15 @@ const MyCoursesPage = () => {
                       styles.resultTypeTag,
                       r.type === 'practice'
                         ? styles.resultTypeTagPractice
-                        : styles.resultTypeTagQuiz,
+                        : r.type === 'mock_exam'
+                          ? styles.resultTypeTagMockExam
+                          : styles.resultTypeTagQuiz,
                     ]}>
-                    {r.type === 'practice' ? 'Thực hành' : 'Trắc nghiệm'}
+                    {r.type === 'practice'
+                      ? 'Bài tập'
+                      : r.type === 'mock_exam'
+                        ? 'Thi thử'
+                        : 'Trắc nghiệm'}
                   </Text>
                 </View>
                 <Text style={styles.resultDate}>

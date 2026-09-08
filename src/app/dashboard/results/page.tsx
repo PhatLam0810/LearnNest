@@ -29,7 +29,9 @@ const ResultsPage: React.FC = () => {
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  const [type, setType] = useState<'quiz' | 'practice' | undefined>(undefined);
+  const [type, setType] = useState<
+    'quiz' | 'practice' | 'mock_exam' | undefined
+  >(undefined);
   const [isPass, setIsPass] = useState<boolean | undefined>(undefined);
   const [lessonId, setLessonId] = useState<string | undefined>(undefined);
 
@@ -54,8 +56,19 @@ const ResultsPage: React.FC = () => {
       render: (_: unknown, r: RecentTestResult) => (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={{ fontSize: 14 }}>{r.name}</Text>
-          <Tag color={r.type === 'practice' ? 'orange' : 'blue'}>
-            {r.type === 'practice' ? 'Thực hành' : 'Trắc nghiệm'}
+          <Tag
+            color={
+              r.type === 'practice'
+                ? 'orange'
+                : r.type === 'mock_exam'
+                  ? 'purple'
+                  : 'blue'
+            }>
+            {r.type === 'practice'
+              ? 'Bài tập'
+              : r.type === 'mock_exam'
+                ? 'Thi thử'
+                : 'Trắc nghiệm'}
           </Tag>
         </View>
       ),
@@ -105,7 +118,8 @@ const ResultsPage: React.FC = () => {
           }}
           options={[
             { value: 'quiz', label: 'Trắc nghiệm' },
-            { value: 'practice', label: 'Thực hành' },
+            { value: 'practice', label: 'Bài tập' },
+            { value: 'mock_exam', label: 'Thi thử' },
           ]}
         />
         <Select

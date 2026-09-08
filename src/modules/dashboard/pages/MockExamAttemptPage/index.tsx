@@ -2,10 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Empty, Popconfirm, Spin, Statistic, Tag } from 'antd';
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { CheckCircleFilled } from '@ant-design/icons';
 import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
-import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
+import PracticeTaskContent, {
+  ResultItemRow,
+} from '~mdDashboard/components/PracticeTaskContent';
+import CommentSection from '@components/CommentSection';
 import './styles.scss';
 
 const { Countdown } = Statistic;
@@ -196,14 +199,17 @@ const MockExamResultView: React.FC<{ attemptId: string }> = ({ attemptId }) => {
               </>
             )}
           </div>
-          {t.failedCriteria.length > 0 && (
-            <div className="mock-exam-result-failed-list">
-              {t.failedCriteria.map((f, i) => (
-                <div key={i} className="mock-exam-result-failed-item">
-                  <CloseCircleFilled style={{ color: '#ff4d4f' }} />
-                  <span>{f.instruction || 'Chưa đạt yêu cầu này'}</span>
-                </div>
+          {t.attempted && t.results.length > 0 && (
+            <div className="mock-exam-result-criteria-list">
+              {t.results.map((item, i) => (
+                <ResultItemRow key={item.criteriaId} item={item} index={i} />
               ))}
+            </div>
+          )}
+          {t.attempted && (
+            <div className="mock-exam-result-discussion">
+              <h3>Thảo luận</h3>
+              <CommentSection postId={t.taskId} type="PracticeTask" inline />
             </div>
           )}
         </div>

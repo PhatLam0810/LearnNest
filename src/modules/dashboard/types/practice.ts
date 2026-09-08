@@ -271,7 +271,9 @@ export interface MockExamResultTask {
   attempted: boolean;
   score: number | null;
   isPass: boolean;
-  failedCriteria: { instruction?: string }[];
+  // ĐỦ mọi tiêu chí (đạt lẫn chưa đạt), không chỉ lọc riêng tiêu chí sai -
+  // để hiển thị đúng y hệt "Yêu cầu 1, 2, 3..." như PracticeTaskContent.
+  results: PracticeSubmissionResultItem[];
 }
 
 // Kết quả tổng hợp sau khi nộp/hết giờ 1 phiên thi thử.
