@@ -16,6 +16,8 @@ const USER_NOTIF_TYPES: { type: string; label: string }[] = [
   { type: 'FEEDBACK_REPLIED', label: 'Phản hồi của bạn được trả lời' },
   { type: 'NEW_COURSE', label: 'Có khóa học mới' },
   { type: 'COURSE_COMPLETED', label: 'Hoàn thành khóa học' },
+  { type: 'RETRY_REMINDER', label: 'Nhắc làm lại bài thực hành chưa đạt' },
+  { type: 'ACHIEVEMENT_UNLOCKED', label: 'Mở khoá huy hiệu mới' },
 ];
 const ADMIN_NOTIF_TYPES: { type: string; label: string }[] = [
   { type: 'NEW_QUESTION', label: 'Có câu hỏi mới cần trả lời' },

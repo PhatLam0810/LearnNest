@@ -11,6 +11,7 @@ import './styles.css';
 import styles from './styles';
 import { Text, View } from 'react-native-web';
 import LessonThumbnail from '../LessonThumbnail';
+import BookmarkButton from '@components/BookmarkButton';
 import { authQuery } from '~mdAuth/redux';
 import { useAppSelector } from '@redux';
 
@@ -35,9 +36,19 @@ type LessonItemProps = {
   refresh?: () => void;
   haveMenu?: boolean;
   style?: any;
+  // Trạng thái "đã lưu" - trang cha suy từ getBookmarkIds('lesson'). Không
+  // truyền = ẩn nút bookmark (vd chỗ dùng lại LessonItem cho admin).
+  bookmarked?: boolean;
+  showBookmark?: boolean;
 };
 
-const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
+const LessonItem: React.FC<LessonItemProps> = ({
+  data,
+  onClick,
+  style,
+  bookmarked,
+  showBookmark,
+}) => {
   const {
     thumbnail,
     title,
@@ -61,6 +72,26 @@ const LessonItem: React.FC<LessonItemProps> = ({ data, onClick, style }) => {
       styles={{ body: { display: 'flex', height: '100%' } }}
       hoverable
       style={Object.assign({}, styles.container, style)}>
+      {showBookmark && data?._id && (
+        <View
+          style={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            zIndex: 2,
+            background: 'rgba(255,255,255,0.9)',
+            borderRadius: 999,
+            padding: 4,
+            lineHeight: 1,
+          }}>
+          <BookmarkButton
+            itemType="lesson"
+            itemId={data._id}
+            bookmarked={bookmarked}
+            size={18}
+          />
+        </View>
+      )}
       <View style={styles.inner} onClick={onClick}>
         {!accessLesson && (
           <View style={styles.premium}>

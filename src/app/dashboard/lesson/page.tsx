@@ -25,6 +25,8 @@ const Page = () => {
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const { data: categories } = dashboardQuery.useGetAllCategoryQuery();
+  const { data: bookmarkedLessonIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('lesson');
   const { myCourses } = useMyCourses(userProfile?._id || null);
   const enrolledIds = useMemo(
     () => new Set(myCourses.map(c => c.lessonId)),
@@ -146,6 +148,8 @@ const Page = () => {
               key={item._id}
               data={{ ...item, isInProgress: enrolledIds.has(item._id) }}
               style={lessonItemStyle}
+              showBookmark
+              bookmarked={(bookmarkedLessonIds || []).includes(item._id)}
               onClick={() => {
                 dispatch(dashboardAction.getLessonDetail({ id: item._id }));
                 router.push(`home/lesson/${item._id}`);
