@@ -42,7 +42,6 @@ const TrafficChart: React.FC = () => {
         border: '1px solid #eef1f6',
         boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
         marginBottom: 16,
-        padding: 24,
       }}>
       <View
         style={{

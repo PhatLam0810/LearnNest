@@ -279,6 +279,7 @@ export interface MockExamResultTask {
 // Kết quả tổng hợp sau khi nộp/hết giờ 1 phiên thi thử.
 export interface MockExamAttemptResult {
   attemptId: string;
+  examId: string;
   title: string;
   subject: MockExamSubject;
   status: MockExamAttemptStatus;

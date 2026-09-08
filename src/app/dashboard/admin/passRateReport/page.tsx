@@ -5,6 +5,7 @@ import { Table, TableProps, Tag, Statistic, Card } from 'antd';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PassRateReportRow } from '~mdDashboard/redux/RTKQuery/types';
 import './styles.scss';
+import StatCard from '../../home/_components/StatCard';
 
 // Báo cáo tỉ lệ đạt/chưa đạt theo TỪNG bài (trắc nghiệm + thực hành), sắp
 // theo tỉ lệ đạt TĂNG DẦN (bài "kẹt" học viên nhiều nhất lên đầu) - giúp
@@ -78,32 +79,23 @@ const PassRateReport: React.FC = () => {
               flexWrap: 'wrap',
               gap: 16,
             }}>
-            <Card
-              className="pass-rate-report-summary-card"
-              style={{ minWidth: 200 }}>
-              <Statistic
-                title="Tổng lượt làm bài"
-                value={data?.summary.totalAttempts ?? 0}
-              />
-            </Card>
-            <Card
-              className="pass-rate-report-summary-card"
-              style={{ minWidth: 200 }}>
-              <Statistic
-                title="Tỉ lệ đạt chung"
-                value={data?.summary.overallPassRate ?? 0}
-                suffix="%"
-              />
-            </Card>
-            <Card
-              className="pass-rate-report-summary-card"
-              style={{ minWidth: 200 }}>
-              <Statistic
-                title="Ngưỡng đạt hiện tại"
-                value={data?.summary.currentThresholdPct ?? 80}
-                suffix="%"
-              />
-            </Card>
+            <StatCard
+              icon="👥"
+              label="Tổng lượt làm bài"
+              value={data?.summary.totalAttempts ?? 0}
+            />
+            <StatCard
+              icon="✓"
+              label="Tỉ lệ đạt chung"
+              value={`${data?.summary.overallPassRate ?? 0}%`}
+              valueColor={passRateColor(data?.summary.overallPassRate ?? 0)}
+            />
+            <StatCard
+              icon="✓"
+              label="Ngưỡng đạt hiện tại"
+              value={`${data?.summary.currentThresholdPct ?? 0}%`}
+              valueColor={passRateColor(data?.summary.currentThresholdPct ?? 0)}
+            />
           </View>
         </div>
         <Text style={{ fontSize: 13, color: '#8D8D8D' }}>

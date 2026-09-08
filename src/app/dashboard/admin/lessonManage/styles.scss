@@ -77,7 +77,7 @@
 .ant-table-wrapper .ant-table-thead > tr > th,
 .ant-table-wrapper .ant-table-thead > tr > th,
 .ant-table-wrapper .ant-table-thead > tr > td {
-  background-color: $color-vhu-primary;
+  background-color: $color-vhu-primary !important;
   color: #fff;
 }
 .ant-pagination .ant-pagination-item-active {

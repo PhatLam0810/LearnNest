@@ -20,6 +20,7 @@ import dayjs from 'dayjs';
 import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
 import { authQuery } from '~mdAuth/redux/RTKQuery';
 import TrafficChart from './components/TrafficChart';
+import StatCard from '../../home/_components/StatCard';
 const UserManage = () => {
   const { listItem, currentData, refresh, search, fetchData } =
     useAppPagination<UserItem>({
@@ -133,62 +134,20 @@ const UserManage = () => {
           gap: 16,
           marginBottom: 16,
         }}>
-        <Card
-          style={{
-            flex: 1,
-            minWidth: 220,
-            borderRadius: 12,
-            border: '1px solid #eef1f6',
-            boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
-            padding: 20,
-          }}
-          styles={{ body: { padding: 20 } }}>
-          <Text style={{ fontSize: 13, color: '#6b7280' }}>
-            Tổng người dùng
-          </Text>
-          <Text
-            style={{
-              display: 'block',
-              fontSize: 28,
-              fontWeight: 700,
-              color: '#1c2536',
-              marginTop: 4,
-            }}>
-            {activitySummary?.totalUsers ?? currentData?.totalRecords ?? 0}
-          </Text>
-          {!!activitySummary?.newUsersLast7Days && (
-            <Text style={{ fontSize: 13, color: '#16a34a', marginTop: 4 }}>
-              +{activitySummary.newUsersLast7Days} trong 7 ngày
-            </Text>
-          )}
-        </Card>
-        <Card
-          style={{
-            flex: 1,
-            minWidth: 220,
-            borderRadius: 12,
-            border: '1px solid #eef1f6',
-            boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
-            padding: 20,
-          }}
-          styles={{ body: { padding: 20 } }}>
-          <Text style={{ fontSize: 13, color: '#6b7280' }}>
-            Hoạt động hôm nay
-          </Text>
-          <Text
-            style={{
-              display: 'block',
-              fontSize: 28,
-              fontWeight: 700,
-              color: '#1c2536',
-              marginTop: 4,
-            }}>
-            {activitySummary?.activeToday ?? 0}
-          </Text>
-          <Text style={{ fontSize: 13, color: '#8D8D8D', marginTop: 4 }}>
-            {activitySummary?.activeTodayPercent ?? 0}% tổng người dùng
-          </Text>
-        </Card>
+        <StatCard
+          icon="👥"
+          label="   Tổng người dùng"
+          value={activitySummary?.totalUsers ?? currentData?.totalRecords}
+          caption={`+${activitySummary?.newUsersLast7Days ?? 0} trong 7 ngày`}
+          captionColor="#16a34a"
+        />
+        <StatCard
+          icon="👥"
+          label="Hoạt động hôm nay"
+          value={activitySummary?.totalUsers ?? currentData?.totalRecords}
+          caption={`+${activitySummary?.activeTodayPercent ?? 0}% tổng người dùng`}
+          captionColor="#8D8D8D"
+        />
       </View>
       <TrafficChart />
       <View

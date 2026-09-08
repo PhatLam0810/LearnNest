@@ -5,7 +5,8 @@ import styles from './styles';
 type StatCardProps = {
   icon: React.ReactNode;
   label: string;
-  value: string;
+  value: any;
+  valueColor?: string;
   caption?: string;
   captionColor?: string;
 };
@@ -16,6 +17,7 @@ const StatCard: React.FC<StatCardProps> = ({
   icon,
   label,
   value,
+  valueColor,
   caption,
   captionColor,
 }) => {
@@ -25,7 +27,9 @@ const StatCard: React.FC<StatCardProps> = ({
         {icon}
         <Text style={styles.label}>{label}</Text>
       </View>
-      <Text style={styles.value}>{value}</Text>
+      <Text style={[styles.value, valueColor ? { color: valueColor } : null]}>
+        {value}
+      </Text>
       {caption ? (
         <Text
           style={[

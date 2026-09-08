@@ -206,14 +206,16 @@ const MockExamResultView: React.FC<{ attemptId: string }> = ({ attemptId }) => {
               ))}
             </div>
           )}
-          {t.attempted && (
-            <div className="mock-exam-result-discussion">
-              <h3>Thảo luận</h3>
-              <CommentSection postId={t.taskId} type="PracticeTask" inline />
-            </div>
-          )}
         </div>
       ))}
+
+      {/* Thảo luận CHUNG cho cả đề thi thử (khoá theo examId, mọi học viên
+          cùng làm đề này chia sẻ 1 luồng) - không còn tách theo từng bài tập
+          trong đề như trước. */}
+      <div className="mock-exam-result-discussion">
+        <h3>Thảo luận</h3>
+        <CommentSection postId={data.examId} type="MockExam" inline />
+      </div>
     </div>
   );
 };

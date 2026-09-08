@@ -140,13 +140,17 @@
   flex-direction: column;
 }
 
+// Khung thảo luận chung của cả đề - đứng riêng thành 1 thẻ sau danh sách
+// bài (không còn nằm lồng trong từng .mock-exam-result-task nữa).
 .mock-exam-result-discussion {
-  margin-top: 14px;
-  padding-top: 14px;
-  border-top: 1px dashed #f0f0f0;
+  margin-top: 24px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 20px;
 
   h3 {
-    margin: 0 0 10px;
-    font-size: 14px;
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 700;
   }
 }

@@ -302,10 +302,10 @@ const HeaderLayout: React.FC = ({}) => {
                 popupRender={renderNotificationDropdown}
                 placement="bottomRight"
                 onOpenChange={setIsNotifOpen}>
-                <Badge count={unreadCount} size="small" offset={[-2, 2]}>
+                <Badge count={unreadCount} size="default" offset={[-2, 2]}>
                   <Button
                     type="text"
-                    icon={<BellOutlined style={{ fontSize: 20 }} />}
+                    icon={<BellOutlined style={{ fontSize: 24 }} />}
                     className="notification-bell-btn"
                   />
                 </Badge>
