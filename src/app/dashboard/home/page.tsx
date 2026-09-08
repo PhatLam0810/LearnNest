@@ -40,6 +40,8 @@ const HomeOverview = () => {
     { skip: !userId },
   );
   const { data: retryQueue } = dashboardQuery.useGetMyRetryQueueQuery();
+  const { data: achievements } = dashboardQuery.useGetMyAchievementsQuery();
+  const { data: leaderboard } = dashboardQuery.useGetLeaderboardQuery();
   const enrolledIds = useMemo(
     () => new Set(myCourses.map(c => c.lessonId)),
     [myCourses],
@@ -76,6 +78,29 @@ const HomeOverview = () => {
             <Text style={styles.retryBannerCta}>Xem danh sách →</Text>
           </View>
         )}
+
+        <View style={styles.miniRow}>
+          <View
+            style={styles.miniCard}
+            onClick={() => router.push('/dashboard/achievements')}>
+            <Text style={styles.miniIcon}>🏆</Text>
+            <Text style={styles.miniLabel}>Thành tích</Text>
+            <Text style={styles.miniValue}>
+              {achievements
+                ? `${achievements.items.filter(i => i.unlocked).length}/${achievements.items.length}`
+                : '—'}
+            </Text>
+          </View>
+          <View
+            style={styles.miniCard}
+            onClick={() => router.push('/dashboard/leaderboard')}>
+            <Text style={styles.miniIcon}>📊</Text>
+            <Text style={styles.miniLabel}>Hạng của bạn</Text>
+            <Text style={styles.miniValue}>
+              {leaderboard?.me?.rank ? `#${leaderboard.me.rank}` : 'Chưa xếp'}
+            </Text>
+          </View>
+        </View>
 
         <View style={statsRowStyle}>
           <StatCard

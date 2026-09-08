@@ -1,0 +1,86 @@
+.meh-page {
+  padding: 24px;
+  max-width: 820px;
+}
+
+.meh-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.meh-back {
+  border: none;
+  background: none;
+  color: #1d418a;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.meh-heading {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.meh-sub {
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.meh-toolbar {
+  margin-bottom: 12px;
+}
+
+.meh-chart {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: #fff;
+}
+
+.meh-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meh-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  background: #fff;
+  transition: box-shadow 0.15s ease;
+}
+
+.meh-row:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.meh-row-date {
+  font-size: 12px;
+  color: #9aa5b8;
+  width: 130px;
+  flex-shrink: 0;
+}
+
+.meh-row-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 140px;
+}
+
+.meh-row-score {
+  font-weight: 700;
+  color: #1c2536;
+}

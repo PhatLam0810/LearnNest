@@ -210,7 +210,15 @@ const PracticeListPage = () => {
 
       {!isLoadingExams && !!mockExams?.length && (
         <>
-          <h2 className="practice-list-subheading-2">Đề Thi Thử</h2>
+          <div className="practice-section-head">
+            <h2 className="practice-list-subheading-2">Đề Thi Thử</h2>
+            <button
+              type="button"
+              className="practice-link-btn"
+              onClick={() => router.push('/dashboard/mock-exam/history')}>
+              Lịch sử thi thử →
+            </button>
+          </div>
           <p className="practice-list-subheading">
             Thi có tính giờ, mô phỏng đúng áp lực thời gian của đề MOS thật.
           </p>

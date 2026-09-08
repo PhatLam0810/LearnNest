@@ -23,6 +23,8 @@ import Icon, {
   FileTextOutlined,
   StarOutlined,
   QuestionCircleOutlined,
+  TrophyOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -241,6 +243,18 @@ const HeaderLayout: React.FC = ({}) => {
             icon: <QuestionCircleOutlined />,
             onClick: () => router.push('/dashboard/my-qa'),
           },
+          {
+            key: 'achievements',
+            label: 'Thành tích',
+            icon: <TrophyOutlined />,
+            onClick: () => router.push('/dashboard/achievements'),
+          },
+          {
+            key: 'leaderboard',
+            label: 'Xếp hạng',
+            icon: <BarChartOutlined />,
+            onClick: () => router.push('/dashboard/leaderboard'),
+          },
         ]),
 
     {
@@ -438,6 +452,36 @@ const HeaderLayout: React.FC = ({}) => {
                 router.push('/dashboard/my-qa');
               }}>
               Hỏi đáp của tôi
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button
+              block
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/achievements');
+              }}>
+              Thành tích
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button
+              block
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/leaderboard');
+              }}>
+              Xếp hạng
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button
+              block
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/mock-exam/history');
+              }}>
+              Lịch sử thi thử
             </Button>
           )}
           <Button

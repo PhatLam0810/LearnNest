@@ -1,0 +1,95 @@
+.lb-page {
+  padding: 24px;
+  max-width: 720px;
+}
+
+.lb-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.lb-heading {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.lb-sub {
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.lb-me-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #eef4ff;
+  border: 1px solid #d6e4ff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+
+.lb-me-label {
+  font-size: 13px;
+  color: #5b6478;
+}
+
+.lb-me-rank {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1d418a;
+}
+
+.lb-me-count {
+  margin-left: auto;
+  font-size: 13px;
+  color: #5b6478;
+}
+
+.lb-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.lb-row--me {
+  border-color: #1d418a;
+  background: #f5f9ff;
+}
+
+.lb-row--detached {
+  margin-top: 8px;
+}
+
+.lb-rank {
+  width: 42px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #1c2536;
+}
+
+.lb-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-count {
+  font-size: 13px;
+  color: #5b6478;
+}

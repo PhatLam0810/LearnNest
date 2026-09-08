@@ -1,5 +1,6 @@
 import { baseQuery } from '@redux/RTKQuery';
 import {
+  AchievementsResponse,
   Category,
   CourseRatingItem,
   CourseRatingSummary,
@@ -7,8 +8,10 @@ import {
   LearningInsight,
   BookmarkItem,
   BookmarkItemType,
+  LeaderboardResponse,
   LessonNote,
   LessonNoteListResponse,
+  MockExamAttemptHistoryItem,
   LessonProgressResponse,
   LessonRecommendRes,
   LibraryType,
@@ -553,6 +556,27 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       },
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+
+    // ---- Huy hiệu / thành tích ----
+    getMyAchievements: builder.query<AchievementsResponse, void>({
+      query: () => '/achievements/mine',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
+    // ---- Bảng xếp hạng ----
+    getLeaderboard: builder.query<LeaderboardResponse, number | void>({
+      query: limit => ({
+        url: '/practice/leaderboard',
+        params: limit ? { limit } : undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
+    // ---- Lịch sử thi thử ----
+    getMyMockExamAttempts: builder.query<MockExamAttemptHistoryItem[], void>({
+      query: () => '/practice/mock-exams/attempts/mine',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });
@@ -594,4 +618,7 @@ export const {
   useToggleBookmarkMutation,
   useGetMyRetryQueueQuery,
   useGetMyQuestionsQuery,
+  useGetMyAchievementsQuery,
+  useGetLeaderboardQuery,
+  useGetMyMockExamAttemptsQuery,
 } = dashboardQuery;

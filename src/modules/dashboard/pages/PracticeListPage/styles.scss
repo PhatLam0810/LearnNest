@@ -54,6 +54,23 @@
   margin-bottom: 4px;
 }
 
+.practice-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.practice-link-btn {
+  border: none;
+  background: none;
+  color: #1d418a;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .practice-retry-card {
   border: 1px solid #ffe0b2;
   background: #fff8f0;

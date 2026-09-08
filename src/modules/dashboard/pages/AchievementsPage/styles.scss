@@ -1,0 +1,79 @@
+.achv-page {
+  padding: 24px;
+  max-width: 900px;
+}
+
+.achv-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.achv-heading {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.achv-sub {
+  color: #666;
+  margin: 0 0 20px;
+}
+
+.achv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.achv-card {
+  border: 1px solid #f0f0f0;
+  border-radius: 14px;
+  padding: 18px 16px;
+  text-align: center;
+  background: #fafafa;
+  opacity: 0.65;
+  filter: grayscale(0.6);
+}
+
+.achv-card--on {
+  background: #fff;
+  opacity: 1;
+  filter: none;
+  border-color: #ffe0a3;
+  box-shadow: 0 4px 16px rgba(245, 166, 35, 0.12);
+}
+
+.achv-icon {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.achv-card-title {
+  font-weight: 700;
+  font-size: 14.5px;
+  margin-bottom: 2px;
+}
+
+.achv-card-desc {
+  font-size: 12.5px;
+  color: #7a7a7a;
+  margin-bottom: 10px;
+  min-height: 32px;
+}
+
+.achv-badge-done {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b26a00;
+  background: #fff2d9;
+  border-radius: 999px;
+  padding: 2px 12px;
+}
+
+.achv-badge-locked {
+  font-size: 12px;
+  color: #9aa5b8;
+}

@@ -298,6 +298,50 @@ export interface MyQuestionListResponse {
   pageSize: number;
 }
 
+// ---- Huy hiệu / thành tích ----
+export interface AchievementItem {
+  code: string;
+  title: string;
+  description: string;
+  icon: string;
+  unlocked: boolean;
+  unlockedAt: string | null;
+  progress?: [number, number];
+}
+
+export interface AchievementsResponse {
+  items: AchievementItem[];
+  newlyUnlocked: { code: string; title: string }[];
+}
+
+// ---- Bảng xếp hạng ----
+export interface LeaderboardRow {
+  rank: number;
+  name: string;
+  passedCount: number;
+  isMe: boolean;
+}
+
+export interface LeaderboardResponse {
+  total: number;
+  me: { rank: number | null; passedCount: number };
+  top: LeaderboardRow[];
+}
+
+// ---- Lịch sử thi thử ----
+export interface MockExamAttemptHistoryItem {
+  attemptId: string;
+  examId: string;
+  title: string;
+  subject: string;
+  status: 'submitted' | 'expired';
+  submittedAt: string;
+  overallScore: number;
+  overallIsPass: boolean;
+  attemptedTasks: number;
+  totalTasks: number;
+}
+
 // ---- Bookmark / Đã lưu ----
 export type BookmarkItemType =
   'sublesson' | 'library' | 'practiceTask' | 'lesson';
