@@ -88,10 +88,13 @@ const PracticeListPage = () => {
   const { data: weakSkills } = dashboardQuery.useGetMyWeakSkillsQuery();
   const { data: mockExams, isFetching: isLoadingExams } =
     dashboardQuery.useGetMockExamsQuery();
-  const [startMockExam, { isLoading: isStarting }] =
-    dashboardQuery.useStartMockExamMutation();
+  const [startMockExam] = dashboardQuery.useStartMockExamMutation();
+  // Loading theo TỪNG đề (id đề đang bấm), không dùng chung isLoading của
+  // mutation - nếu không mọi nút "Bắt đầu" cùng quay loading một lúc.
+  const [startingExamId, setStartingExamId] = useState<string | null>(null);
 
   const handleStartExam = async (examId: string) => {
+    setStartingExamId(examId);
     try {
       const attempt = await startMockExam(examId).unwrap();
       router.push(`/dashboard/mock-exam/${attempt._id}`);
@@ -99,6 +102,7 @@ const PracticeListPage = () => {
       messageApi.error(
         e?.data?.message || 'Không bắt đầu được đề thi thử, thử lại sau',
       );
+      setStartingExamId(null);
     }
   };
 
@@ -201,7 +205,8 @@ const PracticeListPage = () => {
                   onConfirm={() => handleStartExam(exam._id)}>
                   <Button
                     type="primary"
-                    loading={isStarting}
+                    loading={startingExamId === exam._id}
+                    disabled={!!startingExamId && startingExamId !== exam._id}
                     style={{ marginTop: 12 }}>
                     Bắt đầu
                   </Button>
