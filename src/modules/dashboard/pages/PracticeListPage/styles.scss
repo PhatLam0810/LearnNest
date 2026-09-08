@@ -47,6 +47,13 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
+.practice-task-card-topbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
 .practice-task-title {
   margin: 8px 0 4px;
   font-size: 16px;

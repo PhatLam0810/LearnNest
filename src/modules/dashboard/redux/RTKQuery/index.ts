@@ -5,6 +5,10 @@ import {
   CourseRatingSummary,
   GetLessonProgressParams,
   LearningInsight,
+  BookmarkItem,
+  BookmarkItemType,
+  LessonNote,
+  LessonNoteListResponse,
   LessonProgressResponse,
   LessonRecommendRes,
   LibraryType,
@@ -425,6 +429,107 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       query: () => ({ url: '/notification/read-all', method: 'POST' }),
       invalidatesTags: ['Notification'],
     }),
+
+    // ---- Ghi chú cá nhân theo mốc thời gian video ----
+    getLessonNotes: builder.query<LessonNote[], string>({
+      query: subLessonId => ({
+        url: '/lesson-notes',
+        params: { subLessonId },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, subLessonId) => [
+        { type: 'LessonNote', id: subLessonId },
+      ],
+    }),
+    getMyLessonNotes: builder.query<
+      LessonNoteListResponse,
+      { pageNum?: number; pageSize?: number } | void
+    >({
+      query: params => {
+        const p = params || {};
+        return {
+          url: '/lesson-notes/mine',
+          params: { pageNum: p.pageNum || 1, pageSize: p.pageSize || 50 },
+        };
+      },
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'LessonNote', id: 'MINE' }],
+    }),
+    createLessonNote: builder.mutation<
+      LessonNote,
+      {
+        subLessonId: string;
+        lessonId?: string;
+        videoTimeSec?: number;
+        content: string;
+      }
+    >({
+      query: body => ({ url: '/lesson-notes', method: 'POST', body }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, { subLessonId }) => [
+        { type: 'LessonNote', id: subLessonId },
+        { type: 'LessonNote', id: 'MINE' },
+      ],
+    }),
+    updateLessonNote: builder.mutation<
+      LessonNote,
+      {
+        id: string;
+        subLessonId: string;
+        content: string;
+        videoTimeSec?: number;
+      }
+    >({
+      query: ({ id, content, videoTimeSec }) => ({
+        url: `/lesson-notes/${id}`,
+        method: 'PUT',
+        body: { content, videoTimeSec },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, { subLessonId }) => [
+        { type: 'LessonNote', id: subLessonId },
+        { type: 'LessonNote', id: 'MINE' },
+      ],
+    }),
+    deleteLessonNote: builder.mutation<
+      void,
+      { id: string; subLessonId: string }
+    >({
+      query: ({ id }) => ({ url: `/lesson-notes/${id}`, method: 'DELETE' }),
+      invalidatesTags: (_r, _e, { subLessonId }) => [
+        { type: 'LessonNote', id: subLessonId },
+        { type: 'LessonNote', id: 'MINE' },
+      ],
+    }),
+
+    // ---- Bookmark / Đã lưu ----
+    getBookmarks: builder.query<BookmarkItem[], BookmarkItemType | void>({
+      query: type => ({
+        url: '/bookmarks',
+        params: type ? { type } : undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'Bookmark', id: 'LIST' }],
+    }),
+    getBookmarkIds: builder.query<string[], BookmarkItemType | void>({
+      query: type => ({
+        url: '/bookmarks/ids',
+        params: type ? { type } : undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'Bookmark', id: 'IDS' }],
+    }),
+    toggleBookmark: builder.mutation<
+      { bookmarked: boolean },
+      { itemType: BookmarkItemType; itemId: string; lessonId?: string }
+    >({
+      query: body => ({ url: '/bookmarks/toggle', method: 'POST', body }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [
+        { type: 'Bookmark', id: 'LIST' },
+        { type: 'Bookmark', id: 'IDS' },
+      ],
+    }),
   }),
   overrideExisting: true,
 });
@@ -456,4 +561,12 @@ export const {
   useGetNotificationsQuery,
   useMarkNotificationReadMutation,
   useMarkAllNotificationsReadMutation,
+  useGetLessonNotesQuery,
+  useGetMyLessonNotesQuery,
+  useCreateLessonNoteMutation,
+  useUpdateLessonNoteMutation,
+  useDeleteLessonNoteMutation,
+  useGetBookmarksQuery,
+  useGetBookmarkIdsQuery,
+  useToggleBookmarkMutation,
 } = dashboardQuery;

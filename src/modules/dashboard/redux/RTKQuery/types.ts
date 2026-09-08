@@ -240,3 +240,40 @@ export interface NotificationListResponse {
   hasMore: boolean;
   total: number;
 }
+
+// ---- Ghi chú cá nhân theo mốc thời gian video ----
+export interface LessonNote {
+  _id: string;
+  userId: string;
+  // Khi lấy qua /lesson-notes/mine, subLessonId được populate thành object
+  // { _id, title, type }; khi lấy theo bài học thì vẫn là string id.
+  subLessonId: string | { _id: string; title: string; type: string };
+  lessonId?: string;
+  videoTimeSec: number;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LessonNoteListResponse {
+  items: LessonNote[];
+  totalRecords: number;
+  totalPages: number;
+  pageNum: number;
+  pageSize: number;
+}
+
+// ---- Bookmark / Đã lưu ----
+export type BookmarkItemType =
+  'sublesson' | 'library' | 'practiceTask' | 'lesson';
+
+export interface BookmarkItem {
+  _id: string;
+  itemType: BookmarkItemType;
+  itemId: string;
+  lessonId?: string;
+  title: string;
+  subject?: string;
+  link: string;
+  createdAt: string;
+}

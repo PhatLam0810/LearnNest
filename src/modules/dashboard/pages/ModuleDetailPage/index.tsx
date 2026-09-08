@@ -33,6 +33,8 @@ import LibraryDetailItem, {
 } from '~mdDashboard/components/LibraryDetailItem';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
 import CommentSection from '@components/CommentSection';
+import BookmarkButton from '@components/BookmarkButton';
+import LessonNotesPanel from '~mdDashboard/components/LessonNotesPanel';
 import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -105,6 +107,10 @@ const ModuleDetailPage = () => {
     },
   );
   const libraryRef = useRef<LibraryDetailItemHandle>(null);
+  // Danh sách id bài học đã "lưu" của user - để hiện đúng trạng thái nút
+  // Bookmark ngay khi mở bài mà không phải gọi lẻ từng bài.
+  const { data: bookmarkedSubIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('sublesson');
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
   const [, contextHolder] = Modal.useModal();
@@ -660,6 +666,15 @@ const ModuleDetailPage = () => {
                   </View>
                   {!taskId && selectedLibrary && (
                     <View style={styles.titleRowActions}>
+                      <BookmarkButton
+                        itemType="sublesson"
+                        itemId={selectedLibrary._id}
+                        lessonId={lessonDetail?._id}
+                        size={20}
+                        bookmarked={(bookmarkedSubIds || []).includes(
+                          selectedLibrary._id,
+                        )}
+                      />
                       <CommentSection
                         postId={selectedLibrary._id}
                         type={selectedLibrary.type}
@@ -675,6 +690,22 @@ const ModuleDetailPage = () => {
                 lessonId={lessonDetail?._id}
                 onWatchFinish={onWatchFinish}
                 onClickSubmit={handleSubmit}
+              />
+              <Tabs
+                style={styles.contentTabs}
+                items={[
+                  {
+                    key: 'my-notes',
+                    label: 'Ghi chú của tôi',
+                    children: (
+                      <LessonNotesPanel
+                        subLessonId={selectedLibrary._id}
+                        lessonId={lessonDetail?._id}
+                        isVideo={false}
+                      />
+                    ),
+                  },
+                ]}
               />
             </View>
           ) : (
@@ -699,6 +730,19 @@ const ModuleDetailPage = () => {
                       {selectedLibrary?.title}
                     </Text>
                   </View>
+                  {selectedLibrary && (
+                    <View style={styles.titleRowActions}>
+                      <BookmarkButton
+                        itemType="sublesson"
+                        itemId={selectedLibrary._id}
+                        lessonId={lessonDetail?._id}
+                        size={20}
+                        bookmarked={(bookmarkedSubIds || []).includes(
+                          selectedLibrary._id,
+                        )}
+                      />
+                    </View>
+                  )}
                 </View>
                 <Text style={styles.description}>
                   {selectedLibrary?.description}
@@ -718,6 +762,23 @@ const ModuleDetailPage = () => {
                           <Text style={styles.tabEmptyText}>
                             Bài học này chưa có ghi chú.
                           </Text>
+                        ),
+                      },
+                      {
+                        key: 'my-notes',
+                        label: 'Ghi chú của tôi',
+                        children: (
+                          <LessonNotesPanel
+                            subLessonId={selectedLibrary._id}
+                            lessonId={lessonDetail?._id}
+                            isVideo={['Youtube', 'Video', 'Short'].includes(
+                              selectedLibrary.type,
+                            )}
+                            getCurrentTimeSec={() =>
+                              libraryRef.current?.getCurrentTimeSec() ?? 0
+                            }
+                            onSeek={sec => libraryRef.current?.seekToSec(sec)}
+                          />
                         ),
                       },
                       {

@@ -17,6 +17,7 @@ import ReactPlayer from 'react-player';
 import { Library } from '~mdDashboard/types';
 import PdfLessonViewer from '~mdDashboard/components/PdfLessonViewer';
 import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
+import BookmarkButton from '@components/BookmarkButton';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { useAppSelector } from '@redux';
 import { useResponsive } from '@/styles/responsive';
@@ -131,6 +132,8 @@ const LibraryList = () => {
     (s: any) => s.authReducer?.tokenInfo?.userProfile,
   );
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
+  const { data: bookmarkedLibIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('library');
   // getAllLibrary (danh sách) cố tình bỏ questionList để bảng nhẹ hơn - bài
   // trắc nghiệm (type Text) phải gọi riêng lấy đủ câu hỏi khi mở xem trước,
   // nếu không form làm bài luôn trống dù DB có câu hỏi thật.
@@ -305,6 +308,15 @@ const LibraryList = () => {
                   <Text style={styles.rowDate}>
                     {formatDate(item.updatedAt)}
                   </Text>
+                </View>
+                <View
+                  style={styles.tableCell}
+                  onClick={(e: any) => e.stopPropagation()}>
+                  <BookmarkButton
+                    itemType="library"
+                    itemId={item._id}
+                    bookmarked={(bookmarkedLibIds || []).includes(item._id)}
+                  />
                 </View>
               </View>
             );

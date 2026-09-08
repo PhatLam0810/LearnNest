@@ -20,6 +20,8 @@ import Icon, {
   ControlOutlined,
   BookOutlined,
   BellOutlined,
+  FileTextOutlined,
+  StarOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -219,7 +221,20 @@ const HeaderLayout: React.FC = ({}) => {
             onClick: () => router.push('/dashboard/admin/'),
           },
         ]
-      : []),
+      : [
+          {
+            key: 'my-notes',
+            label: 'Ghi chú của tôi',
+            icon: <FileTextOutlined />,
+            onClick: () => router.push('/dashboard/my-notes'),
+          },
+          {
+            key: 'saved',
+            label: 'Đã lưu',
+            icon: <StarOutlined />,
+            onClick: () => router.push('/dashboard/saved'),
+          },
+        ]),
 
     {
       key: 'profile',
@@ -386,6 +401,26 @@ const HeaderLayout: React.FC = ({}) => {
                 router.push('/dashboard/my-courses');
               }}>
               Khóa học của tôi
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button
+              block
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/my-notes');
+              }}>
+              Ghi chú của tôi
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button
+              block
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/saved');
+              }}>
+              Đã lưu
             </Button>
           )}
           <Button

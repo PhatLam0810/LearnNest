@@ -1,0 +1,98 @@
+.my-notes-page {
+  padding: 24px;
+  max-width: 860px;
+}
+
+.my-notes-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.my-notes-heading {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.my-notes-sub {
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.my-notes-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.my-notes-group {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+}
+
+.my-notes-group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.my-notes-group-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.my-notes-open-link {
+  border: none;
+  background: none;
+  color: #1d418a;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.my-notes-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.my-notes-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px dashed #f0f0f0;
+}
+
+.my-notes-ts {
+  flex-shrink: 0;
+  color: #1d418a;
+  background: #f0f5ff;
+  border: 1px solid #d6e4ff;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.my-notes-content {
+  flex: 1;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #1c2536;
+}
+
+.my-notes-del {
+  color: #c0392b;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+}

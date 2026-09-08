@@ -43,6 +43,10 @@ type LibraryDetailItemProps = {
 };
 export interface LibraryDetailItemHandle {
   pauseAll: () => void;
+  // Vị trí video đang phát (giây) và tua tới 1 mốc - phục vụ ghi chú cá
+  // nhân theo mốc thời gian. Trả 0 khi không phải nội dung video.
+  getCurrentTimeSec: () => number;
+  seekToSec: (sec: number) => void;
 }
 
 // Tách riêng khỏi LibraryDetailItem để bấm chọn đáp án (selectedAnswer) chỉ
@@ -547,6 +551,34 @@ const LibraryDetailItem = forwardRef<
           }
         } catch (e) {}
       }
+    },
+    // Dùng cho tính năng "Ghi chú của tôi" theo mốc thời gian video: đọc vị
+    // trí đang phát để lưu, và tua tới mốc khi bấm vào 1 ghi chú. Tự chọn
+    // ref đang có (YouTube playerRef vs HTML5 videoRef).
+    getCurrentTimeSec: (): number => {
+      try {
+        if (playerRef.current?.getCurrentTime) {
+          return Math.floor(playerRef.current.getCurrentTime() || 0);
+        }
+        if (videoRef.current) {
+          return Math.floor(videoRef.current.currentTime || 0);
+        }
+      } catch (e) {}
+      return 0;
+    },
+    seekToSec: (sec: number): void => {
+      const target = Math.max(0, Math.floor(sec || 0));
+      try {
+        if (playerRef.current?.seekTo) {
+          playerRef.current.seekTo(target, true);
+          if (typeof playerRef.current.playVideo === 'function') {
+            playerRef.current.playVideo();
+          }
+        } else if (videoRef.current) {
+          videoRef.current.currentTime = target;
+          void videoRef.current.play?.();
+        }
+      } catch (e) {}
     },
   }));
 

@@ -15,6 +15,7 @@ import { SearchOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PracticeSubject } from '~mdDashboard/types/practice';
+import BookmarkButton from '@components/BookmarkButton';
 import './styles.scss';
 
 // Màu thanh tiến độ theo tỉ lệ đạt — khớp quy ước đỏ/vàng/xanh đã dùng ở
@@ -86,6 +87,8 @@ const PracticeListPage = () => {
   const { data: allTasks, isFetching: isLoadingTasks } =
     dashboardQuery.useGetPracticeTasksStudentQuery();
   const { data: weakSkills } = dashboardQuery.useGetMyWeakSkillsQuery();
+  const { data: bookmarkedTaskIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
   const { data: mockExams, isFetching: isLoadingExams } =
     dashboardQuery.useGetMockExamsQuery();
   const [startMockExam] = dashboardQuery.useStartMockExamMutation();
@@ -301,13 +304,24 @@ const PracticeListPage = () => {
                       onClick={() =>
                         router.push(`/dashboard/practice/${task._id}`)
                       }>
-                      <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
-                        {task.subject}
-                      </Tag>
-                      <Tag color={DIFFICULTY_TAG_COLOR[difficulty]}>
-                        {difficulty}
-                      </Tag>
-                      {task.hasPassed && <Tag color="success">Đạt</Tag>}
+                      <div className="practice-task-card-topbar">
+                        <Tag
+                          color={task.subject === 'Excel' ? 'green' : 'blue'}>
+                          {task.subject}
+                        </Tag>
+                        <Tag color={DIFFICULTY_TAG_COLOR[difficulty]}>
+                          {difficulty}
+                        </Tag>
+                        {task.hasPassed && <Tag color="success">Đạt</Tag>}
+                        <span style={{ flex: 1 }} />
+                        <BookmarkButton
+                          itemType="practiceTask"
+                          itemId={task._id}
+                          bookmarked={(bookmarkedTaskIds || []).includes(
+                            task._id,
+                          )}
+                        />
+                      </div>
                       <h3 className="practice-task-title">{task.title}</h3>
                       {task.description && (
                         <p className="practice-task-desc">{task.description}</p>

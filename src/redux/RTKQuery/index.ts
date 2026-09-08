@@ -37,6 +37,8 @@ export const baseQuery = createApi({
     'CourseRating',
     'Notification',
     'MockExam',
+    'LessonNote',
+    'Bookmark',
   ],
   endpoints: () => ({}),
 });
