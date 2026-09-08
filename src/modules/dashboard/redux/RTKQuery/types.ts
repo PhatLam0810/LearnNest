@@ -263,6 +263,41 @@ export interface LessonNoteListResponse {
   pageSize: number;
 }
 
+// ---- Cần làm lại (bài thực hành chưa đạt) ----
+export interface RetryQueueItem {
+  taskId: string;
+  title: string;
+  subject: 'Word' | 'Excel';
+  bestScore10: number;
+  attempts: number;
+  lastAttemptAt: string;
+  fromMockExam: boolean;
+}
+
+// ---- Hỏi đáp của tôi ----
+export interface MyQuestionItem {
+  _id: string;
+  postId: string;
+  type: string;
+  commentText: string;
+  images: string[];
+  createdAt: string;
+  isAnswered: boolean;
+  replyCount: number;
+  latestReplyPreview: string | null;
+  latestReplyAt: string | null;
+  contextTitle: string;
+  link: string;
+}
+
+export interface MyQuestionListResponse {
+  items: MyQuestionItem[];
+  totalRecords: number;
+  totalPages: number;
+  pageNum: number;
+  pageSize: number;
+}
+
 // ---- Bookmark / Đã lưu ----
 export type BookmarkItemType =
   'sublesson' | 'library' | 'practiceTask' | 'lesson';

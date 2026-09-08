@@ -39,6 +39,7 @@ const HomeOverview = () => {
     userId || '',
     { skip: !userId },
   );
+  const { data: retryQueue } = dashboardQuery.useGetMyRetryQueueQuery();
   const enrolledIds = useMemo(
     () => new Set(myCourses.map(c => c.lessonId)),
     [myCourses],
@@ -62,6 +63,19 @@ const HomeOverview = () => {
     <View style={containerStyle} aria-label="Home dashboard overview">
       <View style={styles.content}>
         <ContinueLearningBanner courses={myCourses} loading={loadingCourses} />
+
+        {!!retryQueue?.length && (
+          <View
+            style={styles.retryBanner}
+            onClick={() => router.push('/dashboard/practice')}
+            aria-label="Bài cần làm lại">
+            <Text style={styles.retryBannerText}>
+              Bạn có {retryQueue.length} bài thực hành chưa đạt — làm lại ngay
+              để mở khoá phần tiếp theo.
+            </Text>
+            <Text style={styles.retryBannerCta}>Xem danh sách →</Text>
+          </View>
+        )}
 
         <View style={statsRowStyle}>
           <StatCard

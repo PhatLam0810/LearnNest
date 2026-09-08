@@ -22,6 +22,7 @@ import Icon, {
   BellOutlined,
   FileTextOutlined,
   StarOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -234,6 +235,12 @@ const HeaderLayout: React.FC = ({}) => {
             icon: <StarOutlined />,
             onClick: () => router.push('/dashboard/saved'),
           },
+          {
+            key: 'my-qa',
+            label: 'Hỏi đáp của tôi',
+            icon: <QuestionCircleOutlined />,
+            onClick: () => router.push('/dashboard/my-qa'),
+          },
         ]),
 
     {
@@ -421,6 +428,16 @@ const HeaderLayout: React.FC = ({}) => {
                 router.push('/dashboard/saved');
               }}>
               Đã lưu
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button
+              block
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/my-qa');
+              }}>
+              Hỏi đáp của tôi
             </Button>
           )}
           <Button

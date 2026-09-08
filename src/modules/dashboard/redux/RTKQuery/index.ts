@@ -13,9 +13,11 @@ import {
   LessonRecommendRes,
   LibraryType,
   MyOverview,
+  MyQuestionListResponse,
   MyResultsParams,
   MyResultsResponse,
   NotificationListResponse,
+  RetryQueueItem,
   PassRateReport,
   QuizResultAdminItem,
   RecentTestResult,
@@ -530,6 +532,27 @@ export const dashboardQuery = baseQuery.injectEndpoints({
         { type: 'Bookmark', id: 'IDS' },
       ],
     }),
+
+    // ---- Cần làm lại (bài thực hành chưa đạt) ----
+    getMyRetryQueue: builder.query<RetryQueueItem[], void>({
+      query: () => '/practice/my-retry-queue',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
+    // ---- Hỏi đáp của tôi ----
+    getMyQuestions: builder.query<
+      MyQuestionListResponse,
+      { pageNum?: number; pageSize?: number } | void
+    >({
+      query: params => {
+        const p = params || {};
+        return {
+          url: '/comments/mine',
+          params: { pageNum: p.pageNum || 1, pageSize: p.pageSize || 30 },
+        };
+      },
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
   }),
   overrideExisting: true,
 });
@@ -569,4 +592,6 @@ export const {
   useGetBookmarksQuery,
   useGetBookmarkIdsQuery,
   useToggleBookmarkMutation,
+  useGetMyRetryQueueQuery,
+  useGetMyQuestionsQuery,
 } = dashboardQuery;

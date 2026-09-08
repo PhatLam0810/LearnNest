@@ -54,6 +54,61 @@
   margin-bottom: 4px;
 }
 
+.practice-retry-card {
+  border: 1px solid #ffe0b2;
+  background: #fff8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+
+.practice-retry-title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #b26a00;
+}
+
+.practice-retry-desc {
+  margin: 0 0 12px;
+  color: #7a6a58;
+  font-size: 13px;
+}
+
+.practice-retry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.practice-retry-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid #f0e2d0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.practice-retry-row:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+}
+
+.practice-retry-row-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.practice-retry-row-meta {
+  margin-left: auto;
+  font-size: 12px;
+  color: #9a8b78;
+}
+
 .practice-task-title {
   margin: 8px 0 4px;
   font-size: 16px;

@@ -87,6 +87,7 @@ const PracticeListPage = () => {
   const { data: allTasks, isFetching: isLoadingTasks } =
     dashboardQuery.useGetPracticeTasksStudentQuery();
   const { data: weakSkills } = dashboardQuery.useGetMyWeakSkillsQuery();
+  const { data: retryQueue } = dashboardQuery.useGetMyRetryQueueQuery();
   const { data: bookmarkedTaskIds } =
     dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
   const { data: mockExams, isFetching: isLoadingExams } =
@@ -144,6 +145,39 @@ const PracticeListPage = () => {
         thống tự động chấm điểm và hướng dẫn sửa lỗi. Bạn có thể nộp lại bao
         nhiêu lần tuỳ ý.
       </p>
+
+      {!!retryQueue?.length && (
+        <div className="practice-retry-card">
+          <h2 className="practice-retry-title">
+            Cần làm lại ({retryQueue.length})
+          </h2>
+          <p className="practice-retry-desc">
+            Những bài bạn đã nộp nhưng chưa đạt — làm lại để mở khoá nội dung
+            tiếp theo và cải thiện điểm.
+          </p>
+          <div className="practice-retry-list">
+            {retryQueue.map(item => (
+              <div
+                key={item.taskId}
+                className="practice-retry-row"
+                role="button"
+                tabIndex={0}
+                onClick={() =>
+                  router.push(`/dashboard/practice/${item.taskId}`)
+                }>
+                <Tag color={item.subject === 'Excel' ? 'green' : 'blue'}>
+                  {item.subject}
+                </Tag>
+                <span className="practice-retry-row-title">{item.title}</span>
+                {item.fromMockExam && <Tag color="purple">Từ đề thi thử</Tag>}
+                <span className="practice-retry-row-meta">
+                  Điểm tốt nhất {item.bestScore10}/10 · {item.attempts} lần thử
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {!!weakSkills?.length && (
         <div className="practice-weak-skills-card">
