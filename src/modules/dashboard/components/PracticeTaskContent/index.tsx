@@ -17,6 +17,7 @@ import {
   PracticeSubmissionResultItem,
 } from '~mdDashboard/types/practice';
 import CommentSection from '@components/CommentSection';
+import BookmarkButton from '@components/BookmarkButton';
 import './styles.scss';
 
 type Props = {
@@ -74,6 +75,14 @@ const PracticeTaskContent: React.FC<Props> = ({
     dashboardQuery.useGetPracticeTaskInstructionsQuery(taskId, {
       skip: !taskId,
     });
+  // Bug thật đã gặp: nút "Lưu" bài thực hành chỉ có ở thẻ trong danh sách
+  // (PracticeListPage) - lúc ĐANG LÀM bài (component này, dùng chung cho cả
+  // trang đứng riêng /dashboard/practice/[id], khóa thực hành, và bài thực
+  // hành trong 1 khóa video) lại không có, nên mở bài từ khóa học/làm bài
+  // xong không có chỗ bấm lưu. Thêm ở đây 1 lần, tự động có mặt ở MỌI nơi
+  // dùng lại component này.
+  const { data: bookmarkedTaskIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
 
   // Đổi bài tập (taskId khác) thì phải xoá kết quả lần nộp trước đi, không
   // thì kết quả bài cũ sẽ hiện nhầm lên bài mới vừa chọn.
@@ -182,6 +191,14 @@ const PracticeTaskContent: React.FC<Props> = ({
     <div className="practice-content">
       <div className="practice-content-header">
         <h1>{task.title}</h1>
+        {!isMockExam && (
+          <BookmarkButton
+            itemType="practiceTask"
+            itemId={taskId}
+            bookmarked={(bookmarkedTaskIds || []).includes(taskId)}
+            size={22}
+          />
+        )}
       </div>
 
       <div className="practice-content-requirements">
