@@ -18,6 +18,8 @@ import MessageProvider from '@components/MessageProvider';
 import PageViewTracker from '@components/PageViewTracker';
 import styles from './layoutStyles';
 import { Analytics } from '@vercel/analytics/next';
+import { ConfigProvider } from 'antd';
+import viVN from 'antd/locale/vi_VN';
 
 const queryClient = new QueryClient();
 
@@ -37,19 +39,26 @@ export default function RootLayoutClient({
 
   return (
     <>
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <PersistGate persistor={persistor}>
-            <MessageProvider />
-            <PageViewTracker />
-            <View style={styles.appShell}>{children}</View>
-            <AiAdvisorWidget />
-            {showFooter && <Footer />}
-            <Authentication />
-            <LoadingScreen />
-          </PersistGate>
-        </QueryClientProvider>
-      </Provider>
+      {/* locale={viVN}: antd trước đây không set locale nào - mọi text mặc
+          định của antd (nút OK/Cancel trong Modal không tự đặt okText/
+          cancelText, chữ "No data" khi bảng rỗng, phân trang "X-Y of Z",
+          v.v.) hiện tiếng Anh xen giữa 1 app hoàn toàn tiếng Việt. Set 1
+          lần ở gốc để sửa toàn bộ, thay vì vá từng chỗ lẻ tẻ. */}
+      <ConfigProvider locale={viVN}>
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <PersistGate persistor={persistor}>
+              <MessageProvider />
+              <PageViewTracker />
+              <View style={styles.appShell}>{children}</View>
+              <AiAdvisorWidget />
+              {showFooter && <Footer />}
+              <Authentication />
+              <LoadingScreen />
+            </PersistGate>
+          </QueryClientProvider>
+        </Provider>
+      </ConfigProvider>
       <Analytics />
     </>
   );
