@@ -62,7 +62,7 @@ const UserManage = () => {
       await sendEmails(payload).unwrap();
       refresh();
       setIsModalCreateUserOpen(false);
-      messageApi.success('Tạo user thành công thành công');
+      messageApi.success('Tạo user thành công');
     } catch (error) {
       messageApi.error(error?.data?.message);
     }
