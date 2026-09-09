@@ -6,6 +6,14 @@
   // Scope trong class riêng của trang này (bài học từ lỗi
   // .ant-card-body { padding:0 !important } trước đó lỡ set toàn cục) chứ
   // không đụng tới các bảng antd khác trong dự án.
+  //
+  // Bị mất ở commit 9450750 (gộp chung với 1 sửa không liên quan về thảo
+  // luận thi thử) - khôi phục lại.
+  .ant-table-column-sort,
+  th.ant-table-column-sort,
+  td.ant-table-column-sort {
+    background: transparent !important;
+  }
 }
 
 .pass-rate-report-summary-row {
