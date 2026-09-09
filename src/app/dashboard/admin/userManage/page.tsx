@@ -272,9 +272,16 @@ const UserManage = () => {
             key="delete"
             danger
             type="primary"
-            onClick={async () => {
-              await handleDeleteUser(infoUser._id);
+            onClick={() => {
+              // Đóng modal TRƯỚC khi refresh() làm Table render lại toàn
+              // bộ - trước đây đóng modal SAU khi await xong (đóng + Table
+              // render lại cùng lúc) khiến modal antd kẹt lại vĩnh viễn,
+              // vẫn hiện thông tin người dùng ĐÃ XÓA (dù xóa+refresh vẫn
+              // chạy đúng ở backend) - xác nhận qua test trực tiếp nhiều
+              // lần. Tách 2 việc ra để không còn đụng độ.
+              const userId = infoUser._id;
               setModalDeleteUser(false);
+              handleDeleteUser(userId);
             }}>
             Xóa tài khoản
           </Button>,
