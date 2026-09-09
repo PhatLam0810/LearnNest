@@ -22,7 +22,7 @@ import { authQuery } from '~mdAuth/redux/RTKQuery';
 import TrafficChart from './components/TrafficChart';
 import StatCard from '../../home/_components/StatCard';
 const UserManage = () => {
-  const { listItem, currentData, refresh, search, fetchData } =
+  const { listItem, setListItem, currentData, refresh, search, fetchData } =
     useAppPagination<UserItem>({
       apiUrl: 'user/getListUser',
     });
@@ -43,7 +43,12 @@ const UserManage = () => {
         Userid: _id,
       });
       messageApi.success('Xóa tài khoản thành công');
-      refresh();
+      // Trước đây gọi refresh() (xoá sạch listItem rồi fetch lại trang 1) -
+      // với danh sách thật nhiều dòng, khoảng thời gian "rỗng rồi fetch lại"
+      // khiến cả bảng + biểu đồ render lại 2 lần liên tiếp, tạo cảm giác
+      // trang bị đứng khựng vài giây sau mỗi lần xoá. Chỉ cần bỏ đúng 1
+      // dòng vừa xoá khỏi state hiện có - khỏi phải fetch lại cả trang.
+      setListItem(prev => prev.filter(u => u._id !== _id));
     } catch (error) {
       messageApi.error('Xóa tài khoản thất bại');
     }
