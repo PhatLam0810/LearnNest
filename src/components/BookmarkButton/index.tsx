@@ -1,10 +1,25 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Tooltip } from 'antd';
-import { StarFilled, StarOutlined } from '@ant-design/icons';
 import { messageApi } from '@hooks';
 import { useToggleBookmarkMutation } from '~mdDashboard/redux';
 import type { BookmarkItemType } from '~mdDashboard/redux/RTKQuery/types';
+
+// @ant-design/icons không có icon bookmark (icon lưu) dạng ruy băng thật sự,
+// nên dùng SVG tự vẽ hình bookmark cho đúng ý nghĩa "lưu bài" thay vì icon ngôi sao.
+const BookmarkIcon: React.FC<{ filled: boolean }> = ({ filled }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="1em"
+    height="1em"
+    fill={filled ? 'currentColor' : 'none'}
+    stroke="currentColor"
+    strokeWidth={filled ? 0 : 2}
+    strokeLinejoin="round"
+    strokeLinecap="round">
+    <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.2L5 21V4.5a1 1 0 0 1 1-1z" />
+  </svg>
+);
 
 interface BookmarkButtonProps {
   itemType: BookmarkItemType;
@@ -63,11 +78,11 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
           alignItems: 'center',
           gap: 6,
           cursor: isLoading ? 'wait' : 'pointer',
-          color: saved ? '#f5a623' : '#9aa5b8',
+          color: saved ? '#1677ff' : '#9aa5b8',
           fontSize: size,
           lineHeight: 1,
         }}>
-        {saved ? <StarFilled /> : <StarOutlined />}
+        <BookmarkIcon filled={saved} />
         {withLabel && (
           <span style={{ fontSize: 13, fontWeight: 500 }}>
             {saved ? 'Đã lưu' : 'Lưu'}
