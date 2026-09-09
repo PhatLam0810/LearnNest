@@ -111,7 +111,27 @@ export default function DashboardLayout({
                 icon: <RocketOutlined />,
               },
             ]
-          : []),
+          : [
+              // Sidebar desktop trước đây KHÔNG có link nào vào trang admin
+              // (/dashboard/admin) - admin chỉ vào được bằng cách gõ thẳng
+              // URL, hoặc qua drawer mobile (chỉ có 2 nút lẻ, thiếu hẳn các
+              // tab Nhật Ký Thao Tác/Báo Cáo Vi Phạm/Hộp Thư Hỏi Đáp/Báo Cáo
+              // Ngưỡng Đạt/Đề Thi Thử...). Thêm 1 link thẳng vào trang admin
+              // đầy đủ (đã có tab điều hướng riêng bên trong).
+              {
+                key: '/dashboard/admin',
+                label: 'Quản Trị',
+                icon: (
+                  <ControlOutlined
+                    style={{
+                      color: pathname.startsWith('/dashboard/admin')
+                        ? 'white'
+                        : 'black',
+                    }}
+                  />
+                ),
+              },
+            ]),
       ],
     },
   ];
