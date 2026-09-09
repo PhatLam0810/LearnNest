@@ -39,6 +39,9 @@ export interface UserProfile {
   avatar?: string;
   studyReminderEnabled?: boolean;
   disabledNotificationTypes?: string[];
+  // false = tài khoản tạo qua Google Sign-In, chưa từng đặt mật khẩu -
+  // trang hồ sơ dùng để hiện "Đặt mật khẩu" thay vì "Đổi mật khẩu".
+  hasPassword?: boolean;
   role: {
     level: number;
     name: string;

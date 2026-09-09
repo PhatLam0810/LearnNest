@@ -14,6 +14,10 @@ const ChangePassword = () => {
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [form] = Form.useForm();
   const [changePassword] = authQuery.useChangePasswordMutation();
+  // Tài khoản tạo qua Google Sign-In (hasPassword=false) chưa từng có mật
+  // khẩu - không thể đòi nhập "mật khẩu hiện tại" (không có gì để so
+  // khớp). Ẩn field đó + đổi nhãn thành "Đặt mật khẩu" cho nhóm này.
+  const hasPassword = userProfile?.hasPassword !== false;
 
   const handleChangePassword = async (value: any) => {
     try {
@@ -36,27 +40,33 @@ const ChangePassword = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Đổi mật khẩu</Text>
+      <Text style={styles.title}>
+        {hasPassword ? 'Đổi mật khẩu' : 'Đặt mật khẩu'}
+      </Text>
       <Text style={styles.hint}>
-        Mật khẩu mới cần ít nhất 8 ký tự, gồm chữ và số.
+        {hasPassword
+          ? 'Mật khẩu mới cần ít nhất 8 ký tự, gồm chữ và số.'
+          : 'Tài khoản của bạn đang đăng nhập bằng Google, chưa có mật khẩu. Đặt mật khẩu để có thêm cách đăng nhập bằng email.'}
       </Text>
       <Form
         form={form}
         style={styles.formContainer}
         initialValues={userProfile}
         onFinish={values => handleChangePassword(values)}>
-        <Form.Item
-          label={<Text style={styles.labelText}>Mật khẩu hiện tại</Text>}
-          name="password"
-          labelCol={{ span: 24 }}
-          style={styles.fullField}
-          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ' }]}>
-          <AppInput
-            type="Password"
-            placeholder="Nhập mật khẩu hiện tại"
-            style={{ width: '100%' }}
-          />
-        </Form.Item>
+        {hasPassword && (
+          <Form.Item
+            label={<Text style={styles.labelText}>Mật khẩu hiện tại</Text>}
+            name="password"
+            labelCol={{ span: 24 }}
+            style={styles.fullField}
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ' }]}>
+            <AppInput
+              type="Password"
+              placeholder="Nhập mật khẩu hiện tại"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+        )}
         <View style={styles.fieldGrid}>
           <Form.Item
             label={<Text style={styles.labelText}>Mật khẩu mới</Text>}
@@ -96,7 +106,7 @@ const ChangePassword = () => {
         </View>
         <View style={styles.actionsRow}>
           <AppButton htmlType="submit" style={styles.saveButton}>
-            Cập nhật mật khẩu
+            {hasPassword ? 'Cập nhật mật khẩu' : 'Đặt mật khẩu'}
           </AppButton>
         </View>
       </Form>
