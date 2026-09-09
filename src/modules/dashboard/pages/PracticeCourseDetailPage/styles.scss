@@ -115,6 +115,13 @@
   }
 }
 
+.practice-course-task-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .practice-course-task-item--active {
   background: var(--color-vhu-primary, #002766);
   color: #fff;

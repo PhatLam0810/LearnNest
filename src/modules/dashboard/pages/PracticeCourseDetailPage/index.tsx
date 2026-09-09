@@ -5,6 +5,7 @@ import { Button, Collapse, Empty, Spin, Tag } from 'antd';
 import { CaretRightOutlined, LeftOutlined } from '@ant-design/icons';
 import { dashboardQuery } from '~mdDashboard/redux';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
+import BookmarkButton from '@components/BookmarkButton';
 import { PracticeTask } from '~mdDashboard/types/practice';
 import './styles.scss';
 
@@ -24,6 +25,12 @@ const PracticeCourseDetailPage: React.FC<Props> = ({ lessonId }) => {
       { lessonId },
       { skip: !lessonId },
     );
+  // Sidebar liệt kê bài tập của khóa thực hành - trước đây chỉ bài ĐANG MỞ
+  // (trong PracticeTaskContent bên trái) mới có nút lưu, các bài còn lại
+  // trong danh sách không lưu được nếu chưa bấm vào. Suy trạng thái đã lưu
+  // 1 lần cho cả sidebar, đúng pattern LessonDetailPage.
+  const { data: bookmarkedTaskIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
 
   const tasksByModule = useMemo(() => {
     const map: Record<string, PracticeTask[]> = {};
@@ -117,9 +124,17 @@ const PracticeCourseDetailPage: React.FC<Props> = ({ lessonId }) => {
                   tabIndex={0}
                   onClick={() => setSelectedTaskId(task._id)}>
                   <span>{task.title}</span>
-                  <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
-                    {task.subject}
-                  </Tag>
+                  <div className="practice-course-task-item-actions">
+                    <Tag color={task.subject === 'Excel' ? 'green' : 'blue'}>
+                      {task.subject}
+                    </Tag>
+                    <BookmarkButton
+                      itemType="practiceTask"
+                      itemId={task._id}
+                      bookmarked={(bookmarkedTaskIds || []).includes(task._id)}
+                      size={16}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
