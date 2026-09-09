@@ -265,6 +265,12 @@ const styles = StyleSheet.create({
     gap: 10,
     width: '100%',
   },
+  rowActionsGap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexShrink: 0,
+  },
   paddingBottom10: {
     paddingBottom: 10,
   },

@@ -13,6 +13,7 @@ import './styles.scss';
 import { useRouter } from 'next/navigation';
 import Icon from '@components/icons';
 import CommentCountBadge from '@components/CommentCountBadge';
+import BookmarkButton from '@components/BookmarkButton';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { LessonItem, LessonThumbnail } from '~mdDashboard/components';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
@@ -63,6 +64,15 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     id || '',
     { skip: !id },
   );
+  // Trạng thái "đã lưu" cho từng bài học/bài thực hành trong "Nội dung khóa
+  // học" - trước đây danh sách này không hiện nút lưu, học viên phải mở
+  // hẳn từng bài mới lưu được. Suy trạng thái ban đầu 1 lần cho cả trang,
+  // BookmarkButton tự giữ state optimistic sau đó (đúng pattern đã dùng ở
+  // ModuleDetailPage/PracticeTaskContent).
+  const { data: bookmarkedSubIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('sublesson');
+  const { data: bookmarkedTaskIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [triggerAccessLesson] = dashboardQuery.useAccessLessonMutation();
   const [checkRegistrationLesson] =
@@ -403,6 +413,14 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                               <CommentCountBadge postId={task._id} />
                             </View>
                           </View>
+                          <BookmarkButton
+                            itemType="practiceTask"
+                            itemId={task._id}
+                            bookmarked={(bookmarkedTaskIds || []).includes(
+                              task._id,
+                            )}
+                            size={18}
+                          />
                         </View>
                       </div>
                     </TouchableOpacity>
@@ -442,19 +460,30 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
                             <CommentCountBadge postId={subItem._id} />
                           </View>
                         </View>
-                        {userProfile?.role?.level <= 2 &&
-                          subItem.type !== 'Text' && (
-                            <AppVideoWatchersButton
-                              subLessonId={subItem._id}
-                              subLessonTitle={subItem.title}
-                              onClick={e => {
-                                e.stopPropagation();
-                                setSelectedSubLessonId(subItem._id);
-                                setSelectedSubLessonTitle(subItem.title);
-                                setWatcherModalVisible(true);
-                              }}
-                            />
-                          )}
+                        <View style={styles.rowActionsGap}>
+                          <BookmarkButton
+                            itemType="sublesson"
+                            itemId={subItem._id}
+                            lessonId={lessonDetail?._id}
+                            bookmarked={(bookmarkedSubIds || []).includes(
+                              subItem._id,
+                            )}
+                            size={18}
+                          />
+                          {userProfile?.role?.level <= 2 &&
+                            subItem.type !== 'Text' && (
+                              <AppVideoWatchersButton
+                                subLessonId={subItem._id}
+                                subLessonTitle={subItem.title}
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setSelectedSubLessonId(subItem._id);
+                                  setSelectedSubLessonTitle(subItem.title);
+                                  setWatcherModalVisible(true);
+                                }}
+                              />
+                            )}
+                        </View>
                       </View>
                     </TouchableOpacity>
                   </TouchableOpacity>
