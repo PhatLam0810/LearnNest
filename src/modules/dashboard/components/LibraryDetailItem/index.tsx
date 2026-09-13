@@ -40,6 +40,10 @@ type LibraryDetailItemProps = {
   onWatchFinish?: () => void;
   onPauseVideo?: () => void;
   onClickSubmit?: (answerList: any) => void;
+  // Id các câu hỏi giữa video (data.questionList) mà user ĐÃ TỪNG trả lời
+  // đúng ở lần xem trước (từ VideoTracking, xem ModuleDetailPage) - seed
+  // sẵn vào shownQuestionIds để không hiện lại đúng câu này nữa.
+  answeredQuestionIds?: string[];
 };
 export interface LibraryDetailItemHandle {
   pauseAll: () => void;
@@ -143,403 +147,636 @@ const QuestionModal: React.FC<QuestionModalProps> = ({
 const LibraryDetailItem = forwardRef<
   LibraryDetailItemHandle,
   LibraryDetailItemProps
->(({ data, dataQuestion, lessonId, onWatchFinish, onClickSubmit }, ref) => {
-  const playerRef = useRef<any>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const correctingSkipRef = useRef(false);
-  // While the anti-skip warning modal is open, suppress the quiz-question
-  // modal so the two don't stack on top of each other.
-  const warningModalOpenRef = useRef(false);
-  // Timestamp (ms) until which forward-seeking is blocked entirely. Seeking
-  // ahead up to SEEK_ALLOWANCE_SECONDS is a one-shot allowance — using it at
-  // all starts this cooldown, during which even a small forward seek is
-  // blocked (must watch through in real time until it expires).
-  const skipCooldownUntilRef = useRef(0);
-  // lastPlayed/maxWatched KHÔNG render ra UI gì (chỉ dùng nội bộ cho logic
-  // chống tua trong interval bên dưới) — trước đây là useState, khiến toàn
-  // bộ component re-render + effect chứa interval bị teardown/tạo lại MỚI
-  // MỖI GIÂY (vì chính 2 state này nằm trong dependency array và bị chính
-  // interval đó cập nhật mỗi tick) — đo được ~12 lần tạo lại interval/6s
-  // (đáng lẽ 1 lần). Đổi hẳn sang ref vì không có gì đọc giá trị "render"
-  // của chúng — chỉ cần luôn mới nhất tại thời điểm interval tick, ref đã
-  // đủ và không kéo theo re-render nào.
-  const lastPlayedRef = useRef(0);
-  const maxWatchedGuardRef = useRef(0);
-  const setGuardedMaxWatched = (value: number | ((prev: number) => number)) => {
-    const next =
-      typeof value === 'function'
-        ? (value as (prev: number) => number)(maxWatchedGuardRef.current)
-        : value;
-    maxWatchedGuardRef.current = next;
-  };
-  const setGuardedLastPlayed = (value: number) => {
-    lastPlayedRef.current = value;
-  };
-  const [visibleQuestion, setVisibleQuestion] = useState<any>(null);
-  const [shownQuestionIds, setShownQuestionIds] = useState<string[]>([]);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, any>>(
-    {},
-  );
-  const [invalidQuestions, setInvalidQuestions] = useState<string[]>([]);
-  const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
-  // Bài trắc nghiệm hiện theo TỪNG CÂU một (không cuộn hết 1 lần) - đúng
-  // theo design. currentQuestionIndex là vị trí đang xem; flaggedQuestionIds
-  // chỉ để tô sáng nút "Đánh dấu xem lại" - không có màn tổng hợp riêng nên
-  // chỉ là trạng thái hiển thị cục bộ, không gửi lên server.
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<string[]>([]);
-  const [modal, contextHolder] = Modal.useModal();
-  const [pendingSeek, setPendingSeek] = useState<number | null>(null);
-  const [resumeInfo, setResumeInfo] = useState<any>(null);
-  const [isConfirmingResume, setIsConfirmingResume] = useState(false);
-  const [isSwitchingContext, setIsSwitchingContext] = useState(false);
-  const activeModalRef = useRef<any>(null);
-
-  const userProfile = useAppSelector(
-    (state: any) => state.authReducer?.tokenInfo?.userProfile,
-  );
-  const userId = userProfile?._id;
-  const isAdmin = userProfile?.role?.level <= 2;
-  const [checkAnswer] = dashboardQuery.useCheckAnswerMutation();
-  const { isMobile } = useResponsive();
-
-  const {
-    currentData: progressRes,
-    isFetching,
-    isLoading,
-  } = useGetLessonProgressQuery(
+>(
+  (
     {
-      userId: userId ?? '',
-      subLessonId: data?._id ?? '',
-      lessonId: lessonId,
+      data,
+      dataQuestion,
+      lessonId,
+      onWatchFinish,
+      onClickSubmit,
+      answeredQuestionIds,
     },
-    {
-      skip:
-        !userId ||
-        !data?._id ||
-        (data.type !== 'Video' && data.type !== 'Youtube'),
-      refetchOnMountOrArgChange: true,
-    },
-  );
-
-  const useVideoTracking = (subLessonId: string, lessonId?: string) => {
-    const [isTracking, setIsTracking] = useState(false);
-    const trackingIntervalRef = useRef<any | null>(null);
-    const lastSentAtRef = useRef<number>(0);
-    const lastSentPositionRef = useRef<number>(0);
-    const lastPositionRef = useRef<number>(0);
-    const maxWatchedRef = useRef<number>(0);
-    const totalWatchedTimeRef = useRef<number>(0);
-    const lastPlayStateRef = useRef<'playing' | 'paused'>('paused');
-    const videoPlayingRef = useRef<boolean>(false);
-
-    const flushTracking = async (opts?: {
-      force?: boolean;
-      currentTime?: number;
-      duration?: number;
-      watchedSeconds?: number;
-      progress?: number;
-      completed?: boolean;
-    }) => {
-      try {
-        if (!subLessonId || !userId) return;
-        const now = Date.now();
-
-        if (
-          !opts?.force &&
-          (now - lastSentAtRef.current < 5000 || !videoPlayingRef.current)
-        ) {
-          return;
-        }
-
-        const currentPos = opts?.currentTime || 0;
-        const duration = opts?.duration || 0;
-        const watchedSeconds =
-          opts?.watchedSeconds || Math.max(maxWatchedRef.current, currentPos);
-        let progress = opts?.progress;
-        if (progress === undefined) {
-          progress =
-            duration > 0 ? Math.round((watchedSeconds / duration) * 100) : 0;
-        } else {
-          progress = Math.round(progress);
-        }
-        const completed = opts?.completed || progress >= 95;
-
-        const payload: any = {
-          userId,
-          subLessonId,
-          progress,
-          duration,
-          completed,
-          watchedSeconds: Math.floor(watchedSeconds),
-          currentTime: Math.floor(currentPos),
-          lastPosition: Math.floor(currentPos),
-          totalWatchedTime: Math.floor(totalWatchedTimeRef.current || 0),
-        };
-
-        if (lessonId) {
-          payload.lessonId = lessonId;
-        }
-
-        await api.post('/lesson/video/track', payload, { timeout: 4000 });
-        lastSentAtRef.current = now;
-
-        const delta = Math.max(
-          0,
-          Math.floor(currentPos - (lastPositionRef.current || 0)),
-        );
-        totalWatchedTimeRef.current =
-          Math.max(totalWatchedTimeRef.current, watchedSeconds) + delta;
-        lastPositionRef.current = currentPos;
-        maxWatchedRef.current = Math.max(maxWatchedRef.current, currentPos);
-
-        return payload;
-      } catch (error) {
-        console.error('Error in flushTracking:', error);
-        return null;
-      }
+    ref,
+  ) => {
+    const playerRef = useRef<any>(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const correctingSkipRef = useRef(false);
+    // While the anti-skip warning modal is open, suppress the quiz-question
+    // modal so the two don't stack on top of each other.
+    const warningModalOpenRef = useRef(false);
+    // Timestamp (ms) until which forward-seeking is blocked entirely. Seeking
+    // ahead up to SEEK_ALLOWANCE_SECONDS is a one-shot allowance — using it at
+    // all starts this cooldown, during which even a small forward seek is
+    // blocked (must watch through in real time until it expires).
+    const skipCooldownUntilRef = useRef(0);
+    // lastPlayed/maxWatched KHÔNG render ra UI gì (chỉ dùng nội bộ cho logic
+    // chống tua trong interval bên dưới) — trước đây là useState, khiến toàn
+    // bộ component re-render + effect chứa interval bị teardown/tạo lại MỚI
+    // MỖI GIÂY (vì chính 2 state này nằm trong dependency array và bị chính
+    // interval đó cập nhật mỗi tick) — đo được ~12 lần tạo lại interval/6s
+    // (đáng lẽ 1 lần). Đổi hẳn sang ref vì không có gì đọc giá trị "render"
+    // của chúng — chỉ cần luôn mới nhất tại thời điểm interval tick, ref đã
+    // đủ và không kéo theo re-render nào.
+    const lastPlayedRef = useRef(0);
+    const maxWatchedGuardRef = useRef(0);
+    const setGuardedMaxWatched = (
+      value: number | ((prev: number) => number),
+    ) => {
+      const next =
+        typeof value === 'function'
+          ? (value as (prev: number) => number)(maxWatchedGuardRef.current)
+          : value;
+      maxWatchedGuardRef.current = next;
     };
+    const setGuardedLastPlayed = (value: number) => {
+      lastPlayedRef.current = value;
+    };
+    const [visibleQuestion, setVisibleQuestion] = useState<any>(null);
+    const [shownQuestionIds, setShownQuestionIds] = useState<string[]>([]);
+    // answeredQuestionIds tới từ 1 query riêng (useGetLessonProgressQuery ở
+    // ModuleDetailPage) nên thường resolve SAU lần render đầu - merge vào
+    // shownQuestionIds ngay khi có, để những câu đã trả lời đúng ở lần xem
+    // trước không hiện lại (coi như "đã hiện" y hệt câu vừa trả lời đúng
+    // trong phiên này).
+    useEffect(() => {
+      if (!answeredQuestionIds?.length) return;
+      setShownQuestionIds(prev =>
+        Array.from(new Set([...prev, ...answeredQuestionIds])),
+      );
+    }, [answeredQuestionIds]);
+    const [selectedAnswers, setSelectedAnswers] = useState<Record<string, any>>(
+      {},
+    );
+    const [invalidQuestions, setInvalidQuestions] = useState<string[]>([]);
+    const [shuffledQuestions, setShuffledQuestions] = useState<any[]>([]);
+    // Bài trắc nghiệm hiện theo TỪNG CÂU một (không cuộn hết 1 lần) - đúng
+    // theo design. currentQuestionIndex là vị trí đang xem; flaggedQuestionIds
+    // chỉ để tô sáng nút "Đánh dấu xem lại" - không có màn tổng hợp riêng nên
+    // chỉ là trạng thái hiển thị cục bộ, không gửi lên server.
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [flaggedQuestionIds, setFlaggedQuestionIds] = useState<string[]>([]);
+    const [modal, contextHolder] = Modal.useModal();
+    const [pendingSeek, setPendingSeek] = useState<number | null>(null);
+    const [resumeInfo, setResumeInfo] = useState<any>(null);
+    const [isConfirmingResume, setIsConfirmingResume] = useState(false);
+    const [isSwitchingContext, setIsSwitchingContext] = useState(false);
+    const activeModalRef = useRef<any>(null);
 
-    const startPeriodicTracking = () => {
-      if (trackingIntervalRef.current != null) return;
-      trackingIntervalRef.current = setInterval(() => {
-        if (videoPlayingRef.current) {
-          flushTracking({ force: true });
+    const userProfile = useAppSelector(
+      (state: any) => state.authReducer?.tokenInfo?.userProfile,
+    );
+    const userId = userProfile?._id;
+    const isAdmin = userProfile?.role?.level <= 2;
+    const [checkAnswer] = dashboardQuery.useCheckAnswerMutation();
+    const { isMobile } = useResponsive();
+
+    const {
+      currentData: progressRes,
+      isFetching,
+      isLoading,
+    } = useGetLessonProgressQuery(
+      {
+        userId: userId ?? '',
+        subLessonId: data?._id ?? '',
+        lessonId: lessonId,
+      },
+      {
+        skip:
+          !userId ||
+          !data?._id ||
+          (data.type !== 'Video' && data.type !== 'Youtube'),
+        refetchOnMountOrArgChange: true,
+      },
+    );
+
+    const useVideoTracking = (subLessonId: string, lessonId?: string) => {
+      const [isTracking, setIsTracking] = useState(false);
+      const trackingIntervalRef = useRef<any | null>(null);
+      const lastSentAtRef = useRef<number>(0);
+      const lastSentPositionRef = useRef<number>(0);
+      const lastPositionRef = useRef<number>(0);
+      const maxWatchedRef = useRef<number>(0);
+      const totalWatchedTimeRef = useRef<number>(0);
+      const lastPlayStateRef = useRef<'playing' | 'paused'>('paused');
+      const videoPlayingRef = useRef<boolean>(false);
+
+      const flushTracking = async (opts?: {
+        force?: boolean;
+        currentTime?: number;
+        duration?: number;
+        watchedSeconds?: number;
+        progress?: number;
+        completed?: boolean;
+      }) => {
+        try {
+          if (!subLessonId || !userId) return;
+          const now = Date.now();
+
+          if (
+            !opts?.force &&
+            (now - lastSentAtRef.current < 5000 || !videoPlayingRef.current)
+          ) {
+            return;
+          }
+
+          const currentPos = opts?.currentTime || 0;
+          const duration = opts?.duration || 0;
+          const watchedSeconds =
+            opts?.watchedSeconds || Math.max(maxWatchedRef.current, currentPos);
+          let progress = opts?.progress;
+          if (progress === undefined) {
+            progress =
+              duration > 0 ? Math.round((watchedSeconds / duration) * 100) : 0;
+          } else {
+            progress = Math.round(progress);
+          }
+          const completed = opts?.completed || progress >= 95;
+
+          const payload: any = {
+            userId,
+            subLessonId,
+            progress,
+            duration,
+            completed,
+            watchedSeconds: Math.floor(watchedSeconds),
+            currentTime: Math.floor(currentPos),
+            lastPosition: Math.floor(currentPos),
+            totalWatchedTime: Math.floor(totalWatchedTimeRef.current || 0),
+          };
+
+          if (lessonId) {
+            payload.lessonId = lessonId;
+          }
+
+          await api.post('/lesson/video/track', payload, { timeout: 4000 });
+          lastSentAtRef.current = now;
+
+          const delta = Math.max(
+            0,
+            Math.floor(currentPos - (lastPositionRef.current || 0)),
+          );
+          totalWatchedTimeRef.current =
+            Math.max(totalWatchedTimeRef.current, watchedSeconds) + delta;
+          lastPositionRef.current = currentPos;
+          maxWatchedRef.current = Math.max(maxWatchedRef.current, currentPos);
+
+          return payload;
+        } catch (error) {
+          console.error('Error in flushTracking:', error);
+          return null;
         }
-      }, 10000);
-    };
+      };
 
-    const stopPeriodicTracking = () => {
-      if (trackingIntervalRef.current != null) {
-        clearInterval(trackingIntervalRef.current);
-        trackingIntervalRef.current = null;
-      }
-    };
+      const startPeriodicTracking = () => {
+        if (trackingIntervalRef.current != null) return;
+        trackingIntervalRef.current = setInterval(() => {
+          if (videoPlayingRef.current) {
+            flushTracking({ force: true });
+          }
+        }, 10000);
+      };
 
-    const startTracking = (currentTime: number = 0, duration: number = 0) => {
-      if (!userId || !subLessonId) return;
+      const stopPeriodicTracking = () => {
+        if (trackingIntervalRef.current != null) {
+          clearInterval(trackingIntervalRef.current);
+          trackingIntervalRef.current = null;
+        }
+      };
 
-      setIsTracking(true);
-      videoPlayingRef.current = true;
-      lastPlayStateRef.current = 'playing';
-      lastPositionRef.current = currentTime;
-      maxWatchedRef.current = Math.max(maxWatchedRef.current, currentTime);
+      const startTracking = (currentTime: number = 0, duration: number = 0) => {
+        if (!userId || !subLessonId) return;
 
-      startPeriodicTracking();
+        setIsTracking(true);
+        videoPlayingRef.current = true;
+        lastPlayStateRef.current = 'playing';
+        lastPositionRef.current = currentTime;
+        maxWatchedRef.current = Math.max(maxWatchedRef.current, currentTime);
 
-      flushTracking({
-        force: true,
-        currentTime,
-        duration,
-        watchedSeconds: currentTime,
-        progress: duration > 0 ? (currentTime / duration) * 100 : 0,
-      });
-    };
+        startPeriodicTracking();
 
-    const updateProgress = (currentTime: number, duration: number) => {
-      if (!isTracking || !videoPlayingRef.current) return;
-
-      maxWatchedRef.current = Math.max(maxWatchedRef.current, currentTime);
-
-      if (Math.abs(currentTime - lastSentPositionRef.current) >= 1) {
-        lastSentPositionRef.current = currentTime;
         flushTracking({
+          force: true,
           currentTime,
           duration,
-          watchedSeconds: maxWatchedRef.current,
-          progress: duration > 0 ? (maxWatchedRef.current / duration) * 100 : 0,
+          watchedSeconds: currentTime,
+          progress: duration > 0 ? (currentTime / duration) * 100 : 0,
         });
-      }
+      };
+
+      const updateProgress = (currentTime: number, duration: number) => {
+        if (!isTracking || !videoPlayingRef.current) return;
+
+        maxWatchedRef.current = Math.max(maxWatchedRef.current, currentTime);
+
+        if (Math.abs(currentTime - lastSentPositionRef.current) >= 1) {
+          lastSentPositionRef.current = currentTime;
+          flushTracking({
+            currentTime,
+            duration,
+            watchedSeconds: maxWatchedRef.current,
+            progress:
+              duration > 0 ? (maxWatchedRef.current / duration) * 100 : 0,
+          });
+        }
+      };
+
+      const stopTracking = (currentTime: number, duration: number) => {
+        videoPlayingRef.current = false;
+        lastPlayStateRef.current = 'paused';
+        setIsTracking(false);
+      };
+
+      const pauseTracking = () => {
+        videoPlayingRef.current = false;
+        lastPlayStateRef.current = 'paused';
+      };
+
+      const resumeTracking = (currentTime: number, duration: number) => {
+        videoPlayingRef.current = true;
+        lastPlayStateRef.current = 'playing';
+        setIsTracking(true);
+      };
+
+      const handleVideoEnd = (duration: number) => {
+        stopPeriodicTracking();
+        videoPlayingRef.current = false;
+        maxWatchedRef.current = Math.max(maxWatchedRef.current, duration);
+
+        flushTracking({
+          force: true,
+          currentTime: duration,
+          duration,
+          watchedSeconds: duration,
+          progress: 100,
+          completed: true,
+        });
+
+        setIsTracking(false);
+        lastPlayStateRef.current = 'paused';
+      };
+
+      const cleanup = () => {
+        stopPeriodicTracking();
+        setIsTracking(false);
+        videoPlayingRef.current = false;
+        lastPlayStateRef.current = 'paused';
+      };
+
+      return {
+        isTracking,
+        startTracking,
+        updateProgress,
+        stopTracking,
+        pauseTracking,
+        resumeTracking,
+        handleVideoEnd,
+        cleanup,
+      };
     };
 
-    const stopTracking = (currentTime: number, duration: number) => {
-      videoPlayingRef.current = false;
-      lastPlayStateRef.current = 'paused';
-      setIsTracking(false);
-    };
-
-    const pauseTracking = () => {
-      videoPlayingRef.current = false;
-      lastPlayStateRef.current = 'paused';
-    };
-
-    const resumeTracking = (currentTime: number, duration: number) => {
-      videoPlayingRef.current = true;
-      lastPlayStateRef.current = 'playing';
-      setIsTracking(true);
-    };
-
-    const handleVideoEnd = (duration: number) => {
-      stopPeriodicTracking();
-      videoPlayingRef.current = false;
-      maxWatchedRef.current = Math.max(maxWatchedRef.current, duration);
-
-      flushTracking({
-        force: true,
-        currentTime: duration,
-        duration,
-        watchedSeconds: duration,
-        progress: 100,
-        completed: true,
-      });
-
-      setIsTracking(false);
-      lastPlayStateRef.current = 'paused';
-    };
-
-    const cleanup = () => {
-      stopPeriodicTracking();
-      setIsTracking(false);
-      videoPlayingRef.current = false;
-      lastPlayStateRef.current = 'paused';
-    };
-
-    return {
-      isTracking,
+    const {
       startTracking,
       updateProgress,
-      stopTracking,
       pauseTracking,
       resumeTracking,
       handleVideoEnd,
-      cleanup,
+    } = useVideoTracking(data._id, lessonId);
+
+    const getYoutubeId = (url: string) => {
+      const match = url.match(/(?:[?&]v=|youtu\.be\/|embed\/)([^&]+)/);
+      return match ? match[1] : null;
     };
-  };
+    const player = playerRef.current;
+    const video = videoRef.current;
+    const videoStatus = useAppSelector(
+      state => state.dashboardReducer.videoStatus,
+    );
+    // Trước đây đây là 2 useEffect gần như y hệt nhau (1 cho YouTube qua
+    // playerRef, 1 cho HTML5 <video> qua videoRef) LUÔN CÙNG CHẠY bất kể loại
+    // media nào đang thật sự hiển thị — cái không dùng tới vẫn no-op mỗi giây
+    // nhưng cả 2 đều bị teardown/tạo lại (vì lastPlayed/maxWatched vốn là
+    // state, nằm trong dependency array, lại chính là 2 giá trị bị chính
+    // interval này cập nhật mỗi tick). Gộp làm 1, tự chọn ref đang có dữ liệu
+    // (player YouTube hay video HTML5) — giảm 1 nửa số interval, và với
+    // lastPlayed/maxWatched giờ đã là ref (không còn trigger re-render/teardown
+    // effect), interval chỉ còn được tạo 1 lần mỗi khi đổi bài học thay vì mỗi
+    // giây (đo được: 12 lần tạo lại/6s trước khi sửa → còn 1 lần sau khi sửa).
+    useEffect(() => {
+      const interval = setInterval(() => {
+        const isYoutube = !!playerRef.current;
+        const isHtml5 = !!videoRef.current;
+        if (!isYoutube && !isHtml5) return;
 
-  const {
-    startTracking,
-    updateProgress,
-    pauseTracking,
-    resumeTracking,
-    handleVideoEnd,
-  } = useVideoTracking(data._id, lessonId);
+        const currentTime = isYoutube
+          ? Math.floor(playerRef.current.getCurrentTime())
+          : Math.floor(videoRef.current!.currentTime);
+        const duration = isYoutube
+          ? playerRef.current.getDuration()
+          : videoRef.current!.duration;
+        const percentWatched = (maxWatchedGuardRef.current / duration) * 100;
+        // So sánh "đã tới hoặc qua mốc" thay vì đúng bằng tuyệt đối — interval
+        // chạy mỗi 1s có thể trôi/nhảy qua đúng giây appearTime, khiến so
+        // sánh === bỏ lỡ mốc vĩnh viễn. shownQuestionIds đảm bảo không hiện
+        // lại câu đã trả lời.
+        const matchedQuestion = data.questionList?.find(
+          (q: any) =>
+            q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
+        );
 
-  const getYoutubeId = (url: string) => {
-    const match = url.match(/(?:[?&]v=|youtu\.be\/|embed\/)([^&]+)/);
-    return match ? match[1] : null;
-  };
-  const player = playerRef.current;
-  const video = videoRef.current;
-  const videoStatus = useAppSelector(
-    state => state.dashboardReducer.videoStatus,
-  );
-  // Trước đây đây là 2 useEffect gần như y hệt nhau (1 cho YouTube qua
-  // playerRef, 1 cho HTML5 <video> qua videoRef) LUÔN CÙNG CHẠY bất kể loại
-  // media nào đang thật sự hiển thị — cái không dùng tới vẫn no-op mỗi giây
-  // nhưng cả 2 đều bị teardown/tạo lại (vì lastPlayed/maxWatched vốn là
-  // state, nằm trong dependency array, lại chính là 2 giá trị bị chính
-  // interval này cập nhật mỗi tick). Gộp làm 1, tự chọn ref đang có dữ liệu
-  // (player YouTube hay video HTML5) — giảm 1 nửa số interval, và với
-  // lastPlayed/maxWatched giờ đã là ref (không còn trigger re-render/teardown
-  // effect), interval chỉ còn được tạo 1 lần mỗi khi đổi bài học thay vì mỗi
-  // giây (đo được: 12 lần tạo lại/6s trước khi sửa → còn 1 lần sau khi sửa).
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const isYoutube = !!playerRef.current;
-      const isHtml5 = !!videoRef.current;
-      if (!isYoutube && !isHtml5) return;
+        const inCooldown = Date.now() < skipCooldownUntilRef.current;
+        const jumpsAhead =
+          currentTime - lastPlayedRef.current > SEEK_JUMP_THRESHOLD_SECONDS &&
+          currentTime > maxWatchedGuardRef.current;
+        const exceedsAllowance =
+          currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
+        // Decide up front whether the warning modal will fire this same
+        // tick — the question check must know this BEFORE it runs, not
+        // after, otherwise both modals can open together in the same tick.
+        const willWarn =
+          !isAdmin &&
+          jumpsAhead &&
+          (inCooldown || exceedsAllowance) &&
+          !correctingSkipRef.current;
 
-      const currentTime = isYoutube
-        ? Math.floor(playerRef.current.getCurrentTime())
-        : Math.floor(videoRef.current!.currentTime);
-      const duration = isYoutube
-        ? playerRef.current.getDuration()
-        : videoRef.current!.duration;
-      const percentWatched = (maxWatchedGuardRef.current / duration) * 100;
-      // So sánh "đã tới hoặc qua mốc" thay vì đúng bằng tuyệt đối — interval
-      // chạy mỗi 1s có thể trôi/nhảy qua đúng giây appearTime, khiến so
-      // sánh === bỏ lỡ mốc vĩnh viễn. shownQuestionIds đảm bảo không hiện
-      // lại câu đã trả lời.
-      const matchedQuestion = data.questionList?.find(
-        (q: any) =>
-          q.appearTime <= currentTime && !shownQuestionIds.includes(q._id),
-      );
-
-      const inCooldown = Date.now() < skipCooldownUntilRef.current;
-      const jumpsAhead =
-        currentTime - lastPlayedRef.current > SEEK_JUMP_THRESHOLD_SECONDS &&
-        currentTime > maxWatchedGuardRef.current;
-      const exceedsAllowance =
-        currentTime > maxWatchedGuardRef.current + SEEK_ALLOWANCE_SECONDS;
-      // Decide up front whether the warning modal will fire this same
-      // tick — the question check must know this BEFORE it runs, not
-      // after, otherwise both modals can open together in the same tick.
-      const willWarn =
-        !isAdmin &&
-        jumpsAhead &&
-        (inCooldown || exceedsAllowance) &&
-        !correctingSkipRef.current;
-
-      if (matchedQuestion && !warningModalOpenRef.current && !willWarn) {
-        setVisibleQuestion(matchedQuestion);
-        // Đọc thẳng ref, không dùng biến player/video ở scope ngoài (chỉ
-        // được gán lại mỗi lần component render) - effect này giờ chỉ được
-        // tạo lại khi đổi bài học, không còn re-render/re-tạo mỗi giây nữa
-        // để "vô tình" giữ 2 biến đó luôn mới như trước khi sửa.
-        if (isYoutube) playerRef.current?.pauseVideo();
-        else videoRef.current?.pause();
-        pauseTracking();
-      }
-
-      if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
-        if (!correctingSkipRef.current) {
-          correctingSkipRef.current = true;
-          if (exceedsAllowance) {
-            // Real violation (jumped past the free allowance) — (re)start
-            // the cooldown that blocks further seeking until it expires.
-            skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
-          }
-          warning();
-          if (isYoutube) {
-            playerRef.current.pauseVideo();
-            // allowSeekAhead=true so YouTube fetches the target position
-            // instead of silently freezing when it isn't buffered yet.
-            playerRef.current.seekTo(lastPlayedRef.current, true);
-          } else {
-            videoRef.current!.pause();
-            videoRef.current!.currentTime = lastPlayedRef.current;
-          }
+        if (matchedQuestion && !warningModalOpenRef.current && !willWarn) {
+          setVisibleQuestion(matchedQuestion);
+          // Đọc thẳng ref, không dùng biến player/video ở scope ngoài (chỉ
+          // được gán lại mỗi lần component render) - effect này giờ chỉ được
+          // tạo lại khi đổi bài học, không còn re-render/re-tạo mỗi giây nữa
+          // để "vô tình" giữ 2 biến đó luôn mới như trước khi sửa.
+          if (isYoutube) playerRef.current?.pauseVideo();
+          else videoRef.current?.pause();
           pauseTracking();
-          // Give the player time to actually complete the seek before
-          // re-checking — otherwise the still-stale currentTime on the
-          // next tick re-triggers this block and re-issues pause/seek,
-          // which is what produced the "stuck loading" symptom.
-          setTimeout(() => {
-            correctingSkipRef.current = false;
-          }, 2000);
+        }
+
+        if (!isAdmin && jumpsAhead && (inCooldown || exceedsAllowance)) {
+          if (!correctingSkipRef.current) {
+            correctingSkipRef.current = true;
+            if (exceedsAllowance) {
+              // Real violation (jumped past the free allowance) — (re)start
+              // the cooldown that blocks further seeking until it expires.
+              skipCooldownUntilRef.current = Date.now() + SEEK_COOLDOWN_MS;
+            }
+            warning();
+            if (isYoutube) {
+              playerRef.current.pauseVideo();
+              // allowSeekAhead=true so YouTube fetches the target position
+              // instead of silently freezing when it isn't buffered yet.
+              playerRef.current.seekTo(lastPlayedRef.current, true);
+            } else {
+              videoRef.current!.pause();
+              videoRef.current!.currentTime = lastPlayedRef.current;
+            }
+            pauseTracking();
+            // Give the player time to actually complete the seek before
+            // re-checking — otherwise the still-stale currentTime on the
+            // next tick re-triggers this block and re-issues pause/seek,
+            // which is what produced the "stuck loading" symptom.
+            setTimeout(() => {
+              correctingSkipRef.current = false;
+            }, 2000);
+          }
+        } else {
+          // Forward seeks within the free allowance are accepted silently —
+          // no warning, no cooldown — the cooldown only starts on an actual
+          // violation above.
+          setGuardedLastPlayed(currentTime);
+          setGuardedMaxWatched(prevMax => Math.max(prevMax, currentTime));
+          updateProgress(currentTime, duration);
+        }
+
+        if (percentWatched >= 99) {
+          handleVideoEnd(duration);
+          onWatchFinish?.();
+          if (isHtml5) {
+            setGuardedMaxWatched(0);
+            clearInterval(interval);
+          }
+        }
+        if (isHtml5 && !videoStatus) {
+          videoRef.current?.pause();
+          pauseTracking();
+        }
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }, [data, shownQuestionIds, videoStatus, onWatchFinish, isAdmin]);
+
+    useImperativeHandle(ref, () => ({
+      pauseAll: () => {
+        if (videoRef.current) {
+          videoRef.current.pause();
+          pauseTracking();
+        }
+        if (playerRef.current) {
+          try {
+            if (
+              typeof playerRef.current.pauseVideo === 'function' &&
+              playerRef.current.getIframe()
+            ) {
+              playerRef.current.pauseVideo();
+              pauseTracking();
+            }
+          } catch (e) {}
+        }
+      },
+      // Dùng cho tính năng "Ghi chú của tôi" theo mốc thời gian video: đọc vị
+      // trí đang phát để lưu, và tua tới mốc khi bấm vào 1 ghi chú. Tự chọn
+      // ref đang có (YouTube playerRef vs HTML5 videoRef).
+      getCurrentTimeSec: (): number => {
+        try {
+          if (playerRef.current?.getCurrentTime) {
+            return Math.floor(playerRef.current.getCurrentTime() || 0);
+          }
+          if (videoRef.current) {
+            return Math.floor(videoRef.current.currentTime || 0);
+          }
+        } catch (e) {}
+        return 0;
+      },
+      seekToSec: (sec: number): void => {
+        const target = Math.max(0, Math.floor(sec || 0));
+        try {
+          if (playerRef.current?.seekTo) {
+            playerRef.current.seekTo(target, true);
+            if (typeof playerRef.current.playVideo === 'function') {
+              playerRef.current.playVideo();
+            }
+          } else if (videoRef.current) {
+            videoRef.current.currentTime = target;
+            void videoRef.current.play?.();
+          }
+        } catch (e) {}
+      },
+    }));
+
+    // Nhận answer làm tham số (thay vì đọc selectedAnswer từ state của chính
+    // LibraryDetailItem) - selectedAnswer giờ là state RIÊNG của QuestionModal
+    // (component con tách ra bên dưới) để bấm chọn đáp án chỉ re-render đúng
+    // cái modal nhỏ đó, không kéo theo re-render + dựng lại toàn bộ
+    // renderMedia() (video/YouTube) mỗi lần bấm - đã đo INP mỗi click ~90-
+    // 130ms trước khi tách, đúng như DevTools báo (240-540ms lúc bấm dồn dập).
+    const handleAnswerSubmit = async (answer: string) => {
+      if (!visibleQuestion) return;
+      const selectedAnswer = answer;
+      // Chấm điểm ở server — correctAnswer không còn được gửi về client nữa
+      // (xem lesson.service.ts#getLessonData), nên phải hỏi server câu này
+      // đúng hay sai thay vì so sánh tay như trước.
+      let isCorrect = false;
+      try {
+        const res = await checkAnswer({
+          libraryId: data._id,
+          questionId: visibleQuestion._id,
+          answer: selectedAnswer,
+        }).unwrap();
+        isCorrect = res.correct;
+      } catch (err) {
+        messageApi.error('Không thể kiểm tra đáp án, vui lòng thử lại.');
+        return;
+      }
+      const player = playerRef.current;
+      const video = videoRef.current;
+      if (isCorrect) {
+        player?.playVideo?.();
+        video?.play?.();
+        setShownQuestionIds(prev => [...prev, visibleQuestion._id]);
+        setVisibleQuestion(null);
+
+        if (player) {
+          const duration = player.getDuration();
+          const currentTime = player.getCurrentTime();
+          if (duration) {
+            resumeTracking(currentTime, duration);
+          }
+        }
+        if (video && video.duration) {
+          resumeTracking(video.currentTime, video.duration);
         }
       } else {
-        // Forward seeks within the free allowance are accepted silently —
-        // no warning, no cooldown — the cooldown only starts on an actual
-        // violation above.
-        setGuardedLastPlayed(currentTime);
-        setGuardedMaxWatched(prevMax => Math.max(prevMax, currentTime));
-        updateProgress(currentTime, duration);
+        // Tua về TRƯỚC appearTime (không phải maxWatched — điểm đó vẫn sau
+        // appearTime, nên với so sánh appearTime <= currentTime, tick kế tiếp
+        // sẽ khớp lại ngay lập tức và mở popup liên tục mà không cho xem lại
+        // đoạn nào cả, biến thành đoán mò tới khi đúng).
+        const rewindTo = Math.max(0, visibleQuestion.appearTime - 5);
+
+        player?.pauseVideo?.();
+        player?.seekTo?.(rewindTo, true);
+
+        if (video) {
+          video.pause();
+          video.currentTime = rewindTo;
+        }
+
+        setGuardedLastPlayed(rewindTo);
+        setShownQuestionIds(prev =>
+          prev.filter(id => id !== visibleQuestion._id),
+        );
+        setVisibleQuestion(null);
+      }
+    };
+
+    const warning = () => {
+      warningModalOpenRef.current = true;
+      modal.warning({
+        title: 'Cảnh báo',
+        content:
+          'Bạn đang học nhanh hơn bình thường, vui lòng tránh bỏ qua quá nhiều khi học!',
+        centered: true,
+        onOk: () => {
+          warningModalOpenRef.current = false;
+        },
+      });
+    };
+
+    const handleSubmit = () => {
+      const unansweredIds = (dataQuestion || [])
+        .filter((q: any) => !selectedAnswers[q._id])
+        .map((q: any) => q._id);
+
+      if (unansweredIds.length > 0) {
+        setInvalidQuestions(unansweredIds);
+        // Nhảy tới câu chưa trả lời ĐẦU TIÊN theo đúng thứ tự đang hiển thị
+        // (shuffledQuestions) - vì giờ chỉ xem 1 câu/lần, báo lỗi suông không
+        // đủ, phải đưa học viên tới đúng chỗ cần làm tiếp.
+        const firstUnansweredIndex = shuffledQuestions.findIndex(q =>
+          unansweredIds.includes(q._id),
+        );
+        if (firstUnansweredIndex >= 0) {
+          setCurrentQuestionIndex(firstUnansweredIndex);
+        }
+        messageApi.error('Vui lòng trả lời hết tất cả các câu hỏi.');
+        return;
       }
 
-      if (percentWatched >= 99) {
-        handleVideoEnd(duration);
-        onWatchFinish?.();
-        if (isHtml5) {
-          setGuardedMaxWatched(0);
-          clearInterval(interval);
+      setInvalidQuestions([]);
+      setSelectedAnswers({});
+      if (onClickSubmit) {
+        onClickSubmit(selectedAnswers);
+      }
+    };
+
+    const handleResumeLesson = () => {
+      setIsConfirmingResume(false);
+      setIsSwitchingContext(false);
+
+      if (resumeInfo) {
+        setGuardedMaxWatched(
+          resumeInfo.watchedSeconds || resumeInfo.lastPosition,
+        );
+        setGuardedLastPlayed(resumeInfo.lastPosition);
+
+        if (data.type === 'Video' && videoRef.current) {
+          videoRef.current.currentTime = resumeInfo.lastPosition;
+          videoRef.current.play();
+        } else if (data.type === 'Youtube' && playerRef.current) {
+          playerRef.current.seekTo(resumeInfo.lastPosition, true);
+          playerRef.current.playVideo();
+        } else {
+          setPendingSeek(resumeInfo.lastPosition);
         }
       }
-      if (isHtml5 && !videoStatus) {
-        videoRef.current?.pause();
-        pauseTracking();
+    };
+
+    const handleRestartLesson = () => {
+      setIsConfirmingResume(false);
+      setGuardedMaxWatched(0);
+      setGuardedLastPlayed(0);
+      setPendingSeek(null);
+      setIsSwitchingContext(false);
+
+      if (data.type === 'Video' && videoRef.current) {
+        videoRef.current.currentTime = 0;
+        videoRef.current.play();
+      } else if (data.type === 'Youtube' && playerRef.current) {
+        playerRef.current.seekTo(0, true);
+        playerRef.current.playVideo();
       }
-    }, 1000);
+    };
 
-    return () => clearInterval(interval);
-  }, [data, shownQuestionIds, videoStatus, onWatchFinish, isAdmin]);
+    const shuffleArray = (array: any[]) => {
+      return [...array].sort(() => Math.random() - 0.5);
+    };
 
-  useImperativeHandle(ref, () => ({
-    pauseAll: () => {
+    useEffect(() => {
+      if (dataQuestion?.length > 0) {
+        const questionsWithShuffledAnswers = dataQuestion.map((q: any) => ({
+          ...q,
+        }));
+
+        const shuffled = shuffleArray(questionsWithShuffledAnswers);
+        setShuffledQuestions(shuffled);
+        setCurrentQuestionIndex(0);
+        setFlaggedQuestionIds([]);
+      }
+    }, [dataQuestion]);
+    useEffect(() => {
+      if (!data?._id) return;
+
       if (videoRef.current) {
         videoRef.current.pause();
-        pauseTracking();
       }
+
       if (playerRef.current) {
         try {
           if (
@@ -547,679 +784,482 @@ const LibraryDetailItem = forwardRef<
             playerRef.current.getIframe()
           ) {
             playerRef.current.pauseVideo();
-            pauseTracking();
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn('Failed to pause stale YouTube player:', e);
+        }
+        playerRef.current = null;
       }
-    },
-    // Dùng cho tính năng "Ghi chú của tôi" theo mốc thời gian video: đọc vị
-    // trí đang phát để lưu, và tua tới mốc khi bấm vào 1 ghi chú. Tự chọn
-    // ref đang có (YouTube playerRef vs HTML5 videoRef).
-    getCurrentTimeSec: (): number => {
-      try {
-        if (playerRef.current?.getCurrentTime) {
-          return Math.floor(playerRef.current.getCurrentTime() || 0);
-        }
-        if (videoRef.current) {
-          return Math.floor(videoRef.current.currentTime || 0);
-        }
-      } catch (e) {}
-      return 0;
-    },
-    seekToSec: (sec: number): void => {
-      const target = Math.max(0, Math.floor(sec || 0));
-      try {
-        if (playerRef.current?.seekTo) {
-          playerRef.current.seekTo(target, true);
-          if (typeof playerRef.current.playVideo === 'function') {
-            playerRef.current.playVideo();
-          }
-        } else if (videoRef.current) {
-          videoRef.current.currentTime = target;
-          void videoRef.current.play?.();
-        }
-      } catch (e) {}
-    },
-  }));
 
-  // Nhận answer làm tham số (thay vì đọc selectedAnswer từ state của chính
-  // LibraryDetailItem) - selectedAnswer giờ là state RIÊNG của QuestionModal
-  // (component con tách ra bên dưới) để bấm chọn đáp án chỉ re-render đúng
-  // cái modal nhỏ đó, không kéo theo re-render + dựng lại toàn bộ
-  // renderMedia() (video/YouTube) mỗi lần bấm - đã đo INP mỗi click ~90-
-  // 130ms trước khi tách, đúng như DevTools báo (240-540ms lúc bấm dồn dập).
-  const handleAnswerSubmit = async (answer: string) => {
-    if (!visibleQuestion) return;
-    const selectedAnswer = answer;
-    // Chấm điểm ở server — correctAnswer không còn được gửi về client nữa
-    // (xem lesson.service.ts#getLessonData), nên phải hỏi server câu này
-    // đúng hay sai thay vì so sánh tay như trước.
-    let isCorrect = false;
-    try {
-      const res = await checkAnswer({
-        libraryId: data._id,
-        questionId: visibleQuestion._id,
-        answer: selectedAnswer,
-      }).unwrap();
-      isCorrect = res.correct;
-    } catch (err) {
-      messageApi.error('Không thể kiểm tra đáp án, vui lòng thử lại.');
-      return;
-    }
-    const player = playerRef.current;
-    const video = videoRef.current;
-    if (isCorrect) {
-      player?.playVideo?.();
-      video?.play?.();
-      setShownQuestionIds(prev => [...prev, visibleQuestion._id]);
+      pauseTracking();
+
+      setGuardedLastPlayed(0);
+      setGuardedMaxWatched(0);
       setVisibleQuestion(null);
+      setShownQuestionIds([]);
+      setSelectedAnswers({});
+      setInvalidQuestions([]);
+      setPendingSeek(null);
 
-      if (player) {
-        const duration = player.getDuration();
-        const currentTime = player.getCurrentTime();
-        if (duration) {
-          resumeTracking(currentTime, duration);
-        }
-      }
-      if (video && video.duration) {
-        resumeTracking(video.currentTime, video.duration);
-      }
-    } else {
-      // Tua về TRƯỚC appearTime (không phải maxWatched — điểm đó vẫn sau
-      // appearTime, nên với so sánh appearTime <= currentTime, tick kế tiếp
-      // sẽ khớp lại ngay lập tức và mở popup liên tục mà không cho xem lại
-      // đoạn nào cả, biến thành đoán mò tới khi đúng).
-      const rewindTo = Math.max(0, visibleQuestion.appearTime - 5);
-
-      player?.pauseVideo?.();
-      player?.seekTo?.(rewindTo, true);
-
-      if (video) {
-        video.pause();
-        video.currentTime = rewindTo;
+      if (data.type === 'Video' || data.type === 'Youtube') {
+        setIsSwitchingContext(true);
       }
 
-      setGuardedLastPlayed(rewindTo);
-      setShownQuestionIds(prev =>
-        prev.filter(id => id !== visibleQuestion._id),
-      );
-      setVisibleQuestion(null);
-    }
-  };
-
-  const warning = () => {
-    warningModalOpenRef.current = true;
-    modal.warning({
-      title: 'Cảnh báo',
-      content:
-        'Bạn đang học nhanh hơn bình thường, vui lòng tránh bỏ qua quá nhiều khi học!',
-      centered: true,
-      onOk: () => {
-        warningModalOpenRef.current = false;
-      },
-    });
-  };
-
-  const handleSubmit = () => {
-    const unansweredIds = (dataQuestion || [])
-      .filter((q: any) => !selectedAnswers[q._id])
-      .map((q: any) => q._id);
-
-    if (unansweredIds.length > 0) {
-      setInvalidQuestions(unansweredIds);
-      // Nhảy tới câu chưa trả lời ĐẦU TIÊN theo đúng thứ tự đang hiển thị
-      // (shuffledQuestions) - vì giờ chỉ xem 1 câu/lần, báo lỗi suông không
-      // đủ, phải đưa học viên tới đúng chỗ cần làm tiếp.
-      const firstUnansweredIndex = shuffledQuestions.findIndex(q =>
-        unansweredIds.includes(q._id),
-      );
-      if (firstUnansweredIndex >= 0) {
-        setCurrentQuestionIndex(firstUnansweredIndex);
-      }
-      messageApi.error('Vui lòng trả lời hết tất cả các câu hỏi.');
-      return;
-    }
-
-    setInvalidQuestions([]);
-    setSelectedAnswers({});
-    if (onClickSubmit) {
-      onClickSubmit(selectedAnswers);
-    }
-  };
-
-  const handleResumeLesson = () => {
-    setIsConfirmingResume(false);
-    setIsSwitchingContext(false);
-
-    if (resumeInfo) {
-      setGuardedMaxWatched(
-        resumeInfo.watchedSeconds || resumeInfo.lastPosition,
-      );
-      setGuardedLastPlayed(resumeInfo.lastPosition);
-
-      if (data.type === 'Video' && videoRef.current) {
-        videoRef.current.currentTime = resumeInfo.lastPosition;
-        videoRef.current.play();
-      } else if (data.type === 'Youtube' && playerRef.current) {
-        playerRef.current.seekTo(resumeInfo.lastPosition, true);
-        playerRef.current.playVideo();
-      } else {
-        setPendingSeek(resumeInfo.lastPosition);
-      }
-    }
-  };
-
-  const handleRestartLesson = () => {
-    setIsConfirmingResume(false);
-    setGuardedMaxWatched(0);
-    setGuardedLastPlayed(0);
-    setPendingSeek(null);
-    setIsSwitchingContext(false);
-
-    if (data.type === 'Video' && videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play();
-    } else if (data.type === 'Youtube' && playerRef.current) {
-      playerRef.current.seekTo(0, true);
-      playerRef.current.playVideo();
-    }
-  };
-
-  const shuffleArray = (array: any[]) => {
-    return [...array].sort(() => Math.random() - 0.5);
-  };
-
-  useEffect(() => {
-    if (dataQuestion?.length > 0) {
-      const questionsWithShuffledAnswers = dataQuestion.map((q: any) => ({
-        ...q,
-      }));
-
-      const shuffled = shuffleArray(questionsWithShuffledAnswers);
-      setShuffledQuestions(shuffled);
-      setCurrentQuestionIndex(0);
-      setFlaggedQuestionIds([]);
-    }
-  }, [dataQuestion]);
-  useEffect(() => {
-    if (!data?._id) return;
-
-    if (videoRef.current) {
-      videoRef.current.pause();
-    }
-
-    if (playerRef.current) {
-      try {
-        if (
-          typeof playerRef.current.pauseVideo === 'function' &&
-          playerRef.current.getIframe()
-        ) {
-          playerRef.current.pauseVideo();
-        }
-      } catch (e) {
-        console.warn('Failed to pause stale YouTube player:', e);
-      }
-      playerRef.current = null;
-    }
-
-    pauseTracking();
-
-    setGuardedLastPlayed(0);
-    setGuardedMaxWatched(0);
-    setVisibleQuestion(null);
-    setShownQuestionIds([]);
-    setSelectedAnswers({});
-    setInvalidQuestions([]);
-    setPendingSeek(null);
-
-    if (data.type === 'Video' || data.type === 'Youtube') {
-      setIsSwitchingContext(true);
-    }
-
-    setIsConfirmingResume(false);
-    setResumeInfo(null);
-
-    return () => {
-      if (activeModalRef.current) {
-        activeModalRef.current.destroy();
-        activeModalRef.current = null;
-      }
-    };
-  }, [data?._id, lessonId]);
-
-  useEffect(() => {
-    if (isFetching || !data?._id) {
       setIsConfirmingResume(false);
-      return;
-    }
+      setResumeInfo(null);
 
-    if (progressRes) {
-      if (progressRes.subLessonId && progressRes.subLessonId !== data._id) {
+      return () => {
+        if (activeModalRef.current) {
+          activeModalRef.current.destroy();
+          activeModalRef.current = null;
+        }
+      };
+    }, [data?._id, lessonId]);
+
+    useEffect(() => {
+      if (isFetching || !data?._id) {
+        setIsConfirmingResume(false);
         return;
       }
 
-      if (progressRes.lastPosition > 5 && !progressRes.completed) {
-        setResumeInfo(progressRes);
-        setIsConfirmingResume(true);
+      if (progressRes) {
+        if (progressRes.subLessonId && progressRes.subLessonId !== data._id) {
+          return;
+        }
+
+        if (progressRes.lastPosition > 5 && !progressRes.completed) {
+          setResumeInfo(progressRes);
+          setIsConfirmingResume(true);
+        } else {
+          setIsConfirmingResume(false);
+          setTimeout(() => setIsSwitchingContext(false), 300);
+        }
       } else {
         setIsConfirmingResume(false);
-        setTimeout(() => setIsSwitchingContext(false), 300);
+        setIsSwitchingContext(false);
       }
-    } else {
-      setIsConfirmingResume(false);
-      setIsSwitchingContext(false);
-    }
-  }, [progressRes, isFetching, data?._id]);
+    }, [progressRes, isFetching, data?._id]);
 
-  // Safety net: if the progress request hangs/never resolves (seen on some
-  // browsers, e.g. Cốc Cốc blocking the request), the black loading overlay
-  // above the video would otherwise stay stuck forever while audio keeps playing.
-  useEffect(() => {
-    if (!isSwitchingContext) return;
-    const timeout = setTimeout(() => setIsSwitchingContext(false), 5000);
-    return () => clearTimeout(timeout);
-  }, [isSwitchingContext, data?._id]);
-  const renderMedia = () => {
-    if (!data?.type) return null;
+    // Safety net: if the progress request hangs/never resolves (seen on some
+    // browsers, e.g. Cốc Cốc blocking the request), the black loading overlay
+    // above the video would otherwise stay stuck forever while audio keeps playing.
+    useEffect(() => {
+      if (!isSwitchingContext) return;
+      const timeout = setTimeout(() => setIsSwitchingContext(false), 5000);
+      return () => clearTimeout(timeout);
+    }, [isSwitchingContext, data?._id]);
+    const renderMedia = () => {
+      if (!data?.type) return null;
 
-    const OverlayLoading = () =>
-      isSwitchingContext || isConfirmingResume ? (
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: '#000',
-            zIndex: 10,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: 'white',
-          }}>
-          {isSwitchingContext && <Spin size="large" />}
-        </div>
-      ) : null;
+      const OverlayLoading = () =>
+        isSwitchingContext || isConfirmingResume ? (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: '#000',
+              zIndex: 10,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              color: 'white',
+            }}>
+            {isSwitchingContext && <Spin size="large" />}
+          </div>
+        ) : null;
 
-    switch (data.type) {
-      case 'Video':
-      case 'Youtube':
-        if (!data.url) {
+      switch (data.type) {
+        case 'Video':
+        case 'Youtube':
+          if (!data.url) {
+            return (
+              <View style={styles.comingSoonContainer}>
+                <Text style={styles.comingSoonText}>
+                  Khóa học này sẽ sớm ra mắt, mời bạn đón chờ nhé!
+                </Text>
+              </View>
+            );
+          }
           return (
-            <View style={styles.comingSoonContainer}>
-              <Text style={styles.comingSoonText}>
-                Khóa học này sẽ sớm ra mắt, mời bạn đón chờ nhé!
-              </Text>
-            </View>
-          );
-        }
-        return (
-          <View style={{ ...styles.mediaContainer, position: 'relative' }}>
-            <OverlayLoading />
-            {data.url.includes('https://storage.googleapis.com') ? (
-              <video
-                key={data._id}
-                ref={videoRef}
-                src={data.url}
-                width="100%"
-                height="100%"
-                style={{ transform: 'translateZ(0)', willChange: 'transform' }}
-                autoPlay={false}
-                controls
-                controlsList="nodownload noseek"
-                onLoadedMetadata={() => {
-                  if (videoRef.current && pendingSeek !== null) {
-                    videoRef.current.currentTime = pendingSeek;
-                    setPendingSeek(null);
-                  }
-                }}
-                onPlay={() => {
-                  if (videoRef.current && videoRef.current.duration) {
-                    resumeTracking(
-                      videoRef.current.currentTime,
-                      videoRef.current.duration,
-                    );
-                  }
-                }}
-                onPause={() => {
-                  if (videoRef.current && videoRef.current.duration) {
-                    pauseTracking();
-                  }
-                }}
-                onEnded={() => {
-                  if (videoRef.current) {
-                    handleVideoEnd(videoRef.current.duration);
-                    onWatchFinish?.();
-                  }
-                }}
-              />
-            ) : (
-              <View style={styles.youtubeWrapper}>
-                <YouTube
+            <View style={{ ...styles.mediaContainer, position: 'relative' }}>
+              <OverlayLoading />
+              {data.url.includes('https://storage.googleapis.com') ? (
+                <video
                   key={data._id}
-                  videoId={getYoutubeId(data.url)}
-                  opts={{
-                    width: '100%',
-                    height: '100%',
-                    playerVars: { controls: 1, autoplay: 0 },
+                  ref={videoRef}
+                  src={data.url}
+                  width="100%"
+                  height="100%"
+                  style={{
+                    transform: 'translateZ(0)',
+                    willChange: 'transform',
                   }}
-                  style={styles.youtubePlayer}
-                  onReady={(event: any) => {
-                    playerRef.current = event.target;
-                    if (pendingSeek !== null) {
-                      event.target.seekTo(pendingSeek, true);
+                  autoPlay={false}
+                  controls
+                  controlsList="nodownload noseek"
+                  onLoadedMetadata={() => {
+                    if (videoRef.current && pendingSeek !== null) {
+                      videoRef.current.currentTime = pendingSeek;
                       setPendingSeek(null);
                     }
                   }}
                   onPlay={() => {
-                    if (playerRef.current) {
-                      const duration = playerRef.current.getDuration();
-                      const currentTime = playerRef.current.getCurrentTime();
-                      if (duration) {
-                        resumeTracking(currentTime, duration);
-                      }
+                    if (videoRef.current && videoRef.current.duration) {
+                      resumeTracking(
+                        videoRef.current.currentTime,
+                        videoRef.current.duration,
+                      );
                     }
                   }}
                   onPause={() => {
-                    if (playerRef.current) {
+                    if (videoRef.current && videoRef.current.duration) {
                       pauseTracking();
                     }
                   }}
-                  onEnd={() => {
-                    if (playerRef.current) {
-                      const duration = playerRef.current.getDuration();
-                      handleVideoEnd(duration);
+                  onEnded={() => {
+                    if (videoRef.current) {
+                      handleVideoEnd(videoRef.current.duration);
                       onWatchFinish?.();
                     }
                   }}
                 />
-              </View>
-            )}
-          </View>
-        );
-      case 'PDF':
-        // Trình xem PDF riêng (react-pdf) thay cho iframe gốc: cần biết
-        // trang hiện tại / tổng số trang để tính tiến độ và "đọc hết trang
-        // cuối = hoàn thành" giống như video — iframe không cho biết điều
-        // đó. Kèm nút chuyển trang / zoom / tải / in.
-        return (
-          <PdfLessonViewer
-            data={data}
-            lessonId={lessonId}
-            userId={userId}
-            onComplete={() => onWatchFinish?.()}
-          />
-        );
-      case 'Text':
-        if (shuffledQuestions.length === 0) {
-          return (
-            <View style={styles.emptyQuizWrap}>
-              <Text style={styles.emptyQuizText}>
-                Bài tập này chưa có câu hỏi.
-              </Text>
+              ) : (
+                <View style={styles.youtubeWrapper}>
+                  <YouTube
+                    key={data._id}
+                    videoId={getYoutubeId(data.url)}
+                    opts={{
+                      width: '100%',
+                      height: '100%',
+                      playerVars: { controls: 1, autoplay: 0 },
+                    }}
+                    style={styles.youtubePlayer}
+                    onReady={(event: any) => {
+                      playerRef.current = event.target;
+                      if (pendingSeek !== null) {
+                        event.target.seekTo(pendingSeek, true);
+                        setPendingSeek(null);
+                      }
+                    }}
+                    onPlay={() => {
+                      if (playerRef.current) {
+                        const duration = playerRef.current.getDuration();
+                        const currentTime = playerRef.current.getCurrentTime();
+                        if (duration) {
+                          resumeTracking(currentTime, duration);
+                        }
+                      }
+                    }}
+                    onPause={() => {
+                      if (playerRef.current) {
+                        pauseTracking();
+                      }
+                    }}
+                    onEnd={() => {
+                      if (playerRef.current) {
+                        const duration = playerRef.current.getDuration();
+                        handleVideoEnd(duration);
+                        onWatchFinish?.();
+                      }
+                    }}
+                  />
+                </View>
+              )}
             </View>
           );
-        }
-        // Hiện TỪNG CÂU một (không cuộn hết 1 lần) - đúng theo màn "Kiểm tra
-        // giữa khóa" trong design: thẻ thông tin bài kiểm tra + thanh tiến
-        // độ "Câu X/N" + 1 câu hỏi + Câu trước/Đánh dấu xem lại/Câu tiếp
-        // theo. KHÔNG hiện đồng hồ đếm ngược/"làm một lần"/"cần 70% để qua"
-        // như bản gốc vì dữ liệu thật không có thời hạn hay giới hạn số lần
-        // làm - ngưỡng đạt thật là ≥80% số câu (khớp với ngưỡng đạt bài
-        // thực hành PRACTICE_PASS_RATIO, xem lesson.service.ts).
-        const totalQuestions = shuffledQuestions.length;
-        const answeredCount = Object.keys(selectedAnswers).filter(qId =>
-          shuffledQuestions.some(q => q._id === qId),
-        ).length;
-        const currentQuestion =
-          shuffledQuestions[currentQuestionIndex] || shuffledQuestions[0];
-        const isCurrentInvalid = invalidQuestions.includes(currentQuestion._id);
-        const isFlagged = flaggedQuestionIds.includes(currentQuestion._id);
-        const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
-
-        return (
-          <ScrollView
-            style={{
-              ...styles.quizContainer,
-              ...(isMobile ? styles.quizContainerMobile : {}),
-            }}>
-            <View style={styles.quizInfoCard}>
-              <Text style={styles.quizInfoTitle}>{data?.title}</Text>
-              <Text style={styles.quizInfoSubtitle}>
-                {totalQuestions} câu · cần đúng tối thiểu 80% số câu để đạt
-              </Text>
-            </View>
-
-            <View style={styles.quizProgressRow}>
-              <Text style={styles.quizProgressLabel}>
-                Câu {currentQuestionIndex + 1}/{totalQuestions}
-              </Text>
-              <Text style={styles.quizProgressLabel}>
-                Đã trả lời {answeredCount} câu
-              </Text>
-            </View>
-            <View style={styles.quizProgressTrack}>
-              <View
-                style={{
-                  ...styles.quizProgressFill,
-                  width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
-                }}
-              />
-            </View>
-
-            <View style={styles.quizContent}>
-              <View
-                key={currentQuestion._id}
-                style={{
-                  ...styles.questionCard,
-                  ...(isMobile ? styles.questionCardMobile : {}),
-                  ...(isCurrentInvalid ? styles.questionCardInvalid : {}),
-                }}>
-                <div
-                  style={{
-                    ...styles.questionTop,
-                    ...(isMobile ? styles.questionTopMobile : {}),
-                  }}>
-                  <div
-                    style={{
-                      ...styles.questionNumber,
-                      ...(isMobile ? styles.questionNumberMobile : {}),
-                    }}>
-                    {currentQuestionIndex + 1}
-                  </div>
-                  <div
-                    style={{
-                      ...styles.questionText,
-                      ...(isMobile ? styles.questionTextMobile : {}),
-                      color: isCurrentInvalid ? '#ef4444' : '#111827',
-                    }}>
-                    {currentQuestion.question}
-                  </div>
-                </div>
-                <Radio.Group
-                  className="customQuizRadio"
-                  onChange={e => {
-                    const selectedValue = e.target.value;
-                    const questionId = currentQuestion._id;
-
-                    setSelectedAnswers((prev: any) => ({
-                      ...prev,
-                      [questionId]: selectedValue,
-                    }));
-                    setInvalidQuestions(prevInvalid => {
-                      if (prevInvalid.includes(questionId)) {
-                        return prevInvalid.filter(id => id !== questionId);
-                      }
-                      return prevInvalid;
-                    });
-                  }}
-                  value={selectedAnswers[currentQuestion._id]}
-                  style={styles.answerGroup}>
-                  {currentQuestion.answerList.map((ans: any, idx: number) => {
-                    const optionLetter = String.fromCharCode(65 + idx);
-                    const isSelected =
-                      selectedAnswers[currentQuestion._id] === optionLetter;
-                    return (
-                      <div
-                        key={idx}
-                        style={{
-                          ...styles.answerOption,
-                          ...(isMobile ? styles.answerOptionMobile : {}),
-                          ...(isSelected ? styles.answerOptionSelected : {}),
-                        }}>
-                        <Radio
-                          rootClassName="hide-default-radio"
-                          className="customQuizRadioItem"
-                          value={optionLetter}
-                          style={styles.radioButton}>
-                          <div
-                            style={{
-                              ...styles.answerContent,
-                              ...(isMobile ? styles.answerContentMobile : {}),
-                            }}>
-                            <div
-                              style={{
-                                ...styles.answerLetterBox,
-                                ...(isMobile
-                                  ? styles.answerLetterBoxMobile
-                                  : {}),
-                                ...(isSelected
-                                  ? styles.answerLetterBoxSelected
-                                  : {}),
-                              }}>
-                              {optionLetter}
-                            </div>
-                            <div
-                              style={{
-                                ...styles.answerLabel,
-                                ...(isMobile ? styles.answerLabelMobile : {}),
-                              }}>
-                              {ans}
-                            </div>
-                          </div>
-                        </Radio>
-                      </div>
-                    );
-                  })}
-                </Radio.Group>
+        case 'PDF':
+          // Trình xem PDF riêng (react-pdf) thay cho iframe gốc: cần biết
+          // trang hiện tại / tổng số trang để tính tiến độ và "đọc hết trang
+          // cuối = hoàn thành" giống như video — iframe không cho biết điều
+          // đó. Kèm nút chuyển trang / zoom / tải / in.
+          return (
+            <PdfLessonViewer
+              data={data}
+              lessonId={lessonId}
+              userId={userId}
+              onComplete={() => onWatchFinish?.()}
+            />
+          );
+        case 'Text':
+          if (shuffledQuestions.length === 0) {
+            return (
+              <View style={styles.emptyQuizWrap}>
+                <Text style={styles.emptyQuizText}>
+                  Bài tập này chưa có câu hỏi.
+                </Text>
               </View>
-            </View>
+            );
+          }
+          // Hiện TỪNG CÂU một (không cuộn hết 1 lần) - đúng theo màn "Kiểm tra
+          // giữa khóa" trong design: thẻ thông tin bài kiểm tra + thanh tiến
+          // độ "Câu X/N" + 1 câu hỏi + Câu trước/Đánh dấu xem lại/Câu tiếp
+          // theo. KHÔNG hiện đồng hồ đếm ngược/"làm một lần"/"cần 70% để qua"
+          // như bản gốc vì dữ liệu thật không có thời hạn hay giới hạn số lần
+          // làm - ngưỡng đạt thật là ≥80% số câu (khớp với ngưỡng đạt bài
+          // thực hành PRACTICE_PASS_RATIO, xem lesson.service.ts).
+          const totalQuestions = shuffledQuestions.length;
+          const answeredCount = Object.keys(selectedAnswers).filter(qId =>
+            shuffledQuestions.some(q => q._id === qId),
+          ).length;
+          const currentQuestion =
+            shuffledQuestions[currentQuestionIndex] || shuffledQuestions[0];
+          const isCurrentInvalid = invalidQuestions.includes(
+            currentQuestion._id,
+          );
+          const isFlagged = flaggedQuestionIds.includes(currentQuestion._id);
+          const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
 
-            {/* FOOTER */}
-            <View
+          return (
+            <ScrollView
               style={{
-                ...styles.quizFooter,
-                ...(isMobile ? styles.quizFooterMobile : {}),
+                ...styles.quizContainer,
+                ...(isMobile ? styles.quizContainerMobile : {}),
               }}>
-              <Button
-                disabled={currentQuestionIndex === 0}
-                onClick={() => setCurrentQuestionIndex(i => Math.max(0, i - 1))}
-                style={styles.quizNavButton}>
-                ← Câu trước
-              </Button>
-              <Button
-                onClick={() =>
-                  setFlaggedQuestionIds(prev =>
-                    isFlagged
-                      ? prev.filter(id => id !== currentQuestion._id)
-                      : [...prev, currentQuestion._id],
-                  )
-                }
-                style={{
-                  ...styles.quizNavButton,
-                  ...(isFlagged ? styles.quizFlagButtonActive : {}),
-                }}>
-                {isFlagged ? '★ Đã đánh dấu' : '☆ Đánh dấu xem lại'}
-              </Button>
-              {isLastQuestion ? (
-                <Button
-                  onClick={handleSubmit}
+              <View style={styles.quizInfoCard}>
+                <Text style={styles.quizInfoTitle}>{data?.title}</Text>
+                <Text style={styles.quizInfoSubtitle}>
+                  {totalQuestions} câu · cần đúng tối thiểu 80% số câu để đạt
+                </Text>
+              </View>
+
+              <View style={styles.quizProgressRow}>
+                <Text style={styles.quizProgressLabel}>
+                  Câu {currentQuestionIndex + 1}/{totalQuestions}
+                </Text>
+                <Text style={styles.quizProgressLabel}>
+                  Đã trả lời {answeredCount} câu
+                </Text>
+              </View>
+              <View style={styles.quizProgressTrack}>
+                <View
                   style={{
-                    color: '#fff',
-                    ...styles.submitQuizButton,
-                    ...(isMobile ? styles.submitQuizButtonMobile : {}),
+                    ...styles.quizProgressFill,
+                    width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`,
+                  }}
+                />
+              </View>
+
+              <View style={styles.quizContent}>
+                <View
+                  key={currentQuestion._id}
+                  style={{
+                    ...styles.questionCard,
+                    ...(isMobile ? styles.questionCardMobile : {}),
+                    ...(isCurrentInvalid ? styles.questionCardInvalid : {}),
                   }}>
-                  Nộp bài
+                  <div
+                    style={{
+                      ...styles.questionTop,
+                      ...(isMobile ? styles.questionTopMobile : {}),
+                    }}>
+                    <div
+                      style={{
+                        ...styles.questionNumber,
+                        ...(isMobile ? styles.questionNumberMobile : {}),
+                      }}>
+                      {currentQuestionIndex + 1}
+                    </div>
+                    <div
+                      style={{
+                        ...styles.questionText,
+                        ...(isMobile ? styles.questionTextMobile : {}),
+                        color: isCurrentInvalid ? '#ef4444' : '#111827',
+                      }}>
+                      {currentQuestion.question}
+                    </div>
+                  </div>
+                  <Radio.Group
+                    className="customQuizRadio"
+                    onChange={e => {
+                      const selectedValue = e.target.value;
+                      const questionId = currentQuestion._id;
+
+                      setSelectedAnswers((prev: any) => ({
+                        ...prev,
+                        [questionId]: selectedValue,
+                      }));
+                      setInvalidQuestions(prevInvalid => {
+                        if (prevInvalid.includes(questionId)) {
+                          return prevInvalid.filter(id => id !== questionId);
+                        }
+                        return prevInvalid;
+                      });
+                    }}
+                    value={selectedAnswers[currentQuestion._id]}
+                    style={styles.answerGroup}>
+                    {currentQuestion.answerList.map((ans: any, idx: number) => {
+                      const optionLetter = String.fromCharCode(65 + idx);
+                      const isSelected =
+                        selectedAnswers[currentQuestion._id] === optionLetter;
+                      return (
+                        <div
+                          key={idx}
+                          style={{
+                            ...styles.answerOption,
+                            ...(isMobile ? styles.answerOptionMobile : {}),
+                            ...(isSelected ? styles.answerOptionSelected : {}),
+                          }}>
+                          <Radio
+                            rootClassName="hide-default-radio"
+                            className="customQuizRadioItem"
+                            value={optionLetter}
+                            style={styles.radioButton}>
+                            <div
+                              style={{
+                                ...styles.answerContent,
+                                ...(isMobile ? styles.answerContentMobile : {}),
+                              }}>
+                              <div
+                                style={{
+                                  ...styles.answerLetterBox,
+                                  ...(isMobile
+                                    ? styles.answerLetterBoxMobile
+                                    : {}),
+                                  ...(isSelected
+                                    ? styles.answerLetterBoxSelected
+                                    : {}),
+                                }}>
+                                {optionLetter}
+                              </div>
+                              <div
+                                style={{
+                                  ...styles.answerLabel,
+                                  ...(isMobile ? styles.answerLabelMobile : {}),
+                                }}>
+                                {ans}
+                              </div>
+                            </div>
+                          </Radio>
+                        </div>
+                      );
+                    })}
+                  </Radio.Group>
+                </View>
+              </View>
+
+              {/* FOOTER */}
+              <View
+                style={{
+                  ...styles.quizFooter,
+                  ...(isMobile ? styles.quizFooterMobile : {}),
+                }}>
+                <Button
+                  disabled={currentQuestionIndex === 0}
+                  onClick={() =>
+                    setCurrentQuestionIndex(i => Math.max(0, i - 1))
+                  }
+                  style={styles.quizNavButton}>
+                  ← Câu trước
                 </Button>
-              ) : (
                 <Button
                   onClick={() =>
-                    setCurrentQuestionIndex(i =>
-                      Math.min(totalQuestions - 1, i + 1),
+                    setFlaggedQuestionIds(prev =>
+                      isFlagged
+                        ? prev.filter(id => id !== currentQuestion._id)
+                        : [...prev, currentQuestion._id],
                     )
                   }
                   style={{
-                    color: '#fff',
-                    ...styles.submitQuizButton,
-                    ...(isMobile ? styles.submitQuizButtonMobile : {}),
+                    ...styles.quizNavButton,
+                    ...(isFlagged ? styles.quizFlagButtonActive : {}),
                   }}>
-                  Câu tiếp theo →
+                  {isFlagged ? '★ Đã đánh dấu' : '☆ Đánh dấu xem lại'}
                 </Button>
-              )}
-            </View>
-
-            {/* Danh sách câu hỏi - bấm số để nhảy thẳng tới câu bất kỳ,
-                không cần đi tuần tự qua Câu trước/tiếp theo. */}
-            <View style={styles.quizNavGridCard}>
-              <Text style={styles.quizNavGridTitle}>Danh sách câu hỏi</Text>
-              <View style={styles.quizNavGrid}>
-                {shuffledQuestions.map((q, idx) => {
-                  const isAnswered = !!selectedAnswers[q._id];
-                  const isCurrent = idx === currentQuestionIndex;
-                  return (
-                    <View
-                      key={q._id}
-                      onClick={() => setCurrentQuestionIndex(idx)}
-                      style={{
-                        ...styles.quizNavGridItem,
-                        ...(isAnswered ? styles.quizNavGridItemAnswered : {}),
-                        ...(isCurrent ? styles.quizNavGridItemCurrent : {}),
-                      }}>
-                      <Text
-                        style={
-                          isAnswered
-                            ? styles.quizNavGridItemTextAnswered
-                            : styles.quizNavGridItemText
-                        }>
-                        {idx + 1}
-                      </Text>
-                    </View>
-                  );
-                })}
+                {isLastQuestion ? (
+                  <Button
+                    onClick={handleSubmit}
+                    style={{
+                      color: '#fff',
+                      ...styles.submitQuizButton,
+                      ...(isMobile ? styles.submitQuizButtonMobile : {}),
+                    }}>
+                    Nộp bài
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() =>
+                      setCurrentQuestionIndex(i =>
+                        Math.min(totalQuestions - 1, i + 1),
+                      )
+                    }
+                    style={{
+                      color: '#fff',
+                      ...styles.submitQuizButton,
+                      ...(isMobile ? styles.submitQuizButtonMobile : {}),
+                    }}>
+                    Câu tiếp theo →
+                  </Button>
+                )}
               </View>
-              <Button
-                onClick={handleSubmit}
-                style={{
-                  color: '#1c2536',
-                  ...styles.quizSubmitFromGridButton,
-                }}>
-                Nộp bài
-              </Button>
-            </View>
-          </ScrollView>
-        );
-      default:
-        return null;
-    }
-  };
-  return (
-    <View>
-      {renderMedia()}
-      {contextHolder}
-      <QuestionModal question={visibleQuestion} onSubmit={handleAnswerSubmit} />
-      <ResumeLessonModal
-        open={
-          isConfirmingResume &&
-          !isFetching &&
-          (!progressRes?.subLessonId || progressRes.subLessonId === data?._id)
-        }
-        resumeInfo={resumeInfo}
-        onRestart={handleRestartLesson}
-        onResume={handleResumeLesson}
-      />
-    </View>
-  );
-});
+
+              {/* Danh sách câu hỏi - bấm số để nhảy thẳng tới câu bất kỳ,
+                không cần đi tuần tự qua Câu trước/tiếp theo. */}
+              <View style={styles.quizNavGridCard}>
+                <Text style={styles.quizNavGridTitle}>Danh sách câu hỏi</Text>
+                <View style={styles.quizNavGrid}>
+                  {shuffledQuestions.map((q, idx) => {
+                    const isAnswered = !!selectedAnswers[q._id];
+                    const isCurrent = idx === currentQuestionIndex;
+                    return (
+                      <View
+                        key={q._id}
+                        onClick={() => setCurrentQuestionIndex(idx)}
+                        style={{
+                          ...styles.quizNavGridItem,
+                          ...(isAnswered ? styles.quizNavGridItemAnswered : {}),
+                          ...(isCurrent ? styles.quizNavGridItemCurrent : {}),
+                        }}>
+                        <Text
+                          style={
+                            isAnswered
+                              ? styles.quizNavGridItemTextAnswered
+                              : styles.quizNavGridItemText
+                          }>
+                          {idx + 1}
+                        </Text>
+                      </View>
+                    );
+                  })}
+                </View>
+                <Button
+                  onClick={handleSubmit}
+                  style={{
+                    color: '#1c2536',
+                    ...styles.quizSubmitFromGridButton,
+                  }}>
+                  Nộp bài
+                </Button>
+              </View>
+            </ScrollView>
+          );
+        default:
+          return null;
+      }
+    };
+    return (
+      <View>
+        {renderMedia()}
+        {contextHolder}
+        <QuestionModal
+          question={visibleQuestion}
+          onSubmit={handleAnswerSubmit}
+        />
+        <ResumeLessonModal
+          open={
+            isConfirmingResume &&
+            !isFetching &&
+            (!progressRes?.subLessonId || progressRes.subLessonId === data?._id)
+          }
+          resumeInfo={resumeInfo}
+          onRestart={handleRestartLesson}
+          onResume={handleResumeLesson}
+        />
+      </View>
+    );
+  },
+);
 LibraryDetailItem.displayName = 'LibraryDetailItem';
 export default LibraryDetailItem;

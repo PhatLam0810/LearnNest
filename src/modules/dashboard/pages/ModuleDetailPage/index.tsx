@@ -715,6 +715,9 @@ const ModuleDetailPage = () => {
                 data={selectedLibrary}
                 lessonId={lessonDetail?._id}
                 onWatchFinish={onWatchFinish}
+                answeredQuestionIds={
+                  videoProgress?.correctlyAnsweredQuestionIds
+                }
               />
               <View style={styles.layoutTitleContainer}>
                 {currentContentIndex >= 0 && (

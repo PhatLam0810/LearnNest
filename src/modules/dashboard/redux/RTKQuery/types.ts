@@ -57,6 +57,9 @@ export interface LessonProgressResponse {
   completed: boolean;
   duration: number;
   subLessonId?: string;
+  // Câu hỏi giữa video (Library.questionList) đã trả lời ĐÚNG ở lần xem
+  // trước - dùng để không hiện lại đúng câu này nữa, xem LibraryDetailItem.
+  correctlyAnsweredQuestionIds?: string[];
 }
 export interface GetLessonProgressParams {
   userId: string;
