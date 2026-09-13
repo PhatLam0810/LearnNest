@@ -41,6 +41,32 @@ const nextConfig: NextConfig = {
     return config;
   },
   reactStrictMode: false,
+  // Security headers cho mọi route. HSTS đã do Vercel tự set; ở đây bổ sung
+  // chống clickjacking (X-Frame-Options + CSP frame-ancestors), chặn MIME
+  // sniffing, siết referrer và tắt các quyền trình duyệt không dùng tới.
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self'",
+          },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+    ];
+  },
   images: {
     domains: [
       'storage.googleapis.com',
