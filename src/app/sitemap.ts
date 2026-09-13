@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import fs from 'fs';
 import path from 'path';
+import { getPublicCourses } from './khoa-hoc/_lib/courses';
 
 const BASE_URL = 'https://www.learnestvhu.com'; // domain thật (apex redirect 308 sang đây)
 
@@ -57,7 +58,7 @@ function collectStaticRoutes(
   return routes;
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const appDir = path.join(process.cwd(), 'src', 'app');
   const allRoutes = Array.from(new Set(collectStaticRoutes(appDir)));
 
@@ -72,6 +73,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const lastModified = new Date();
 
+  // Trang chi tiết từng khóa học là route ĐỘNG (/khoa-hoc/[id]) nên hàm quét
+  // route tĩnh ở trên không thấy - phải lấy danh sách khóa từ API và thêm tay.
+  // Đây mới là nội dung thật để Google index (trước đây sitemap chỉ có trang
+  // chủ + mấy trang đăng nhập/đăng ký).
+  const courses = await getPublicCourses();
+  const courseEntries = courses.map(c => ({
+    url: `${BASE_URL}/khoa-hoc/${c._id}`,
+    lastModified,
+    changeFrequency: 'weekly' as const,
+    priority: 0.9,
+  }));
+
   return [
     {
       url: BASE_URL,
@@ -85,5 +98,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     })),
+    ...courseEntries,
   ];
 }

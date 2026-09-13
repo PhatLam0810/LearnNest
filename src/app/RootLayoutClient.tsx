@@ -37,6 +37,25 @@ export default function RootLayoutClient({
   const pathname = usePathname();
   const showFooter = pathname === '/dashboard/home';
 
+  // Trang khóa học công khai phải render được HOÀN TOÀN phía server để Google
+  // đọc được nội dung. PersistGate (redux-persist) chỉ render children SAU khi
+  // rehydrate ở trình duyệt -> khi SSR nó trả về rỗng, HTML gửi cho crawler
+  // không có chữ nào. Các trang này không dùng state đã lưu nên cho đi vòng
+  // qua PersistGate; phần còn lại của app giữ nguyên như cũ.
+  const isPublicCoursePage = pathname?.startsWith('/khoa-hoc');
+  if (isPublicCoursePage) {
+    return (
+      <>
+        <ConfigProvider locale={viVN}>
+          <Provider store={store}>
+            <View style={styles.appShell}>{children}</View>
+          </Provider>
+        </ConfigProvider>
+        <Analytics />
+      </>
+    );
+  }
+
   return (
     <>
       {/* locale={viVN}: antd trước đây không set locale nào - mọi text mặc

@@ -34,11 +34,30 @@ export const metadata: Metadata = {
   },
 };
 
+// schema.org: nói rõ đây là nền tảng học của một trường đại học, kèm ô tìm kiếm
+// -> Google hiểu đúng thực thể thay vì coi như một website chung chung.
+const ORGANIZATION_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'EducationalOrganization',
+  name: `${SITE_NAME} - Trung tâm Tin học, Trường Đại học Văn Hiến (VHU)`,
+  alternateName: SITE_NAME,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  sameAs: [SITE_URL],
+};
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="vi">
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
+        <script
+          type="application/ld+json"
+          // Hằng số do chính chúng ta định nghĩa, không phải dữ liệu người dùng.
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(ORGANIZATION_JSON_LD),
+          }}
+        />
       </head>
       <body>
         <RootLayoutClient>{children}</RootLayoutClient>
