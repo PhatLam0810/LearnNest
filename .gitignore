@@ -55,3 +55,7 @@ ds-bundle/
 .design-sync/.cache/
 .design-sync/learnings/
 .design-sync/node_modules
+
+# Dự án dùng yarn (field resolutions là của yarn) - package-lock gây lệch cây
+# phụ thuộc và báo động bảo mật sai.
+package-lock.json
