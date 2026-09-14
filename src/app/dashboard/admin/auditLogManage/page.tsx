@@ -27,6 +27,40 @@ const ACTION_LABEL: Record<string, string> = {
   'user.role.revoke': 'Gỡ quyền admin',
 };
 
+// Dịch từng field trong `meta` sang tiếng Việt dễ hiểu — khớp đúng các key
+// mà AUDIT_PICKERS (BE) tạo ra, xem audit.actions.ts. Field lạ (action mới
+// thêm sau này quên cập nhật ở đây) vẫn hiện được, chỉ là giữ nguyên tên key.
+const META_FIELD_LABEL: Record<string, string> = {
+  email: 'Email',
+  studentId: 'Mã số sinh viên',
+  fullName: 'Họ và tên',
+  roleLevel: 'Cấp quyền',
+  roleId: 'Mã vai trò',
+  // targetUserId chỉ hiện khi KHÔNG có targetUserName/Email đi kèm (user đã
+  // bị xoá trước khi audit log được tạo - xem enrichTargetUser ở BE).
+  targetUserId: 'Người dùng bị tác động (mã)',
+  targetUserName: 'Người dùng bị tác động',
+  targetUserEmail: 'Email người dùng bị tác động',
+};
+
+// targetUserId chỉ còn ý nghĩa hiển thị khi không resolve được thành tên -
+// có tên rồi thì hiện mã ObjectId thô chỉ gây rối, không thêm thông tin.
+const formatMetaEntries = (
+  meta: Record<string, unknown> = {},
+): [string, string][] => {
+  const hasTargetName = 'targetUserName' in meta;
+  return Object.entries(meta)
+    .filter(([key, value]) => {
+      if (value === undefined || value === null || value === '') return false;
+      if (key === 'targetUserId' && hasTargetName) return false;
+      return true;
+    })
+    .map(([key, value]) => [
+      META_FIELD_LABEL[key] || key,
+      typeof value === 'object' ? JSON.stringify(value) : String(value),
+    ]);
+};
+
 const AuditLogManage: React.FC = () => {
   const { listItem, currentData, fetchData } = useAppPagination<AuditLogItem>({
     apiUrl: 'admin/audit-logs',
@@ -60,9 +94,22 @@ const AuditLogManage: React.FC = () => {
     },
     {
       title: 'Đối tượng',
-      dataIndex: 'targetId',
       key: 'targetId',
-      render: (v?: string) => <Text>{v || '—'}</Text>,
+      render: (_: unknown, r: AuditLogItem) => {
+        const name = r.meta?.targetUserName as string | undefined;
+        const email = r.meta?.targetUserEmail as string | undefined;
+        if (name) {
+          return (
+            <View>
+              <Text>{name}</Text>
+              {email && (
+                <Text style={{ color: '#6b7280', fontSize: 12 }}>{email}</Text>
+              )}
+            </View>
+          );
+        }
+        return <Text>{r.targetId || '—'}</Text>;
+      },
     },
     {
       title: 'Trạng thái',
@@ -126,7 +173,13 @@ const AuditLogManage: React.FC = () => {
               {ACTION_LABEL[selected.action] || selected.action}
             </Text>
             <Text>
-              <b>Đối tượng:</b> {selected.targetId || '—'}
+              <b>Đối tượng:</b>{' '}
+              {(selected.meta?.targetUserName as string) ||
+                selected.targetId ||
+                '—'}
+              {selected.meta?.targetUserEmail
+                ? ` (${selected.meta.targetUserEmail})`
+                : ''}
             </Text>
             <Text>
               <b>Trạng thái:</b>{' '}
@@ -140,11 +193,37 @@ const AuditLogManage: React.FC = () => {
             <Text>
               <b>IP:</b> {selected.ip || '—'}
             </Text>
-            <Text style={{ whiteSpace: 'pre-wrap' }}>
-              <b>Chi tiết:</b>
-              {'\n'}
-              {JSON.stringify(selected.meta ?? {}, null, 2)}
-            </Text>
+            {formatMetaEntries(selected.meta).length > 0 && (
+              <View style={{ marginTop: 4 }}>
+                <Text>
+                  <b>Chi tiết:</b>
+                </Text>
+                <View
+                  style={{
+                    marginTop: 4,
+                    border: '1px solid #f0f0f0',
+                    borderRadius: 8,
+                    overflow: 'hidden',
+                  }}>
+                  {formatMetaEntries(selected.meta).map(([label, value], i) => (
+                    <View
+                      key={label}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        padding: '8px 12px',
+                        backgroundColor: i % 2 === 0 ? '#fafafa' : '#fff',
+                        borderTop: i === 0 ? undefined : '1px solid #f0f0f0',
+                      }}>
+                      <Text style={{ width: 220, color: '#6b7280' }}>
+                        {label}
+                      </Text>
+                      <Text style={{ flex: 1 }}>{value}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
             <Text style={{ color: '#6b7280', fontSize: 12 }}>
               {selected.userAgent || ''}
             </Text>
