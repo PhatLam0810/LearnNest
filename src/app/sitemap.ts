@@ -1,103 +1,43 @@
 import type { MetadataRoute } from 'next';
-import fs from 'fs';
-import path from 'path';
 import { getPublicCourses } from './khoa-hoc/_lib/courses';
 
 const BASE_URL = 'https://www.learnestvhu.com'; // domain thật (apex redirect 308 sang đây)
 
-// Các route (hoặc tiền tố route) không nên xuất hiện trong sitemap công khai:
-// - '/dashboard': toàn bộ nằm sau đăng nhập, Google không truy cập được nếu chưa xác thực
-// - '/forgotPassword/changePassword': trang xử lý theo token đặt lại mật khẩu, không có giá trị index
-const EXCLUDED_PREFIXES = ['/dashboard', '/forgotPassword/changePassword'];
-
-const PAGE_FILE_NAMES = new Set(['page.tsx', 'page.ts', 'page.jsx', 'page.js']);
-
-function isTraversableSegment(name: string): boolean {
-  if (name.startsWith('_')) return false; // thư mục private của Next.js
-  if (name.startsWith('.')) return false;
-  if (name.startsWith('@')) return false; // parallel routes
-  if (name.includes('[')) return false; // dynamic segment -> bỏ qua vì cần params
-  return true;
-}
-
-function collectStaticRoutes(
-  dir: string,
-  urlSegments: string[] = [],
-): string[] {
-  let entries: fs.Dirent[];
-  try {
-    entries = fs.readdirSync(dir, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-
-  const routes: string[] = [];
-
-  const hasPage = entries.some(
-    entry => entry.isFile() && PAGE_FILE_NAMES.has(entry.name),
-  );
-
-  if (hasPage) {
-    routes.push(urlSegments.length === 0 ? '/' : `/${urlSegments.join('/')}`);
-  }
-
-  for (const entry of entries) {
-    if (!entry.isDirectory() || !isTraversableSegment(entry.name)) continue;
-
-    // Route group dạng (auth) không xuất hiện trong URL thực tế
-    const isRouteGroup = entry.name.startsWith('(') && entry.name.endsWith(')');
-    const nextSegments = isRouteGroup
-      ? urlSegments
-      : [...urlSegments, entry.name];
-
-    routes.push(
-      ...collectStaticRoutes(path.join(dir, entry.name), nextSegments),
-    );
-  }
-
-  return routes;
-}
+// Route công khai đáng để Google index, khai TƯỜNG MINH.
+//
+// Trước đây hàm này tự quét thư mục src/app bằng fs để tìm route. Cách đó hỏng
+// khi sitemap chuyển sang chạy lúc runtime (từ khi thêm fetch danh sách khóa
+// học): bundle serverless trên Vercel KHÔNG có thư mục mã nguồn, fs đọc không
+// ra gì -> sitemap tụt từ 12 xuống 7 URL và mất luôn /khoa-hoc. Cả site chỉ có
+// 8 trang công khai nên một mảng tường minh vừa đúng vừa không thể hỏng.
+//
+// Cố ý BỎ /login, /forgotPassword, /forgotPassword/changePassword và
+// /signup/createAccount: là trang tiện ích, không có giá trị tìm kiếm.
+const PUBLIC_ROUTES: { path: string; priority: number }[] = [
+  { path: '/', priority: 1 },
+  { path: '/khoa-hoc', priority: 0.9 },
+  { path: '/signup', priority: 0.5 },
+];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const appDir = path.join(process.cwd(), 'src', 'app');
-  const allRoutes = Array.from(new Set(collectStaticRoutes(appDir)));
-
-  const publicRoutes = allRoutes
-    .filter(route => route !== '/')
-    .filter(
-      route =>
-        !EXCLUDED_PREFIXES.some(
-          prefix => route === prefix || route.startsWith(`${prefix}/`),
-        ),
-    );
-
   const lastModified = new Date();
 
-  // Trang chi tiết từng khóa học là route ĐỘNG (/khoa-hoc/[id]) nên hàm quét
-  // route tĩnh ở trên không thấy - phải lấy danh sách khóa từ API và thêm tay.
-  // Đây mới là nội dung thật để Google index (trước đây sitemap chỉ có trang
-  // chủ + mấy trang đăng nhập/đăng ký).
+  // Trang chi tiết khóa học là route động (/khoa-hoc/[id]) - lấy id từ API.
+  // API lỗi thì getPublicCourses trả [] và sitemap vẫn còn các route tĩnh.
   const courses = await getPublicCourses();
-  const courseEntries = courses.map(c => ({
-    url: `${BASE_URL}/khoa-hoc/${c._id}`,
-    lastModified,
-    changeFrequency: 'weekly' as const,
-    priority: 0.9,
-  }));
 
   return [
-    {
-      url: BASE_URL,
+    ...PUBLIC_ROUTES.map(route => ({
+      url: route.path === '/' ? BASE_URL : `${BASE_URL}${route.path}`,
       lastModified,
-      changeFrequency: 'weekly',
-      priority: 1,
-    },
-    ...publicRoutes.map(route => ({
-      url: `${BASE_URL}${route}`,
+      changeFrequency: 'weekly' as const,
+      priority: route.priority,
+    })),
+    ...courses.map(course => ({
+      url: `${BASE_URL}/khoa-hoc/${course._id}`,
       lastModified,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
     })),
-    ...courseEntries,
   ];
 }
