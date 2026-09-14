@@ -372,7 +372,11 @@ const HeaderLayout: React.FC = ({}) => {
         placement="left"
         open={open}
         onClose={() => setOpen(false)}
-        width={260}>
+        width={260}
+        styles={{ body: { padding: 0 } }}>
+        {/* .ant-drawer-body mặc định padding 24px, cộng dồn với padding
+            riêng của .drawer-header (20px) / .drawer-content (16px) bên
+            dưới -> lề đôi. Bỏ padding mặc định, để 2 khối tự kiểm soát. */}
         <div className="drawer-header">
           <Image
             src="/images/LogoVhu.png"

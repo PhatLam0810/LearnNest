@@ -4,6 +4,7 @@ import { Progress } from 'antd';
 import { useRouter } from 'next/navigation';
 import { MyCourseItem } from '@/hooks/useMyCourses';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
+import { useResponsive } from '@/styles/responsive';
 import styles from './styles';
 
 type ContinuingCoursesProps = {
@@ -23,10 +24,19 @@ const ContinuingCourses: React.FC<ContinuingCoursesProps> = ({
   formatRelativeTime,
 }) => {
   const router = useRouter();
+  const { isMobile } = useResponsive();
+  // repeat(auto-fill, minmax(240px, 1fr)) để lại 1 cột ma bên phải trên màn
+  // hẹp (auto-fill tính số cột theo bề rộng container thực tế, có thể rộng
+  // hơn viewport khả kiến) - ép hẳn 1 cột full-width ở mobile thay vì để
+  // grid tự tính.
+  const gridStyle = [
+    styles.grid,
+    isMobile ? { gridTemplateColumns: '1fr' } : null,
+  ];
 
   if (loading) {
     return (
-      <View style={styles.grid}>
+      <View style={gridStyle}>
         {[0, 1].map(i => (
           <View key={i} style={styles.cardSkeleton} />
         ))}
@@ -37,7 +47,7 @@ const ContinuingCourses: React.FC<ContinuingCoursesProps> = ({
   if (!courses?.length) return null;
 
   return (
-    <View style={styles.grid}>
+    <View style={gridStyle}>
       {courses.map(course => (
         <View
           key={course.lessonId}
