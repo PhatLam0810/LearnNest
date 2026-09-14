@@ -301,7 +301,10 @@ const ImportUserManage = () => {
           <Text type="secondary" className="import-user-manage__hint">
             File Excel bắt buộc gồm các cột: <strong>Họ và tên</strong>,{' '}
             <strong>MSSV</strong>, <strong>Email</strong>. Có thể thêm các cột
-            tùy chọn: Lớp, Khoa, Ngành.
+            tùy chọn: Lớp, Khoa, Ngành.{' '}
+            <a href="/templates/mau-nhap-nguoi-dung.xlsx" download>
+              Tải file mẫu
+            </a>
           </Text>
           <Upload
             maxCount={1}
