@@ -60,10 +60,13 @@ const PracticeTaskContent: React.FC<Props> = ({
     useState<PracticeSubmitResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: detail, isFetching } =
-    dashboardQuery.useGetPracticeTaskDetailStudentQuery(taskId, {
-      skip: !taskId,
-    });
+  const {
+    data: detail,
+    isFetching,
+    error: detailError,
+  } = dashboardQuery.useGetPracticeTaskDetailStudentQuery(taskId, {
+    skip: !taskId,
+  });
   const { data: submissions, refetch: refetchSubmissions } =
     dashboardQuery.useGetMyPracticeSubmissionsQuery(taskId, {
       skip: !taskId,
@@ -101,9 +104,16 @@ const PracticeTaskContent: React.FC<Props> = ({
   }
 
   if (!detail?.task) {
+    // Backend chặn bài chưa tới lượt bằng 403 kèm lý do cụ thể ("Bạn cần xem
+    // hết video trước đó..."). Hiện đúng câu đó thay vì "Không tìm thấy đề
+    // thực hành": bài CÓ tồn tại, chỉ là chưa mở khóa — báo sai sẽ khiến học
+    // viên tưởng đề bị xóa và đi hỏi admin.
+    const rawMessage =
+      (detailError as any)?.data?.message ?? (detailError as any)?.message;
+    const lockedMessage = typeof rawMessage === 'string' ? rawMessage : '';
     return (
       <div className="practice-content">
-        <Empty description="Không tìm thấy đề thực hành" />
+        <Empty description={lockedMessage || 'Không tìm thấy đề thực hành'} />
       </div>
     );
   }

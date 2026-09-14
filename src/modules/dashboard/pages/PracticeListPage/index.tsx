@@ -118,12 +118,16 @@ const PracticeListPage = () => {
   const filteredCourses = (courses || []).filter(
     c => (!subject || c.subject === subject) && matchesKeyword(c.title),
   );
-  // Toàn bộ đề (không gom theo khóa) — để học viên tìm nhanh 1 bài cụ thể mà
-  // không cần bấm vào từng thẻ khóa trước. Mặc định sắp theo tên cho dễ dò,
-  // hoặc theo độ khó Dễ → Khó nếu chọn.
+  // CHỈ các đề lẻ (chưa gắn khóa nào) — đề thuộc khóa phải vào qua thẻ khóa
+  // để đi đúng lộ trình, vì backend nay chặn bài chưa tới lượt
+  // (PracticeTaskService.assertTaskAccessible). Trước đây danh sách này
+  // không lọc lessonId nên hiện thẳng MỌI đề trong hệ thống, mở được bài
+  // chưa mở khóa chỉ bằng một cú bấm — trái hẳn với phần khóa theo thứ tự ở
+  // trang học. Mặc định sắp theo tên cho dễ dò, hoặc theo độ khó nếu chọn.
   const allTasksFiltered = [...(allTasks || [])]
     .filter(
       t =>
+        !t.lessonId &&
         (!subject || t.subject === subject) &&
         matchesKeyword(t.title, t.description),
     )
