@@ -317,3 +317,16 @@ export interface LessonLearnersResponse {
   totalLearners: number;
   data: LessonLearnersData;
 }
+
+export interface ClassAssignmentItem {
+  _id: string;
+  practiceClassId: string;
+  taskId: { _id: string; title: string; subject: 'Word' | 'Excel' };
+  dueDate: string;
+  createdAt: string;
+}
+
+export interface AssignTaskPayload {
+  taskId: string;
+  dueDate: string;
+}

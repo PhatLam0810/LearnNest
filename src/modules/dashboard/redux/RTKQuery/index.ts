@@ -21,6 +21,8 @@ import {
   MyResultsResponse,
   NotificationListResponse,
   RetryQueueItem,
+  MyAssignmentItem,
+  SearchResults,
   PassRateReport,
   QuizResultAdminItem,
   RecentTestResult,
@@ -539,6 +541,18 @@ export const dashboardQuery = baseQuery.injectEndpoints({
     // ---- Cần làm lại (bài thực hành chưa đạt) ----
     getMyRetryQueue: builder.query<RetryQueueItem[], void>({
       query: () => '/practice/my-retry-queue',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
+    // ---- Bài được giao (admin giao qua lớp thực hành) ----
+    getMyAssignments: builder.query<MyAssignmentItem[], void>({
+      query: () => '/practice/my-assignments',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
+    // ---- Tìm kiếm toàn hệ thống (SearchBar ở header) ----
+    search: builder.query<SearchResults, string>({
+      query: q => ({ url: '/search', method: 'GET', params: { q } }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
 

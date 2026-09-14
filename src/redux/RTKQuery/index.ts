@@ -39,6 +39,7 @@ export const baseQuery = createApi({
     'MockExam',
     'LessonNote',
     'Bookmark',
+    'ClassAssignment',
   ],
   endpoints: () => ({}),
 });

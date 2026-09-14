@@ -101,6 +101,27 @@ const styles = StyleSheet.create({
     border: '1px solid #e2e8f0',
     overflow: 'hidden',
   },
+  assignSection: {
+    marginTop: 20,
+    paddingTop: 16,
+    borderTop: '1px solid #f0f0f0',
+  },
+  assignForm: {
+    display: 'flex',
+    gap: 8,
+    marginBottom: 12,
+    flexWrap: 'wrap',
+  },
+  assignRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    padding: '8px 12px',
+    borderRadius: 8,
+    border: '1px solid #e2e8f0',
+    marginBottom: 8,
+  },
 });
 
 export default styles;

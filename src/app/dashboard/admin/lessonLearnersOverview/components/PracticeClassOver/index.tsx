@@ -112,6 +112,7 @@ const LessonLearnersOverview: React.FC = () => {
         open={isPracticeModalVisible}
         onClose={handlePracticeModalClose}
         selectedPracticeClassId={selectedPracticeClass?._id}
+        selectedLessonId={selectedPracticeClass?.lessonId}
         onExport={handlePracticeExport}
       />
     </div>

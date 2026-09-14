@@ -22,6 +22,8 @@ import {
   PracticeCriteriaInput,
   PracticeClassListResponse,
   PracticeClassUsersResponse,
+  ClassAssignmentItem,
+  AssignTaskPayload,
   ReminderLogItem,
   ReminderLogType,
   RemindLearnersBulkResponse,
@@ -655,6 +657,53 @@ export const adminQuery = baseQuery.injectEndpoints({
         body,
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    // Giao 1 đề thực hành cho cả lớp kèm hạn nộp — upsert phía BE, giao lại
+    // cùng 1 đề chỉ đổi hạn nộp thay vì tạo bản ghi trùng.
+    assignTaskToClass: builder.mutation<
+      ClassAssignmentItem,
+      { classId: string; body: AssignTaskPayload }
+    >({
+      query: ({ classId, body }) => ({
+        url: `admin/practice-classes/${classId}/assignments`,
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_result, _error, { classId }) => [
+        { type: 'ClassAssignment', id: classId },
+      ],
+    }),
+    getClassAssignments: builder.query<ClassAssignmentItem[], string>({
+      query: classId => ({
+        url: `admin/practice-classes/${classId}/assignments`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_result, _error, classId) => [
+        { type: 'ClassAssignment', id: classId },
+      ],
+    }),
+    removeClassAssignment: builder.mutation<
+      void,
+      { classId: string; assignmentId: string }
+    >({
+      query: ({ classId, assignmentId }) => ({
+        url: `admin/practice-classes/${classId}/assignments/${assignmentId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_result, _error, { classId }) => [
+        { type: 'ClassAssignment', id: classId },
+      ],
+    }),
+    // File CSV, giống hệt pattern exportLearners (blob) ở trên nhưng khác
+    // định dạng (điểm số theo bài giao thay vì roster).
+    exportClassGrades: builder.mutation<Blob, { classId: string }>({
+      query: ({ classId }) => ({
+        url: `admin/practice-classes/${classId}/grades.csv`,
+        method: 'GET',
+        responseHandler: response => response.blob(),
+      }),
     }),
   }),
   overrideExisting: true,

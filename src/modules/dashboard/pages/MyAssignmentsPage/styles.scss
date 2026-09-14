@@ -1,0 +1,71 @@
+.my-assignments-page {
+  padding: 24px;
+  max-width: 820px;
+}
+
+.my-assignments-center {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.my-assignments-heading {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.my-assignments-sub {
+  color: #666;
+  margin: 0 0 16px;
+}
+
+.my-assignments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.my-assignments-item {
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  background: #fff;
+  transition: box-shadow 0.15s ease;
+}
+
+.my-assignments-item:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.my-assignments-item--overdue {
+  border-color: #ffccc7;
+  background: #fff8f7;
+}
+
+.my-assignments-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.my-assignments-class {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1d418a;
+}
+
+.my-assignments-due {
+  margin-left: auto;
+  font-size: 12px;
+  color: #9aa5b8;
+}
+
+.my-assignments-title {
+  font-size: 14.5px;
+  color: #1c2536;
+  line-height: 1.5;
+}

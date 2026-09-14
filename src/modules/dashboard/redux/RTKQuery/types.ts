@@ -277,6 +277,33 @@ export interface RetryQueueItem {
   fromMockExam: boolean;
 }
 
+// ---- Tìm kiếm toàn hệ thống ----
+export interface SearchResultItem {
+  _id: string;
+  title: string;
+  snippet: string;
+  link: string;
+  meta?: string;
+}
+
+export interface SearchResults {
+  lessons: SearchResultItem[];
+  libraries: SearchResultItem[];
+  tasks: SearchResultItem[];
+}
+
+// ---- Bài được giao (admin giao qua lớp thực hành) ----
+export interface MyAssignmentItem {
+  assignmentId: string;
+  taskId: string;
+  taskTitle: string;
+  subject: 'Word' | 'Excel';
+  dueDate: string;
+  className?: string;
+  status: 'not_submitted' | 'passed' | 'failed';
+  isOverdue: boolean;
+}
+
 // ---- Hỏi đáp của tôi ----
 export interface MyQuestionItem {
   _id: string;

@@ -25,6 +25,7 @@ import Icon, {
   QuestionCircleOutlined,
   TrophyOutlined,
   BarChartOutlined,
+  CarryOutOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -244,6 +245,12 @@ const HeaderLayout: React.FC = ({}) => {
             onClick: () => router.push('/dashboard/my-qa'),
           },
           {
+            key: 'my-assignments',
+            label: 'Bài được giao',
+            icon: <CarryOutOutlined />,
+            onClick: () => router.push('/dashboard/my-assignments'),
+          },
+          {
             key: 'achievements',
             label: 'Thành tích',
             icon: <TrophyOutlined />,
@@ -452,6 +459,16 @@ const HeaderLayout: React.FC = ({}) => {
                 router.push('/dashboard/my-qa');
               }}>
               Hỏi đáp của tôi
+            </Button>
+          )}
+          {!isAdmin && (
+            <Button
+              block
+              onClick={() => {
+                setOpen(false);
+                router.push('/dashboard/my-assignments');
+              }}>
+              Bài được giao
             </Button>
           )}
           {!isAdmin && (
