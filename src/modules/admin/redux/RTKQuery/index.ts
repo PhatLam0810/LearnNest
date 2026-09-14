@@ -24,6 +24,9 @@ import {
   PracticeClassUsersResponse,
   ClassAssignmentItem,
   AssignTaskPayload,
+  AssignTaskBulkPayload,
+  AssignTaskBulkResult,
+  LessonAssignmentItem,
   ReminderLogItem,
   ReminderLogType,
   RemindLearnersBulkResponse,
@@ -327,14 +330,21 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res?.data ?? res,
     }),
+    // Sửa lại đúng route thật của BE (admin.controller.ts
+    // getPracticeClassesByLesson là POST 'practice-classes', KHÔNG có
+    // :lessonId trong URL - trước đây hook này gọi sai URL
+    // (GET admin/practice-classes/:lessonId, không khớp route nào cả) và
+    // chưa từng được dùng ở đâu nên không ai phát hiện. lessonId lọc qua
+    // filter, đúng cách paginationService.paginate xử lý (model.find(filter)
+    // trực tiếp).
     getPracticeClasses: builder.query<
       PracticeClassListResponse,
       { lessonId: string; search?: string; pageNum?: number; pageSize?: number }
     >({
       query: ({ lessonId, ...params }) => ({
-        url: `admin/practice-classes/${lessonId}`,
-        method: 'GET',
-        params,
+        url: `admin/practice-classes`,
+        method: 'POST',
+        body: { ...params, filter: { lessonId } },
       }),
       transformResponse: (res: any) => res?.data ?? res,
     }),
@@ -704,6 +714,25 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'GET',
         responseHandler: response => response.blob(),
       }),
+    }),
+    // ---- Trang "Giao Bài" ----
+    assignTaskToClassesBulk: builder.mutation<
+      AssignTaskBulkResult,
+      AssignTaskBulkPayload
+    >({
+      query: body => ({
+        url: `admin/practice-classes/assignments/bulk`,
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getLessonAssignments: builder.query<LessonAssignmentItem[], string>({
+      query: lessonId => ({
+        url: `admin/lessons/${lessonId}/assignments`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
   }),
   overrideExisting: true,

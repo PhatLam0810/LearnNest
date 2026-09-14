@@ -330,3 +330,25 @@ export interface AssignTaskPayload {
   taskId: string;
   dueDate: string;
 }
+
+// ---- Trang "Giao Bài" (chọn 1+ lớp thuộc cùng 1 khóa, giao 1 đề) ----
+export interface AssignTaskBulkPayload {
+  classIds: string[];
+  taskId: string;
+  dueDate: string;
+}
+
+export interface AssignTaskBulkResult {
+  succeeded: string[];
+  failed: { classId: string; message: string }[];
+}
+
+export interface LessonAssignmentItem {
+  assignmentId: string;
+  classId: string;
+  className: string;
+  taskId: string;
+  taskTitle: string;
+  subject: 'Word' | 'Excel';
+  dueDate: string;
+}

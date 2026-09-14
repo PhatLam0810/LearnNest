@@ -10,6 +10,7 @@ import UserManage from './userManage/page';
 import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
 import LessonLearnersOverview from './lessonLearnersOverview';
+import GiaoBaiPage from './giaoBai/page';
 import FeedbackManage from './feedbackManage/page';
 import AuditLogManage from './auditLogManage/page';
 import CommentReportsManage from './commentReportsManage/page';
@@ -38,6 +39,11 @@ const items: TabsProps['items'] = [
     key: '4',
     label: 'Tổng Quan Người Học',
     children: <LessonLearnersOverview />,
+  },
+  {
+    key: '11',
+    label: 'Giao Bài',
+    children: <GiaoBaiPage />,
   },
   {
     key: '5',
