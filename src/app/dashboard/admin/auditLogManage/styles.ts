@@ -1,104 +1,139 @@
 import { StyleSheet } from '@styles';
 
-const NAVY = '#1d3a6e';
-
+// Giá trị lấy đúng theo design (modal "Chi tiết thao tác" + bảng Nhật Ký
+// Thao Tác) - xem trao đổi ngày 14/09. --color-vhu-primary là biến CSS
+// thương hiệu đã dùng sẵn trong dự án (khớp header bảng + header modal).
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     margin: 20,
   },
   modalHeader: {
-    backgroundColor: NAVY,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    padding: '16px 20px',
+    background: 'var(--color-vhu-primary)',
+    padding: '22px 28px',
   },
   modalHeaderTop: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: 20,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 700,
+    fontWeight: 600,
     color: '#fff',
   },
+  modalCloseIcon: {
+    fontSize: 17,
+    color: 'rgba(255,255,255,0.7)',
+    cursor: 'pointer',
+    // Áp trực tiếp vào <span> gốc (không qua react-native-web Text) - số
+    // trần ở đây được CSS hiểu đúng nghĩa là hệ số nhân (1 = bằng
+    // font-size), không tự thành px. Khác với lineHeight số trần trong các
+    // component <Text>/<View> khác của react-native-web (nơi số trần lại bị
+    // coi là px tuyệt đối) - xem qaInbox/styles.ts.replyTextarea.
+    lineHeight: 1,
+  },
   modalTimestamp: {
-    marginTop: 4,
+    marginTop: 6,
     fontSize: 13,
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.72)',
   },
   modalBody: {
-    padding: '20px',
+    padding: '26px 28px 28px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 26,
   },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: 0.5,
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: '0.08em',
     color: '#9ca3af',
-    marginBottom: 6,
   },
   actionHeadline: {
-    fontSize: 16,
-    fontWeight: 700,
+    fontSize: 17,
+    fontWeight: 500,
     color: '#111827',
-    marginBottom: 16,
+    lineHeight: 25,
   },
+  // Đường phân cách giữa 2 card KHÔNG phải border riêng - là nền xám lộ ra
+  // qua khe gap: 1px giữa 2 ô nền trắng, đúng cách design dựng (xem
+  // modal-block trích từ file design).
   cardsRow: {
-    display: 'flex',
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: 1,
+    background: '#eef1f6',
+    border: '1px solid #eef1f6',
+    borderRadius: 10,
+    overflow: 'hidden',
   },
   card: {
-    flex: 1,
-    border: '1px solid #e5e7eb',
-    borderRadius: 10,
-    padding: '10px 14px',
-    backgroundColor: '#fafafa',
+    background: '#fff',
+    padding: '16px 18px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
   },
   cardLabel: {
     fontSize: 12,
     color: '#6b7280',
-    marginBottom: 4,
   },
   cardName: {
     fontSize: 14,
-    fontWeight: 700,
+    fontWeight: 500,
     color: '#111827',
   },
   cardEmail: {
     fontSize: 12,
-    color: '#2563eb',
+    color: 'var(--color-vhu-primary)',
   },
   errorBox: {
     backgroundColor: '#fff1f0',
     border: '1px solid #ffccc7',
     borderRadius: 8,
     padding: '8px 12px',
-    marginBottom: 12,
   },
   detailTable: {
-    border: '1px solid #f0f0f0',
-    borderRadius: 8,
+    border: '1px solid #eef1f6',
+    borderRadius: 10,
     overflow: 'hidden',
   },
+  // KHÔNG có borderTop - footer là mục cuối cùng trong cùng cột gap:26 của
+  // modalBody, không phải 1 dải riêng có viền như bản cũ.
   modalFooter: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '12px 20px',
-    borderTop: '1px solid #f0f0f0',
+    gap: 16,
+    flexWrap: 'wrap',
   },
   userAgentText: {
     fontSize: 12,
     color: '#9ca3af',
-    maxWidth: 260,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
+  },
+  secondaryBtn: {
+    height: 38,
+    padding: '0 18px',
+    border: '1px solid #e5e9f0',
+    borderRadius: 8,
+    fontSize: 13,
+    background: '#fff',
+    cursor: 'pointer',
+  },
+  primaryBtn: {
+    height: 38,
+    padding: '0 22px',
+    border: 'none',
+    borderRadius: 8,
+    background: 'var(--color-vhu-primary)',
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: 'pointer',
   },
 });
 

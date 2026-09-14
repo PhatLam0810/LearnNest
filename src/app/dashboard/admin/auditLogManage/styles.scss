@@ -1,0 +1,16 @@
+// Header bảng màu navy thương hiệu (thay header trắng mặc định của antd
+// Table) - khớp design: xem docs/design audit modal, header list cùng màu
+// với header modal chi tiết.
+.audit-log-table .ant-table-thead > tr > th {
+  background: var(--color-vhu-primary) !important;
+  color: #fff !important;
+  font-size: 12px;
+  font-weight: 600;
+  border: none !important;
+}
+.audit-log-table .ant-table-thead > tr > th::before {
+  display: none; // bỏ đường phân cách dọc mặc định của antd giữa các cột
+}
+.audit-log-table .ant-table-tbody > tr:hover > td {
+  background: #f7f9fc !important;
+}

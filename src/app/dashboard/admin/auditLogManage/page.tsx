@@ -1,11 +1,11 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Table, TableProps, Modal, Tag, Button, message } from 'antd';
-import { CloseOutlined, CopyOutlined } from '@ant-design/icons';
+import { Table, TableProps, Modal, message } from 'antd';
 import dayjs from 'dayjs';
 import { useAppPagination } from '@hooks';
 import styles from './styles';
+import './styles.scss';
 
 type AuditLogItem = {
   _id: string;
@@ -99,6 +99,20 @@ const buildActionSummary = (item: AuditLogItem): string => {
   return target ? `${label} · ${target}` : label;
 };
 
+const StatusPill: React.FC<{ status: 'success' | 'error' }> = ({ status }) => (
+  <span
+    style={{
+      fontSize: 12,
+      fontWeight: 500,
+      padding: '4px 10px',
+      borderRadius: 6,
+      color: status === 'success' ? '#16a34a' : '#dc2626',
+      background: status === 'success' ? '#f0fdf4' : '#fef2f2',
+    }}>
+    {status === 'success' ? 'Thành công' : 'Lỗi'}
+  </span>
+);
+
 const AuditLogManage: React.FC = () => {
   const { listItem, currentData, fetchData } = useAppPagination<AuditLogItem>({
     apiUrl: 'admin/audit-logs',
@@ -143,11 +157,7 @@ const AuditLogManage: React.FC = () => {
       title: 'Kết quả',
       dataIndex: 'status',
       key: 'status',
-      render: (v: string) => (
-        <Tag color={v === 'success' ? 'green' : 'red'}>
-          {v === 'success' ? 'Thành công' : 'Lỗi'}
-        </Tag>
-      ),
+      render: (v: 'success' | 'error') => <StatusPill status={v} />,
     },
   ];
 
@@ -160,6 +170,7 @@ const AuditLogManage: React.FC = () => {
       <h1 style={{ marginTop: 0, marginBottom: 16 }}>Nhật ký thao tác</h1>
 
       <Table
+        className="audit-log-table"
         columns={columns}
         dataSource={listItem}
         rowKey={record => record._id}
@@ -182,9 +193,13 @@ const AuditLogManage: React.FC = () => {
         open={!!selected}
         onCancel={() => setSelected(null)}
         footer={null}
-        width={600}
+        width={720}
         closeIcon={null}
-        styles={{ body: { padding: 0 } }}>
+        styles={{
+          body: { padding: 0 },
+          content: { padding: 0, borderRadius: 14, overflow: 'hidden' },
+          mask: { background: 'rgba(17,24,39,0.45)' },
+        }}>
         {selected && (
           <View>
             <View style={styles.modalHeader}>
@@ -194,32 +209,40 @@ const AuditLogManage: React.FC = () => {
                   style={{
                     display: 'flex',
                     flexDirection: 'row',
-                    gap: 8,
+                    gap: 14,
                     alignItems: 'center',
                   }}>
-                  <Tag
-                    color={selected.status === 'success' ? 'success' : 'error'}>
-                    {selected.status === 'success' ? 'Thành công' : 'Lỗi'}
-                  </Tag>
-                  <Button
-                    type="text"
-                    icon={<CloseOutlined style={{ color: '#fff' }} />}
+                  <StatusPill status={selected.status} />
+                  <span
                     onClick={() => setSelected(null)}
-                  />
+                    style={styles.modalCloseIcon as React.CSSProperties}>
+                    ✕
+                  </span>
                 </View>
               </View>
+              {/* Thiết kế gốc có kèm "· IP {{ip}}" ở đây - bỏ theo yêu cầu
+                  (dữ liệu này không cần thiết với người không rành kỹ thuật,
+                  xem trao đổi ngày 14/09). */}
               <Text style={styles.modalTimestamp}>
                 {dayjs(selected.createdAt).format('DD/MM/YYYY HH:mm:ss')}
               </Text>
             </View>
 
             <View style={styles.modalBody}>
-              <Text style={styles.sectionLabel}>HÀNH ĐỘNG</Text>
-              <Text style={styles.actionHeadline}>
-                {buildActionSummary(selected)}
-              </Text>
+              <View
+                style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <Text style={styles.sectionLabel}>HÀNH ĐỘNG</Text>
+                <Text style={styles.actionHeadline}>
+                  {buildActionSummary(selected)}
+                </Text>
+              </View>
 
-              <View style={styles.cardsRow}>
+              <View
+                style={{
+                  ...styles.cardsRow,
+                  gridTemplateColumns:
+                    targetName || selected.targetId ? 'repeat(2, 1fr)' : '1fr',
+                }}>
                 <View style={styles.card}>
                   <Text style={styles.cardLabel}>Người thực hiện</Text>
                   <Text style={styles.cardName}>
@@ -259,43 +282,60 @@ const AuditLogManage: React.FC = () => {
                 );
                 if (!entries.length) return null;
                 return (
-                  <View style={{ marginTop: 8 }}>
+                  <View
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 12,
+                    }}>
                     <Text style={styles.sectionLabel}>CHI TIẾT</Text>
                     <View style={styles.detailTable}>
-                      {entries.map(([label, value], i) => (
+                      {entries.map(([label, value]) => (
                         <View
                           key={label}
                           style={{
-                            display: 'flex',
-                            flexDirection: 'row',
-                            padding: '8px 12px',
-                            backgroundColor: i % 2 === 0 ? '#fafafa' : '#fff',
-                            borderTop:
-                              i === 0 ? undefined : '1px solid #f0f0f0',
+                            display: 'grid',
+                            gridTemplateColumns: '220px 1fr',
+                            gap: 16,
+                            padding: '13px 18px',
+                            alignItems: 'center',
+                            borderBottom: '1px solid #f4f6fa',
                           }}>
-                          <Text style={{ width: 220, color: '#6b7280' }}>
+                          <Text style={{ fontSize: 13, color: '#6b7280' }}>
                             {label}
                           </Text>
-                          <Text style={{ flex: 1 }}>{value}</Text>
+                          <Text
+                            style={{
+                              fontSize: 13,
+                              color: '#111827',
+                              wordBreak: 'break-all',
+                            }}>
+                            {value}
+                          </Text>
                         </View>
                       ))}
                     </View>
                   </View>
                 );
               })()}
-            </View>
 
-            <View style={styles.modalFooter}>
-              <Text style={styles.userAgentText}>
-                User agent: {selected.userAgent || '—'}
-              </Text>
-              <View style={{ display: 'flex', flexDirection: 'row', gap: 8 }}>
-                <Button icon={<CopyOutlined />} onClick={handleCopyJson}>
-                  Sao chép JSON
-                </Button>
-                <Button type="primary" onClick={() => setSelected(null)}>
-                  Đóng
-                </Button>
+              <View style={styles.modalFooter}>
+                <Text style={styles.userAgentText}>
+                  User agent: {selected.userAgent || '—'}
+                </Text>
+                <View
+                  style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
+                  <button
+                    style={styles.secondaryBtn as React.CSSProperties}
+                    onClick={handleCopyJson}>
+                    Sao chép JSON
+                  </button>
+                  <button
+                    style={styles.primaryBtn as React.CSSProperties}
+                    onClick={() => setSelected(null)}>
+                    Đóng
+                  </button>
+                </View>
               </View>
             </View>
           </View>

@@ -1,93 +1,292 @@
 import { StyleSheet } from '@styles';
 
+// Giá trị theo design (master-detail: danh sách bên trái 390px cố định +
+// panel chi tiết bên phải) - xem trao đổi ngày 14/09.
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     margin: 20,
-    gap: 16,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 12,
+    gap: 18,
   },
   title: {
     fontSize: 22,
     fontWeight: '700',
     color: '#1c2536',
   },
-  list: {
-    gap: 14,
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 20,
+    flexWrap: 'wrap',
   },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 14,
+  statsGroup: {
+    flexDirection: 'row',
+    gap: 26,
+    alignItems: 'flex-end',
+    flexWrap: 'wrap',
+  },
+  statBlock: {
+    gap: 2,
+  },
+  statNumber: {
+    fontSize: 22,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  statDivider: {
+    width: 1,
+    height: 34,
+    backgroundColor: '#e9edf4',
+  },
+  filterTabs: {
+    flexDirection: 'row',
     borderWidth: 1,
-    borderColor: '#eef0f5',
-    boxShadow: '0 4px 12px rgba(15, 23, 42, 0.05)',
-    padding: 20,
-    gap: 14,
+    borderColor: '#d9e2ef',
+    borderRadius: 8,
+    overflow: 'hidden',
   },
-  headerLine: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flexWrap: 'wrap',
-  },
-  userName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1c2536',
-  },
-  metaText: {
+  filterTab: {
+    height: 36,
+    paddingHorizontal: 16,
     fontSize: 13,
-    color: '#8D8D8D',
+    display: 'flex',
+    alignItems: 'center',
+    cursor: 'pointer',
+    borderLeftWidth: 1,
+    borderLeftColor: '#d9e2ef',
   },
-  commentBox: {
-    backgroundColor: '#f5f7fb',
-    borderRadius: 10,
-    padding: 14,
-    gap: 4,
+  // Layout chính: danh sách 390px cố định + panel chi tiết chiếm phần còn lại.
+  mainGrid: {
+    display: 'grid',
+    gridTemplateColumns: '390px 1fr',
+    gap: 18,
+    alignItems: 'flex-start',
   },
-  commentText: {
-    fontSize: 14,
-    color: '#333',
-    lineHeight: 20,
+  listPanel: {
+    backgroundColor: '#fff',
+    border: '1px solid #e5e9f0',
+    borderRadius: 12,
+    overflow: 'hidden',
   },
-  actionsRow: {
+  listItem: {
+    padding: '15px 18px',
+    borderTop: '1px solid #f1f3f7',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    cursor: 'pointer',
+  },
+  listItemHead: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    flexWrap: 'wrap',
   },
-  answeredTag: {
+  listItemName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#111827',
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  listItemTime: {
+    fontSize: 11,
+    whiteSpace: 'nowrap',
+  },
+  listItemText: {
+    fontSize: 13,
+    color: '#374151',
+    lineHeight: 20,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  listItemFoot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  listItemLesson: {
+    fontSize: 11,
+    color: '#6b7280',
+    flex: 1,
+    minWidth: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  statePill: {
+    fontSize: 11,
+    fontWeight: '500',
+    padding: '3px 9px',
+    borderRadius: 6,
+    whiteSpace: 'nowrap',
+  },
+  emptyListText: {
+    padding: '44px 20px',
+    textAlign: 'center',
+    fontSize: 13,
+    color: '#9ca3af',
+  },
+  detailPanel: {
+    backgroundColor: '#fff',
+    border: '1px solid #e5e9f0',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  detailHeader: {
+    padding: '20px 24px',
+    borderBottom: '1px solid #f1f3f7',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 20,
+  },
+  detailHeaderLeft: {
+    flexDirection: 'row',
+    gap: 14,
+    minWidth: 0,
+  },
+  detailName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  detailMeta: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  statePillLarge: {
+    fontSize: 12,
+    fontWeight: '500',
+    padding: '5px 12px',
+    borderRadius: 999,
+    whiteSpace: 'nowrap',
+    flexShrink: 0,
+  },
+  detailBody: {
+    padding: '22px 24px',
+    gap: 20,
+  },
+  lessonCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: '12px 16px',
+    backgroundColor: '#f7f9fc',
+    borderRadius: 10,
+  },
+  lessonIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: '#eef3fb',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  lessonTitle: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#111827',
+  },
+  sectionLabel: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#16a34a',
-    backgroundColor: '#eafbee',
-    borderRadius: 999,
-    paddingVertical: 3,
-    paddingHorizontal: 10,
+    letterSpacing: '0.08em',
+    color: '#9ca3af',
   },
-  dismissedTag: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#5b6478',
-    backgroundColor: '#eef0f5',
-    borderRadius: 999,
-    paddingVertical: 3,
-    paddingHorizontal: 10,
+  questionText: {
+    fontSize: 15,
+    lineHeight: 26,
+    color: '#111827',
   },
-  replyBox: {
+  answerBox: {
+    borderLeft: '3px solid var(--color-vhu-primary)',
+    backgroundColor: '#f7f9fc',
+    borderRadius: '0 10px 10px 0',
+    padding: '16px 18px',
+    gap: 8,
+  },
+  answerByRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
   },
-  emptyText: {
+  answerByName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  answerByTime: {
+    fontSize: 11,
+    color: '#6b7280',
+  },
+  answerText: {
     fontSize: 14,
-    color: '#8D8D8D',
+    lineHeight: 24,
+    color: '#374151',
+  },
+  replyTextarea: {
+    width: '100%',
+    border: '1px solid #e5e9f0',
+    borderRadius: 10,
+    padding: '14px 16px',
+    fontSize: 14,
+    // Đây là style áp trực tiếp vào <textarea> gốc (Input.TextArea), không
+    // qua react-native-web Text - số trần bị React coi là hệ số nhân
+    // (24x font-size!) chứ không tự thành px như bên Text. Phải ghi rõ đơn
+    // vị 'px' ở đây, khác với các lineHeight số trần khác trong file này.
+    lineHeight: '24px',
+    resize: 'vertical',
+    outline: 'none',
+    fontFamily: 'inherit',
+  },
+  skippedBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+    padding: '14px 16px',
+    backgroundColor: '#f7f9fc',
+    borderRadius: 10,
+  },
+  skippedText: {
+    fontSize: 13,
+    color: '#6b7280',
+  },
+  secondaryBtn: {
+    height: 40,
+    padding: '0 18px',
+    border: '1px solid #e5e9f0',
+    borderRadius: 8,
+    fontSize: 13,
+    color: '#6b7280',
+    background: '#fff',
+    cursor: 'pointer',
+  },
+  primaryBtn: {
+    height: 40,
+    padding: '0 26px',
+    border: 'none',
+    borderRadius: 8,
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  detailEmpty: {
+    padding: '64px 20px',
     textAlign: 'center',
-    paddingVertical: 40,
+    fontSize: 13,
+    color: '#9ca3af',
   },
 });
 
