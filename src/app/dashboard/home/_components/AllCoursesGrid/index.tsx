@@ -2,9 +2,7 @@ import React from 'react';
 import { View } from 'react-native-web';
 import { useRouter } from 'next/navigation';
 import { useAppPagination } from '@hooks';
-import { useAppDispatch } from '@redux';
 import { LessonItem } from '~mdDashboard/components';
-import { dashboardAction } from '~mdDashboard/redux';
 import styles from './styles';
 
 const PREVIEW_PAGE_SIZE = 8;
@@ -20,7 +18,6 @@ type AllCoursesGridProps = {
 // đó ở đây - chỉ 1 lần fetch trang đầu.
 const AllCoursesGrid: React.FC<AllCoursesGridProps> = ({ enrolledIds }) => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
 
   const { listItem, isLoading } = useAppPagination<any>({
     apiUrl: 'lesson/getAllLesson',
@@ -46,7 +43,6 @@ const AllCoursesGrid: React.FC<AllCoursesGridProps> = ({ enrolledIds }) => {
           key={item._id}
           data={{ ...item, isInProgress: enrolledIds.has(item._id) }}
           onClick={() => {
-            dispatch(dashboardAction.getLessonDetail({ id: item._id }));
             router.push(`/dashboard/home/lesson/${item._id}`);
           }}
         />

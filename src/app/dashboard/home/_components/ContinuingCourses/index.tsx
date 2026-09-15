@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native-web';
 import { Progress } from 'antd';
 import { useRouter } from 'next/navigation';
-import { MyCourseItem } from '@/hooks/useMyCourses';
+import { MyCourseItem } from '~mdDashboard/redux/RTKQuery/types';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
 import { useResponsive } from '@/styles/responsive';
 import styles from './styles';

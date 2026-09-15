@@ -6,7 +6,7 @@ import { ScrollView } from 'react-native-web';
 import { AddLessonContent } from '~mdAdmin/components';
 import { Lesson } from '~mdDashboard/redux/saga/type';
 import { messageApi, useWindowSize } from '@hooks';
-import { updateLessonApi } from '~mdAdmin/services/api';
+import { adminQuery } from '~mdAdmin/redux';
 type UpdateLessonFormProps = {
   data: Lesson;
   isVisible: boolean;
@@ -25,6 +25,7 @@ const UpdateLessonForm: React.FC<UpdateLessonFormProps> = ({
   refresh,
 }) => {
   const { width } = useWindowSize();
+  const [updateLesson] = adminQuery.useUpdateLessonMutation();
   const onCloseModalAdd = () => {
     setSelectedItem(null);
     setIsVisibleModalAdd(false);
@@ -42,11 +43,13 @@ const UpdateLessonForm: React.FC<UpdateLessonFormProps> = ({
         <AddLessonContent
           initialValues={data}
           onFormFinish={res => {
-            updateLessonApi({ _id: data._id, ...res }).then(res => {
-              setIsVisible(false);
-              messageApi.success('Update Successfully');
-              refresh();
-            });
+            updateLesson({ _id: data._id, ...res })
+              .unwrap()
+              .then(() => {
+                setIsVisible(false);
+                messageApi.success('Update Successfully');
+                refresh();
+              });
           }}
         />
       </ScrollView>

@@ -1,3 +1,16 @@
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/vi';
+
+dayjs.extend(relativeTime);
+dayjs.locale('vi');
+
+// "Học cách đây 5 phút" - dùng cho danh sách "Khóa học của tôi".
+export const formatRelativeTime = (dateString: string): string => {
+  if (!dateString) return '';
+  return dayjs(dateString).fromNow();
+};
+
 export const convertDurationToTime = (
   duration: number = 0,
   isShortString: boolean = false,

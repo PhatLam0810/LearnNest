@@ -38,6 +38,7 @@ const SignUpPage = () => {
     }
   }, [accessToken]);
 
+  const [loginOauth] = authQuery.useLoginOauthMutation();
   const handleLoginOauth = async () => {
     if (isGoogleLoading) return;
     setIsGoogleLoading(true);
@@ -46,7 +47,8 @@ const SignUpPage = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const token = await user.getIdToken();
-      dispatch(authAction.loginOAuth({ token }));
+      const data = await loginOauth({ token }).unwrap();
+      dispatch(authAction.setTokenInfo(data));
     } catch (error) {
       console.error('Login Error:', error);
     } finally {

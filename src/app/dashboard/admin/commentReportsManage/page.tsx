@@ -5,7 +5,7 @@ import { Button, Image, Pagination, Segmented, Space } from 'antd';
 import dayjs from 'dayjs';
 import { useAppPagination } from '@hooks';
 import { messageApi } from '@hooks';
-import api from '@services/api';
+import { adminQuery } from '~mdAdmin/redux';
 import styles from './styles';
 
 type ReportUser = {
@@ -69,6 +69,8 @@ const CommentReportsManage: React.FC = () => {
       params: { filter: { status: 'pending' } },
     });
   const [actingId, setActingId] = useState<string | null>(null);
+  const [resolveReport] = adminQuery.useResolveCommentReportMutation();
+  const [warnUser] = adminQuery.useWarnCommentUserMutation();
 
   const changeStatus = (v: 'pending' | 'resolved' | 'dismissed') => {
     setStatus(v);
@@ -78,13 +80,11 @@ const CommentReportsManage: React.FC = () => {
   const handleHide = async (item: CommentReportItem) => {
     setActingId(item._id);
     try {
-      await api.post(`/comments/admin/reports/${item._id}/resolve`, {
-        action: 'hide',
-      });
+      await resolveReport({ reportId: item._id, action: 'hide' }).unwrap();
       messageApi.success('Đã ẩn bình luận');
       refresh();
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không xử lý được');
+      messageApi.error(e?.data?.message || 'Không xử lý được');
     } finally {
       setActingId(null);
     }
@@ -93,13 +93,11 @@ const CommentReportsManage: React.FC = () => {
   const handleDismiss = async (item: CommentReportItem) => {
     setActingId(item._id);
     try {
-      await api.post(`/comments/admin/reports/${item._id}/resolve`, {
-        action: 'dismiss',
-      });
+      await resolveReport({ reportId: item._id, action: 'dismiss' }).unwrap();
       messageApi.success('Đã bỏ qua báo cáo');
       refresh();
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không xử lý được');
+      messageApi.error(e?.data?.message || 'Không xử lý được');
     } finally {
       setActingId(null);
     }
@@ -108,15 +106,15 @@ const CommentReportsManage: React.FC = () => {
   const handleWarn = async (item: CommentReportItem) => {
     setActingId(item._id);
     try {
-      const res = await api.post(`/comments/admin/reports/${item._id}/warn`);
+      const res = await warnUser(item._id).unwrap();
       messageApi.success(
-        res.data?.data?.sent
+        res?.sent
           ? 'Đã gửi email cảnh báo cho người dùng.'
           : 'Đã ghi nhận nhưng gửi email thất bại.',
       );
       refresh();
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không gửi được cảnh báo');
+      messageApi.error(e?.data?.message || 'Không gửi được cảnh báo');
     } finally {
       setActingId(null);
     }

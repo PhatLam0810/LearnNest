@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Modal, Select, Upload, UploadFile } from 'antd';
-import { useAppDispatch, useAppSelector } from '@redux';
-import { adminAction } from '~mdAdmin/redux';
+import { useAppSelector } from '@redux';
+import { adminQuery } from '~mdAdmin/redux';
 import api from '@services/api';
 
 const { TextArea } = Input;
@@ -39,9 +39,9 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({
   open,
   onOpenChange,
 }) => {
-  const dispatch = useAppDispatch();
   const { userProfile, accessToken } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const [createFeedback] = adminQuery.useCreateFeedbackMutation();
   const [form] = Form.useForm<FeedbackFormValues>();
   const [submitting, setSubmitting] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -66,26 +66,23 @@ const FeedbackFormModal: React.FC<FeedbackFormModalProps> = ({
       .filter((url): url is string => Boolean(url));
 
     setSubmitting(true);
-    dispatch(
-      adminAction.submitFeedback({
-        params: {
-          fullName: values.fullName,
-          email: values.email,
-          content: values.content,
-          category: values.category as any,
-          images,
-        },
-        callback: () => {
-          setSubmitting(false);
-          onOpenChange(false);
-          form.resetFields();
-          setFileList([]);
-        },
-      }),
-    );
-    // Callback above only fires on success; make sure the button doesn't
-    // stay stuck spinning forever if the saga's error path is hit instead.
-    setTimeout(() => setSubmitting(false), 8000);
+    createFeedback({
+      fullName: values.fullName,
+      email: values.email,
+      content: values.content,
+      category: values.category as any,
+      images,
+    })
+      .unwrap()
+      .then(() => {
+        setSubmitting(false);
+        onOpenChange(false);
+        form.resetFields();
+        setFileList([]);
+      })
+      .catch(() => {
+        setSubmitting(false);
+      });
   };
 
   return (

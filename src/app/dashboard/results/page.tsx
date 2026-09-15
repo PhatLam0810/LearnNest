@@ -5,7 +5,6 @@ import { Select, Table, TableProps, Tag } from 'antd';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@redux';
-import { useMyCourses } from '@/hooks/useMyCourses';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { RecentTestResult } from '~mdDashboard/redux/RTKQuery/types';
 import styles from './styles';
@@ -25,7 +24,10 @@ const ResultsPage: React.FC = () => {
   const userId = useAppSelector(
     state => state.authReducer.tokenInfo?.userProfile?._id,
   );
-  const { myCourses } = useMyCourses(userId || null);
+  const { data: myCourses } = dashboardQuery.useGetMyCoursesQuery(
+    userId || '',
+    { skip: !userId },
+  );
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -147,7 +149,7 @@ const ResultsPage: React.FC = () => {
             resetToFirstPage();
           }}
           optionFilterProp="label"
-          options={myCourses
+          options={(myCourses || [])
             .filter(c => c && c.lessonId)
             .map(c => ({
               value: c.lessonId,

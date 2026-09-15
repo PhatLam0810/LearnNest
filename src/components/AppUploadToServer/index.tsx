@@ -25,13 +25,28 @@ const AppUploadToServer: React.FC<AppUploadProps> = ({
         accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
       }
       onChange={info => {
-        messageApi.loading('Uploading...', 0);
+        // `key` cố định - antd thay message cũ thay vì chồng thêm cái mới mỗi
+        // lần sự kiện 'uploading' bắn lại (progress), trước đây gọi
+        // messageApi.loading không kèm key nên upload càng lâu càng chồng
+        // nhiều toast "Uploading..." không tự tắt.
+        if (info.file.status === 'uploading') {
+          messageApi.loading({
+            content: 'Uploading...',
+            key: 'app-upload',
+            duration: 0,
+          });
+          return;
+        }
+        messageApi.destroy('app-upload');
         if (info.file.status === 'done') {
           const responseUrl = info.file.response?.data;
           if (responseUrl) {
-            messageApi.destroy();
             onChange(responseUrl);
+          } else {
+            messageApi.error('Tải ảnh lên thất bại');
           }
+        } else if (info.file.status === 'error') {
+          messageApi.error('Tải ảnh lên thất bại');
         }
       }}
     />

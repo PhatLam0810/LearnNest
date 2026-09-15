@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
 import { Button, Modal } from 'antd';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 import { useAppDispatch, useAppSelector } from '@redux';
 import './styles.scss';
 import Icon from '@components/icons';
@@ -22,15 +22,16 @@ const AppModalSuccess: React.FC<AppModalSuccessProps> = ({
   const dispatch = useAppDispatch();
   const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
   const router = useRouter();
+  const [getTransactionDetail] = authQuery.useGetTransactionDetailMutation();
   const onCloseModalAdd = () => {
     setIsVisibleModalSuccess(false);
     dispatch(authAction.lessonPurchaseData(undefined));
   };
   const onViewDetail = () => {
     setIsVisibleModalSuccess(false);
-    dispatch(
-      authAction.viewDetailTransaction({ id: lessonPurchaseData?.paymentId }),
-    );
+    getTransactionDetail({ id: lessonPurchaseData?.paymentId })
+      .unwrap()
+      .then((res: any) => dispatch(authAction.lessonPurchaseData(res.data)));
     router.replace(`/dashboard/profile?tab=${2}`);
   };
 

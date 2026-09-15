@@ -1,14 +1,8 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import {
-  AuthInitialState,
-  LoginOauthPayload,
-  LoginPayload,
-  SignUpPayload,
-  SignUpResponse,
-} from './types';
+import { AuthInitialState, SignUpResponse } from './types';
 import { persistReducer } from 'redux-persist';
 import { storage } from '@redux/storage';
-import { LessonPurchase, UserProfile } from '~mdAuth/services/api/type';
+import { UserProfile } from '~mdAuth/services/api/type';
 import { OtpType } from '@/constants/otp-type.enum';
 
 const initialState: AuthInitialState = {
@@ -21,41 +15,31 @@ export const authSlice = createSlice({
   name: 'Auth',
   initialState,
   reducers: {
-    login: (_s, a: PayloadAction<LoginPayload>) => {},
     setTokenInfo: (s, a) => {
       s.tokenInfo = a.payload;
     },
-    loginOAuth: (_s, a: PayloadAction<LoginOauthPayload>) => {},
     logout: () => initialState,
-    signUp: (_s, a: PayloadAction<SignUpPayload>) => {},
     setSignUpInfo: (s, a: PayloadAction<SignUpResponse>) => {
       s.signUpInfo = a.payload;
     },
-    updateCurrentInfo: (_s, _a: PayloadAction<UserProfile>) => {},
-    changePassword: (_s, _a: PayloadAction<any>) => {},
     setCurrentUserInfo: (s, a: PayloadAction<UserProfile>) => {
       s.tokenInfo.userProfile = a.payload;
     },
     sendOtpInfo: (s, a: PayloadAction<{ email: string }>) => {
       s.sendOtpInfo = a.payload;
     },
-
-    verifyOtp: (s, a: PayloadAction<{ email: string; otp: number }>) => {},
     setVerifyInfo: (s, a: PayloadAction<boolean>) => {
       s.verifyInfo = a.payload;
     },
-
-    lessonPurchase: (s, a: PayloadAction<LessonPurchase>) => {
-      s.lessonPurchase = a.payload;
-    },
+    // lessonPurchase (trigger) không còn dùng - luồng mua bằng ETH/MetaMask
+    // đã bị comment hết ở AppModalPayPal, chỉ giữ setter lessonPurchaseData
+    // vì AppModalSuccess vẫn đọc/ghi field này khi hiện chi tiết giao dịch.
     lessonPurchaseData: (s, a: PayloadAction<any>) => {
       s.lessonPurchaseData = a.payload;
     },
     setIsShowLoading: (s, a: PayloadAction<boolean>) => {
       s.isLoading = a.payload;
     },
-
-    viewDetailTransaction: (s, a: PayloadAction<{ id: string }>) => {},
     walletAddress: (s, a: PayloadAction<string>) => {
       s.walletAddress = a.payload;
     },

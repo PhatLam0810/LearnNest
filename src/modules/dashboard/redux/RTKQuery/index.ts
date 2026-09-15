@@ -1,9 +1,12 @@
 import { baseQuery } from '@redux/RTKQuery';
 import {
   AchievementsResponse,
+  AskAiParams,
+  AskAiResponse,
   Category,
   CourseRatingItem,
   CourseRatingSummary,
+  DeleteCommentResponse,
   GetLessonProgressParams,
   LearningInsight,
   BookmarkItem,
@@ -15,6 +18,7 @@ import {
   LessonProgressResponse,
   LessonRecommendRes,
   LibraryType,
+  MyCourseItem,
   MyOverview,
   MyQuestionListResponse,
   MyResultsParams,
@@ -22,12 +26,14 @@ import {
   NotificationListResponse,
   RetryQueueItem,
   MyAssignmentItem,
+  ReportCommentParams,
   SearchResults,
   PassRateReport,
   QuizResultAdminItem,
   RecentTestResult,
   RoadmapStep,
   StudyStats,
+  ToggleCommentLikeResponse,
 } from './types';
 import { AxiosResponse } from 'axios';
 import { Library, SelfCareItem } from '~mdDashboard/types';
@@ -342,6 +348,54 @@ export const dashboardQuery = baseQuery.injectEndpoints({
     // tra gần đây. Cùng convention không bọc {data:...} như getStudyStats.
     getMyOverview: builder.query<MyOverview, string>({
       query: userId => `/lesson/user/${userId}/overview`,
+    }),
+
+    // Tiến độ các khóa đang học - dùng ở Trang Chủ, Header, "Khóa học của
+    // tôi". Cùng convention không bọc {data:...} như getStudyStats.
+    getMyCourses: builder.query<MyCourseItem[], string>({
+      query: userId => `/lesson/user/${userId}/my-courses`,
+    }),
+
+    // ChatboxAi - route BE yêu cầu JwtAuthGuard, phải qua baseQuery (tự gắn
+    // Bearer token) thay vì axios.post thẳng như trước (thiếu header, gọi
+    // sẽ bị 401). Cùng convention không bọc {data:...} như getStudyStats.
+    askAi: builder.mutation<AskAiResponse, AskAiParams>({
+      query: body => ({
+        url: '/ai/ask',
+        method: 'POST',
+        body,
+      }),
+    }),
+
+    // CommentSection - upload ảnh đính kèm bình luận. UploadService.uploadFile
+    // (BE) bọc kết quả qua responseService.single() -> {data: url}, khác
+    // convention không bọc như getStudyStats.
+    uploadCommentImage: builder.mutation<string, FormData>({
+      query: formData => ({
+        url: '/upload',
+        method: 'POST',
+        body: formData,
+      }),
+      transformResponse: (res: any) => res.data,
+    }),
+    deleteComment: builder.mutation<DeleteCommentResponse, string>({
+      query: id => ({
+        url: `/comments/${id}`,
+        method: 'DELETE',
+      }),
+    }),
+    toggleCommentLike: builder.mutation<ToggleCommentLikeResponse, string>({
+      query: id => ({
+        url: `/comments/${id}/like`,
+        method: 'POST',
+      }),
+    }),
+    reportComment: builder.mutation<any, ReportCommentParams>({
+      query: body => ({
+        url: '/comments/report',
+        method: 'POST',
+        body,
+      }),
     }),
 
     // Trang "Toàn bộ lịch sử kiểm tra" (/dashboard/results) - phân trang +

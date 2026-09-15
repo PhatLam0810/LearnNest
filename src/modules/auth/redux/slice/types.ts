@@ -1,15 +1,5 @@
-import {
-  LessonPurchase,
-  LessonPurchaseResponse,
-} from './../../services/api/type';
-import {
-  LoginApiReq,
-  loginApiRes,
-  LoginOauthApiReq,
-  OtpApiReq,
-  SignUpApiReq,
-  signUpApiRes,
-} from '../../services/api/type';
+import { LessonPurchaseResponse } from './../../services/api/type';
+import { loginApiRes, signUpApiRes } from '../../services/api/type';
 
 export type AuthInitialState = {
   tokenInfo?: loginApiRes;
@@ -17,17 +7,10 @@ export type AuthInitialState = {
   sendOtpInfo?: { email: string };
   verifyInfo?: boolean;
   isLoading: boolean;
-  lessonPurchase?: LessonPurchasePayLoad;
   lessonPurchaseData?: LessonPurchaseData;
   walletAddress?: string;
   errorPassword?: string;
 };
 
-export type LoginPayload = LoginApiReq;
-export type SignUpPayload = any;
-export type LoginOauthPayload = LoginOauthApiReq;
 export type SignUpResponse = signUpApiRes;
-export type LessonPurchasePayLoad = LessonPurchase;
-
 export type LessonPurchaseData = LessonPurchaseResponse;
-export type OtpPayLoad = OtpApiReq;

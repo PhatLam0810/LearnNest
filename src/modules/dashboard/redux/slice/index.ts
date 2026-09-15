@@ -1,16 +1,10 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { HomeInitialState, SelectedSubLessonPayload } from './types';
-import {
-  LessonDetailDataResponse,
-  Module,
-  SubLessonDetailResponse,
-} from '../saga/type';
+import { Module } from '../saga/type';
 import { UserProfile } from '~mdAuth/services/api/type';
 import { Library } from '~mdDashboard/types';
 
 const initialState: HomeInitialState = {
-  lessonDetail: {},
-  subLessonDetail: {},
   videoStatus: true,
 };
 
@@ -18,21 +12,6 @@ export const dashboardSlice = createSlice({
   name: 'Dashboard',
   initialState,
   reducers: {
-    getLessonDetail: (_s, _a: PayloadAction<{ id: string }>) => {},
-    setLessonDetail: (
-      state,
-      action: PayloadAction<LessonDetailDataResponse>,
-    ) => {
-      state.lessonDetail = action.payload;
-    },
-
-    getSubLessonDetail: (_s, _a: PayloadAction<{ id: string }>) => {},
-    setSubLessonDetail: (
-      state,
-      action: PayloadAction<SubLessonDetailResponse>,
-    ) => {
-      state.subLessonDetail = action.payload;
-    },
     setSelectedSubLessonStart: (
       s,
       a: PayloadAction<SelectedSubLessonPayload>,

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Modal, Input, Button, Form } from 'antd';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 import { useAppDispatch } from '@redux';
 
 type VerifyOtpModalProps = {
@@ -18,13 +18,16 @@ const VerifyOtpModal: React.FC<VerifyOtpModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
+  const [verifyOtp] = authQuery.useVerifyOtpMutation();
 
   const onClose = () => {
     setIsVisible(false);
     form.resetFields(); // Reset form khi đóng modal
   };
-  const onFinish = (values: { otp: number }) => {
-    dispatch(authAction.verifyOtp({ email: email, otp: values.otp }));
+  const onFinish = (values: { otp: string }) => {
+    verifyOtp({ email, otp: values.otp })
+      .unwrap()
+      .then(() => dispatch(authAction.setVerifyInfo(true)));
   };
 
   useEffect(() => {

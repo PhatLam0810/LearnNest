@@ -4,7 +4,7 @@ import { View, Text } from 'react-native-web';
 import { Form } from 'antd';
 import { AppButton, AppInput } from '@components';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 import styles from './styles';
 
 // Card "Thông tin cá nhân" trong trang Cài Đặt - chỉ giữ 4 trường theo
@@ -15,6 +15,7 @@ const EditProfile = () => {
   const [form] = Form.useForm();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const [updateCurrentInfo] = authQuery.useUpdateCurrentInfoMutation();
 
   return (
     <View style={styles.container}>
@@ -23,7 +24,11 @@ const EditProfile = () => {
         form={form}
         style={styles.formContainer}
         initialValues={userProfile}
-        onFinish={values => dispatch(authAction.updateCurrentInfo(values))}>
+        onFinish={values =>
+          updateCurrentInfo(values)
+            .unwrap()
+            .then(res => dispatch(authAction.setCurrentUserInfo(res)))
+        }>
         <View style={styles.fieldGrid}>
           <Form.Item
             label={<Text style={styles.labelText}>Họ và tên</Text>}

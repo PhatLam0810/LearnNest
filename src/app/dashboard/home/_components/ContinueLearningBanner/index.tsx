@@ -3,7 +3,7 @@ import { Text, View } from 'react-native-web';
 import { useRouter } from 'next/navigation';
 import { AppButton } from '@components';
 import { useAppSelector } from '@redux';
-import { MyCourseItem } from '@/hooks/useMyCourses';
+import { MyCourseItem } from '~mdDashboard/redux/RTKQuery/types';
 import styles from './styles';
 
 type ContinueLearningBannerProps = {

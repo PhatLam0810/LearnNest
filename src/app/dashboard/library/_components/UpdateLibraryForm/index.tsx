@@ -14,8 +14,7 @@ import {
   Modal,
 } from 'antd';
 import api from '@services/api';
-import { adminAction, adminQuery } from '@/modules/admin/redux';
-import { useAppDispatch } from '@redux';
+import { adminQuery } from '@/modules/admin/redux';
 import { PlusOutlined } from '@ant-design/icons';
 import { UpdateLibraryFormData } from './types';
 import { Library } from '~mdDashboard/types';
@@ -38,8 +37,6 @@ const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({
   setIsVisibleModalAdd,
   refresh,
 }) => {
-  const dispatch = useAppDispatch();
-
   // getAllLibrary (nguồn của `data`) cố tình bỏ questionList để bảng danh
   // sách nhẹ hơn — fetch lại đầy đủ document khi mở form Cập nhật để không
   // mất câu hỏi đã gắn sẵn cho bài học này.
@@ -47,6 +44,7 @@ const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({
     data?._id ?? '',
     { skip: !isVisible || !data?._id },
   );
+  const [updateLibrary] = adminQuery.useUpdateLibraryMutation();
   const formInitialValues = fullLibrary ? { ...data, ...fullLibrary } : data;
   // Form hiện ngay, không bắt đợi — nhưng nút "Cập nhật bài học" bị khoá
   // (loading) cho tới khi có đủ dữ liệu gốc. Nếu cho bấm nộp sớm khi `data`
@@ -55,18 +53,15 @@ const UpdateLibraryForm: React.FC<UpdateLibraryFormProps> = ({
   const isSubmitDisabled = !!data?._id && !fullLibrary;
 
   const onFinish = (values: any) => {
-    dispatch(
-      adminAction.updateLibrary({
-        params: {
-          _id: data?._id,
-          ...values,
-        },
-        callback() {
-          refresh();
-          setIsVisible(false);
-        },
-      }),
-    );
+    updateLibrary({
+      _id: data?._id,
+      ...values,
+    })
+      .unwrap()
+      .then(() => {
+        refresh();
+        setIsVisible(false);
+      });
   };
   const onCloseModalAdd = () => {
     setSelectedItem(null);

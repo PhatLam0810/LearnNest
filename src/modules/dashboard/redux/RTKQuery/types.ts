@@ -128,6 +128,58 @@ export interface MyOverview {
   recentResults: RecentTestResult[];
 }
 
+// Trang Chủ / Header / "Khóa học của tôi" - tiến độ các khóa đang học. Xem
+// LessonService.getMyCoursesProgress (BE).
+export interface MyCourseItem {
+  lessonId: string;
+  lessonName?: string;
+  thumbnail?: string;
+  progress: number;
+  lastStudiedAt: string;
+  lastSubLessonId: string;
+  totalItems?: number;
+  completedItems?: number;
+  lastSubLessonTitle?: string;
+  lastSubLessonRemainingSeconds?: number;
+}
+
+// ChatboxAi - trợ lý AI hỏi đáp về khóa học. Xem GeminiController.askGemini
+// (BE).
+export interface AskAiParams {
+  question: string;
+  userId: string;
+  lessonId?: string;
+}
+
+export interface AskAiResponse {
+  response: string;
+  lessonInfo: {
+    _id: string;
+    title: string;
+    thumbnail?: string;
+    price?: number;
+    isPremium: boolean;
+  } | null;
+}
+
+// CommentSection - bình luận/hỏi đáp dưới bài học. Xem CommentController
+// (BE, module gateway/comment).
+export interface DeleteCommentResponse {
+  deletedIds: string[];
+}
+
+export interface ToggleCommentLikeResponse {
+  _id: string;
+  likes: string[];
+  [key: string]: unknown;
+}
+
+export interface ReportCommentParams {
+  commentId: string;
+  reason: string;
+  note?: string;
+}
+
 // Trang "Toàn bộ lịch sử kiểm tra" (/dashboard/results). Xem
 // LessonService.getMyResults (BE).
 export interface MyResultsResponse {

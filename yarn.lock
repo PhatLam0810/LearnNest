@@ -922,7 +922,7 @@
     "@babel/plugin-transform-modules-commonjs" "^7.29.7"
     "@babel/plugin-transform-typescript" "^7.29.7"
 
-"@babel/runtime@^7.10.1", "@babel/runtime@^7.10.4", "@babel/runtime@^7.11.1", "@babel/runtime@^7.11.2", "@babel/runtime@^7.15.4", "@babel/runtime@^7.16.7", "@babel/runtime@^7.18.0", "@babel/runtime@^7.18.3", "@babel/runtime@^7.18.6", "@babel/runtime@^7.20.0", "@babel/runtime@^7.20.13", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.22.5", "@babel/runtime@^7.23.2", "@babel/runtime@^7.23.6", "@babel/runtime@^7.23.9", "@babel/runtime@^7.24.4", "@babel/runtime@^7.24.7", "@babel/runtime@^7.24.8", "@babel/runtime@^7.25.0", "@babel/runtime@^7.25.7", "@babel/runtime@^7.26.0", "@babel/runtime@^7.28.4", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.10.1", "@babel/runtime@^7.10.4", "@babel/runtime@^7.11.1", "@babel/runtime@^7.11.2", "@babel/runtime@^7.15.4", "@babel/runtime@^7.16.7", "@babel/runtime@^7.18.0", "@babel/runtime@^7.18.3", "@babel/runtime@^7.18.6", "@babel/runtime@^7.20.0", "@babel/runtime@^7.20.13", "@babel/runtime@^7.20.7", "@babel/runtime@^7.21.0", "@babel/runtime@^7.22.5", "@babel/runtime@^7.23.2", "@babel/runtime@^7.23.6", "@babel/runtime@^7.23.9", "@babel/runtime@^7.24.4", "@babel/runtime@^7.24.7", "@babel/runtime@^7.24.8", "@babel/runtime@^7.25.0", "@babel/runtime@^7.25.7", "@babel/runtime@^7.26.0", "@babel/runtime@^7.9.2":
   version "7.29.7"
   resolved "https://registry.npmjs.org/@babel/runtime/-/runtime-7.29.7.tgz"
   integrity sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==
@@ -2796,48 +2796,6 @@
     "@react-pdf/font" "^4.0.10"
     "@react-pdf/primitives" "^4.3.0"
     "@react-pdf/stylesheet" "^6.2.3"
-
-"@redux-saga/core@^1.5.1":
-  version "1.5.1"
-  resolved "https://registry.npmjs.org/@redux-saga/core/-/core-1.5.1.tgz"
-  integrity sha512-Yh/eO0YBawlK5qAVXh9vSS0BDMWyFe6qIcVcKa8JtPOo3IFwRly33ZYBrsCwxu7jdSQT9QUJHChAU8fil5dRZQ==
-  dependencies:
-    "@babel/runtime" "^7.28.4"
-    "@redux-saga/deferred" "^1.3.1"
-    "@redux-saga/delay-p" "^1.3.1"
-    "@redux-saga/is" "^1.2.1"
-    "@redux-saga/symbols" "^1.2.1"
-    "@redux-saga/types" "^1.4.1"
-
-"@redux-saga/deferred@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.npmjs.org/@redux-saga/deferred/-/deferred-1.3.1.tgz"
-  integrity sha512-0YZ4DUivWojXBqLB/TmuRRpDDz7tyq1I0AuDV7qi01XlLhM5m51W7+xYtIckH5U2cMlv9eAuicsfRAi1XHpXIg==
-
-"@redux-saga/delay-p@^1.3.1":
-  version "1.3.1"
-  resolved "https://registry.npmjs.org/@redux-saga/delay-p/-/delay-p-1.3.1.tgz"
-  integrity sha512-597I7L5MXbD/1i3EmcaOOjL/5suxJD7p5tnbV1PiWnE28c2cYiIHqmSMK2s7us2/UrhOL2KTNBiD0qBg6KnImg==
-  dependencies:
-    "@redux-saga/symbols" "^1.2.1"
-
-"@redux-saga/is@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/@redux-saga/is/-/is-1.2.1.tgz"
-  integrity sha512-x3aWtX3GmQfEvn8dh0ovPbsXgK9JjpiR24wKztpGbZP8JZUWWvUgKrvnWZ/T/4iphOBftyVc9VrIwhAnsM+OFA==
-  dependencies:
-    "@redux-saga/symbols" "^1.2.1"
-    "@redux-saga/types" "^1.3.1"
-
-"@redux-saga/symbols@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/@redux-saga/symbols/-/symbols-1.2.1.tgz"
-  integrity sha512-3dh+uDvpBXi7EUp/eO+N7eFM4xKaU4yuGBXc50KnZGzIrR/vlvkTFQsX13zsY8PB6sCFYAgROfPSRUj8331QSA==
-
-"@redux-saga/types@^1.3.1", "@redux-saga/types@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.npmjs.org/@redux-saga/types/-/types-1.4.1.tgz"
-  integrity sha512-GSOGLWvJIjA63ywISJZr4skTjTnyQdu2WZbUeVguYNMyinEa9yTflBlVOFuBZxmyMR1dQodCE3PiKDu0BvyAHg==
 
 "@reduxjs/toolkit@^1.9.0 || 2.x.x", "@reduxjs/toolkit@^2.5.0":
   version "2.12.0"
@@ -8960,14 +8918,6 @@ redux-persist@*:
   version "6.0.0"
   resolved "https://registry.npmjs.org/redux-persist/-/redux-persist-6.0.0.tgz"
   integrity sha512-71LLMbUq2r02ng2We9S215LtPu3fY0KgaGE0k8WRgl6RkqxtGfl7HUozz1Dftwsb0D/5mZ8dwAaPbtnzfvbEwQ==
-
-redux-saga@^1.3.0:
-  version "1.5.1"
-  resolved "https://registry.npmjs.org/redux-saga/-/redux-saga-1.5.1.tgz"
-  integrity sha512-ZwnV/p+ABHoaDzyBrZshmIG/axRQG6AQJre8p9t1bPI/i6UzE5C9jGG9wgSKi8ojLMVyFLwmiDwFtuaul9c3wQ==
-  dependencies:
-    "@babel/runtime" "^7.28.4"
-    "@redux-saga/core" "^1.5.1"
 
 redux-thunk@^3.1.0:
   version "3.1.0"

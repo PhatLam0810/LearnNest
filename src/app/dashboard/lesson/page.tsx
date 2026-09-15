@@ -1,12 +1,11 @@
 'use client';
 import { useAppPagination } from '@hooks';
-import { useMyCourses } from '@hooks/useMyCourses';
 import { FlatList, Text, View } from 'react-native-web';
 import { LessonItem } from '~mdDashboard/components';
 import styles from './styles';
 import './styles.scss';
-import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
-import { useAppDispatch, useAppSelector } from '@redux';
+import { dashboardQuery } from '~mdDashboard/redux';
+import { useAppSelector } from '@redux';
 import { useRouter } from 'next/navigation';
 import { UpdateLessonForm } from './_components';
 import { useEffect, useMemo, useState } from 'react';
@@ -14,7 +13,6 @@ import { useResponsive } from '@/styles/responsive';
 import { useSearchContext } from '@components/SearchContext';
 
 const Page = () => {
-  const dispatch = useAppDispatch();
   const router = useRouter();
 
   const { keyword, sortBy } = useSearchContext();
@@ -27,9 +25,12 @@ const Page = () => {
   const { data: categories } = dashboardQuery.useGetAllCategoryQuery();
   const { data: bookmarkedLessonIds } =
     dashboardQuery.useGetBookmarkIdsQuery('lesson');
-  const { myCourses } = useMyCourses(userProfile?._id || null);
+  const { data: myCourses } = dashboardQuery.useGetMyCoursesQuery(
+    userProfile?._id || '',
+    { skip: !userProfile?._id },
+  );
   const enrolledIds = useMemo(
-    () => new Set(myCourses.map(c => c.lessonId)),
+    () => new Set((myCourses || []).map(c => c.lessonId)),
     [myCourses],
   );
 
@@ -151,7 +152,6 @@ const Page = () => {
               showBookmark
               bookmarked={(bookmarkedLessonIds || []).includes(item._id)}
               onClick={() => {
-                dispatch(dashboardAction.getLessonDetail({ id: item._id }));
                 router.push(`home/lesson/${item._id}`);
               }}
             />

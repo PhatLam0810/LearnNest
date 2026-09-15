@@ -14,7 +14,6 @@ import {
   Row,
   Col,
 } from 'antd';
-import api from '@services/api';
 import { adminQuery } from '@/modules/admin/redux';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { CreateLessonFrom } from './type';
@@ -37,6 +36,7 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [addLesson] = adminQuery.useAddLessonMutation();
+  const [uploadImage] = adminQuery.useUploadImageMutation();
   const [isPremium, setIsPremium] = useState(initialValues?.isPremium);
   const [listSelected, setListSelected] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -261,10 +261,8 @@ const CreateLessonForm: React.FC<CreateLessonFormProps> = ({
                           type: 'image/jpeg',
                         }),
                       );
-                      const res = await api.post('/upload', formData, {
-                        headers: { 'Content-Type': 'multipart/form-data' },
-                      });
-                      form.setFieldsValue({ thumbnail: res.data.data });
+                      const url = await uploadImage(formData).unwrap();
+                      form.setFieldsValue({ thumbnail: url });
                     }}
                   />
                 </Form.Item>

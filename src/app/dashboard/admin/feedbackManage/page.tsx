@@ -5,7 +5,7 @@ import { Button, Image, Modal, Space, Input, Pagination } from 'antd';
 import dayjs from 'dayjs';
 import { useAppPagination } from '@hooks';
 import { messageApi } from '@hooks';
-import api from '@services/api';
+import { adminQuery } from '~mdAdmin/redux';
 import { UserAvatar } from '@components';
 import { FeedbackItem } from '~mdDashboard/types';
 import styles from './styles';
@@ -30,19 +30,18 @@ const FeedbackManage: React.FC = () => {
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [toggleResolved] = adminQuery.useToggleFeedbackResolvedMutation();
+  const [replyFeedback] = adminQuery.useReplyFeedbackMutation();
 
   const handleToggleResolve = async (item: FeedbackItem) => {
     setTogglingId(item._id);
     try {
-      const res = await api.post(`/feedback/${item._id}/resolve`);
-      const updated = res.data?.data;
+      const updated = await toggleResolved(item._id).unwrap();
       setListItem(prev =>
         prev.map(f => (f._id === item._id ? { ...f, ...updated } : f)),
       );
     } catch (e: any) {
-      messageApi.error(
-        e?.response?.data?.message || 'Không cập nhật được trạng thái',
-      );
+      messageApi.error(e?.data?.message || 'Không cập nhật được trạng thái');
     } finally {
       setTogglingId(null);
     }
@@ -52,10 +51,10 @@ const FeedbackManage: React.FC = () => {
     if (!replyTarget || !replyText.trim()) return;
     setSending(true);
     try {
-      const res = await api.post(`/feedback/${replyTarget._id}/reply`, {
+      const updated = await replyFeedback({
+        id: replyTarget._id,
         message: replyText.trim(),
-      });
-      const updated = res.data?.data;
+      }).unwrap();
       setListItem(prev =>
         prev.map(f => (f._id === replyTarget._id ? { ...f, ...updated } : f)),
       );
@@ -67,7 +66,7 @@ const FeedbackManage: React.FC = () => {
       setReplyTarget(null);
       setReplyText('');
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không gửi được trả lời');
+      messageApi.error(e?.data?.message || 'Không gửi được trả lời');
     } finally {
       setSending(false);
     }

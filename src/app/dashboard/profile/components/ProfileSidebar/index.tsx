@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { AppUploadToServer, UserAvatar } from '@components';
 import { messageApi } from '@hooks';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 import styles from './styles';
 
 const MAX_AVATAR_SIZE_MB = 5;
@@ -34,6 +34,7 @@ const ProfileSidebar = () => {
   const dispatch = useAppDispatch();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const [updateCurrentInfo] = authQuery.useUpdateCurrentInfoMutation();
   const roleName = (userProfile as any)?.role?.name;
   const className = (userProfile as any)?.class;
   const joinedAt = (userProfile as any)?.createdAt;
@@ -58,12 +59,9 @@ const ProfileSidebar = () => {
         accept="image/*"
         beforeUpload={beforeUploadAvatar}
         onChange={url =>
-          dispatch(
-            authAction.updateCurrentInfo({
-              ...userProfile,
-              avatar: url,
-            } as any),
-          )
+          updateCurrentInfo({ ...userProfile, avatar: url })
+            .unwrap()
+            .then(res => dispatch(authAction.setCurrentUserInfo(res)))
         }>
         <View style={styles.changeAvatarBtn}>
           <Text style={styles.changeAvatarText}>Đổi ảnh đại diện</Text>

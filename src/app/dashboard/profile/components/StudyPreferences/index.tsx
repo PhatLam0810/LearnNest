@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text } from 'react-native-web';
 import { Switch, Checkbox } from 'antd';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 import styles from './styles';
 
 // Nhãn tiếng Việt cho từng loại thông báo user tự bật/tắt được - KHÔNG gồm
@@ -32,22 +32,24 @@ const StudyPreferences = () => {
   const dispatch = useAppDispatch();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const [updateCurrentInfo] = authQuery.useUpdateCurrentInfoMutation();
   // Field có thể chưa tồn tại trên profile cũ (chưa từng đổi) - mặc định
   // bật, khớp default true ở BE.
   const reminderEnabled = userProfile?.studyReminderEnabled !== false;
   const isAdmin = (userProfile as any)?.role?.level <= 2;
   const disabledTypes = (userProfile as any)?.disabledNotificationTypes || [];
 
+  const saveProfile = (patch: Record<string, unknown>) => {
+    updateCurrentInfo({ ...userProfile, ...patch })
+      .unwrap()
+      .then(res => dispatch(authAction.setCurrentUserInfo(res)));
+  };
+
   const toggleNotifType = (type: string, checked: boolean) => {
     const next = checked
       ? disabledTypes.filter((t: string) => t !== type)
       : [...disabledTypes, type];
-    dispatch(
-      authAction.updateCurrentInfo({
-        ...userProfile,
-        disabledNotificationTypes: next,
-      } as any),
-    );
+    saveProfile({ disabledNotificationTypes: next });
   };
 
   return (
@@ -61,14 +63,7 @@ const StudyPreferences = () => {
         </View>
         <Switch
           checked={reminderEnabled}
-          onChange={checked =>
-            dispatch(
-              authAction.updateCurrentInfo({
-                ...userProfile,
-                studyReminderEnabled: checked,
-              } as any),
-            )
-          }
+          onChange={checked => saveProfile({ studyReminderEnabled: checked })}
         />
       </View>
       <View style={styles.divider} />

@@ -414,7 +414,6 @@ const ModuleDetailPage = () => {
         libraryId: next.data._id,
         userId: userProfile?._id,
       });
-      await dispatch(dashboardAction.getLessonDetail({ id: lessonId }));
       handleSelectLibrary(next.data);
     } else {
       handleSelectTask(next.data);

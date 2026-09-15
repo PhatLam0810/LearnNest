@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { AppButton } from '@components';
 import styles from './styles';
 import { View, Text } from 'react-native-web';
-import { useMyCourses } from '@/hooks/useMyCourses';
+import { formatRelativeTime } from '@/utils/time';
 import { useResponsive } from '@/styles/responsive';
 import ContinueLearningBanner from './_components/ContinueLearningBanner';
 import StatCard from './_components/StatCard';
@@ -32,9 +32,9 @@ const HomeOverview = () => {
     state => state.authReducer.tokenInfo?.userProfile?._id,
   );
 
-  const { myCourses, loadingCourses, formatRelativeTime } = useMyCourses(
-    userId || null,
-  );
+  const { data: myCoursesData, isFetching: loadingCourses } =
+    dashboardQuery.useGetMyCoursesQuery(userId || '', { skip: !userId });
+  const myCourses = myCoursesData || [];
   const { data: studyStats } = dashboardQuery.useGetStudyStatsQuery(
     userId || '',
     { skip: !userId },

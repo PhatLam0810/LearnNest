@@ -8,12 +8,12 @@ import Link from 'next/link';
 import styles from './styles';
 import { AppButton, AppInput } from '@components';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 import { useResponsive } from '@/styles/responsive';
 import typography from '@/styles/typography';
 
 type FieldType = {
-  otp: number;
+  otp: string;
   password: string;
   confirmPassword: string;
 };
@@ -24,6 +24,8 @@ const CreateAccountPage = () => {
   const { sendOtpInfo } = useAppSelector(state => state.authReducer);
   const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
+  const [verifyOtp] = authQuery.useVerifyOtpMutation();
+  const [signUp] = authQuery.useSignUpMutation();
 
   useEffect(() => {
     if (sendOtpInfo) {
@@ -75,20 +77,36 @@ const CreateAccountPage = () => {
           <Form<FieldType>
             name="register"
             requiredMark={false}
-            onFinish={data => {
-              dispatch(
-                authAction.signUp({
-                  params: {
-                    email: sendOtpInfo.email,
-                    password: data.password,
-                    // Input.OTP trả về string ("123456"), BE cần number.
-                    otp: Number(data.otp),
-                  },
-                  callback() {
-                    router.push('/login');
-                  },
-                }),
-              );
+            onFinish={async data => {
+              if (!sendOtpInfo) return;
+              messageApi?.open({
+                type: 'loading',
+                content: 'SignUp',
+                duration: 0,
+              });
+              try {
+                await verifyOtp({
+                  email: sendOtpInfo.email,
+                  otp: data.otp,
+                }).unwrap();
+              } catch (e: any) {
+                messageApi.destroy();
+                messageApi.error(e?.data?.message || 'Mã OTP không đúng');
+                return;
+              }
+              try {
+                const signUpRes = await signUp({
+                  email: sendOtpInfo.email,
+                  password: data.password,
+                }).unwrap();
+                messageApi.destroy();
+                messageApi.success('SignUp successfully!');
+                dispatch(authAction.setSignUpInfo(signUpRes));
+                router.push('/login');
+              } catch (e: any) {
+                messageApi.destroy();
+                messageApi.error(e?.data?.message || 'Email already exists');
+              }
             }}
             layout="vertical"
             form={form}>

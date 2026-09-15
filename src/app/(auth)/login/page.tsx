@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@utils';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { authAction } from '~mdAuth/redux';
+import { authAction, authQuery } from '~mdAuth/redux';
 import Icon from '@components/icons';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
@@ -19,6 +19,7 @@ import { AppButton, AppInput } from '@components';
 import { useRouter } from 'next/navigation';
 import { useResponsive } from '@/styles/responsive';
 import typography from '@/styles/typography';
+import { messageApi } from '@hooks';
 
 type FieldType = {
   email: string;
@@ -32,6 +33,8 @@ const LoginPage = () => {
   const { signUpInfo } = useAppSelector(state => state.authReducer);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [login] = authQuery.useLoginMutation();
+  const [loginOauth] = authQuery.useLoginOauthMutation();
   const handleLoginOauth = async () => {
     if (isGoogleLoading) return;
     setIsGoogleLoading(true);
@@ -40,13 +43,14 @@ const LoginPage = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       const token = await user.getIdToken();
-      // Không push ngay ở đây — dispatch chỉ kích hoạt saga (async, gọi API
-      // xong mới set tokenInfo). Push liền lúc token chưa kịp set khiến
-      // Authentication guard thấy chưa đăng nhập và đá ngược về "/", rồi kẹt
-      // luôn ở đó vì "/" không tự theo dõi accessToken để vào lại. useEffect
-      // bên dưới đã theo dõi accessToken và tự push khi có, y hệt luồng
-      // email/password — cứ để nó lo, không cần push tay ở đây nữa.
-      dispatch(authAction.loginOAuth({ token }));
+      // Không push ngay ở đây — chờ mutation trả về xong mới set tokenInfo.
+      // Push liền lúc token chưa kịp set khiến Authentication guard thấy
+      // chưa đăng nhập và đá ngược về "/", rồi kẹt luôn ở đó vì "/" không tự
+      // theo dõi accessToken để vào lại. useEffect bên dưới đã theo dõi
+      // accessToken và tự push khi có, y hệt luồng email/password — cứ để
+      // nó lo, không cần push tay ở đây nữa.
+      const data = await loginOauth({ token }).unwrap();
+      dispatch(authAction.setTokenInfo(data));
     } catch (error) {
       console.error('Login Error:', error);
     } finally {
@@ -113,8 +117,17 @@ const LoginPage = () => {
             <View style={{ overflow: 'hidden' }}>
               <Form<FieldType>
                 name="login"
-                onFinish={data => {
-                  dispatch(authAction.login(data));
+                onFinish={async data => {
+                  messageApi?.loading('Login', 0);
+                  try {
+                    const res = await login(data).unwrap();
+                    messageApi?.destroy();
+                    messageApi.success('Login successfully!');
+                    dispatch(authAction.setTokenInfo(res));
+                  } catch {
+                    messageApi?.destroy();
+                    messageApi.error('Incorrect account or password.');
+                  }
                 }}
                 autoComplete="off"
                 layout="vertical"

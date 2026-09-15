@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Progress } from 'antd';
-import { MyCourseItem } from '@/hooks/useMyCourses';
+import { MyCourseItem } from '~mdDashboard/redux/RTKQuery/types';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
 import './styles.scss';
 

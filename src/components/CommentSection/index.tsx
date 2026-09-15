@@ -21,6 +21,7 @@ import { useAppSelector } from '@redux';
 import { useSocket } from '@hooks/useSocket';
 import { AppInput } from '@components';
 import UserAvatar from '@components/UserAvatar';
+import { dashboardQuery } from '~mdDashboard/redux';
 import styles from './styles';
 
 const REPLIES_PREVIEW_COUNT = 4;
@@ -98,6 +99,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const [reportNote, setReportNote] = useState('');
   const [submittingReport, setSubmittingReport] = useState(false);
 
+  const [uploadCommentImage] = dashboardQuery.useUploadCommentImageMutation();
+  const [deleteCommentMutation] = dashboardQuery.useDeleteCommentMutation();
+  const [toggleCommentLikeMutation] =
+    dashboardQuery.useToggleCommentLikeMutation();
+  const [reportCommentMutation] = dashboardQuery.useReportCommentMutation();
+
   useEffect(() => {
     if (!postId) return;
     setLoading(true);
@@ -174,19 +181,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({
         toUpload.map(async file => {
           const formData = new FormData();
           formData.append('file', file);
-          // `api` mặc định set Content-Type: application/json cho mọi
-          // request - phải gỡ header đó ở đây để trình duyệt tự set đúng
-          // multipart/form-data kèm boundary, nếu không BE (Multer) không
-          // parse được file, upload thất bại âm thầm.
-          const res = await api.post('/upload', formData, {
-            headers: { 'Content-Type': undefined },
-          });
-          return { url: res.data?.data as string, name: file.name };
+          const url = await uploadCommentImage(formData).unwrap();
+          return { url, name: file.name };
         }),
       );
       setPendingImages(prev => [...prev, ...uploaded.filter(img => img.url)]);
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không tải được ảnh lên');
+      messageApi.error(e?.data?.message || 'Không tải được ảnh lên');
     } finally {
       setUploadingImages(false);
     }
@@ -208,33 +209,28 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await api.delete(`/comments/${id}`);
+      const res = await deleteCommentMutation(id).unwrap();
       // Xóa 1 comment gốc kéo theo xóa luôn reply của nó ở BE - deletedIds có
       // thể nhiều hơn 1 id, phải dọn hết để không còn reply "mồ côi" (vẫn
       // đếm vào tổng nhưng không render được do cha đã mất).
-      const deletedIds: string[] = res.data?.deletedIds || [id];
+      const deletedIds: string[] = res?.deletedIds || [id];
       setComments(prev => prev.filter(item => !deletedIds.includes(item._id)));
       socket.emit('notifyDeleted', { ids: deletedIds, postId });
     } catch (e: any) {
-      messageApi.error(
-        e?.response?.data?.message || 'Không xóa được bình luận',
-      );
+      messageApi.error(e?.data?.message || 'Không xóa được bình luận');
     }
   };
 
   const handleToggleLike = async (id: string) => {
     try {
-      const res = await api.post(`/comments/${id}/like`);
-      // Endpoint này trả thẳng document Mongoose (không bọc qua
-      // responseService.list như các API phân trang khác) - res.data CHÍNH
-      // LÀ comment, không phải res.data.data.
-      const likes: string[] = res.data?.likes || [];
+      const res = await toggleCommentLikeMutation(id).unwrap();
+      const likes: string[] = res?.likes || [];
       setComments(prev =>
         prev.map(item => (item._id === id ? { ...item, likes } : item)),
       );
       socket.emit('notifyLiked', { id, postId, likes });
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không thực hiện được');
+      messageApi.error(e?.data?.message || 'Không thực hiện được');
     }
   };
 
@@ -252,15 +248,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
     setSubmittingReport(true);
     try {
-      await api.post('/comments/report', {
+      await reportCommentMutation({
         commentId: reportTarget,
         reason: reportReason,
         note: reportNote.trim() || undefined,
-      });
+      }).unwrap();
       messageApi.success('Đã gửi báo cáo, cảm ơn bạn!');
       setReportTarget(null);
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không gửi được báo cáo');
+      messageApi.error(e?.data?.message || 'Không gửi được báo cáo');
     } finally {
       setSubmittingReport(false);
     }

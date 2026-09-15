@@ -1,5 +1,6 @@
 import { baseQuery } from '@redux/RTKQuery';
 import { AxiosResponse } from 'axios';
+import { FeedbackItem } from '~mdDashboard/types';
 import { LibraryType } from '~mdDashboard/redux/RTKQuery/types';
 import { Category } from '~mdDashboard/redux/saga/type';
 import {
@@ -138,6 +139,30 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
 
+    updateModule: builder.mutation<any, any>({
+      query: (body: any) => ({
+        url: 'lesson/updateModule',
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    updateLibrary: builder.mutation<any, any>({
+      query: (body: any) => ({
+        url: 'library',
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    createFeedback: builder.mutation<any, any>({
+      query: (body: any) => ({
+        url: 'feedback',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
     deleteModule: builder.mutation({
       query: (params: { _id: string }) => ({
         url: `/lesson/module/${params._id}`,
@@ -754,6 +779,63 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+
+    // Ảnh nền bài học (AddLessonContent) - cùng route /upload dùng chung
+    // toàn dự án (avatar, video/PDF thư viện, ảnh bình luận...). BE bọc
+    // kết quả qua responseService.single() -> {data: url}.
+    uploadImage: builder.mutation<string, FormData>({
+      query: formData => ({
+        url: '/upload',
+        method: 'POST',
+        body: formData,
+      }),
+      transformResponse: (res: any) => res.data,
+    }),
+
+    // ---- Báo Cáo Vi Phạm (bình luận) ----
+    resolveCommentReport: builder.mutation<
+      any,
+      { reportId: string; action: 'hide' | 'dismiss' }
+    >({
+      query: ({ reportId, action }) => ({
+        url: `/comments/admin/reports/${reportId}/resolve`,
+        method: 'POST',
+        body: { action },
+      }),
+    }),
+    // CommentService.warnUser (BE) trả thẳng {sent, warnedAt}, không bọc
+    // qua responseService.single() như các API khác trong file này.
+    warnCommentUser: builder.mutation<
+      { sent: boolean; warnedAt: string },
+      string
+    >({
+      query: reportId => ({
+        url: `/comments/admin/reports/${reportId}/warn`,
+        method: 'POST',
+      }),
+    }),
+
+    // ---- Phản Hồi Người Dùng ----
+    toggleFeedbackResolved: builder.mutation<FeedbackItem, string>({
+      query: id => ({
+        url: `/feedback/${id}/resolve`,
+        method: 'POST',
+      }),
+      transformResponse: (res: AxiosResponse<FeedbackItem>) => res.data,
+    }),
+    replyFeedback: builder.mutation<
+      FeedbackItem & { sent: boolean },
+      { id: string; message: string }
+    >({
+      query: ({ id, message }) => ({
+        url: `/feedback/${id}/reply`,
+        method: 'POST',
+        body: { message },
+      }),
+      transformResponse: (
+        res: AxiosResponse<FeedbackItem & { sent: boolean }>,
+      ) => res.data,
     }),
   }),
   overrideExisting: true,

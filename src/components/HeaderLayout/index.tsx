@@ -38,7 +38,7 @@ import { authAction } from '~mdAuth/redux';
 import { useAppSelector } from '@redux';
 import UserAvatar from '@components/UserAvatar';
 import SearchBar from '@components/SearchContext/SearchBar';
-import { useMyCourses } from '@/hooks/useMyCourses';
+import { formatRelativeTime } from '@/utils/time';
 import CourseItem from '@/components/CourseItem';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
 import { useSocket } from '@hooks/useSocket';
@@ -68,8 +68,11 @@ const HeaderLayout: React.FC = ({}) => {
   const isHomePage = pathname.startsWith('/dashboard/home');
   const isMyCoursesPage = pathname === '/dashboard/my-courses';
 
-  const { myCourses, loadingCourses, fetchMyCourses, formatRelativeTime } =
-    useMyCourses(userId);
+  const {
+    data: myCourses,
+    isFetching: loadingCourses,
+    refetch: fetchMyCourses,
+  } = dashboardQuery.useGetMyCoursesQuery(userId || '', { skip: !userId });
 
   const socket = useSocket();
   const [isNotifOpen, setIsNotifOpen] = useState(false);

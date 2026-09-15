@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAppSelector } from '@redux';
 import { useRouter } from 'next/navigation';
 import {
@@ -14,6 +13,7 @@ import {
 
 import styles from './styles';
 import { messageApi } from '@hooks';
+import { dashboardQuery } from '~mdDashboard/redux';
 
 export default function Chatbox() {
   const [mounted, setMounted] = useState(false);
@@ -32,13 +32,14 @@ export default function Chatbox() {
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const router = useRouter();
+  const [askAi] = dashboardQuery.useAskAiMutation();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const sendMessage = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !userProfile?._id) return;
 
     const userMsg = { role: 'user', content: message };
     setChat(prev => [...prev, userMsg]);
@@ -46,22 +47,15 @@ export default function Chatbox() {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/ai/ask`,
-        {
-          question: message,
-          userId: userProfile?._id || null,
-        },
-      );
+      const res = await askAi({
+        question: message,
+        userId: userProfile._id,
+      }).unwrap();
 
-      const aiMsg = { role: 'ai', content: res.data.response };
+      const aiMsg = { role: 'ai', content: res.response };
       setChat(prev => [...prev, aiMsg]);
 
-      if (res.data.lessonInfo) {
-        setLessonInfo(res.data.lessonInfo);
-      } else {
-        setLessonInfo(null);
-      }
+      setLessonInfo(res.lessonInfo || null);
     } catch (err) {
       setChat(prev => [
         ...prev,

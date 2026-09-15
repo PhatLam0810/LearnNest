@@ -14,7 +14,7 @@ import {
   YAxis,
 } from 'recharts';
 import { useAppSelector } from '@redux';
-import { useMyCourses } from '@/hooks/useMyCourses';
+import { formatRelativeTime } from '@/utils/time';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { RecentTestResult } from '~mdDashboard/redux/RTKQuery/types';
 import { AppButton } from '@components';
@@ -37,9 +37,9 @@ const MyCoursesPage = () => {
     state => state.authReducer.tokenInfo?.userProfile?._id,
   );
 
-  const { myCourses, loadingCourses, formatRelativeTime } = useMyCourses(
-    userId || null,
-  );
+  const { data: myCoursesData, isFetching: loadingCourses } =
+    dashboardQuery.useGetMyCoursesQuery(userId || '', { skip: !userId });
+  const myCourses = myCoursesData || [];
   const { data: overview } = dashboardQuery.useGetMyOverviewQuery(
     userId || '',
     { skip: !userId },

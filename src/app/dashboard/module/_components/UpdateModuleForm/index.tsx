@@ -1,9 +1,8 @@
 'use client';
 import React from 'react';
 import { Modal } from 'antd';
-import { adminAction } from '@/modules/admin/redux';
+import { adminQuery } from '@/modules/admin/redux';
 import { ScrollView } from 'react-native-web';
-import { useAppDispatch } from '@redux';
 import { AddModuleContent } from '~mdAdmin/components';
 import { useWindowSize } from '@hooks';
 import { Module } from '~mdDashboard/redux/saga/type';
@@ -31,23 +30,20 @@ const UpdateModuleForm: React.FC<UpdateModuleFormProps> = ({
   refresh,
   zIndex,
 }) => {
-  const dispatch = useAppDispatch();
   const { width } = useWindowSize();
   const height = (width * 0.8 * 9) / 16;
+  const [updateModule] = adminQuery.useUpdateModuleMutation();
   const onFinish = (values: Module) => {
-    dispatch(
-      adminAction.updateModule({
-        params: {
-          _id: data._id,
-          ...values,
-        },
-        callback() {
-          refresh();
-          setSelectedItem(null);
-          setIsVisible(false);
-        },
-      }),
-    );
+    updateModule({
+      _id: data._id,
+      ...values,
+    })
+      .unwrap()
+      .then(() => {
+        refresh();
+        setSelectedItem(null);
+        setIsVisible(false);
+      });
   };
 
   const onCloseModalAdd = () => {
