@@ -1,11 +1,12 @@
 'use client';
-import React from 'react';
-import { ConfigProvider, Tabs } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Badge, ConfigProvider, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { View } from 'react-native-web';
 import styles from './styles';
 import './styles.scss';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { getQuestionStatsApi } from '~mdAdmin/services/api';
 import UserManage from './userManage/page';
 import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
@@ -19,7 +20,7 @@ import PassRateReport from './passRateReport/page';
 import MockExamManage from './mockExamManage/page';
 import { ADMIN_PRIMARY } from './adminTheme';
 
-const items: TabsProps['items'] = [
+const buildItems = (qnaPendingCount: number): TabsProps['items'] => [
   {
     key: '1',
     label: 'Quản Trị Người Dùng',
@@ -62,7 +63,11 @@ const items: TabsProps['items'] = [
   },
   {
     key: '8',
-    label: 'Hộp Thư Hỏi Đáp',
+    label: (
+      <Badge count={qnaPendingCount} size="small" offset={[8, -2]}>
+        Hộp Thư Hỏi Đáp
+      </Badge>
+    ),
     children: <QaInbox />,
   },
   {
@@ -81,6 +86,14 @@ const AdminPage: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab') || '1'; // Lấy `tab` từ URL, mặc định là '1'
+  const [qnaPendingCount, setQnaPendingCount] = useState(0);
+
+  useEffect(() => {
+    getQuestionStatsApi()
+      .then(stats => setQnaPendingCount(stats?.openCount ?? 0))
+      .catch(() => {});
+  }, []);
+
   return (
     <ConfigProvider
       theme={{
@@ -89,13 +102,21 @@ const AdminPage: React.FC = () => {
           colorInfo: ADMIN_PRIMARY,
           borderRadius: 10,
         },
+        components: {
+          // Nút lọc trạng thái đang chọn (Hộp Thư Hỏi Đáp) nền navy thương
+          // hiệu, chữ trắng - mặc định Segmented dùng nền xám.
+          Segmented: {
+            itemSelectedBg: ADMIN_PRIMARY,
+            itemSelectedColor: '#fff',
+          },
+        },
       }}>
       <div className="admin-page">
         <View style={styles.container}>
           <View style={styles.headerWrapper}>
             <h1 style={styles.pageTitle}>Quản Trị Hệ Thống</h1>
           </View>
-          <Tabs defaultActiveKey={tab} items={items} />
+          <Tabs defaultActiveKey={tab} items={buildItems(qnaPendingCount)} />
         </View>
       </div>
     </ConfigProvider>
