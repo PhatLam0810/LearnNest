@@ -367,6 +367,27 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res?.data ?? res,
     }),
+    addPracticeClassMembers: builder.mutation<
+      { added: number; count: number },
+      { classId: string; userIds: string[] }
+    >({
+      query: ({ classId, userIds }) => ({
+        url: `admin/practice-classes/${classId}/members`,
+        method: 'POST',
+        body: { userIds },
+      }),
+      transformResponse: (res: any) => res?.data ?? res,
+    }),
+    removePracticeClassMember: builder.mutation<
+      { count: number },
+      { classId: string; userId: string }
+    >({
+      query: ({ classId, userId }) => ({
+        url: `admin/practice-classes/${classId}/members/${userId}`,
+        method: 'DELETE',
+      }),
+      transformResponse: (res: any) => res?.data ?? res,
+    }),
     exportLearners: builder.mutation<Blob, { learners: any[] }>({
       query: body => ({
         url: 'admin/export-learners',

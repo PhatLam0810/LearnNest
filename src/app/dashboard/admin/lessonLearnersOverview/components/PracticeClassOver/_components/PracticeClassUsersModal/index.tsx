@@ -16,6 +16,7 @@ import styles from './styles';
 import { useAppPagination } from '@hooks/pagination';
 import { adminQuery } from '~mdAdmin/redux';
 import { dashboardQuery } from '~mdDashboard/redux';
+import AddClassMembersModal from '../AddClassMembersModal';
 
 type PracticeClassUserItem = {
   userId: string;
@@ -46,6 +47,9 @@ const PracticeClassUsersModal: React.FC<Props> = ({
     useAppPagination<PracticeClassUserItem>({
       apiUrl: `admin/practice-classes/${selectedPracticeClassId}/users`,
     });
+  const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
+  const [removeMember] = adminQuery.useRemovePracticeClassMemberMutation();
+  const [removingUserId, setRemovingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && selectedPracticeClassId) {
@@ -53,6 +57,22 @@ const PracticeClassUsersModal: React.FC<Props> = ({
       refresh();
     }
   }, [open, selectedPracticeClassId]);
+
+  const handleRemoveMember = async (userId: string) => {
+    setRemovingUserId(userId);
+    try {
+      await removeMember({
+        classId: selectedPracticeClassId,
+        userId,
+      }).unwrap();
+      message.success('Đã xóa học viên khỏi lớp');
+      refresh();
+    } catch (error: any) {
+      message.error(error?.data?.message || 'Xóa học viên thất bại');
+    } finally {
+      setRemovingUserId(null);
+    }
+  };
 
   // ---- Giao bài (ClassAssignment) ----
   const { data: assignments, refetch: refetchAssignments } =
@@ -149,6 +169,20 @@ const PracticeClassUsersModal: React.FC<Props> = ({
       key: 'faculty',
       width: '15%',
     },
+    {
+      title: '',
+      key: 'remove',
+      width: 60,
+      render: (_, record) => (
+        <Button
+          danger
+          type="text"
+          icon={<DeleteOutlined />}
+          loading={removingUserId === record.userId}
+          onClick={() => handleRemoveMember(record.userId)}
+        />
+      ),
+    },
   ];
 
   return (
@@ -164,6 +198,13 @@ const PracticeClassUsersModal: React.FC<Props> = ({
             Tổng số: {currentData?.totalRecords}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
+            <Button
+              key="addMembers"
+              type="primary"
+              disabled={!selectedLessonId}
+              onClick={() => setIsAddMembersOpen(true)}>
+              Thêm học viên
+            </Button>
             <Button
               key="exportGrades"
               onClick={handleExportGrades}
@@ -256,6 +297,14 @@ const PracticeClassUsersModal: React.FC<Props> = ({
           )}
         </div>
       </div>
+
+      <AddClassMembersModal
+        open={isAddMembersOpen}
+        onClose={() => setIsAddMembersOpen(false)}
+        classId={selectedPracticeClassId}
+        lessonId={selectedLessonId}
+        onAdded={refresh}
+      />
     </Modal>
   );
 };
