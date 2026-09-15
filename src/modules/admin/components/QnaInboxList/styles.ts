@@ -63,6 +63,13 @@ const styles = StyleSheet.create({
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
+  paginationRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingTop: 14,
+    paddingBottom: 14,
+    borderTop: '1px solid #f1f3f7',
+  },
   emptyListText: {
     ...typography.body2,
     // padding dạng chuỗi rút gọn bị react-native-web <Text> bỏ qua - viết

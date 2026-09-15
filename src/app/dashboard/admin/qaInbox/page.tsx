@@ -37,10 +37,19 @@ const QaInbox: React.FC = () => {
   const socket = useSocket();
   const { isMobile } = useResponsive();
   const [status, setStatus] = useState<StatusFilter>('open');
-  const { listItem, filter, refresh } = useAppPagination<QuestionItem>({
-    apiUrl: 'comments/admin/questions/list',
-    params: { filter: { status: 'open' }, pageSize: 50 },
-  });
+  const { listItem, setListItem, filter, refresh, fetchData, currentData } =
+    useAppPagination<QuestionItem>({
+      apiUrl: 'comments/admin/questions/list',
+      params: { filter: { status: 'open' }, pageSize: 5 },
+    });
+  // fetchData gộp dồn (append) từng trang vào listItem chứ không thay thế -
+  // xoá trước khi đổi trang để trang mới THAY THẾ thay vì cộng dồn (đúng như
+  // "chỉ hiển thị 5 item" thay vì list dài dần khi bấm nhiều trang).
+  const changePage = (p: number) => {
+    setListItem([]);
+    fetchData({ pageNum: p });
+  };
+  const pageItems = listItem;
   const [stats, setStats] = useState<QuestionStats | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answer, setAnswer] = useState<AnswerInfo | null>(null);
@@ -83,19 +92,20 @@ const QaInbox: React.FC = () => {
   };
 
   const selected =
-    listItem.find(q => q._id === selectedId) || listItem[0] || null;
+    pageItems.find(q => q._id === selectedId) || pageItems[0] || null;
 
-  // Mở khóa "câu hỏi đầu tiên" khi danh sách vừa tải xong, hoặc khi bộ lọc
-  // đổi khiến item đang chọn không còn trong danh sách nữa.
+  // Mở khóa "câu hỏi đầu tiên" khi trang hiện tại vừa tải xong, hoặc khi bộ
+  // lọc/đổi trang khiến item đang chọn không còn trong trang này nữa.
   useEffect(() => {
-    if (!listItem.length) {
+    if (!pageItems.length) {
       setSelectedId(null);
       return;
     }
-    if (!listItem.some(q => q._id === selectedId)) {
-      setSelectedId(listItem[0]._id);
+    if (!pageItems.some(q => q._id === selectedId)) {
+      setSelectedId(pageItems[0]._id);
     }
-  }, [listItem, selectedId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageItems.map(q => q._id).join(','), selectedId]);
 
   // Câu trả lời (nếu có) chỉ cần khi ĐANG XEM 1 câu hỏi đã trả lời - không
   // tải trước cho cả danh sách. Tái dùng endpoint liệt kê comment theo
@@ -213,9 +223,11 @@ const QaInbox: React.FC = () => {
           gridTemplateColumns: isMobile ? '1fr' : '390px 1fr',
         }}>
         <QnaInboxList
-          listItem={listItem}
+          listItem={pageItems}
           selectedId={selected?._id}
           onSelect={setSelectedId}
+          currentData={currentData}
+          onChangePage={changePage}
         />
         <QnaInboxDetail
           selected={selected}

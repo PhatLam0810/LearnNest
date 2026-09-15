@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Text, View } from 'react-native-web';
-import { Tag } from 'antd';
+import { Pagination, Tag } from 'antd';
 import dayjs from 'dayjs';
 import UserAvatar from '@components/UserAvatar';
 import { questionState } from '../qnaShared';
@@ -12,12 +12,16 @@ interface QnaInboxListProps {
   listItem: QuestionItem[];
   selectedId?: string;
   onSelect: (id: string) => void;
+  currentData?: { pageNum?: number; pageSize?: number; totalRecords?: number };
+  onChangePage: (pageNum: number) => void;
 }
 
 const QnaInboxList: React.FC<QnaInboxListProps> = ({
   listItem,
   selectedId,
   onSelect,
+  currentData,
+  onChangePage,
 }) => (
   <View style={styles.listPanel}>
     {!listItem.length && (
@@ -68,6 +72,19 @@ const QnaInboxList: React.FC<QnaInboxListProps> = ({
         </div>
       );
     })}
+    {!!currentData?.totalRecords &&
+      currentData.totalRecords > (currentData.pageSize || 5) && (
+        <View style={styles.paginationRow}>
+          <Pagination
+            size="small"
+            current={currentData.pageNum}
+            pageSize={currentData.pageSize}
+            total={currentData.totalRecords}
+            showSizeChanger={false}
+            onChange={onChangePage}
+          />
+        </View>
+      )}
   </View>
 );
 
