@@ -1,13 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import React, { useState } from 'react';
-import { BubbleMenu, EditorContent, useEditor } from '@tiptap/react';
+import { EditorContent, useEditor } from '@tiptap/react';
+import { BubbleMenu } from '@tiptap/react/menus';
 import { StarterKit } from '@tiptap/starter-kit';
 import { Image } from '@tiptap/extension-image';
-import { Bold } from '@tiptap/extension-bold';
-import { Italic } from '@tiptap/extension-italic';
-import { Underline } from '@tiptap/extension-underline';
-import { Heading } from '@tiptap/extension-heading';
-import { Link } from '@tiptap/extension-link';
 import Toolbar from './Toolbar';
 import './styles.css';
 const AppRichTextInput = ({
@@ -18,20 +14,20 @@ const AppRichTextInput = ({
   onChange?: (value: string) => void;
 }) => {
   const editor = useEditor({
+    // Bold/Italic/Underline/Link đã có sẵn trong StarterKit v3, chỉ cần
+    // chỉnh riêng heading (giới hạn H1-H3 thay vì H1-H6 mặc định).
     extensions: [
-      StarterKit,
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       Image,
-      Bold,
-      Italic,
-      Underline,
-      Heading.configure({ levels: [1, 2, 3] }),
-      Link,
     ],
     editorProps: {
       attributes: {
         class: 'richtext-input',
       },
     },
+    // Tránh mismatch hydration SSR (Next.js) - editor chỉ render nội dung
+    // thật ở client, giống khuyến nghị chính thức Tiptap v3 cho App Router.
+    immediatelyRender: false,
     content: value,
     onUpdate: ({ editor }) => {
       onChange && onChange(editor.getHTML());

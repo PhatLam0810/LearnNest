@@ -19,7 +19,11 @@ import { useUploadProgress } from '@hooks/useUploadProgress';
 import api from '@services/api';
 import { Library } from '~mdDashboard/types';
 import { ScrollView, View } from 'react-native-web';
-import { AppRichTextInput } from '@components';
+// Import thẳng đường dẫn con, không qua barrel '@components' - file này có
+// side-effect import './styles.css' nên bundler không tree-shake được, đi
+// qua barrel '@components' (nơi AppInput cũng nằm, dùng ở khắp app) sẽ kéo
+// theo @tiptap/* + @floating-ui vào MỌI route chỉ vì dùng AppInput.
+import AppRichTextInput from '@components/(Form)/AppRichTextInput';
 import {
   MinusCircleOutlined,
   PlusOutlined,
