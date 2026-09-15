@@ -1,63 +1,70 @@
-.import-user-manage {
+.import-excel-card {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 16px;
+  padding: 24px;
   background: #ffffff;
+  border: 1px solid #e5e9f0;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(5, 15, 40, 0.08);
   width: 100%;
 }
 
-.import-user-manage__header {
+.import-excel-card__header {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   align-items: flex-end;
 }
 
-.import-user-manage__field {
+.import-excel-card__field {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 8px;
 }
 
-.import-user-manage__hint {
+.import-excel-card__hint {
   font-size: 13px;
+  color: #6b7280;
+  line-height: 1.7;
   max-width: 480px;
 }
 
-.import-user-manage__preview-btn {
+.import-excel-card__preview-btn {
   margin-top: 4px;
 }
 
-.import-user-manage__actions {
+.import-excel-card__actions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
-.import-user-manage__summary {
+.import-excel-card__summary {
   padding: 12px 0;
+  font-size: 13px;
+  color: #6b7280;
 }
 
-.import-user-manage__alert {
+.import-excel-card__alert {
   margin-bottom: 12px;
 }
 
-.import-user-manage__table {
+.import-excel-card__table {
   width: 100%;
+  max-height: 520px;
+  overflow-y: auto;
 }
 
-.import-user-manage__row-error {
+.import-excel-card__row-error {
   background: #fff2f0;
 }
 
-.import-user-manage__input--error .ant-input {
+.import-excel-card__input--error .ant-input {
   border-color: #ff4d4f;
 }
 
-.import-user-manage__result-card {
+.import-excel-card__result-card {
   margin-top: 12px;
   padding: 16px;
   border: 1px solid #f0f0f0;

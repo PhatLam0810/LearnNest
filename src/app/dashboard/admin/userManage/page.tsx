@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
 import {
@@ -37,6 +37,17 @@ const UserManage = () => {
     adminQuery.useCreateUserMutation();
   const [sendEmails] = adminQuery.useSendImportEmailsMutation();
   const [messageApi, contextHolder] = message.useMessage();
+
+  // Card "Tạo người dùng mới" ở tab "Tạo Người Dùng" (CreateUserForm) là 1
+  // component riêng, không share state với danh sách ở đây - bắn event khi
+  // tạo xong để tự làm mới thay vì phải nâng state lên AdminPage.
+  useEffect(() => {
+    const handleUserCreated = () => refresh();
+    window.addEventListener('learnnest:user-created', handleUserCreated);
+    return () =>
+      window.removeEventListener('learnnest:user-created', handleUserCreated);
+  }, [refresh]);
+
   const handleDeleteUser = async (_id: string) => {
     try {
       await deleteAccount({

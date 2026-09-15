@@ -14,9 +14,11 @@ export interface DeleteAdminRoleParams {
 
 export interface CreateUserParams {
   email: string;
-  phone: number;
   fullName: string;
   studentId: string;
+  phoneNumber?: string;
+  class?: string;
+  faculty?: string;
 }
 
 export interface ImportUserItem {
