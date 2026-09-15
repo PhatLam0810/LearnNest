@@ -283,9 +283,13 @@ const ImportExcelCard: React.FC = () => {
             <strong>MSSV</strong>, <strong>Email</strong>. Có thể thêm các cột
             tùy chọn: Lớp, Khoa, Ngành. Tối đa {MAX_IMPORT_ROWS} dòng mỗi lần
             nhập.{' '}
-            <a href="/templates/mau-nhap-nguoi-dung.xlsx" download>
+            <AppButton
+              type="link"
+              href="/templates/mau-nhap-nguoi-dung.xlsx"
+              download
+              style={{ width: 'auto', height: 'auto', padding: 0 }}>
               Tải file mẫu →
-            </a>
+            </AppButton>
           </Text>
           <Upload
             maxCount={1}

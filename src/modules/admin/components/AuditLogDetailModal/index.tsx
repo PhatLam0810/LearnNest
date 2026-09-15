@@ -175,9 +175,6 @@ const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
             })()}
 
             <View style={styles.modalFooter}>
-              <Text style={styles.userAgentText}>
-                User agent: {selected.userAgent || '—'}
-              </Text>
               <View style={{ display: 'flex', flexDirection: 'row', gap: 10 }}>
                 <AppButton
                   style={styles.secondaryBtnStyle}
