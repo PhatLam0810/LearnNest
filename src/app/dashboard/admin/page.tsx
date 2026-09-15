@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Badge, ConfigProvider, Tabs } from 'antd';
 import type { TabsProps } from 'antd';
 import { View } from 'react-native-web';
+import { typography } from '@styles';
 import styles from './styles';
 import './styles.scss';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -101,6 +102,12 @@ const AdminPage: React.FC = () => {
           colorPrimary: ADMIN_PRIMARY,
           colorInfo: ADMIN_PRIMARY,
           borderRadius: 10,
+          // antd tự set font-family riêng cho từng component (Tag, Select,
+          // Table, Input...), GHI ĐÈ font Lexend kế thừa từ body - phải khai
+          // báo lại ở đây thì toàn bộ chữ trong khu Quản Trị mới đúng Lexend
+          // (đã xác minh: .ant-tag trước đó vẫn dùng font hệ thống mặc định
+          // dù <body> đã set Lexend).
+          fontFamily: typography.body2.fontFamily,
         },
         components: {
           // Nút lọc trạng thái đang chọn (Hộp Thư Hỏi Đáp) nền navy thương
