@@ -37,6 +37,7 @@ export const baseQuery = createApi({
     'CourseRating',
     'Notification',
     'MockExam',
+    'MockExamAttempt',
     'LessonNote',
     'Bookmark',
     'ClassAssignment',

@@ -24,7 +24,9 @@ const subjectLabel = (s: string) => (s === 'Mixed' ? 'Word + Excel' : s);
 const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   const router = useRouter();
   const { data, isFetching, refetch } =
-    dashboardQuery.useGetMockExamAttemptQuery(attemptId, { skip: !attemptId });
+    dashboardQuery.useGetMockExamAttemptQuery(attemptId, {
+      skip: !attemptId,
+    });
   const [submitAttempt, { isLoading: isSubmitting }] =
     dashboardQuery.useSubmitMockExamAttemptMutation();
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
@@ -37,11 +39,12 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
   const handleSubmit = async (auto: boolean) => {
     try {
+      // submitMockExamAttempt đã invalidatesTags MockExamAttempt - không
+      // cần tự refetch(), useGetMockExamAttemptQuery tự tải lại.
       await submitAttempt(attemptId).unwrap();
       if (auto) {
         messageApi.warning('Hết giờ! Bài thi thử đã được nộp tự động.');
       }
-      refetch();
     } catch (e: any) {
       if (!auto) {
         messageApi.error(

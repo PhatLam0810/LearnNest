@@ -27,10 +27,9 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
   const [hoverStars, setHoverStars] = useState(0);
   const [comment, setComment] = useState('');
 
-  const { data, refetch } = dashboardQuery.useGetCourseRatingQuery(
-    lessonId || '',
-    { skip: !lessonId },
-  );
+  const { data } = dashboardQuery.useGetCourseRatingQuery(lessonId || '', {
+    skip: !lessonId,
+  });
   const [submitRating, { isLoading: submitting }] =
     dashboardQuery.useSubmitCourseRatingMutation();
   const [fetchRatings, { data: ratingsData, isLoading: loadingRatings }] =
@@ -65,7 +64,9 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
         comment: comment.trim() || undefined,
       }).unwrap();
       messageApi.success('Cảm ơn bạn đã đánh giá khóa học!');
-      refetch();
+      // getCourseRating đã providesTags/invalidatesTags CourseRating - không
+      // cần tự refetch(), chỉ getCourseRatings (mutation, danh sách phân
+      // trang) mới cần tự gọi lại vì mutation không nằm trong cơ chế tag.
       fetchRatings({ lessonId, pageNum: 1, pageSize: 10 });
     } catch (e: any) {
       messageApi.error(e?.data?.message || 'Không gửi được đánh giá');

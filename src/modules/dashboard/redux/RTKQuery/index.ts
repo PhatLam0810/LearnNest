@@ -298,6 +298,9 @@ export const dashboardQuery = baseQuery.injectEndpoints({
     getMockExamAttempt: builder.query<MockExamAttemptDetail, string>({
       query: attemptId => `/practice/mock-exams/attempts/${attemptId}`,
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, attemptId) => [
+        { type: 'MockExamAttempt', id: attemptId },
+      ],
     }),
     submitMockExamAttempt: builder.mutation<{ status: string }, string>({
       query: attemptId => ({
@@ -305,6 +308,9 @@ export const dashboardQuery = baseQuery.injectEndpoints({
         method: 'POST',
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, attemptId) => [
+        { type: 'MockExamAttempt', id: attemptId },
+      ],
     }),
     getMockExamResult: builder.query<MockExamAttemptResult, string>({
       query: attemptId => `/practice/mock-exams/attempts/${attemptId}/result`,
