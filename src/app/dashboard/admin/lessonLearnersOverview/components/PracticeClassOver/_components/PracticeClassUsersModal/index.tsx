@@ -48,8 +48,6 @@ const PracticeClassUsersModal: React.FC<Props> = ({
       apiUrl: `admin/practice-classes/${selectedPracticeClassId}/users`,
     });
   const [isAddMembersOpen, setIsAddMembersOpen] = useState(false);
-  const [removeMember] = adminQuery.useRemovePracticeClassMemberMutation();
-  const [removingUserId, setRemovingUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (open && selectedPracticeClassId) {
@@ -57,22 +55,6 @@ const PracticeClassUsersModal: React.FC<Props> = ({
       refresh();
     }
   }, [open, selectedPracticeClassId]);
-
-  const handleRemoveMember = async (userId: string) => {
-    setRemovingUserId(userId);
-    try {
-      await removeMember({
-        classId: selectedPracticeClassId,
-        userId,
-      }).unwrap();
-      message.success('Đã xóa học viên khỏi lớp');
-      refresh();
-    } catch (error: any) {
-      message.error(error?.data?.message || 'Xóa học viên thất bại');
-    } finally {
-      setRemovingUserId(null);
-    }
-  };
 
   // ---- Giao bài (ClassAssignment) ----
   const { data: assignments, refetch: refetchAssignments } =
@@ -169,20 +151,6 @@ const PracticeClassUsersModal: React.FC<Props> = ({
       key: 'faculty',
       width: '15%',
     },
-    {
-      title: '',
-      key: 'remove',
-      width: 60,
-      render: (_, record) => (
-        <Button
-          danger
-          type="text"
-          icon={<DeleteOutlined />}
-          loading={removingUserId === record.userId}
-          onClick={() => handleRemoveMember(record.userId)}
-        />
-      ),
-    },
   ];
 
   return (
@@ -224,7 +192,7 @@ const PracticeClassUsersModal: React.FC<Props> = ({
           dataSource={listItem}
           rowKey="userId"
           onChange={res => {
-            fetchData({ pageNum: res.current });
+            fetchData({ pageNum: res.current, replace: true });
           }}
           pagination={{
             current: currentData?.pageNum,

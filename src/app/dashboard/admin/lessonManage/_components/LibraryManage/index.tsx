@@ -17,7 +17,6 @@ import { PlusOutlined } from '@ant-design/icons';
 import { AddLibraryContent } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import { Library } from '~mdDashboard/types';
-import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
 import { UpdateLibraryForm } from '@/app/dashboard/library/_components';
 
 const LibraryManage = () => {
@@ -30,8 +29,6 @@ const LibraryManage = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [dataEdit, setDataEdit] = useState<any>();
   const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
-
-  const [data, setData] = useState<Library>(null);
 
   const { listItem, currentData, refresh, fetchData, search } =
     useAppPagination<Library>({
@@ -151,21 +148,14 @@ const LibraryManage = () => {
           columns={columns}
           dataSource={listItem}
           onChange={res => {
-            fetchData({ pageNum: res.current });
-          }}
-          onRow={record => {
-            return {
-              onClick: () => {
-                setData(record);
-              },
-            };
+            fetchData({ pageNum: res.current, replace: true });
           }}
           pagination={{
             current: currentData?.pageNum,
             pageSize: currentData?.pageSize,
             total: currentData?.totalRecords,
+            showSizeChanger: false,
           }}
-          style={{ cursor: 'pointer' }}
         />
       </View>
       <Modal
@@ -191,19 +181,6 @@ const LibraryManage = () => {
         <Text>{`Xóa bài học: ${selectedItem?.title}`}</Text>
       </Modal>
 
-      <Modal
-        width={'80%'}
-        closeIcon={null}
-        styles={{
-          content: { padding: 0, backgroundColor: 'transparent' },
-        }}
-        centered
-        style={{ aspectRatio: 16 / 9 }}
-        footer={null}
-        open={!!data}
-        onCancel={() => setData(null)}>
-        <LibraryDetailItem data={data} />
-      </Modal>
       <UpdateLibraryForm
         data={dataEdit}
         isVisible={isVisibleModalUpdate}

@@ -51,7 +51,16 @@ export const useAppPagination = <T>(props: {
           ? await api.get(props.apiUrl, { params: requestParams })
           : await api.post(props.apiUrl, requestParams);
       if (status === 201) {
-        setListItem(prev => [...prev, ...data.data?.items]);
+        // fetchData mặc định CỘNG DỒN (dùng cho các màn "tải thêm" khi
+        // cuộn - onEndReached). Bảng antd Table thì khác: nó tự cắt
+        // dataSource theo (current-1)*pageSize nếu length đã tích luỹ vượt
+        // pageSize, nên bấm nhảy trang không theo thứ tự (vd thẳng trang 10)
+        // sẽ ra rỗng dù server có dữ liệu. replace:true cho các Table dùng
+        // phân trang server-side thay listItem = đúng 1 trang vừa tải, để
+        // antd Table hiển thị nguyên vẹn không tự cắt lại.
+        setListItem(prev =>
+          p?.replace ? data.data?.items : [...prev, ...data.data?.items],
+        );
         pageNum.current++;
         totalPages.current = data.data.totalPages;
         setCurrentData(data.data);

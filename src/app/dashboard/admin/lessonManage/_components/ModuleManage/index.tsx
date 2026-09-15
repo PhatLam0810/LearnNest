@@ -140,13 +140,14 @@ const ModuleManage = () => {
           columns={columns}
           dataSource={listItem}
           onChange={res => {
-            fetchData({ pageNum: res.current });
+            fetchData({ pageNum: res.current, replace: true });
           }}
           style={{ cursor: 'pointer' }}
           pagination={{
             current: currentData?.pageNum,
             pageSize: currentData?.pageSize,
             total: currentData?.totalRecords,
+            showSizeChanger: false,
           }}
         />
       </View>

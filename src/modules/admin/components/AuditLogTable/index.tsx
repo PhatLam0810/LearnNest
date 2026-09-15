@@ -80,6 +80,7 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({
         current: currentData?.pageNum,
         pageSize: currentData?.pageSize,
         total: currentData?.totalRecords,
+        showSizeChanger: false,
       }}
     />
   );

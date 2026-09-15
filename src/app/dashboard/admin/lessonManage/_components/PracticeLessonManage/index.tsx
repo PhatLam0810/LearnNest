@@ -236,11 +236,12 @@ const PracticeLessonManage = () => {
         rowKey="_id"
         columns={columns}
         dataSource={listItem}
-        onChange={res => fetchData({ pageNum: res.current })}
+        onChange={res => fetchData({ pageNum: res.current, replace: true })}
         pagination={{
           current: currentData?.pageNum,
           pageSize: currentData?.pageSize,
           total: currentData?.totalRecords,
+          showSizeChanger: false,
         }}
       />
 

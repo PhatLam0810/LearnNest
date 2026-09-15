@@ -106,10 +106,11 @@ const ResultTestHistoryPage = () => {
             current: currentData?.pageNum,
             pageSize: currentData?.pageSize,
             total: currentData?.totalRecords,
+            showSizeChanger: false,
           }}
           style={{ cursor: 'pointer' }}
           onChange={pagination => {
-            fetchData({ pageNum: pagination.current });
+            fetchData({ pageNum: pagination.current, replace: true });
           }}
         />
       </View>

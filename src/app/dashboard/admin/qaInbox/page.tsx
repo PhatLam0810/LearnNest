@@ -37,18 +37,13 @@ const QaInbox: React.FC = () => {
   const socket = useSocket();
   const { isMobile } = useResponsive();
   const [status, setStatus] = useState<StatusFilter>('open');
-  const { listItem, setListItem, filter, refresh, fetchData, currentData } =
+  const { listItem, filter, refresh, fetchData, currentData } =
     useAppPagination<QuestionItem>({
       apiUrl: 'comments/admin/questions/list',
       params: { filter: { status: 'open' }, pageSize: 5 },
     });
-  // fetchData gộp dồn (append) từng trang vào listItem chứ không thay thế -
-  // xoá trước khi đổi trang để trang mới THAY THẾ thay vì cộng dồn (đúng như
-  // "chỉ hiển thị 5 item" thay vì list dài dần khi bấm nhiều trang).
-  const changePage = (p: number) => {
-    setListItem([]);
-    fetchData({ pageNum: p });
-  };
+  // replace:true - trang mới THAY THẾ 5 item cũ thay vì cộng dồn.
+  const changePage = (p: number) => fetchData({ pageNum: p, replace: true });
   const pageItems = listItem;
   const [stats, setStats] = useState<QuestionStats | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);

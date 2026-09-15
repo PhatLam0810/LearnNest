@@ -409,7 +409,7 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
                 total={totalRecords}
                 pageSize={pageSize}
                 showSizeChanger={false}
-                onChange={page => fetchData({ pageNum: page })}
+                onChange={page => fetchData({ pageNum: page, replace: true })}
               />
             </div>
           )}

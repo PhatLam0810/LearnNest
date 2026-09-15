@@ -247,7 +247,7 @@ const CreatePracticeClassModal: React.FC<Props> = ({
               dataSource={listItem}
               rowKey="_id"
               onChange={res => {
-                fetchData({ pageNum: res.current });
+                fetchData({ pageNum: res.current, replace: true });
               }}
               onRow={record => ({
                 onClick: () => {

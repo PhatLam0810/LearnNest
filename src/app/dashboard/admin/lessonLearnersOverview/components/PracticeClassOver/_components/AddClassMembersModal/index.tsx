@@ -127,7 +127,7 @@ const AddClassMembersModal: React.FC<Props> = ({
         columns={columns}
         dataSource={listItem}
         rowKey="_id"
-        onChange={res => fetchData({ pageNum: res.current })}
+        onChange={res => fetchData({ pageNum: res.current, replace: true })}
         onRow={record => ({
           onClick: () => {
             const isSelected = selectedUsers.some(

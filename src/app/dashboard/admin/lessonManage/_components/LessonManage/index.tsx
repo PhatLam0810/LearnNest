@@ -124,12 +124,13 @@ const LessonManage = () => {
           columns={columns}
           dataSource={listItem}
           onChange={res => {
-            fetchData({ pageNum: res.current });
+            fetchData({ pageNum: res.current, replace: true });
           }}
           pagination={{
             current: currentData?.pageNum,
             pageSize: currentData?.pageSize,
             total: currentData?.totalRecords,
+            showSizeChanger: false,
           }}
           style={{ cursor: 'pointer' }}
           onRow={record => {

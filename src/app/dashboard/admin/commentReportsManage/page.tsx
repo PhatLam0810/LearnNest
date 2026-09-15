@@ -229,7 +229,8 @@ const CommentReportsManage: React.FC = () => {
           current={currentData?.pageNum}
           pageSize={currentData?.pageSize}
           total={currentData?.totalRecords}
-          onChange={pageNum => fetchData({ pageNum })}
+          showSizeChanger={false}
+          onChange={pageNum => fetchData({ pageNum, replace: true })}
         />
       )}
     </View>

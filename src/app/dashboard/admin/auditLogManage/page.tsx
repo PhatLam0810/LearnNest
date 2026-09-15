@@ -20,7 +20,7 @@ const AuditLogManage: React.FC = () => {
       <AuditLogTable
         listItem={listItem}
         currentData={currentData}
-        onChangePage={pageNum => fetchData({ pageNum })}
+        onChangePage={pageNum => fetchData({ pageNum, replace: true })}
         onRowClick={setSelected}
       />
 
