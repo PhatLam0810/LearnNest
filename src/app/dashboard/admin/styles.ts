@@ -18,6 +18,9 @@ const styles = StyleSheet.create({
     ...typography.body2,
     fontWeight: '500',
   },
+  subTitle: {
+    ...typography.body1,
+  },
 });
 
 export default styles;

@@ -1,5 +1,11 @@
 import { StyleSheet } from '@styles';
 
+// LƯU Ý: react-native-web's <View>/<Text> ÂM THẦM BỎ QUA `padding` dạng
+// chuỗi rút gọn CSS (VD '22px 24px') - RN chỉ hiểu padding là số hoặc
+// paddingTop/Right/Bottom/Left riêng lẻ. Dùng chuỗi rút gọn khiến toàn bộ
+// padding biến mất (đã xác minh qua DOM thật). `replyTextarea` là ngoại lệ
+// duy nhất được để nguyên chuỗi rút gọn vì áp trực tiếp vào <textarea> gốc
+// (antd Input.TextArea), không qua View/Text nên không bị ảnh hưởng.
 const styles = StyleSheet.create({
   detailPanel: {
     backgroundColor: '#fff',
@@ -8,7 +14,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   detailHeader: {
-    padding: '20px 24px',
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 24,
+    paddingRight: 24,
     borderBottom: '1px solid #f1f3f7',
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -30,14 +39,20 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   detailBody: {
-    padding: '22px 24px',
+    paddingTop: 22,
+    paddingBottom: 22,
+    paddingLeft: 24,
+    paddingRight: 24,
     gap: 20,
   },
   lessonCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    padding: '12px 16px',
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: 16,
+    paddingRight: 16,
     backgroundColor: '#f7f9fc',
     borderRadius: 10,
   },
@@ -71,7 +86,10 @@ const styles = StyleSheet.create({
     borderLeft: '3px solid var(--color-vhu-primary)',
     backgroundColor: '#f7f9fc',
     borderRadius: '0 10px 10px 0',
-    padding: '16px 18px',
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingLeft: 18,
+    paddingRight: 18,
     gap: 8,
   },
   answerByRow: {
@@ -112,7 +130,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 16,
-    padding: '14px 16px',
+    paddingTop: 14,
+    paddingBottom: 14,
+    paddingLeft: 16,
+    paddingRight: 16,
     backgroundColor: '#f7f9fc',
     borderRadius: 10,
   },
@@ -121,7 +142,10 @@ const styles = StyleSheet.create({
     color: '#6b7280',
   },
   detailEmpty: {
-    padding: '64px 20px',
+    paddingTop: 64,
+    paddingBottom: 64,
+    paddingLeft: 20,
+    paddingRight: 20,
     textAlign: 'center',
     fontSize: 13,
     color: '#9ca3af',

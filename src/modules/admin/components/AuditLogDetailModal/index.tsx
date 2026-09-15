@@ -149,7 +149,10 @@ const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
                           display: 'grid',
                           gridTemplateColumns: '220px 1fr',
                           gap: 16,
-                          padding: '13px 18px',
+                          paddingTop: 13,
+                          paddingBottom: 13,
+                          paddingLeft: 18,
+                          paddingRight: 18,
                           alignItems: 'center',
                           borderBottom: '1px solid #f4f6fa',
                         }}>

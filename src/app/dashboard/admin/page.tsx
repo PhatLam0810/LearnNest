@@ -64,8 +64,8 @@ const buildItems = (qnaPendingCount: number): TabsProps['items'] => [
   {
     key: '8',
     label: (
-      <Badge count={qnaPendingCount} size="small" offset={[8, -2]}>
-        Hộp Thư Hỏi Đáp
+      <Badge count={qnaPendingCount} size="default" offset={[8, -2]}>
+        <View style={styles.subTitle}>Hộp Thư Hỏi Đáp</View>
       </Badge>
     ),
     children: <QaInbox />,

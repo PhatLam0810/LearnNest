@@ -57,7 +57,12 @@ const styles = StyleSheet.create({
     whiteSpace: 'nowrap',
   },
   emptyListText: {
-    padding: '44px 20px',
+    // padding dạng chuỗi rút gọn bị react-native-web <Text> bỏ qua - viết
+    // riêng từng cạnh (đã xác minh qua DOM thật, xem QnaInboxDetail/styles.ts).
+    paddingTop: 44,
+    paddingBottom: 44,
+    paddingLeft: 20,
+    paddingRight: 20,
     textAlign: 'center',
     fontSize: 13,
     color: '#9ca3af',

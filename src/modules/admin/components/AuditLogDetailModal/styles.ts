@@ -3,10 +3,20 @@ import { StyleSheet } from '@styles';
 // Giá trị lấy đúng theo design (modal "Chi tiết thao tác") - xem trao đổi
 // ngày 14/09. --color-vhu-primary là biến CSS thương hiệu đã dùng sẵn trong
 // dự án (khớp header bảng + header modal).
+//
+// LƯU Ý: react-native-web's <View>/<Text> ÂM THẦM BỎ QUA `padding` dạng
+// chuỗi rút gọn CSS (VD '22px 28px') - RN chỉ hiểu padding là số hoặc
+// paddingTop/Right/Bottom/Left/Vertical/Horizontal riêng lẻ. Dùng chuỗi rút
+// gọn sẽ khiến toàn bộ padding biến mất (đã xác minh qua DOM thật, không
+// phải suy đoán) dù `border`/`gap` cùng object vẫn áp dụng bình thường. Vì
+// vậy MỌI padding trong file này đều viết dạng paddingTop/Right/Bottom/Left.
 const styles = StyleSheet.create({
   modalHeader: {
     background: 'var(--color-vhu-primary)',
-    padding: '22px 28px',
+    paddingTop: 22,
+    paddingBottom: 22,
+    paddingLeft: 28,
+    paddingRight: 28,
   },
   modalHeaderTop: {
     display: 'flex',
@@ -37,7 +47,10 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.72)',
   },
   modalBody: {
-    padding: '26px 28px 28px',
+    paddingTop: 26,
+    paddingBottom: 28,
+    paddingLeft: 28,
+    paddingRight: 28,
     display: 'flex',
     flexDirection: 'column',
     gap: 26,
@@ -68,7 +81,10 @@ const styles = StyleSheet.create({
   },
   card: {
     background: '#fff',
-    padding: '16px 18px',
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingLeft: 18,
+    paddingRight: 18,
     display: 'flex',
     flexDirection: 'column',
     gap: 6,
@@ -90,7 +106,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff1f0',
     border: '1px solid #ffccc7',
     borderRadius: 8,
-    padding: '8px 12px',
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingLeft: 12,
+    paddingRight: 12,
   },
   detailTable: {
     border: '1px solid #eef1f6',
