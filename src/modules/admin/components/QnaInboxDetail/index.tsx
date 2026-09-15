@@ -2,6 +2,7 @@
 import React from 'react';
 import { Text, View } from 'react-native-web';
 import { Input, Tag } from 'antd';
+import { typography } from '@styles';
 import { PlayCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import AppButton from '@components/AppButton';
@@ -204,7 +205,12 @@ const QnaInboxDetail: React.FC<QnaInboxDetailProps> = ({
                 gap: 16,
                 flexWrap: 'wrap',
               }}>
-              <Text style={{ fontSize: 12, color: '#9ca3af' }}>
+              <Text
+                style={{
+                  ...typography.caption,
+                  fontSize: 12,
+                  color: '#9ca3af',
+                }}>
                 {draft.trim() ? `${draft.trim().length} ký tự · ` : ''}
                 Học viên nhận email ngay khi bạn gửi trả lời
               </Text>

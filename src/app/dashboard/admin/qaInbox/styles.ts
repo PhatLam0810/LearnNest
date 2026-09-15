@@ -1,9 +1,14 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 // Giá trị theo design (master-detail: danh sách bên trái 390px cố định +
 // panel chi tiết bên phải) - xem trao đổi ngày 14/09. Style của danh sách và
 // panel chi tiết nằm ở QnaInboxList/QnaInboxDetail
 // (src/modules/admin/components/) - file này chỉ giữ phần khung trang.
+//
+// Mọi style chữ đều spread ...typography.<preset> trước rồi mới ghi đè
+// fontSize/fontWeight/color riêng - lấy đúng fontFamily Lexend (+
+// letterSpacing) từ preset chung của dự án thay vì chỉ set fontSize/color
+// trần (không đủ đảm bảo font family).
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -11,6 +16,7 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   title: {
+    ...typography.titleS,
     fontSize: 22,
     fontWeight: '700',
     color: '#1c2536',
@@ -32,11 +38,13 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   statNumber: {
+    ...typography.titleS,
     fontSize: 22,
     fontWeight: '600',
     color: '#111827',
   },
   statLabel: {
+    ...typography.caption,
     fontSize: 12,
     color: '#6b7280',
   },

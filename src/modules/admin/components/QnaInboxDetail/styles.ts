@@ -1,4 +1,4 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 // LƯU Ý: react-native-web's <View>/<Text> ÂM THẦM BỎ QUA `padding` dạng
 // chuỗi rút gọn CSS (VD '22px 24px') - RN chỉ hiểu padding là số hoặc
@@ -6,6 +6,10 @@ import { StyleSheet } from '@styles';
 // padding biến mất (đã xác minh qua DOM thật). `replyTextarea` là ngoại lệ
 // duy nhất được để nguyên chuỗi rút gọn vì áp trực tiếp vào <textarea> gốc
 // (antd Input.TextArea), không qua View/Text nên không bị ảnh hưởng.
+//
+// Mọi style chữ khác spread ...typography.<preset> trước rồi ghi đè
+// fontSize/fontWeight/color riêng - lấy đúng fontFamily Lexend từ preset
+// chung của dự án thay vì chỉ set fontSize/color trần.
 const styles = StyleSheet.create({
   detailPanel: {
     backgroundColor: '#fff',
@@ -30,11 +34,13 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   detailName: {
+    ...typography.subTitle1,
     fontSize: 16,
     fontWeight: '600',
     color: '#111827',
   },
   detailMeta: {
+    ...typography.caption,
     fontSize: 12,
     color: '#6b7280',
   },
@@ -67,17 +73,20 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   lessonTitle: {
+    ...typography.buttonSmall,
     fontSize: 13,
     fontWeight: '500',
     color: '#111827',
   },
   sectionLabel: {
+    ...typography.caption,
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: '0.08em',
     color: '#9ca3af',
   },
   questionText: {
+    ...typography.body1,
     fontSize: 15,
     lineHeight: 26,
     color: '#111827',
@@ -98,15 +107,18 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   answerByName: {
+    ...typography.buttonSmall,
     fontSize: 13,
     fontWeight: '600',
     color: '#111827',
   },
   answerByTime: {
+    ...typography.caption,
     fontSize: 11,
     color: '#6b7280',
   },
   answerText: {
+    ...typography.body2,
     fontSize: 14,
     lineHeight: 24,
     color: '#374151',
@@ -138,10 +150,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   skippedText: {
+    ...typography.body2,
     fontSize: 13,
     color: '#6b7280',
   },
   detailEmpty: {
+    ...typography.body2,
     paddingTop: 64,
     paddingBottom: 64,
     paddingLeft: 20,

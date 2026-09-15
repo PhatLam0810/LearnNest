@@ -1,5 +1,8 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
+// Mọi style chữ spread ...typography.<preset> trước rồi ghi đè
+// fontSize/fontWeight/color riêng - lấy đúng fontFamily Lexend từ preset
+// chung của dự án thay vì chỉ set fontSize/color trần.
 const styles = StyleSheet.create({
   listPanel: {
     backgroundColor: '#fff',
@@ -21,6 +24,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   listItemName: {
+    ...typography.buttonSmall,
     fontSize: 13,
     fontWeight: '600',
     color: '#111827',
@@ -31,10 +35,12 @@ const styles = StyleSheet.create({
     whiteSpace: 'nowrap',
   },
   listItemTime: {
+    ...typography.caption,
     fontSize: 11,
     whiteSpace: 'nowrap',
   },
   listItemText: {
+    ...typography.body2,
     fontSize: 13,
     color: '#374151',
     lineHeight: 20,
@@ -48,6 +54,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   listItemLesson: {
+    ...typography.caption,
     fontSize: 11,
     color: '#6b7280',
     flex: 1,
@@ -57,6 +64,7 @@ const styles = StyleSheet.create({
     whiteSpace: 'nowrap',
   },
   emptyListText: {
+    ...typography.body2,
     // padding dạng chuỗi rút gọn bị react-native-web <Text> bỏ qua - viết
     // riêng từng cạnh (đã xác minh qua DOM thật, xem QnaInboxDetail/styles.ts).
     paddingTop: 44,
