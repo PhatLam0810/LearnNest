@@ -3,17 +3,15 @@ import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Empty, Select, Spin, Tag } from 'antd';
 import dayjs from 'dayjs';
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import dynamic from 'next/dynamic';
 import { useGetMyMockExamAttemptsQuery } from '~mdDashboard/redux';
 import './styles.scss';
+
+// recharts chỉ hiện khi có >= 2 lần thi (điều kiện bên dưới) - tách khỏi
+// bundle chính, không bắt user chưa đủ dữ liệu tải thư viện chart vô ích.
+const ScoreTrendChart = dynamic(() => import('./ScoreTrendChart'), {
+  ssr: false,
+});
 
 const ALL = '__all__';
 
@@ -79,23 +77,7 @@ const MockExamHistoryPage: React.FC = () => {
 
           {chartData.length >= 2 && (
             <div className="meh-chart">
-              <ResponsiveContainer width="100%" height={240}>
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 8, right: 16, bottom: 8, left: -16 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                  <XAxis dataKey="label" fontSize={12} />
-                  <YAxis domain={[0, 10]} fontSize={12} />
-                  <Tooltip formatter={(v: number) => [`${v}/10`, 'Điểm']} />
-                  <Line
-                    type="monotone"
-                    dataKey="score"
-                    stroke="#1d418a"
-                    strokeWidth={2}
-                    dot={{ r: 3 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              <ScoreTrendChart data={chartData} />
             </div>
           )}
 

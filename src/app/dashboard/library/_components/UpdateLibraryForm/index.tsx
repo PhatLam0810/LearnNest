@@ -12,13 +12,21 @@ import {
   UploadFile,
   UploadProps,
   Modal,
+  Spin,
 } from 'antd';
 import api from '@services/api';
 import { adminQuery } from '@/modules/admin/redux';
 import { PlusOutlined } from '@ant-design/icons';
+import dynamic from 'next/dynamic';
 import { UpdateLibraryFormData } from './types';
 import { Library } from '~mdDashboard/types';
-import { AddLibraryContent } from '~mdAdmin/components';
+
+// AddLibraryContent kéo theo AppRichTextInput (@tiptap/*, nặng) - tách bằng
+// next/dynamic, chỉ tải khi modal thật sự mở.
+const AddLibraryContent = dynamic(
+  () => import('~mdAdmin/components/AddLibraryContent'),
+  { ssr: false, loading: () => <Spin style={{ margin: 24 }} /> },
+);
 
 type UpdateLibraryFormProps = {
   data: Library;

@@ -25,7 +25,7 @@ import {
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Button, Collapse, CollapseProps, Modal, Tabs, Tag } from 'antd';
-import { convertDurationToTime } from '@utils';
+import { convertDurationToTime } from '@utils/time';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { useResponsive } from '@/styles/responsive';
 import LibraryDetailItem, {

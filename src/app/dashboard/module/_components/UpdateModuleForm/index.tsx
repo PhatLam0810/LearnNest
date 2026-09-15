@@ -1,11 +1,16 @@
 'use client';
 import React from 'react';
-import { Modal } from 'antd';
+import { Modal, Spin } from 'antd';
 import { adminQuery } from '@/modules/admin/redux';
 import { ScrollView } from 'react-native-web';
-import { AddModuleContent } from '~mdAdmin/components';
+import dynamic from 'next/dynamic';
 import { useWindowSize } from '@hooks';
 import { Module } from '~mdDashboard/redux/saga/type';
+
+const AddModuleContent = dynamic(
+  () => import('~mdAdmin/components/AddModuleContent'),
+  { ssr: false, loading: () => <Spin style={{ margin: 24 }} /> },
+);
 
 type UpdateModuleFormProps = {
   data: Module;

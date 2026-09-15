@@ -6,7 +6,6 @@ import { usePathname } from 'next/navigation';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Authentication } from '~mdAuth/components';
-import { pdfjs } from 'react-pdf';
 import LoadingScreen from '~mdAuth/components/Loading';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -22,11 +21,6 @@ import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
 
 const queryClient = new QueryClient();
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
 
 export default function RootLayoutClient({
   children,

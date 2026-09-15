@@ -9,9 +9,17 @@ import React, {
 import { ScrollView, Text, View } from 'react-native-web';
 import { Library } from '~mdDashboard/types';
 import styles from './styles';
-import PdfLessonViewer from '../PdfLessonViewer';
-import YouTube from 'react-youtube';
+import dynamic from 'next/dynamic';
 import { Button, Modal, Radio, Spin } from 'antd';
+
+// react-pdf (PdfLessonViewer) và react-youtube chỉ cần cho đúng 1 trong 3
+// loại bài học (video YouTube / PDF / quiz) - tách khỏi bundle chính của
+// trang, chỉ tải khi thật sự render đúng loại đó.
+const PdfLessonViewer = dynamic(() => import('../PdfLessonViewer'), {
+  ssr: false,
+  loading: () => <Spin style={{ marginTop: 40 }} />,
+});
+const YouTube = dynamic(() => import('react-youtube'), { ssr: false });
 import api from '@/services/api';
 import { messageApi } from '@hooks';
 import { useAppSelector } from '@redux';

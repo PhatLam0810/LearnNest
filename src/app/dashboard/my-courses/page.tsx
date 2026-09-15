@@ -4,21 +4,19 @@ import React from 'react';
 import { View, Text } from 'react-native-web';
 import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import dynamic from 'next/dynamic';
 import { useAppSelector } from '@redux';
 import { formatRelativeTime } from '@/utils/time';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { RecentTestResult } from '~mdDashboard/redux/RTKQuery/types';
 import { AppButton } from '@components';
 import styles from './styles';
+
+// recharts chỉ hiện khi > 1 kết quả (điều kiện bên dưới) - tách khỏi bundle
+// chính của trang.
+const ScoreHistoryChart = dynamic(() => import('./ScoreHistoryChart'), {
+  ssr: false,
+});
 
 // Trang "Tổng Quan" - theo design mới: biểu đồ giờ học từng ngày trong tuần
 // này (Thứ 2 - Chủ nhật), kết quả bài kiểm tra gần đây, gợi ý từ Lộ Trình AI
@@ -167,46 +165,7 @@ const MyCoursesPage = () => {
             </Text>
           </View>
           <div style={{ width: '100%', height: 220 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={scoreChartData}
-                margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#eef1f6"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 12, fill: '#6b7280' }}
-                  tickMargin={10}
-                  axisLine={{ stroke: '#eef1f6' }}
-                  tickLine={false}
-                />
-                <YAxis
-                  domain={[0, 10]}
-                  tick={{ fontSize: 12, fill: '#6b7280' }}
-                  tickMargin={8}
-                  axisLine={false}
-                  tickLine={false}
-                  width={28}
-                />
-                <Tooltip
-                  formatter={(value: number, _key, item) => [
-                    value,
-                    item?.payload?.name || 'Điểm',
-                  ]}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="score"
-                  stroke="var(--color-vhu-primary)"
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <ScoreHistoryChart data={scoreChartData} />
           </div>
         </View>
       )}

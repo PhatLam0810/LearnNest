@@ -7,7 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { Text, View } from 'react-native-web';
-import { Document, Page } from 'react-pdf';
+import { Document, Page, pdfjs } from 'react-pdf';
 import { Button, Spin } from 'antd';
 import {
   CheckCircleOutlined,
@@ -24,7 +24,14 @@ import { messageApi } from '@hooks';
 import { Library } from '~mdDashboard/types';
 import styles from './styles';
 
-// pdfjs worker đã được cấu hình 1 lần ở app/RootLayoutClient.tsx.
+// Cấu hình worker ngay tại đây (không phải app/RootLayoutClient.tsx như
+// trước) - react-pdf/pdfjs-dist nặng, đặt ở root layout kéo theo mọi trang
+// trong app đều tải nó dù không hiển thị PDF. Chỉ chạy 1 lần khi module này
+// được tải (component cha dùng next/dynamic để trì hoãn tới lúc cần).
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 type Props = {
   data: Library & { allowDownload?: boolean };

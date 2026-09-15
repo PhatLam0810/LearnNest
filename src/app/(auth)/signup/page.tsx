@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { AppButton, AppInput } from '@components';
 import styles from './styles';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '@utils';
+import { auth } from '@utils/firebase';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction, authQuery } from '~mdAuth/redux';
 import { useResponsive } from '@/styles/responsive';

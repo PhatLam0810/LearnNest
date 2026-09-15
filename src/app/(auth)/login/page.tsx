@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '@utils';
+import { auth } from '@utils/firebase';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction, authQuery } from '~mdAuth/redux';
 import Icon from '@components/icons';

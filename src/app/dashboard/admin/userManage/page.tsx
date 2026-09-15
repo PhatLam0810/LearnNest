@@ -19,8 +19,13 @@ import { adminQuery } from '~mdAdmin/redux';
 import dayjs from 'dayjs';
 import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
 import { authQuery } from '~mdAuth/redux/RTKQuery';
-import TrafficChart from './components/TrafficChart';
+import dynamic from 'next/dynamic';
 import StatCard from '../../home/_components/StatCard';
+
+const TrafficChart = dynamic(() => import('./components/TrafficChart'), {
+  ssr: false,
+  loading: () => <Card style={{ height: 350, marginBottom: 16 }} loading />,
+});
 const UserManage = () => {
   const { listItem, setListItem, currentData, refresh, search, fetchData } =
     useAppPagination<UserItem>({

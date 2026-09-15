@@ -13,15 +13,22 @@ import styles from './styles';
 import AppButton from '@components/AppButton';
 import { useAppPagination } from '@hooks';
 import { messageApi } from '@hooks';
-import ReactPlayer from 'react-player';
+import dynamic from 'next/dynamic';
 import { Library } from '~mdDashboard/types';
-import PdfLessonViewer from '~mdDashboard/components/PdfLessonViewer';
 import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
 import BookmarkButton from '@components/BookmarkButton';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { useAppSelector } from '@redux';
 import { useResponsive } from '@/styles/responsive';
 import { useSearchContext } from '@components/SearchContext';
+
+// react-player và PdfLessonViewer (react-pdf) chỉ cần khi modal xem trước mở
+// đúng loại Video/PDF - tách khỏi bundle chính của trang danh sách.
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
+const PdfLessonViewer = dynamic(
+  () => import('~mdDashboard/components/PdfLessonViewer'),
+  { ssr: false },
+);
 
 // Nhãn + icon theo loại nội dung — dùng cho header modal xem trước lẫn cột
 // "Loại" trên bảng danh sách.

@@ -25,7 +25,7 @@ import {
   View,
 } from 'react-native-web';
 import styles from './styles';
-import { convertDurationToTime } from '@utils';
+import { convertDurationToTime } from '@utils/time';
 import { Collapse, CollapseProps, message, Modal, Tag } from 'antd';
 import { authAction } from '~mdAuth/redux';
 import AppModalSuccess from '@components/AppModalSuccess';
