@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import path from 'path';
+import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
   sassOptions: {
@@ -79,4 +80,12 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  // Chưa cấu hình SENTRY_AUTH_TOKEN trên Vercel -> plugin tự bỏ qua bước
+  // upload source map (không làm fail build), lỗi vẫn báo về Sentry bình
+  // thường, chỉ là stack trace sẽ trỏ tới code đã build thay vì code gốc
+  // cho tới khi thêm token. silent: true để không in log ồn ào mỗi lần
+  // build local khi không có token.
+  silent: true,
+  disableLogger: true,
+});
