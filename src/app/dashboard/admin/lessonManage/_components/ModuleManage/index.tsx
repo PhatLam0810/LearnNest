@@ -175,6 +175,9 @@ const ModuleManage = () => {
               refresh();
               setSelectedItem(null);
               onCloseDelete();
+            })
+            .catch((e: any) => {
+              messageApi.error(e?.data?.message || 'Xóa phần học thất bại');
             });
         }}>
         <Text>{`Xóa phần học: ${selectedItem?.title}`}</Text>

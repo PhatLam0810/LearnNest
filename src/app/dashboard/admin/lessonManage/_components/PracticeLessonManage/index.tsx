@@ -273,10 +273,14 @@ const PracticeLessonManage = () => {
         onCancel={() => setDeleteTarget(null)}
         onOk={async () => {
           if (!deleteTarget) return;
-          await deleteLesson({ _id: deleteTarget._id }).unwrap();
-          messageApi.success('Đã xoá');
-          setDeleteTarget(null);
-          refresh();
+          try {
+            await deleteLesson({ _id: deleteTarget._id }).unwrap();
+            messageApi.success('Đã xoá');
+            setDeleteTarget(null);
+            refresh();
+          } catch (e: any) {
+            messageApi.error(e?.data?.message || 'Xóa phần thực hành thất bại');
+          }
         }}>
         <Text>{`Xóa "${deleteTarget?.title}"? Các bài tập đang gắn vào đây sẽ KHÔNG bị xoá, chỉ mất gắn kết với khóa này.`}</Text>
       </Modal>

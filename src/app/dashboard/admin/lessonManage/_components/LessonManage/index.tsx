@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native-web';
 import styles from './styles';
 import { Button, Input, Modal, Space, Table, TableProps, Tag } from 'antd';
-import { useAppPagination, useWindowSize } from '@hooks';
+import { messageApi, useAppPagination, useWindowSize } from '@hooks';
 import { Lesson } from '~mdDashboard/redux/saga/type';
 import { PlusOutlined } from '@ant-design/icons';
 import { AddLessonContent } from '~mdAdmin/components';
@@ -166,6 +166,9 @@ const LessonManage = () => {
             .then(res => {
               refresh();
               onCloseDelete();
+            })
+            .catch((e: any) => {
+              messageApi.error(e?.data?.message || 'Xóa khóa học thất bại');
             });
         }}>
         <Text>{`Xóa khóa học: ${selectedItem?.title}`}</Text>

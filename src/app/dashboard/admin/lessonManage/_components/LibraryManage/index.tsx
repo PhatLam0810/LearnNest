@@ -176,6 +176,9 @@ const LibraryManage = () => {
             .then(res => {
               refresh();
               onCloseDelete();
+            })
+            .catch((e: any) => {
+              messageApi.error(e?.data?.message || 'Xóa bài học thất bại');
             });
         }}>
         <Text>{`Xóa bài học: ${selectedItem?.title}`}</Text>
