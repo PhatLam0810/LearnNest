@@ -50,7 +50,7 @@ Firebase client config (`apiKey` etc., via `NEXT_PUBLIC_*`) is expected to
 be public — Firebase's security model restricts access via
 project/console rules, not by keeping the key secret. Don't treat a
 Firebase client key as a secret that needs server-side proxying (unlike
-the YouTube key above, which *was* quota/cost-sensitive).
+the YouTube key above, which _was_ quota/cost-sensitive).
 
 ## User-generated content
 

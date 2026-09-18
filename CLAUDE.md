@@ -8,7 +8,7 @@ captures real gotchas found the hard way in this project, not theory.
 - **Next.js 15, App Router.**
 - **State/data**: Redux Toolkit + **RTK Query** (`src/redux/RTKQuery` +
   per-module `redux/RTKQuery` — `adminQuery` / `dashboardQuery` /
-  `authQuery`). This is the *only* API-calling layer — no raw `axios`/
+  `authQuery`). This is the _only_ API-calling layer — no raw `axios`/
   `fetch` in components, no `useEffect` + `useState` data fetching. If you
   find one, it's leftover from before the RTK Query migration; move it
   over rather than adding a new instance of the old pattern.
@@ -26,9 +26,9 @@ captures real gotchas found the hard way in this project, not theory.
 ## Gotchas that have caused real bugs here
 
 - **Barrel-file tree-shaking trap.** A barrel (`export * from './x'` or
-  even a named re-export) that includes a file with a *side-effect
-  import* (`import './styles.css'`, Firebase init code, etc.) drags that
-  side effect into every route that imports *anything* from the barrel —
+  even a named re-export) that includes a file with a _side-effect
+  import_ (`import './styles.css'`, Firebase init code, etc.) drags that
+  side effect into every route that imports _anything_ from the barrel —
   the bundler can't prove the side effect is safe to skip. This shipped
   twice: `@utils` re-exporting `./firebase` pulled the Firebase Auth SDK
   into unrelated lesson-viewing pages; `components/(Form)/index.ts`
@@ -63,20 +63,34 @@ captures real gotchas found the hard way in this project, not theory.
   yarn's flat-hoisting from an unrelated package. Removing that unrelated
   package breaks the phantom dependency with no warning until runtime.
   Before removing a dependency, grep the codebase for direct imports of
-  it *and* check whether anything else's `node_modules` requires it
+  it _and_ check whether anything else's `node_modules` requires it
   internally (the second case only shows up by actually running the app).
 - **Next.js dev server (Turbopack) + `.next` cache from a `next build`
   run collide.** Running `next build` (production) then starting `next
-  dev` against the same `.next` directory produces stale/corrupted
+dev` against the same `.next` directory produces stale/corrupted
   behavior (a page that should render correctly instead silently
   redirects or 404s). Fix: stop the dev server, `rm -rf .next`, restart.
 
 ## Verify-before-done standard
 
-`npx tsc --noEmit` clean + `npx prettier --check .` clean + `npx next
-build` clean, **and** an actual look in the browser (desktop *and*
-mobile width) before calling a UI change done. A clean build does not
-catch a layout bug, a stale-cache artifact, or a runtime-only crash.
+**Run `yarn build` — not a manual `next build`.** The `build` script in
+`package.json` is `yarn type-check && yarn format:check && next build`;
+running `next build` alone skips the format check, which is exactly what
+production's own build runs (Vercel calls `yarn build`, not `next build`).
+A commit that passes a bare `next build` locally can still fail Vercel's
+real build — this happened for real: `UI-UX.md` wasn't Prettier-formatted,
+`next build` alone didn't catch it, and the Vercel deploy failed on
+`format:check` while local testing looked fine. Before pushing:
+
+```bash
+yarn format   # prettier --write . — fixes formatting, run this first
+yarn build    # type-check && format:check && next build — must be clean
+```
+
+And **always visually verify in the browser** (desktop _and_ mobile
+width) before calling a UI change done — `yarn build` passing proves the
+code compiles, it does not prove the layout is correct. A clean build has
+shipped a broken layout before (react-native-web gotchas above).
 
 ## See also
 

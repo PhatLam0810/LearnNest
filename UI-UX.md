@@ -37,18 +37,18 @@ If no existing token fits, **add a new token to
 
 ### Desktop tokens (`typography.*`)
 
-| Token         | Size (px) | Weight | Use for                                 |
-| ------------- | --------- | ------ | ---------------------------------------- |
-| `titleM`      | 22.78     | 500    | Page / section main heading              |
-| `titleS`      | 20.25     | 400    | Sub-heading, card title                  |
-| `titleSM`     | 14        | 400    | Small heading, compact card title        |
-| `subTitle1`   | 16.4      | 500    | Emphasized label, list item title        |
-| `subTitle2`   | 14        | 500    | Table header text, secondary label       |
-| `body1`       | 16        | 400    | Primary paragraph / description text     |
-| `body2`       | 14        | 400    | Secondary text, table cell text          |
-| `caption`     | 12        | 400    | Meta text, timestamps, tag text          |
-| `button`      | 16        | 500    | Primary button label                     |
-| `buttonSmall` | 14        | 500    | Compact button label                     |
+| Token         | Size (px) | Weight | Use for                              |
+| ------------- | --------- | ------ | ------------------------------------ |
+| `titleM`      | 22.78     | 500    | Page / section main heading          |
+| `titleS`      | 20.25     | 400    | Sub-heading, card title              |
+| `titleSM`     | 14        | 400    | Small heading, compact card title    |
+| `subTitle1`   | 16.4      | 500    | Emphasized label, list item title    |
+| `subTitle2`   | 14        | 500    | Table header text, secondary label   |
+| `body1`       | 16        | 400    | Primary paragraph / description text |
+| `body2`       | 14        | 400    | Secondary text, table cell text      |
+| `caption`     | 12        | 400    | Meta text, timestamps, tag text      |
+| `button`      | 16        | 500    | Primary button label                 |
+| `buttonSmall` | 14        | 500    | Compact button label                 |
 
 ### Mobile tokens — only inside an `isMobile` branch
 
@@ -62,16 +62,16 @@ If no existing token fits, **add a new token to
 ### Line-height (not part of the token — set explicitly, as absolute px)
 
 `react-native-web` treats `lineHeight` as an **absolute pixel number**
-(React Native semantics), *not* a CSS multiplier. Writing `lineHeight: 1.5`
+(React Native semantics), _not_ a CSS multiplier. Writing `lineHeight: 1.5`
 renders as `line-height: 1.5px` and collapses the text box — this is a real
 bug that shipped once (see §11). Always compute it: `fontSize × ratio`,
 rounded.
 
-| Content type      | Ratio | Example (fontSize 16) |
-| ------------------ | ----- | ---------------------- |
-| Heading             | 1.3   | `lineHeight: 21`        |
-| UI text (labels, buttons) | 1.5 | `lineHeight: 24` |
-| Long-form paragraph  | 1.75  | `lineHeight: 28`        |
+| Content type              | Ratio | Example (fontSize 16) |
+| ------------------------- | ----- | --------------------- |
+| Heading                   | 1.3   | `lineHeight: 21`      |
+| UI text (labels, buttons) | 1.5   | `lineHeight: 24`      |
+| Long-form paragraph       | 1.75  | `lineHeight: 28`      |
 
 ### Fonts
 
@@ -134,11 +134,12 @@ doc). Reference them as CSS var strings: `color: 'var(--color-text-primary)'`.
 ```
 
 Rules:
+
 - **Zero hex literals in any `styles.ts`.** Need a new shade → add a token
   to `variables.css`, don't inline `rgba()`/hex.
 - `--color-vhu-secondary` (gold, `#f0c356`) is an **accent**, never body
   text color on a white surface (fails contrast — see §10).
-- `global.scss` defines its *own*, older `:root` block (`--color-primary`,
+- `global.scss` defines its _own_, older `:root` block (`--color-primary`,
   `--color-text-dark`, ...) with **different values** from the tokens
   above. That block is legacy — do not read from it or extend it; use only
   the `--color-vhu-*` / `--color-text-*` / `--color-surface-*` /
@@ -149,21 +150,21 @@ Rules:
 Only these values are allowed: **4, 8, 12, 16, 20, 24, 32, 40, 48, 64**.
 Anything else (13, 14, 15, 18, 22, 26, 28, ...) is a bug.
 
-| Context                        | Value          |
-| ------------------------------- | -------------- |
-| Page padding                    | 24 / 32 / 48   |
-| Card padding                    | 24 (compact: 16) |
-| Gap inside a card                | 16             |
-| Gap between sections             | 20             |
-| Gap at page level                 | 24             |
-| Label → input gap                 | 8              |
-| Form grid gap                     | 16             |
-| Button row gap                    | 12             |
-| Chip / tag internal padding       | 8              |
-| Table cell padding                | 16 / 20        |
-| Modal header padding              | 24 / 28        |
-| Modal body padding                | 24 / 28 / 28   |
-| List row padding                  | 16 / 20        |
+| Context                     | Value            |
+| --------------------------- | ---------------- |
+| Page padding                | 24 / 32 / 48     |
+| Card padding                | 24 (compact: 16) |
+| Gap inside a card           | 16               |
+| Gap between sections        | 20               |
+| Gap at page level           | 24               |
+| Label → input gap           | 8                |
+| Form grid gap               | 16               |
+| Button row gap              | 12               |
+| Chip / tag internal padding | 8                |
+| Table cell padding          | 16 / 20          |
+| Modal header padding        | 24 / 28          |
+| Modal body padding          | 24 / 28 / 28     |
+| List row padding            | 16 / 20          |
 
 - Use `display: flex` or `grid` + `gap` for spacing between siblings.
   `margin` is only for pulling something out of normal flow (e.g.
@@ -171,13 +172,13 @@ Anything else (13, 14, 15, 18, 22, 26, 28, ...) is a bug.
 
 ### Radius
 
-| Element        | Radius |
-| --------------- | ------ |
-| Tag              | 6      |
-| Control (input/button) | 8 |
-| Card             | 12     |
-| Modal            | 14     |
-| Pill             | 999    |
+| Element                | Radius |
+| ---------------------- | ------ |
+| Tag                    | 6      |
+| Control (input/button) | 8      |
+| Card                   | 12     |
+| Modal                  | 14     |
+| Pill                   | 999    |
 
 ### Shadow — exactly 2 allowed values
 
@@ -199,15 +200,15 @@ const { isMobile, isTablet, isDesktop } = useResponsive();
 Fixed breakpoints: `isMobile` < 600px, `isTablet` 600–1023px, `isDesktop`
 ≥ 1024px.
 
-| Aspect            | Desktop        | Tablet          | Mobile              |
-| ------------------ | -------------- | --------------- | -------------------- |
-| Page padding        | 48             | 32              | 16–24                |
-| Grid columns         | 3              | 2               | 1                    |
-| 2-pane layout         | side-by-side   | side-by-side (narrower) | stacked        |
-| Sidebar                | fixed, visible | collapsible    | drawer                |
-| Table                  | full table     | full table (scrolls) | card list per row |
-| Typography              | desktop tokens | desktop tokens | `*Mobile` tokens     |
-| Tap target                | ≥ 36px       | ≥ 40px         | ≥ 44px               |
+| Aspect        | Desktop        | Tablet                  | Mobile            |
+| ------------- | -------------- | ----------------------- | ----------------- |
+| Page padding  | 48             | 32                      | 16–24             |
+| Grid columns  | 3              | 2                       | 1                 |
+| 2-pane layout | side-by-side   | side-by-side (narrower) | stacked           |
+| Sidebar       | fixed, visible | collapsible             | drawer            |
+| Table         | full table     | full table (scrolls)    | card list per row |
+| Typography    | desktop tokens | desktop tokens          | `*Mobile` tokens  |
+| Tap target    | ≥ 36px         | ≥ 40px                  | ≥ 44px            |
 
 Never hide meaningfully content on mobile — stack it or collapse it into a
 disclosure (accordion/drawer), don't drop it.
@@ -257,12 +258,12 @@ not allowed.
 
 | Purpose | Width |
 | ------- | ----- |
-| Confirm  | 520  |
-| Detail   | 720  |
-| Editor   | 1120 |
+| Confirm | 520   |
+| Detail  | 720   |
+| Editor  | 1120  |
 
 - Shell: `borderRadius: 14`, `overflow: 'hidden'`, `display: 'flex',
-  flexDirection: 'column'`.
+flexDirection: 'column'`.
 - Header: padding `24/28`, row, `justifyContent: 'space-between'`,
   `gap: 20`. If the header background is brand color, title is
   `...typography.titleS` in white, subline in `rgba(255,255,255,0.72)`.
@@ -284,7 +285,7 @@ not allowed.
 - Validation error: shown under the field, `...typography.caption` in
   `var(--color-error)`. **Never `alert()`.** `message`/toast is for success
   confirmations only, not field-level errors.
-- Validate on blur *and* on submit.
+- Validate on blur _and_ on submit.
 - Submit button: `disabled` + `loading` while the request is in flight.
 - Bulk-entry tables (many rows of inputs): every row needs a **stable
   `key`** (a real id, not array index) or inputs lose focus while typing.
@@ -351,20 +352,20 @@ const styles = StyleSheet.create({
 Common mistakes found by scanning all 89 `styles.ts` files in this repo —
 fix pattern for each, don't repeat it in new code:
 
-| Mistake | Found (count) | Fix |
-| ------- | -------------- | --- |
-| `fontSize: 13` hardcoded (not a token size at all) | 71 | Use `caption` (12) or `subTitle2` (14) |
-| `#fff` / `#ffffff` / `#FFF` — same color, 3 spellings | 89 + 23 + 12 | `var(--color-surface)` |
-| `#8D8D8D` — an un-tokenized gray | 56 | `var(--color-text-muted)` (#6b7280) if it's meant as muted text — otherwise add a token, don't keep hardcoding |
-| Padding `10` (not on the 4px scale) | 30 | `8` or `12` |
-| Padding `14` (not on the 4px scale) | 22 | `12` or `16` |
-| `fontSize: 22.78` written out literally instead of spreading `titleM` | 4 | `...typography.titleM` |
-| `#1677ff` (antd's default blue leaking through un-themed controls) | 7 | Theme the control or use `var(--color-vhu-primary)` |
-| `div`/`View` with `onClick` instead of a real button | ~60 files | `AppButton`, or a real `<button>`/`Link` |
-| `margin` used to space list items instead of parent `gap` | common | `gap` on the flex/grid parent |
-| `window.innerWidth` instead of `useResponsive()` | — | `useResponsive()` |
-| `alert()` for a form error | — | Inline error under the field (§8) |
-| Gray/default table header | — | `var(--color-table-header-bg)` (§6) |
+| Mistake                                                               | Found (count) | Fix                                                                                                            |
+| --------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------- |
+| `fontSize: 13` hardcoded (not a token size at all)                    | 71            | Use `caption` (12) or `subTitle2` (14)                                                                         |
+| `#fff` / `#ffffff` / `#FFF` — same color, 3 spellings                 | 89 + 23 + 12  | `var(--color-surface)`                                                                                         |
+| `#8D8D8D` — an un-tokenized gray                                      | 56            | `var(--color-text-muted)` (#6b7280) if it's meant as muted text — otherwise add a token, don't keep hardcoding |
+| Padding `10` (not on the 4px scale)                                   | 30            | `8` or `12`                                                                                                    |
+| Padding `14` (not on the 4px scale)                                   | 22            | `12` or `16`                                                                                                   |
+| `fontSize: 22.78` written out literally instead of spreading `titleM` | 4             | `...typography.titleM`                                                                                         |
+| `#1677ff` (antd's default blue leaking through un-themed controls)    | 7             | Theme the control or use `var(--color-vhu-primary)`                                                            |
+| `div`/`View` with `onClick` instead of a real button                  | ~60 files     | `AppButton`, or a real `<button>`/`Link`                                                                       |
+| `margin` used to space list items instead of parent `gap`             | common        | `gap` on the flex/grid parent                                                                                  |
+| `window.innerWidth` instead of `useResponsive()`                      | —             | `useResponsive()`                                                                                              |
+| `alert()` for a form error                                            | —             | Inline error under the field (§8)                                                                              |
+| Gray/default table header                                             | —             | `var(--color-table-header-bg)` (§6)                                                                            |
 
 ## 12. Pre-commit checklist
 
@@ -414,6 +415,6 @@ tasks; worth checking before hand-rolling a new UI workflow.
    `variables.css` **first**, then use them.
 4. Write the code.
 5. Open it with Playwright MCP (or the Browser pane), screenshot desktop
-   *and* mobile.
+   _and_ mobile.
 6. Run the checklist in §12.
 7. Report what changed and which tokens (if any) were added.
