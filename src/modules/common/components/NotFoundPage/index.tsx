@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Image, Text, View } from 'react-native-web';
+import { useResponsive } from '@/styles/responsive';
 import styles from './styles';
 
 interface SuggestedLink {
@@ -17,6 +18,7 @@ const suggestedLinks: SuggestedLink[] = [
 ];
 
 const NotFoundPage: React.FC = () => {
+  const { isMobile } = useResponsive();
   const [isHeaderHomeHover, setIsHeaderHomeHover] = useState(false);
   const [isPrimaryHover, setIsPrimaryHover] = useState(false);
   const [isSecondaryHover, setIsSecondaryHover] = useState(false);
@@ -24,17 +26,23 @@ const NotFoundPage: React.FC = () => {
 
   return (
     <View style={styles.page}>
-      <View style={styles.header}>
+      <View style={[styles.header, isMobile && styles.headerMobile]}>
         <Link href="/" style={styles.logoLink}>
           <View style={styles.logoGroup}>
-            <View style={styles.logoImageWrap}>
+            <View
+              style={[
+                styles.logoImageWrap,
+                isMobile && styles.logoImageWrapMobile,
+              ]}>
               <Image
                 source={{ uri: '/images/LogoVhu.png' }}
                 style={styles.logoImage}
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.logoText}>LearnNest</Text>
+            <Text style={[styles.logoText, isMobile && styles.logoTextMobile]}>
+              LearnNest
+            </Text>
           </View>
         </Link>
 
@@ -46,6 +54,7 @@ const NotFoundPage: React.FC = () => {
           <View
             style={[
               styles.headerHomeButton,
+              isMobile && styles.headerHomeButtonMobile,
               isHeaderHomeHover && styles.headerHomeButtonHover,
             ]}>
             <Text style={styles.headerHomeButtonText}>Về trang chủ</Text>
@@ -54,12 +63,14 @@ const NotFoundPage: React.FC = () => {
       </View>
 
       <View style={styles.body}>
-        <View style={styles.grid}>
+        <View style={[styles.grid, isMobile && styles.gridMobile]}>
           <View style={styles.leftCol}>
             <Text style={styles.eyebrow}>Lỗi 404</Text>
 
             <View style={styles.titleGroup}>
-              <Text style={styles.h1}>Không tìm thấy trang bạn đang tìm</Text>
+              <Text style={[styles.h1, isMobile && styles.h1Mobile]}>
+                Không tìm thấy trang bạn đang tìm
+              </Text>
               <Text style={styles.description}>
                 Đường dẫn có thể đã thay đổi, hoặc bài học này không còn nằm
                 trong khóa học của bạn. Thử quay lại trang chủ hoặc tìm bằng tên
@@ -121,8 +132,11 @@ const NotFoundPage: React.FC = () => {
           </View>
 
           <View style={styles.rightCol}>
-            <View style={styles.circle}>
-              <Text style={styles.bigNumber}>404</Text>
+            <View style={[styles.circle, isMobile && styles.circleMobile]}>
+              <Text
+                style={[styles.bigNumber, isMobile && styles.bigNumberMobile]}>
+                404
+              </Text>
             </View>
           </View>
         </View>

@@ -24,6 +24,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 16,
   },
+  headerMobile: {
+    padding: '0 16px',
+  },
   logoLink: {
     textDecoration: 'none',
   },
@@ -44,6 +47,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
+  logoImageWrapMobile: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+  },
   logoImage: {
     width: '100%',
     height: '100%',
@@ -55,6 +63,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: 'var(--color-vhu-primary)',
     whiteSpace: 'nowrap',
+  },
+  logoTextMobile: {
+    fontSize: 20,
   },
   headerHomeLink: {
     textDecoration: 'none',
@@ -80,6 +91,10 @@ const styles = StyleSheet.create({
   headerHomeButtonHover: {
     borderColor: '#88c1e9',
   },
+  headerHomeButtonMobile: {
+    height: 36,
+    padding: '0 14px',
+  },
   headerHomeButtonText: {
     ...typography.body2,
     fontFamily: 'Lexend, sans-serif',
@@ -102,6 +117,12 @@ const styles = StyleSheet.create({
     gridTemplateColumns: '1.1fr 1fr',
     gap: 64,
     alignItems: 'center',
+  },
+  // Dưới 600px: 1 cột, vòng tròn xuống dưới - lưới 2 cột gốc vỡ layout ở
+  // mobile thật (H1 xuống 6 dòng, vòng tròn đè lên mô tả).
+  gridMobile: {
+    gridTemplateColumns: '1fr',
+    gap: 32,
   },
 
   // Left column
@@ -136,6 +157,10 @@ const styles = StyleSheet.create({
     lineHeight: 48,
     color: '#111827',
     textWrap: 'pretty',
+  },
+  h1Mobile: {
+    fontSize: 26,
+    lineHeight: 33, // 26 * 1.25
   },
   description: {
     ...typography.body1,
@@ -256,6 +281,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  circleMobile: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+  },
   bigNumber: {
     ...typography.titleM,
     fontFamily: 'Lexend, sans-serif',
@@ -265,6 +295,10 @@ const styles = StyleSheet.create({
     // 132 * 1 = 132 (xem giải thích ở style "h1").
     lineHeight: 132,
     color: 'var(--color-vhu-primary)',
+  },
+  bigNumberMobile: {
+    fontSize: 72,
+    lineHeight: 72,
   },
 
   // Footer
