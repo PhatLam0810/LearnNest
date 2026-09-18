@@ -54,9 +54,26 @@ captures real gotchas found the hard way in this project, not theory.
     override stops applying. Declare `borderWidth`/`borderStyle`/
     `borderColor` as three separate properties if any of them varies
     conditionally.
-  - All three of the above shipped as real, visually broken bugs in this
-    project before being caught — always visually verify a new screen in
-    the browser, don't trust a clean `tsc`/build alone.
+  - **CSS shorthand _strings_ (`padding: '0 28px'`, `border: '1px solid
+#hex'`, `borderBottom: '...'`) are silently dropped by
+    react-native-web's production style extraction — but work fine in
+    `next dev`.** This is the most dangerous of the four: it passes
+    `tsc`, passes `next build`, and looks correct when you test it with
+    `next dev` in the browser. It only breaks in the actual deployed
+    build (confirmed by reproducing locally with `next build && next
+start` — same style, `padding: '0 28px'` computes to `0px` in the
+    real production bundle, `paddingRight: 28, paddingLeft: 28` computes
+    correctly). **Always use the longhand numeric properties**
+    (`paddingTop`/`paddingRight`/`paddingBottom`/`paddingLeft`,
+    `borderTopWidth`/`borderTopStyle`/`borderTopColor`, etc.), never a
+    combined shorthand string, in any `styles.ts` in this repo. ~35
+    existing `styles.ts` files use the shorthand-string form and have not
+    been individually re-verified against a real production build — don't
+    assume a screen is fine just because it looks right in `next dev`.
+  - All four of the above shipped as real, visually broken (or silently
+    broken) bugs in this project before being caught — always visually
+    verify a new screen **against a real `next build && next start`, not
+    just `next dev`**, before calling a UI change done.
 - **Phantom dependencies happen here too.** `lucide-react` and `redux`
   were both used at runtime (one directly, one by a dependency's own
   source) without being declared in `package.json` — only "worked" via
@@ -87,10 +104,12 @@ yarn format   # prettier --write . — fixes formatting, run this first
 yarn build    # type-check && format:check && next build — must be clean
 ```
 
-And **always visually verify in the browser** (desktop _and_ mobile
-width) before calling a UI change done — `yarn build` passing proves the
-code compiles, it does not prove the layout is correct. A clean build has
-shipped a broken layout before (react-native-web gotchas above).
+And **always visually verify in the browser against a real `next build &&
+next start`** (desktop _and_ mobile width) before calling a UI change
+done — `yarn build` passing proves the code compiles, it does not prove
+the layout is correct, and **`next dev` is not a reliable stand-in for
+production** (see the shorthand-string gotcha above — it only breaks in
+the real production build).
 
 ## See also
 

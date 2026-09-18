@@ -169,6 +169,14 @@ Anything else (13, 14, 15, 18, 22, 26, 28, ...) is a bug.
 - Use `display: flex` or `grid` + `gap` for spacing between siblings.
   `margin` is only for pulling something out of normal flow (e.g.
   `marginTop: 'auto'` to push a footer down) — not for spacing a list.
+- **Never write `padding`/`border`/`borderTop`/etc. as a combined
+  shorthand string** (`padding: '0 28px'`, `border: '1px solid #hex'`).
+  react-native-web's production build silently drops these — they render
+  fine in `next dev` and pass `tsc`/`next build`, then compute to `0` (no
+  padding/border at all) in the real deployed app. This shipped as a real
+  bug. Always use the longhand numeric/single-value properties:
+  `paddingTop`/`paddingRight`/`paddingBottom`/`paddingLeft`,
+  `borderTopWidth`/`borderTopStyle`/`borderTopColor`, etc.
 
 ### Radius
 
@@ -352,33 +360,36 @@ const styles = StyleSheet.create({
 Common mistakes found by scanning all 89 `styles.ts` files in this repo —
 fix pattern for each, don't repeat it in new code:
 
-| Mistake                                                               | Found (count) | Fix                                                                                                            |
-| --------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------- |
-| `fontSize: 13` hardcoded (not a token size at all)                    | 71            | Use `caption` (12) or `subTitle2` (14)                                                                         |
-| `#fff` / `#ffffff` / `#FFF` — same color, 3 spellings                 | 89 + 23 + 12  | `var(--color-surface)`                                                                                         |
-| `#8D8D8D` — an un-tokenized gray                                      | 56            | `var(--color-text-muted)` (#6b7280) if it's meant as muted text — otherwise add a token, don't keep hardcoding |
-| Padding `10` (not on the 4px scale)                                   | 30            | `8` or `12`                                                                                                    |
-| Padding `14` (not on the 4px scale)                                   | 22            | `12` or `16`                                                                                                   |
-| `fontSize: 22.78` written out literally instead of spreading `titleM` | 4             | `...typography.titleM`                                                                                         |
-| `#1677ff` (antd's default blue leaking through un-themed controls)    | 7             | Theme the control or use `var(--color-vhu-primary)`                                                            |
-| `div`/`View` with `onClick` instead of a real button                  | ~60 files     | `AppButton`, or a real `<button>`/`Link`                                                                       |
-| `margin` used to space list items instead of parent `gap`             | common        | `gap` on the flex/grid parent                                                                                  |
-| `window.innerWidth` instead of `useResponsive()`                      | —             | `useResponsive()`                                                                                              |
-| `alert()` for a form error                                            | —             | Inline error under the field (§8)                                                                              |
-| Gray/default table header                                             | —             | `var(--color-table-header-bg)` (§6)                                                                            |
+| Mistake                                                                                 | Found (count) | Fix                                                                                                            |
+| --------------------------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------- |
+| `fontSize: 13` hardcoded (not a token size at all)                                      | 71            | Use `caption` (12) or `subTitle2` (14)                                                                         |
+| `#fff` / `#ffffff` / `#FFF` — same color, 3 spellings                                   | 89 + 23 + 12  | `var(--color-surface)`                                                                                         |
+| `#8D8D8D` — an un-tokenized gray                                                        | 56            | `var(--color-text-muted)` (#6b7280) if it's meant as muted text — otherwise add a token, don't keep hardcoding |
+| Padding `10` (not on the 4px scale)                                                     | 30            | `8` or `12`                                                                                                    |
+| Padding `14` (not on the 4px scale)                                                     | 22            | `12` or `16`                                                                                                   |
+| `fontSize: 22.78` written out literally instead of spreading `titleM`                   | 4             | `...typography.titleM`                                                                                         |
+| `#1677ff` (antd's default blue leaking through un-themed controls)                      | 7             | Theme the control or use `var(--color-vhu-primary)`                                                            |
+| `div`/`View` with `onClick` instead of a real button                                    | ~60 files     | `AppButton`, or a real `<button>`/`Link`                                                                       |
+| `margin` used to space list items instead of parent `gap`                               | common        | `gap` on the flex/grid parent                                                                                  |
+| `window.innerWidth` instead of `useResponsive()`                                        | —             | `useResponsive()`                                                                                              |
+| `alert()` for a form error                                                              | —             | Inline error under the field (§8)                                                                              |
+| Gray/default table header                                                               | —             | `var(--color-table-header-bg)` (§6)                                                                            |
+| `padding`/`border` shorthand string (works in `next dev`, drops silently in production) | —             | `paddingTop`/`Right`/`Bottom`/`Left`, `borderTopWidth`/`Style`/`Color`, etc. (§3)                              |
 
 ## 12. Pre-commit checklist
 
 - [ ] No literal `fontSize`/`fontFamily`/`fontWeight` — all via `typography.*`
 - [ ] No hex color literal — all via `var(--color-*)`
 - [ ] All spacing on the 4px scale (§3)
+- [ ] No `padding`/`border` shorthand strings — longhand only (§3)
 - [ ] Layout spacing uses `gap`, not per-child `margin`
 - [ ] Table header uses `var(--color-table-header-bg)` + white text
 - [ ] Modal padding matches §7
 - [ ] Screen has all 4 data states: loading / populated / empty / error
 - [ ] Keyboard-navigable, visible focus state
 - [ ] Contrast checked (§10)
-- [ ] Verified at 1440 / 1024 / 768 / 375px
+- [ ] Verified at 1440 / 1024 / 768 / 375px **against `next build && next
+start`, not just `next dev`**
 - [ ] Vietnamese copy in sentence case
 - [ ] No `any` in props/types
 - [ ] Didn't touch an unrelated screen

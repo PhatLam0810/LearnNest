@@ -12,8 +12,21 @@ const styles = StyleSheet.create({
   header: {
     height: 72,
     backgroundColor: '#fff',
-    borderBottom: '1px solid #f0f0f0',
-    padding: '0 24px',
+    // borderBottom / padding viết dạng shorthand string ('1px solid #hex',
+    // '0 24px'...) bị react-native-web ÂM THẦM BỎ QUA khi build production
+    // thật (next build, không phải next dev) - đã tự verify: cùng 1 style
+    // hiện đúng lúc `next dev` nhưng padding/border biến mất hoàn toàn sau
+    // `next build && next start`. Chỉ dùng property CSS chuẩn, giá trị số/
+    // chuỗi đơn (borderBottomWidth, paddingTop/Right/Bottom/Left...), không
+    // dùng shorthand nhiều giá trị trong 1 string - áp dụng cho TOÀN BỘ
+    // file này.
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: '#f0f0f0',
+    paddingTop: 0,
+    paddingRight: 24,
+    paddingBottom: 0,
+    paddingLeft: 24,
     display: 'flex',
     // Mặc định của react-native-web là 'column' (theo React Native), khác
     // mặc định 'row' của CSS thường - phải khai báo tường minh, thiếu dòng
@@ -25,7 +38,8 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   headerMobile: {
-    padding: '0 16px',
+    paddingRight: 16,
+    paddingLeft: 16,
   },
   logoLink: {
     textDecoration: 'none',
@@ -72,7 +86,8 @@ const styles = StyleSheet.create({
   },
   headerHomeButton: {
     height: 40,
-    padding: '0 22px',
+    paddingRight: 22,
+    paddingLeft: 22,
     // borderWidth/borderStyle/borderColor tách riêng thay vì shorthand
     // "border: '1px solid ...'" - khi đổi màu lúc hover (chỉ override
     // borderColor), trộn shorthand với 1 property riêng lẻ qua mảng style
@@ -93,7 +108,8 @@ const styles = StyleSheet.create({
   },
   headerHomeButtonMobile: {
     height: 36,
-    padding: '0 14px',
+    paddingRight: 14,
+    paddingLeft: 14,
   },
   headerHomeButtonText: {
     ...typography.body2,
@@ -108,7 +124,10 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '64px 24px 80px',
+    paddingTop: 64,
+    paddingRight: 24,
+    paddingBottom: 80,
+    paddingLeft: 24,
   },
   grid: {
     width: '100%',
@@ -184,7 +203,8 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     height: 46,
-    padding: '0 28px',
+    paddingRight: 28,
+    paddingLeft: 28,
     borderRadius: 8,
     backgroundColor: 'var(--color-vhu-primary)',
     display: 'flex',
@@ -206,7 +226,8 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     height: 46,
-    padding: '0 28px',
+    paddingRight: 28,
+    paddingLeft: 28,
     borderRadius: 8,
     // Tách borderWidth/borderStyle/borderColor - xem giải thích ở style
     // "headerHomeButton" bên trên.
@@ -232,7 +253,9 @@ const styles = StyleSheet.create({
   // Suggested links
   linksBlock: {
     paddingTop: 20,
-    borderTop: '1px solid #e9edf4',
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: '#e9edf4',
     marginTop: 8,
     display: 'flex',
     flexDirection: 'column',
@@ -303,8 +326,13 @@ const styles = StyleSheet.create({
 
   // Footer
   footer: {
-    padding: '20px 24px',
-    borderTop: '1px solid #e9edf4',
+    paddingTop: 20,
+    paddingRight: 24,
+    paddingBottom: 20,
+    paddingLeft: 24,
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: '#e9edf4',
     textAlign: 'center',
   },
   footerText: {
