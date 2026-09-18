@@ -1,5 +1,42 @@
 :root {
+  /* Brand */
   --color-vhu-primary: #1d418a;
+  --color-vhu-primary-hover: #15316b;
   --color-vhu-secondary: #f0c356;
   --color-vhu-accent: #88c1e9;
+
+  /* Text */
+  --color-text-primary: #111827;
+  --color-text-body: #374151;
+  --color-text-muted: #6b7280;
+  --color-text-disabled: #9ca3af;
+  --color-text-on-primary: #fff;
+
+  /* Surface */
+  --color-surface: #fff;
+  --color-surface-page: #f5f7fb;
+  --color-surface-subtle: #f7f9fc;
+  --color-surface-selected: #f1f5fb;
+
+  /* Border */
+  --color-border: #e5e9f0;
+  --color-border-strong: #d9e2ef;
+  --color-border-subtle: #f1f3f7;
+  --color-border-focus: #88c1e9;
+
+  /* Table */
+  --color-table-header-bg: var(--color-vhu-primary);
+  --color-table-header-text: #fff;
+  --color-table-row-hover: #f7f9fc;
+  --color-table-row-border: #f1f3f7;
+
+  /* State */
+  --color-success: #16a34a;
+  --color-success-bg: #e9f9ef;
+  --color-warning: #b45309;
+  --color-warning-bg: #fef3e2;
+  --color-error: #dc2626;
+  --color-error-bg: #fdecec;
+  --color-info: #1d418a;
+  --color-info-bg: #eef3fb;
 }
