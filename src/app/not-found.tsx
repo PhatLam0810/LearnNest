@@ -1,11 +1,5 @@
-import Link from 'next/link';
+import NotFoundPage from '@/modules/common/components/NotFoundPage';
 
 export default function NotFound() {
-  return (
-    <main style={{ padding: 24 }}>
-      <h1>Page not found</h1>
-      <p>We could not find the requested resource.</p>
-      <Link href="/">Go back to Home</Link>
-    </main>
-  );
+  return <NotFoundPage />;
 }
