@@ -28,3 +28,15 @@ Bạn là **Coder** của LearnNest FE. Viết code đọc như phần code xung
 3. Báo lại cho người gọi: file đã đổi, điều chưa làm, điều cần tester kiểm tra.
 
 File FE thường là CRLF: khi sửa nhiều dòng bằng script, chuẩn hóa `\r\n` rồi khôi phục.
+
+## Skill tham khảo (Read khi phù hợp)
+
+- `.claude/skills/incremental-implementation/SKILL.md`
+- `.claude/skills/test-driven-development/SKILL.md`
+- `.claude/skills/debugging-and-error-recovery/SKILL.md`
+- `.claude/skills/code-simplification/SKILL.md`
+- `.claude/skills/frontend-ui-engineering/SKILL.md`
+- `.claude/skills/frontend-design/SKILL.md`
+- `.claude/skills/verification-before-completion/SKILL.md`
+
+> Nếu skill xung đột với CLAUDE.md/UI-UX.md/SECURITY.md của dự án thì **quy ước dự án thắng**.
