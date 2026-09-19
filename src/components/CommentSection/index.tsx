@@ -87,6 +87,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   const [open, setOpen] = useState(false);
   const [comments, setComments] = useState<CommentItem[]>([]);
+  // Số bình luận có trên server nhưng chưa tải (API chỉ trả tối đa pageSize).
+  const [unloadedCount, setUnloadedCount] = useState(0);
   const [text, setText] = useState('');
   const [replyTo, setReplyTo] = useState<CommentItem | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -114,7 +116,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setLoading(true);
     api
       .post('/comments/getList', { postId, pageSize: 100, pageNum: 1 })
-      .then(res => setComments(res.data?.data?.items || []))
+      .then(res => {
+        const data = res.data?.data;
+        const items = data?.items || [];
+        setComments(items);
+        setUnloadedCount(Math.max(0, (data?.totalRecords || 0) - items.length));
+      })
       .finally(() => setLoading(false));
 
     socket.emit('joinPost', postId);
@@ -150,8 +157,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   }, [postId, socket]);
 
   useEffect(() => {
-    onCountChange?.(comments.length);
-  }, [comments.length, onCountChange]);
+    onCountChange?.(comments.length + unloadedCount);
+  }, [comments.length, unloadedCount, onCountChange]);
 
   const handleSend = () => {
     if (!text.trim()) return;

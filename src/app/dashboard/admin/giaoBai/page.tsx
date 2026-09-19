@@ -279,6 +279,7 @@ const GiaoBaiPage: React.FC = () => {
                 onChange={setDueDate}
                 format="DD/MM/YYYY HH:mm"
                 showTime={{ format: 'HH:mm' }}
+                popupClassName="picker-fit-mobile"
               />
             </View>
             <AppButton

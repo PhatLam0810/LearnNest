@@ -67,3 +67,15 @@
 .ant-form-item-has-error .ant-input-affix-wrapper {
   border-color: #ef4444 !important;
 }
+
+/* Popup DatePicker có showTime rộng hơn màn hình nhỏ: neo sát lề trái, không tràn. */
+@media (max-width: 599px) {
+  .picker-fit-mobile {
+    left: 8px !important;
+    max-width: calc(100vw - 16px);
+  }
+  .picker-fit-mobile .ant-picker-panel-container {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
