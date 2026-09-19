@@ -23,16 +23,14 @@ export const getAvatarColor = (seed?: string) => {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 };
 
-// Chữ cái đầu khi user chưa có ảnh đại diện - lấy chữ cái đầu của 2 từ CUỐI
-// trong họ tên (vd "Lê Quốc Toàn" -> "QT") vì tên đệm+tên chính mới là phần
-// mọi người quen gọi nhau, không phải họ.
+// Chữ cái đầu khi user chưa có ảnh đại diện - lấy chữ cái đầu của từ ĐẦU và
+// từ CUỐI trong họ tên đăng ký (vd "Lam Tan Phat" -> "LP", "Lê Quốc Toàn" ->
+// "LT"). Tên 1 từ thì lấy 2 chữ cái đầu của từ đó.
 export const getInitials = (fullName?: string) => {
   const words = (fullName || '').trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return '?';
   if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
-  return (
-    words[words.length - 2][0] + words[words.length - 1][0]
-  ).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 };
 
 interface UserAvatarProps extends Omit<AvatarProps, 'src' | 'children'> {
