@@ -1,6 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { DndContext } from '@dnd-kit/core';
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -22,6 +28,13 @@ const ScrollableDragList: React.FC<ScrollableDragListProps> = ({
   style,
 }) => {
   const [listItem, setListItem] = useState<any[]>([]);
+  // Chỉ bắt đầu kéo sau khi di chuyển >= 5px - nhấn/bấm thường (nút xóa, ô
+  // nhập trong hàng) vẫn nhận onClick thay vì bị dnd-kit nuốt. KeyboardSensor
+  // giữ lại cho đúng mặc định của DndContext.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor),
+  );
 
   useEffect(() => {
     if (data) {
@@ -45,7 +58,7 @@ const ScrollableDragList: React.FC<ScrollableDragListProps> = ({
     }
   };
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
       <SortableContext
         items={listItem.map(keyExtractor)}
         strategy={verticalListSortingStrategy}>

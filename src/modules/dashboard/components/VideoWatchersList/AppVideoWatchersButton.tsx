@@ -23,13 +23,14 @@ const AppVideoWatchersButton: React.FC<AppVideoWatchersButtonProps> = ({
       <Button
         type="text"
         icon={<EyeOutlined />}
-        size="small"
+        size="middle"
+        aria-label="Xem danh sách người đã học bài này"
         onClick={onClick}
         disabled={disabled}
         style={{
-          color: disabled ? '#ccc' : '#1890ff',
-          position: 'absolute',
-          right: 16,
+          color: disabled
+            ? 'var(--color-text-disabled)'
+            : 'var(--color-vhu-primary)',
         }}
       />
     </Tooltip>

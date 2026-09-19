@@ -15,7 +15,7 @@ import {
 import { CheckCircleFilled } from '@ant-design/icons';
 import { Library } from '~mdDashboard/types';
 import { PracticeTask, PracticeSubject } from '~mdDashboard/types/practice';
-import { AddLibraryContent } from '~mdAdmin/components';
+import AddLibraryContent from '~mdAdmin/components/AddLibraryContent';
 import { adminQuery } from '~mdAdmin/redux';
 import './styles.scss';
 

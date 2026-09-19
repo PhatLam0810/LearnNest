@@ -46,6 +46,7 @@ export const baseQuery = createApi({
     'PracticeSubmission',
     'PracticeClassOverview',
     'CommentReport',
+    'Library',
   ],
   endpoints: () => ({}),
 });

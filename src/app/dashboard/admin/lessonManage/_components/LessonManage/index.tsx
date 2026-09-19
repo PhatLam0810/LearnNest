@@ -13,7 +13,6 @@ import {
   ThemedTable,
 } from '~mdAdmin/components';
 import { ModalLessonOverview } from './_components';
-import { UpdateLessonForm } from '@/app/dashboard/lesson/_components';
 
 const LessonManage = () => {
   const divRef = useRef(null);
@@ -21,7 +20,7 @@ const LessonManage = () => {
   const [height, setHeight] = useState(0);
   const [selectedItem, setSelectedItem] = useState<Lesson>(null);
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
-  const [dataEdit, setDataEdit] = useState<any>(null);
+  const [dataEdit, setDataEdit] = useState<Lesson | null>(null);
   const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
   const [isVisibleModalOverview, setIsVisibleModalModalOverview] =
     useState(false);
@@ -104,7 +103,10 @@ const LessonManage = () => {
         searchPlaceholder="Tìm kiếm khóa học"
         onSearch={handleSearch}
         addLabel="Thêm khóa học"
-        onAdd={() => setIsVisibleModalAdd(true)}
+        onAdd={() => {
+          setDataEdit(null);
+          setIsVisibleModalAdd(true);
+        }}
       />
       <View ref={divRef} style={{ flex: 1 }}>
         <ThemedTable
@@ -139,10 +141,14 @@ const LessonManage = () => {
         />
       </View>
 
+      {/* 1 modal cho cả tạo (dataEdit=null) lẫn cập nhật. dataEdit giữ nguyên
+          sau khi đóng để tiêu đề không nhảy về "Thêm khóa học" lúc đang mờ
+          dần. */}
       <CreateCourseModal
-        isVisible={isVisibleModalAdd}
-        onClose={() => setIsVisibleModalAdd(false)}
+        isVisible={isVisibleModalAdd || isVisibleModalUpdate}
+        onClose={onCloseModalAdd}
         onDone={refresh}
+        initialValues={dataEdit}
       />
 
       <Modal
@@ -167,14 +173,6 @@ const LessonManage = () => {
         data={data}
         isVisible={isVisibleModalOverview}
         setIsVisible={setIsVisibleModalModalOverview}
-      />
-      <UpdateLessonForm
-        data={dataEdit}
-        isVisible={isVisibleModalUpdate}
-        setIsVisible={setIsVisibleModalUpdate}
-        refresh={refresh}
-        setSelectedItem={onCloseModalAdd}
-        setIsVisibleModalAdd={onCloseModalAdd}
       />
     </View>
   );

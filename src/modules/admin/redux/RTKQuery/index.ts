@@ -108,6 +108,9 @@ export const adminQuery = baseQuery.injectEndpoints({
         url: `library/${id}`,
         method: 'GET',
       }),
+      // Modal Cập nhật bài học đọc bản đầy đủ (có questionList) - phải tự làm
+      // mới sau khi sửa/xóa, nếu không mở lại sẽ lấy bản cache cũ và gửi đè.
+      providesTags: (_result, _error, id) => [{ type: 'Library', id }],
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
 
@@ -151,6 +154,9 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'DELETE',
         body: params,
       }),
+      invalidatesTags: (_result, _error, { _id }) => [
+        { type: 'Library', id: _id },
+      ],
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
 
@@ -168,6 +174,9 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'PUT',
         body,
       }),
+      invalidatesTags: (_result, _error, { _id }) => [
+        { type: 'Library', id: _id },
+      ],
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
     createFeedback: builder.mutation<any, any>({
@@ -930,7 +939,7 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
 
-    // Ảnh nền bài học (AddLessonContent) - cùng route /upload dùng chung
+    // Ảnh nền khóa học (CreateCourseModal) - cùng route /upload dùng chung
     // toàn dự án (avatar, video/PDF thư viện, ảnh bình luận...). BE bọc
     // kết quả qua responseService.single() -> {data: url}.
     uploadImage: builder.mutation<string, FormData>({

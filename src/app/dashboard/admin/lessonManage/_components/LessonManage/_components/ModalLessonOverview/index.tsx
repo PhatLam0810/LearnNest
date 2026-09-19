@@ -1,14 +1,10 @@
-import { useWindowSize } from '@hooks';
 import { Collapse, Modal } from 'antd';
 
 import { ScrollView, Text, View } from 'react-native-web';
 import { LessonThumbnail } from '~mdDashboard/components';
 import { CheckOutlined } from '@ant-design/icons';
-import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
 import styles from './styles';
 const ModalLessonOverview = ({ isVisible, setIsVisible, data }: any) => {
-  const { width } = useWindowSize();
-
   const items =
     data?.modules?.map((m: any) => ({
       key: m._id,
@@ -29,16 +25,13 @@ const ModalLessonOverview = ({ isVisible, setIsVisible, data }: any) => {
       open={isVisible}
       onCancel={() => setIsVisible(false)}
       footer={false}
-      width="85%"
+      width={720}
       centered
-      title={
-        <div style={{ fontSize: 18, fontWeight: 700 }}>{data?.title}</div>
-      }>
-      <ScrollView style={{ height: (width * 0.85 * 9) / 16 }}>
+      title={<div style={styles.modalTitle}>{data?.title}</div>}>
+      <ScrollView style={styles.scroll}>
         <div style={styles.modalBody}>
           {/* HEADER */}
           <div style={styles.header}>
-            <div style={styles.title}>{data?.title}</div>
             <div style={styles.subtitle}>
               Khám phá nội dung chi tiết của khóa học
             </div>
@@ -54,7 +47,9 @@ const ModalLessonOverview = ({ isVisible, setIsVisible, data }: any) => {
                 <div>
                   {data?.learnedSkills?.map((s: string, i: number) => (
                     <div key={i} style={styles.skillItem}>
-                      <CheckOutlined style={{ color: '#52c41a' }} />
+                      <CheckOutlined
+                        style={{ color: 'var(--color-success)' }}
+                      />
                       <Text style={styles.skillText}>{s}</Text>
                     </div>
                   ))}

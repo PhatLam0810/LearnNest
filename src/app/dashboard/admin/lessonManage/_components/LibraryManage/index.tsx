@@ -2,17 +2,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
-import { MenuProps, Modal, Space, TableProps } from 'antd';
-import { messageApi, useAppPagination, useWindowSize } from '@hooks';
+import { Modal, Space, TableProps } from 'antd';
+import { messageApi, useAppPagination } from '@hooks';
 import {
-  AddLibraryContent,
   ContentToolbar,
   FilteredEmptyState,
   ThemedTable,
 } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import { Library } from '~mdDashboard/types';
-import { UpdateLibraryForm } from '@/app/dashboard/library/_components';
+// Import thẳng, không qua barrel ~mdAdmin/components - modal kéo theo
+// AddLibraryContent (tiptap + CSS side-effect).
+import CreateLibraryModal from '~mdAdmin/components/CreateLibraryModal';
 
 const LibraryManage = () => {
   const divRef = useRef(null);
@@ -20,9 +21,8 @@ const LibraryManage = () => {
   const [height, setHeight] = useState(0);
   const [selectedItem, setSelectedItem] = useState<Library>(null);
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
-  const [isVisibleModalBulk, setIsVisibleModalBulk] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
-  const [dataEdit, setDataEdit] = useState<any>();
+  const [dataEdit, setDataEdit] = useState<Library | null>(null);
   const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -32,11 +32,6 @@ const LibraryManage = () => {
     });
 
   const [deleteItem] = adminQuery.useDeleteLibraryMutation();
-  const [bulkLibraryFromYoutube, { isLoading: isLoadingBulkYoutube }] =
-    adminQuery.useBulkLibraryFromYoutubeMutation();
-
-  const [bulkLibraryFromGoogleDrive, { isLoading: isLoadingBulkGG }] =
-    adminQuery.useBulkLibraryFromGoogleDriveMutation();
 
   const columns: TableProps<Library>['columns'] = [
     {
@@ -93,16 +88,9 @@ const LibraryManage = () => {
     setOpenDelete(false);
   };
 
-  const items: MenuProps['items'] = [
-    {
-      key: '1',
-      label: <a onClick={() => setIsVisibleModalAdd(true)}>Thêm bài học</a>,
-    },
-  ];
   const onDone = () => {
     refresh();
     setIsVisibleModalAdd(false);
-    setDataEdit(null);
     setSelectedItem(null);
   };
 
@@ -118,6 +106,7 @@ const LibraryManage = () => {
         onSearch={handleSearch}
         addLabel="Thêm bài học"
         onAdd={() => {
+          setDataEdit(null);
           setIsVisibleModalAdd(true);
           setSelectedItem(null);
         }}
@@ -148,14 +137,6 @@ const LibraryManage = () => {
         />
       </View>
       <Modal
-        open={isVisibleModalAdd}
-        onCancel={onCloseModalAdd}
-        footer={null}
-        title="Thêm bài học">
-        <AddLibraryContent initialValues={selectedItem} onDone={onDone} />
-      </Modal>
-
-      <Modal
         title="Xóa bài học "
         open={openDelete}
         onCancel={onCloseDelete}
@@ -173,13 +154,14 @@ const LibraryManage = () => {
         <Text>{`Xóa bài học: ${selectedItem?.title}`}</Text>
       </Modal>
 
-      <UpdateLibraryForm
-        data={dataEdit}
-        isVisible={isVisibleModalUpdate}
-        setIsVisible={setIsVisibleModalUpdate}
-        refresh={onDone}
-        setSelectedItem={onCloseModalAdd}
-        setIsVisibleModalAdd={onCloseModalAdd}
+      {/* 1 modal cho cả tạo (dataEdit=null) lẫn cập nhật. dataEdit giữ nguyên
+          sau khi đóng để tiêu đề không nhảy về "Thêm bài học" lúc đang mờ dần. */}
+      <CreateLibraryModal
+        isVisible={isVisibleModalAdd || isVisibleModalUpdate}
+        onClose={onCloseModalAdd}
+        initialValues={dataEdit}
+        onCreated={onDone}
+        onUpdated={onDone}
       />
     </View>
   );

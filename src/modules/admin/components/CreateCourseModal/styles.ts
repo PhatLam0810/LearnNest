@@ -73,7 +73,12 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginBottom: 12,
   },
+  addSectionRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   addSectionButton: {
+    flex: 1,
     height: 44,
   },
   sectionsList: {
@@ -81,6 +86,8 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 8,
     marginTop: 12,
+    // Ghi đè paddingBottom: 100 mặc định của DraggableList.
+    paddingBottom: 0,
   },
   sectionRow: {
     height: 44,
@@ -93,6 +100,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--color-border)',
+    cursor: 'grab',
   },
   sectionRowTitle: {
     ...typography.body2,

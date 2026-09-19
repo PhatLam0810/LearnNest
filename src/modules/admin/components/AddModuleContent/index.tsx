@@ -137,7 +137,14 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
               messageApi.success('Add new module successfully!');
               form.resetFields();
               setContentItems([]);
-              onDone && onDone(res.data);
+              // Response addModule chưa có practiceTaskCount (BE chỉ tự tính ở
+              // getAllModule) - bổ sung để nơi nhận đếm đúng "Tổng bài học".
+              onDone &&
+                onDone({
+                  ...res.data,
+                  practiceTaskCount: contentItems.filter(i => i.type === 'task')
+                    .length,
+                });
             })
             .catch(() => {
               messageApi.error('Add new module failed!');

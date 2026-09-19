@@ -1,6 +1,16 @@
 import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
+  modalTitle: {
+    ...typography.titleS,
+    color: 'var(--color-text-primary)',
+  },
+
+  // Trần chiều cao theo viewport thay cho chiều cao tính từ width.
+  scroll: {
+    maxHeight: '70vh',
+  },
+
   modalBody: {
     padding: 20,
     backgroundColor: 'var(--color-surface-subtle)',
@@ -9,11 +19,6 @@ const styles = StyleSheet.create({
 
   header: {
     marginBottom: 16,
-  },
-
-  title: {
-    ...typography.titleS,
-    marginBottom: 4,
   },
 
   subtitle: {
@@ -89,7 +94,9 @@ const styles = StyleSheet.create({
 
   libraryItem: {
     padding: 10,
-    borderBottom: '1px solid var(--color-border-subtle)',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'var(--color-border-subtle)',
   },
 });
 

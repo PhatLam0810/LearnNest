@@ -1,34 +1,29 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native-web';
+import { Text, View } from 'react-native-web';
 import styles from './styles';
 import { Modal, Space, TableProps } from 'antd';
-import { messageApi, useAppPagination, useWindowSize } from '@hooks';
+import { messageApi, useAppPagination } from '@hooks';
 import { Module } from '~mdDashboard/redux/saga/type';
 import {
-  AddModuleContent,
   ContentToolbar,
+  CreateSectionModal,
   FilteredEmptyState,
   ThemedTable,
 } from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import api from '@services/api';
-import { ModalModuleOverview } from './_components';
-import { UpdateModuleForm } from '@/app/dashboard/module/_components';
 
 const ModuleManage = () => {
   const divRef = useRef(null);
-  const { width } = useWindowSize();
 
   const [height, setHeight] = useState(0);
   const [selectedItem, setSelectedItem] = useState<Module>(null);
   const [isVisibleModalAdd, setIsVisibleModalAdd] = useState(false);
   const [isVisibleModalBulk, setIsVisibleModalBulk] = useState(false);
-  const [isVisibleModalOverview, setIsVisibleModalOverview] = useState(false);
   const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
-  const [dataEdit, setDataEdit] = useState<any>();
+  const [dataEdit, setDataEdit] = useState<Module>();
   const [openDelete, setOpenDelete] = useState(false);
-  const [data, setData] = useState<Module>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const { listItem, currentData, fetchData, refresh, search } =
     useAppPagination<Module>({
@@ -155,18 +150,11 @@ const ModuleManage = () => {
           }}
         />
       </View>
-      <Modal
-        open={isVisibleModalAdd}
-        onCancel={onCloseModalAdd}
-        footer={null}
-        width={'80%'}
-        centered
-        destroyOnClose
-        title={selectedItem ? selectedItem.title : 'Thêm phần học'}>
-        <ScrollView style={{ height: (width * 0.8 * 9) / 16 }}>
-          <AddModuleContent onDone={onDone} />
-        </ScrollView>
-      </Modal>
+      <CreateSectionModal
+        isVisible={isVisibleModalAdd}
+        onClose={onCloseModalAdd}
+        onCreated={onDone}
+      />
 
       <Modal
         title="Xóa phần học"
@@ -186,18 +174,11 @@ const ModuleManage = () => {
         }}>
         <Text>{`Xóa phần học: ${selectedItem?.title}`}</Text>
       </Modal>
-      <ModalModuleOverview
-        data={data}
-        isVisible={isVisibleModalOverview}
-        setIsVisible={setIsVisibleModalOverview}
-      />
-      <UpdateModuleForm
-        data={dataEdit}
+      <CreateSectionModal
         isVisible={isVisibleModalUpdate}
-        setIsVisible={setIsVisibleModalUpdate}
-        refresh={refresh}
-        setSelectedItem={onCloseModalAdd}
-        setIsVisibleModalAdd={onCloseModalAdd}
+        onClose={onCloseModalAdd}
+        initialValues={dataEdit}
+        onUpdated={refresh}
       />
     </View>
   );

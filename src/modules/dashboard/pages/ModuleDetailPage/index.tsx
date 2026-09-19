@@ -1,30 +1,29 @@
 'use client';
 
-import React, { useRef, useEffect, useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native-web';
+import React, { useRef, useEffect, useState } from 'react';
+import { Text, View } from 'react-native-web';
 import styles from './styles';
 import {
-  CheckCircleFilled,
   FilePdfOutlined,
-  FileTextOutlined,
   LeftOutlined,
-  LockOutlined,
   PictureOutlined,
-  PlayCircleOutlined,
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Button, Modal, Skeleton, Tabs } from 'antd';
-import { convertDurationToTime } from '@utils/time';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { useResponsive } from '@/styles/responsive';
 import LibraryDetailItem, {
   LibraryDetailItemHandle,
 } from '~mdDashboard/components/LibraryDetailItem';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
+import CurriculumRail, {
+  CurriculumRailSkeleton,
+} from '~mdDashboard/components/CurriculumRail';
 import CommentSection from '@components/CommentSection';
 import BookmarkButton from '@components/BookmarkButton';
 import LessonNotesPanel from '~mdDashboard/components/LessonNotesPanel';
 import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
+import { getLessonContentItems } from '~mdDashboard/utils/getLessonContentItems';
 import { useSearchParams, useRouter } from 'next/navigation';
 
 const ModuleDetailPage = () => {
@@ -184,29 +183,13 @@ const ModuleDetailPage = () => {
 
   const isAdmin = userProfile?.role?.level <= 2;
 
-  const hasAccess = (item: any) =>
-    isAdmin || item?.usersCanPlay?.some(user => user._id === userProfile?._id);
-
-  // Trộn bài học video (order = vị trí trong module.libraries[]) với bài
-  // thực hành thuộc module này (order = field riêng) thành 1 danh sách nội
-  // dung duy nhất, đúng thứ tự admin đã sắp xếp trong màn Phần học.
-  const getModuleContentItems = (moduleItem: any) => {
-    const libraryItems = (moduleItem.libraries || []).map(
-      (l: any, i: number) => ({ kind: 'library' as const, data: l, order: i }),
-    );
-    const taskItems = (practiceTasksForLesson || [])
-      .filter(t => t.moduleId === moduleItem._id)
-      .map(t => ({ kind: 'task' as const, data: t, order: t.order ?? 0 }));
-    return [...libraryItems, ...taskItems].sort((a, b) => a.order - b.order);
-  };
-
   // Toàn bộ nội dung khóa học (video + bài thực hành) theo ĐÚNG 1 thứ tự
   // duy nhất, nối các module lại theo đúng thứ tự module — dùng để: (1) tìm
   // "nội dung tiếp theo" thật sự khi 1 video xem xong hoặc 1 bài thực hành
   // đạt >= 80%, dù nội dung kế tiếp là video hay bài thực hành; (2) khoá
-  // các bài thực hành CHƯA tới lượt trong sidebar.
-  const getLessonContentItems = () =>
-    (lessonDetail?.modules || []).flatMap(m => getModuleContentItems(m));
+  // các bài thực hành CHƯA tới lượt.
+  const getLessonSeq = () =>
+    getLessonContentItems(lessonDetail?.modules, practiceTasksForLesson);
 
   // Logic thật nằm ở utils/isTaskAccessible.ts (dùng chung với
   // LessonDetailPage, có test riêng) — wrapper này chỉ khép kín state của
@@ -221,130 +204,6 @@ const ModuleDetailPage = () => {
       quizPassedByLibrary,
     });
 
-  const isContentDone = (item: { kind: 'library' | 'task'; data: any }) => {
-    if (item.kind === 'task') return !!item.data.hasPassed;
-    if (item.data.type === 'Text') {
-      return !!quizPassedByLibrary?.[item.data._id];
-    }
-    return !!videoCompletedBySubLesson?.[item.data._id];
-  };
-
-  // Danh sách phẳng theo từng phần: mỗi mục là 1 <button> thật (Tab/Enter
-  // hoạt động), mục đang học tô nền vàng nhạt + nhãn "Đang học", mục đã xong
-  // có dấu tích + nhãn — trạng thái không chỉ dựa vào màu.
-  const renderCurriculum = () => {
-    const lessonSeq = getLessonContentItems();
-    return (lessonDetail?.modules || []).map(moduleItem => {
-      const contentItems = getModuleContentItems(moduleItem);
-      return (
-        <View key={moduleItem._id}>
-          <View style={styles.moduleHeader}>
-            <Text style={styles.moduleTitle} numberOfLines={2}>
-              {moduleItem.title}
-            </Text>
-            <Text style={styles.moduleCount}>{contentItems.length} bài</Text>
-          </View>
-          {contentItems.map(contentItem => {
-            const isTask = contentItem.kind === 'task';
-            const data = contentItem.data;
-            const isSelected = isTask
-              ? taskId === data._id
-              : !taskId && selectedLibrary?._id === data._id;
-            const isLocked = isTask
-              ? !isTaskAccessible(
-                  lessonSeq,
-                  lessonSeq.findIndex(
-                    it => it.kind === 'task' && it.data._id === data._id,
-                  ),
-                )
-              : !hasAccess(data);
-            const isDone = isContentDone(contentItem);
-            const meta = isTask
-              ? `Bài thực hành ${data.subject}`
-              : data.type === 'Text'
-                ? 'Trắc nghiệm'
-                : convertDurationToTime(data.duration);
-            const stateLabel = isSelected
-              ? 'Đang học'
-              : isDone
-                ? isTask
-                  ? 'Đạt'
-                  : 'Đã xong'
-                : isLocked
-                  ? 'Chưa mở'
-                  : '';
-            const blocked = isLocked && !isSelected;
-            return (
-              <button
-                key={`${contentItem.kind}-${data._id}`}
-                type="button"
-                disabled={blocked}
-                aria-current={isSelected ? 'true' : undefined}
-                onClick={() =>
-                  isTask ? handleSelectTask(data) : handleSelectLibrary(data)
-                }
-                style={{
-                  ...styles.lessonRow,
-                  ...(isSelected ? styles.lessonRowActive : null),
-                  ...(blocked ? styles.lessonRowLocked : null),
-                }}>
-                <span
-                  aria-hidden="true"
-                  style={{
-                    ...styles.lessonIcon,
-                    ...(isDone ? styles.lessonIconDone : null),
-                  }}>
-                  {isDone ? (
-                    <CheckCircleFilled />
-                  ) : blocked ? (
-                    <LockOutlined />
-                  ) : isTask || data.type === 'Text' ? (
-                    <FileTextOutlined />
-                  ) : (
-                    <PlayCircleOutlined />
-                  )}
-                </span>
-                <View style={styles.lessonText}>
-                  <Text numberOfLines={2} style={styles.lessonTitle}>
-                    {data.title}
-                  </Text>
-                  <Text style={styles.lessonMeta}>{meta}</Text>
-                </View>
-                {!!stateLabel && (
-                  <Text
-                    style={[
-                      styles.lessonState,
-                      isDone && styles.lessonStateDone,
-                      isSelected && styles.lessonStateCurrent,
-                    ]}>
-                    {stateLabel}
-                  </Text>
-                )}
-              </button>
-            );
-          })}
-        </View>
-      );
-    });
-  };
-
-  // renderCurriculum() duyệt MỌI phần × MỌI mục để dựng lại danh sách — bọc
-  // useMemo để không chạy lại ở mỗi lần render không liên quan tới nó (vd mở
-  // modal kết quả trắc nghiệm, đổi dataQuestion...).
-  const curriculum = useMemo(
-    () => renderCurriculum(),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      lessonDetail?.modules,
-      practiceTasksForLesson,
-      taskId,
-      selectedLibrary?._id,
-      videoCompletedBySubLesson,
-      quizPassedByLibrary,
-      isAdmin,
-    ],
-  );
-
   // Tìm mục kế tiếp trong TOÀN BỘ khóa học (video + bài thực hành trộn
   // chung 1 thứ tự) rồi mở khóa/chuyển sang đúng mục đó — dùng chung cho cả
   // 2 trường hợp "vừa xem xong 1 video/trắc nghiệm" và "vừa nộp bài thực
@@ -356,7 +215,7 @@ const ModuleDetailPage = () => {
     currentKind: 'library' | 'task',
     currentId: string,
   ) => {
-    const seq = getLessonContentItems();
+    const seq = getLessonSeq();
     const currentIndex = seq.findIndex(
       it => it.kind === currentKind && it.data._id === currentId,
     );
@@ -381,7 +240,7 @@ const ModuleDetailPage = () => {
   // thuần chuyển màn. Lùi về mục trước luôn được phép; tới mục sau chỉ khi
   // đã mở khóa (hasAccess) - không cho nhảy cóc qua nội dung chưa tới lượt.
   const goToRelativeContentItem = (delta: 1 | -1) => {
-    const seq = getLessonContentItems();
+    const seq = getLessonSeq();
     const currentId = taskId || selectedLibrary?._id;
     const currentKind: 'library' | 'task' = taskId ? 'task' : 'library';
     const currentIndex = seq.findIndex(
@@ -486,11 +345,7 @@ const ModuleDetailPage = () => {
             />
             <Skeleton active paragraph={{ rows: 3 }} />
           </View>
-          <View style={[styles.rail, isMobile && styles.railMobile]}>
-            <View style={styles.railHeader}>
-              <Skeleton active paragraph={{ rows: 6 }} />
-            </View>
-          </View>
+          <CurriculumRailSkeleton />
         </View>
       </View>
     );
@@ -551,12 +406,6 @@ const ModuleDetailPage = () => {
     isMobile && { position: 'relative', top: 0 },
   ] as any;
 
-  const railStyle = [
-    styles.rail,
-    isMobile && styles.railMobile,
-    !isMobile && { maxHeight: '100%' },
-  ] as any;
-
   // Mobile: xếp tiêu đề và nút thao tác chồng lên nhau theo cột thay vì
   // cùng 1 hàng - title dài (vd "Word - Giới thiệu Tổng quan Bài thi MOS
   // 2019") kèm nút cạnh nhau trên màn hình hẹp sẽ bị bóp chật, khó đọc.
@@ -568,17 +417,13 @@ const ModuleDetailPage = () => {
   // "Bài N/M" dưới tiêu đề - vị trí mục đang xem trong TOÀN BỘ nội dung
   // khóa (video + bài thực hành trộn theo đúng thứ tự), không chỉ trong 1
   // module - khớp với cách LessonDetailPage đếm tiến độ.
-  const currentContentSeq = getLessonContentItems();
+  const currentContentSeq = getLessonSeq();
   const currentContentKind: 'library' | 'task' = taskId ? 'task' : 'library';
   const currentContentId = taskId || selectedLibrary?._id;
   const currentContentIndex = currentContentSeq.findIndex(
     it => it.kind === currentContentKind && it.data._id === currentContentId,
   );
   const totalContentCount = currentContentSeq.length;
-  const doneContentCount = currentContentSeq.filter(isContentDone).length;
-  const progressPercent = totalContentCount
-    ? Math.round((doneContentCount / totalContentCount) * 100)
-    : 0;
   const watchedMinutes = videoProgress
     ? Math.floor((videoProgress.lastPosition || 0) / 60)
     : 0;
@@ -857,38 +702,24 @@ const ModuleDetailPage = () => {
         </View>
 
         {lessonDetail?.modules?.length > 0 && (
-          <View style={railStyle}>
-            <View style={styles.railHeader}>
-              <Text style={styles.railTitle}>Nội dung khóa học</Text>
-              <Text style={styles.railProgressLabel}>
-                {doneContentCount}/{totalContentCount} bài đã hoàn thành ·{' '}
-                {progressPercent}%
-              </Text>
-              <div
-                role="progressbar"
-                aria-label="Tiến độ khóa học"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={progressPercent}
-                style={styles.progressTrack}>
-                <div
-                  style={{
-                    ...styles.progressFill,
-                    width: `${progressPercent}%`,
-                  }}
-                />
-              </div>
-            </View>
-            {isMobile ? (
-              // Plain View on mobile — react-native-web's ScrollView still
-              // attaches its own JS touch handling even with overflow
-              // disabled via style, which fights the page's native scroll
-              // and makes scrolling feel like it randomly stops working.
-              <View>{curriculum}</View>
-            ) : (
-              <ScrollView style={styles.railScroll}>{curriculum}</ScrollView>
-            )}
-          </View>
+          <CurriculumRail
+            modules={lessonDetail.modules}
+            tasks={practiceTasksForLesson}
+            videoCompletedBySubLesson={videoCompletedBySubLesson}
+            quizPassedByLibrary={quizPassedByLibrary}
+            isAdmin={isAdmin}
+            currentUserId={userProfile?._id}
+            selected={
+              taskId
+                ? { kind: 'task', id: taskId }
+                : { kind: 'library', id: selectedLibrary?._id || '' }
+            }
+            onSelect={entry =>
+              entry.kind === 'task'
+                ? handleSelectTask(entry.data)
+                : handleSelectLibrary(entry.data)
+            }
+          />
         )}
       </View>
       <Modal

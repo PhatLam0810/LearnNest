@@ -7,7 +7,6 @@ import './styles.scss';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { useAppSelector } from '@redux';
 import { useRouter } from 'next/navigation';
-import { UpdateLessonForm } from './_components';
 import { useEffect, useMemo, useState } from 'react';
 import { useResponsive } from '@/styles/responsive';
 import { useSearchContext } from '@components/SearchContext';
@@ -42,8 +41,6 @@ const Page = () => {
       apiUrl: 'lesson/getAllLesson',
       isLazy: true,
     });
-  const [isVisible, setIsVisible] = useState(false);
-  const [dataEdit, setDataEdit] = useState<any>();
 
   useEffect(() => {
     const filter =
@@ -157,11 +154,6 @@ const Page = () => {
             />
           );
         }}
-      />
-      <UpdateLessonForm
-        data={dataEdit}
-        isVisible={isVisible}
-        setIsVisible={setIsVisible}
       />
     </View>
   );

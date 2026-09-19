@@ -103,6 +103,9 @@ function ThemedTable<T extends object>(props: TableProps<T>) {
     <View style={styles.wrap}>
       <Table
         {...props}
+        // display:flex tránh khoảng trắng ~16px phía trên header do ::before
+        // của .ant-table-wrapper (display:table) trong khung có viền bo tròn.
+        style={{ display: 'flex', flexDirection: 'column', ...props.style }}
         components={{
           header: {
             cell: (cellProps: React.HTMLAttributes<HTMLTableCellElement>) => (

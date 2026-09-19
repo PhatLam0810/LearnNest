@@ -16,12 +16,11 @@ import { useAppPagination, messageApi } from '@hooks';
 import { Lesson, Module } from '~mdDashboard/redux/saga/type';
 import { adminQuery } from '~mdAdmin/redux';
 import {
-  AddModuleContent,
   ContentToolbar,
   FilteredEmptyState,
+  CreateSectionModal,
   ThemedTable,
 } from '~mdAdmin/components';
-import { UpdateModuleForm } from '@/app/dashboard/module/_components';
 import styles from './styles';
 
 // Quản lý các Lesson type='practice' — "phần thực hành" gom bài tập theo kỹ
@@ -72,7 +71,10 @@ const PracticeLessonManage = () => {
   }, [selectedLesson?._id, selectedLesson?.title, selectedLesson?.description]);
 
   const [isAddModuleOpen, setIsAddModuleOpen] = useState(false);
+  // Cờ mở tách khỏi editModuleTarget: đóng modal không xóa target, để tiêu đề
+  // không nháy sang "Thêm phần học" trong lúc modal đang chạy hiệu ứng đóng.
   const [editModuleTarget, setEditModuleTarget] = useState<Module | null>(null);
+  const [isEditModuleOpen, setIsEditModuleOpen] = useState(false);
   const [deleteModuleTarget, setDeleteModuleTarget] = useState<Module | null>(
     null,
   );
@@ -163,7 +165,6 @@ const PracticeLessonManage = () => {
         modules: [...selectedLesson.modules.map(m => m._id), newModule._id],
       }).unwrap();
       messageApi.success('Đã thêm phần');
-      setIsAddModuleOpen(false);
       refresh();
     } catch {
       messageApi.error(
@@ -211,7 +212,10 @@ const PracticeLessonManage = () => {
           </button>
           <button
             style={styles.button}
-            onClick={() => setEditModuleTarget(record)}>
+            onClick={() => {
+              setEditModuleTarget(record);
+              setIsEditModuleOpen(true);
+            }}>
             <a style={styles.buttonText}>Sửa tên</a>
           </button>
         </Space>
@@ -350,26 +354,18 @@ const PracticeLessonManage = () => {
       {/* zIndex nâng lên trên Drawer (mặc định 1000, bằng z-index Drawer nên
           bị đè khuất — đã kiểm chứng: mở được, DOM có mặt, nhưng không thấy
           gì) — 3 overlay dưới đây đều có thể mở TRONG LÚC Drawer đang mở. */}
-      <Modal
-        title="Thêm phần mới"
-        open={isAddModuleOpen}
-        onCancel={() => setIsAddModuleOpen(false)}
-        footer={null}
-        width="70%"
+      <CreateSectionModal
+        isVisible={isAddModuleOpen}
+        onClose={() => setIsAddModuleOpen(false)}
+        onCreated={handleAddModuleDone}
         zIndex={1100}
-        destroyOnClose>
-        <AddModuleContent onDone={handleAddModuleDone} />
-      </Modal>
+      />
 
-      <UpdateModuleForm
-        data={editModuleTarget}
-        isVisible={!!editModuleTarget}
-        setIsVisible={open => {
-          if (!open) setEditModuleTarget(null);
-        }}
-        refresh={refresh}
-        setSelectedItem={() => setEditModuleTarget(null)}
-        setIsVisibleModalAdd={() => setEditModuleTarget(null)}
+      <CreateSectionModal
+        isVisible={isEditModuleOpen}
+        onClose={() => setIsEditModuleOpen(false)}
+        initialValues={editModuleTarget ?? undefined}
+        onUpdated={refresh}
         zIndex={1100}
       />
 

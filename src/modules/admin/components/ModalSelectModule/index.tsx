@@ -5,7 +5,6 @@ import { Button, Modal } from 'antd';
 import { Module } from '~mdDashboard/redux/saga/type';
 import { ModuleItem } from '@/app/dashboard/module/_components';
 import Search from 'antd/es/input/Search';
-import { AddModuleContent } from '~mdAdmin/components';
 import './styles.scss';
 import { useAppSelector } from '@redux';
 type ModalSelectModuleProps = {
@@ -13,12 +12,15 @@ type ModalSelectModuleProps = {
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
   listSelected?: any[];
   onFinish: (data: any[]) => void;
+  // Caller mở picker LỒNG trong modal khác cần nâng zIndex (mặc định 1000).
+  zIndex?: number;
 };
 const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
   isVisible,
   setIsVisible,
   listSelected,
   onFinish,
+  zIndex,
 }) => {
   const { listItem, fetchData, refresh, search } = useAppPagination<Module>({
     apiUrl: 'lesson/getAllModule',
@@ -71,6 +73,7 @@ const ModalSelectModule: React.FC<ModalSelectModuleProps> = ({
       onCancel={closeModal}
       loading={isLoading}
       width={'70%'}
+      zIndex={zIndex}
       style={{ top: 20 }}>
       <div className="modal" onClick={closeModal}>
         <div className="content" onClick={e => e.stopPropagation()}>
