@@ -14,6 +14,9 @@ export interface UserItem {
   class?: string;
   faculty?: string;
   major?: string;
+  // Loại tài khoản: 'student' = sinh viên VHU, 'guest' = khách. Tài khoản cũ
+  // chưa có field này.
+  userType?: 'student' | 'guest';
   phoneNumber?: string;
   bio?: string;
 }

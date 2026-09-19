@@ -20,6 +20,7 @@ import {
   LessonRecommendRes,
   LibraryType,
   MyCourseItem,
+  MyClassItem,
   MyOverview,
   MyQuestionListResponse,
   MyQuizResultDetail,
@@ -366,6 +367,11 @@ export const dashboardQuery = baseQuery.injectEndpoints({
 
     // Tiến độ các khóa đang học - dùng ở Trang Chủ, Header, "Khóa học của
     // tôi". Cùng convention không bọc {data:...} như getStudyStats.
+    getMyClasses: builder.query<MyClassItem[], void>({
+      query: () => 'classes/mine',
+      transformResponse: (res: { data?: MyClassItem[] } | MyClassItem[]) =>
+        Array.isArray(res) ? res : (res.data ?? []),
+    }),
     getMyCourses: builder.query<MyCourseItem[], string>({
       query: userId => `/lesson/user/${userId}/my-courses`,
     }),

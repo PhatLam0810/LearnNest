@@ -47,6 +47,9 @@ export const baseQuery = createApi({
     'PracticeClassOverview',
     'CommentReport',
     'Library',
+    // "Lớp học": id 'LIST' = danh sách, id = classId = chi tiết + học viên
+    // của lớp đó. Tạo/sửa/chuyển/thêm/gỡ học viên đều làm mới qua tag này.
+    'Class',
   ],
   endpoints: () => ({}),
 });

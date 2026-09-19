@@ -1,7 +1,8 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native-web';
-import { Switch, Checkbox } from 'antd';
+import { Switch, Checkbox, Button } from 'antd';
+import { messageApi } from '@hooks';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction, authQuery } from '~mdAuth/redux';
 import styles from './styles';
@@ -24,32 +25,60 @@ const ADMIN_NOTIF_TYPES: { type: string; label: string }[] = [
   { type: 'VIOLATION_REPORT', label: 'Có báo cáo vi phạm mới' },
 ];
 
-// Card "Học tập và thông báo" - bật/tắt email nhắc nhở học tập lúc 19:00
-// hàng ngày. Lưu trực tiếp vào userProfile.studyReminderEnabled qua API cập
-// nhật hồ sơ đã có sẵn (cùng luồng với đổi avatar/tên) - BE gửi email thật
-// mỗi ngày cho user đang bật, xem AiCoachService.runDailyStudyReminder.
+// Card "Học tập và thông báo" - công tắc nhắc nhở học tập (email 19:00 hàng
+// ngày) + loại thông báo muốn nhận. Thay đổi chỉ giữ ở bản nháp trên màn hình;
+// bấm "Lưu cài đặt" mới gọi API cập nhật hồ sơ đã có sẵn (cùng luồng với đổi
+// avatar/tên) - tránh gọi API mỗi lần tick/bỏ tick. BE gửi email thật mỗi ngày
+// cho user đang bật, xem AiCoachService.runDailyStudyReminder.
 const StudyPreferences = () => {
   const dispatch = useAppDispatch();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const [updateCurrentInfo] = authQuery.useUpdateCurrentInfoMutation();
+  const [updateCurrentInfo, { isLoading: isSaving }] =
+    authQuery.useUpdateCurrentInfoMutation();
   // Field có thể chưa tồn tại trên profile cũ (chưa từng đổi) - mặc định
   // bật, khớp default true ở BE.
-  const reminderEnabled = userProfile?.studyReminderEnabled !== false;
+  const savedReminder = userProfile?.studyReminderEnabled !== false;
   const isAdmin = (userProfile as any)?.role?.level <= 2;
-  const disabledTypes = (userProfile as any)?.disabledNotificationTypes || [];
+  const savedDisabledTypes: string[] =
+    (userProfile as any)?.disabledNotificationTypes || [];
 
-  const saveProfile = (patch: Record<string, unknown>) => {
-    updateCurrentInfo({ ...userProfile, ...patch })
-      .unwrap()
-      .then(res => dispatch(authAction.setCurrentUserInfo(res)));
-  };
+  const [reminderEnabled, setReminderEnabled] = useState(savedReminder);
+  const [disabledTypes, setDisabledTypes] =
+    useState<string[]>(savedDisabledTypes);
+
+  // Đồng bộ lại bản nháp khi hồ sơ đã lưu đổi (vừa lưu xong / tải hồ sơ).
+  const savedKey = JSON.stringify([
+    savedReminder,
+    [...savedDisabledTypes].sort(),
+  ]);
+  useEffect(() => {
+    setReminderEnabled(savedReminder);
+    setDisabledTypes(savedDisabledTypes);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedKey]);
+
+  const isDirty =
+    JSON.stringify([reminderEnabled, [...disabledTypes].sort()]) !== savedKey;
 
   const toggleNotifType = (type: string, checked: boolean) => {
-    const next = checked
-      ? disabledTypes.filter((t: string) => t !== type)
-      : [...disabledTypes, type];
-    saveProfile({ disabledNotificationTypes: next });
+    setDisabledTypes(prev =>
+      checked ? prev.filter(t => t !== type) : [...prev, type],
+    );
+  };
+
+  const handleSave = async () => {
+    try {
+      const res = await updateCurrentInfo({
+        ...userProfile,
+        studyReminderEnabled: reminderEnabled,
+        disabledNotificationTypes: disabledTypes,
+      }).unwrap();
+      dispatch(authAction.setCurrentUserInfo(res));
+      messageApi.success('Đã lưu cài đặt');
+    } catch {
+      messageApi.error('Không lưu được cài đặt, vui lòng thử lại');
+    }
   };
 
   return (
@@ -61,10 +90,7 @@ const StudyPreferences = () => {
           <Text style={styles.rowTitle}>Nhắc nhở học tập</Text>
           <Text style={styles.rowSubtitle}>Email lúc 19:00 mỗi ngày</Text>
         </View>
-        <Switch
-          checked={reminderEnabled}
-          onChange={checked => saveProfile({ studyReminderEnabled: checked })}
-        />
+        <Switch checked={reminderEnabled} onChange={setReminderEnabled} />
       </View>
       <View style={styles.divider} />
       <Text style={styles.rowTitle}>Loại thông báo muốn nhận</Text>
@@ -78,6 +104,18 @@ const StudyPreferences = () => {
               {label}
             </Checkbox>
           ),
+        )}
+      </View>
+      <View style={styles.saveRow}>
+        <Button
+          type="primary"
+          loading={isSaving}
+          disabled={!isDirty}
+          onClick={handleSave}>
+          Lưu cài đặt
+        </Button>
+        {isDirty && (
+          <Text style={styles.dirtyHint}>Bạn có thay đổi chưa lưu</Text>
         )}
       </View>
       <View style={styles.divider} />

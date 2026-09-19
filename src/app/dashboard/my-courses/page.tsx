@@ -38,6 +38,9 @@ const MyCoursesPage = () => {
   const { data: myCoursesData, isFetching: loadingCourses } =
     dashboardQuery.useGetMyCoursesQuery(userId || '', { skip: !userId });
   const myCourses = myCoursesData || [];
+  const { data: myClasses } = dashboardQuery.useGetMyClassesQuery(undefined, {
+    skip: !userId,
+  });
   const { data: overview } = dashboardQuery.useGetMyOverviewQuery(
     userId || '',
     { skip: !userId },
@@ -180,6 +183,72 @@ const MyCoursesPage = () => {
             {latestInsight.roadmap?.[0]?.action || 'Xem lộ trình đề xuất'}
           </AppButton>
         </View>
+      )}
+
+      {!!myClasses?.length && (
+        <>
+          <View>
+            <Text style={styles.sectionTitle}>Khóa học của lớp tôi</Text>
+          </View>
+          {myClasses.map(cls => (
+            <View key={cls.classId} style={styles.classCard}>
+              <View style={styles.classCardHeader}>
+                <Text style={styles.className}>
+                  {cls.name}
+                  {cls.name !== cls.code ? ` (${cls.code})` : ''}
+                </Text>
+                {!!cls.termLabel && (
+                  <Text style={styles.classMeta}>{cls.termLabel}</Text>
+                )}
+              </View>
+              {!cls.courses.length && (
+                <Text style={styles.emptyText}>
+                  Lớp chưa được phân khóa học nào.
+                </Text>
+              )}
+              {cls.courses.map(course => (
+                <View key={course.lessonId} style={styles.classCourseRow}>
+                  <View style={styles.classCourseInfo}>
+                    <Text style={styles.classCourseTitle} numberOfLines={2}>
+                      {course.title}
+                    </Text>
+                    <Text style={styles.classMeta}>
+                      {course.startAt || course.endAt
+                        ? `${course.startAt ? dayjs(course.startAt).format('DD/MM/YYYY') : '…'} – ${course.endAt ? dayjs(course.endAt).format('DD/MM/YYYY') : '…'}`
+                        : 'Không giới hạn thời gian'}
+                      {course.endAt && dayjs(course.endAt).isBefore(dayjs())
+                        ? ' · Đã kết thúc'
+                        : ''}
+                    </Text>
+                  </View>
+                  <View style={styles.classCourseProgress}>
+                    <View style={styles.progressTrack}>
+                      <View
+                        style={[
+                          styles.progressFill,
+                          course.percent >= 100 && styles.progressFillDone,
+                          { width: `${course.percent}%` },
+                        ]}
+                      />
+                    </View>
+                    <Text style={styles.progressPct}>
+                      {course.percent >= 100
+                        ? 'Hoàn thành'
+                        : `${course.percent}%`}
+                    </Text>
+                  </View>
+                  <AppButton
+                    style={{ width: 'auto', height: 40 }}
+                    onClick={() =>
+                      router.push(`/dashboard/home/lesson/${course.lessonId}`)
+                    }>
+                    {course.percent > 0 ? 'Học tiếp' : 'Bắt đầu học'}
+                  </AppButton>
+                </View>
+              ))}
+            </View>
+          ))}
+        </>
       )}
 
       <View>

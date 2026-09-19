@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Text, View } from 'react-native-web';
-import { Button, Form, Input, Modal, Typography } from 'antd';
+import { Button, Form, Input, Modal, Segmented, Typography } from 'antd';
 import {
   DeleteOutlined,
   PlusOutlined,
@@ -61,6 +61,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
         title: initialValues.title,
         description: initialValues.description,
         instructor: initialValues.instructor,
+        accessMode: initialValues.accessMode ?? 'public',
         learnedSkills: initialValues.learnedSkills,
         thumbnail: initialValues.thumbnail?.includes('youtube.com/watch')
           ? getYouTubeThumbnail(initialValues.thumbnail)
@@ -94,6 +95,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
     title: string;
     description: string;
     instructor?: string;
+    accessMode?: 'public' | 'class';
     thumbnail?: string;
     learnedSkills?: string[];
   }) => {
@@ -158,6 +160,20 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
               name="instructor"
               rules={[{ max: 100, message: 'Tối đa 100 ký tự' }]}>
               <Input placeholder="Tên giảng viên" style={styles.control} />
+            </Form.Item>
+
+            <Form.Item
+              style={styles.formItem}
+              label="Ai được học khóa này"
+              name="accessMode"
+              initialValue="public"
+              extra="Khóa 'Chỉ lớp được phân' bị ẩn với người ngoài lớp; gán khóa cho lớp ở tab Lớp Học.">
+              <Segmented
+                options={[
+                  { value: 'public', label: 'Công khai' },
+                  { value: 'class', label: 'Chỉ lớp được phân' },
+                ]}
+              />
             </Form.Item>
 
             <Form.Item

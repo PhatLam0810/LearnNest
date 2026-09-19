@@ -10,6 +10,9 @@ import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { ClassRosterLearner } from '../../redux/RTKQuery/type';
 import StateTag from '../StateTag';
+import ClassMembersTab from '../ClassMembersTab';
+import ClassCoursesTab from '../ClassCoursesTab';
+import ClassProgressTab from '../ClassProgressTab';
 import ThemedTable from '../ThemedTable';
 import { LEARNER_STATE } from '../practiceClassShared';
 import styles from './styles';
@@ -21,20 +24,35 @@ interface PracticeClassDetailModalProps {
 
 const buttonStyle = { width: 'auto', height: 40 } as const;
 
+const TABS = [
+  { key: 'members', label: 'Học viên' },
+  { key: 'courses', label: 'Khóa học' },
+  { key: 'progress', label: 'Tiến độ' },
+  { key: 'assignments', label: 'Bài giao' },
+] as const;
+type TabKey = (typeof TABS)[number]['key'];
+
 const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
   classId,
   onClose,
 }) => {
+  const [tab, setTab] = useState<TabKey>('members');
   const [assignmentId, setAssignmentId] = useState<string | undefined>();
+  // Tên/mã/trạng thái lớp cho header - nhẹ hơn roster (không tải cả danh sách
+  // học viên), roster chỉ tải khi mở tab "Bài giao".
+  const { data: classInfo } = adminQuery.useGetClassByIdQuery(classId ?? '', {
+    skip: !classId,
+  });
   const { data, isFetching, isError, refetch } =
     adminQuery.useGetPracticeClassRosterQuery(
       { classId: classId ?? '', assignmentId },
-      { skip: !classId },
+      { skip: !classId || tab !== 'assignments' },
     );
   const [remind, { isLoading: isReminding }] =
     adminQuery.useRemindClassAssignmentMutation();
 
   const close = () => {
+    setTab('members');
     setAssignmentId(undefined);
     onClose();
   };
@@ -117,7 +135,7 @@ const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
     },
   ];
 
-  const renderBody = () => {
+  const renderAssignments = () => {
     if (isFetching && !data) {
       return (
         <View style={styles.skeletonWrap}>
@@ -189,17 +207,17 @@ const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
       onCancel={close}
       footer={null}
       closable={false}
-      width={720}
+      width={1120}
       destroyOnHidden
       styles={{ body: { padding: 0 }, content: { padding: 0 } }}>
       <View style={styles.shell}>
         <View style={styles.header}>
           <View style={styles.headerText}>
             <Text style={styles.title}>
-              {data?.class.name || 'Chi tiết lớp'}
+              {classInfo?.name || 'Chi tiết lớp'}
             </Text>
             <Text style={styles.subline}>
-              {data ? `Mã lớp ${data.class.code}` : ' '}
+              {classInfo ? `Mã lớp ${classInfo.code}` : ' '}
             </Text>
           </View>
           <button
@@ -211,17 +229,53 @@ const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
           </button>
         </View>
         <View style={styles.body}>
-          {renderBody()}
-          <View style={styles.footer}>
-            <AppButton
-              type="primary"
-              style={buttonStyle}
-              loading={isReminding}
-              disabled={!assignment || !notSubmitted || isReminding}
-              onClick={handleRemind}>
-              Nhắc hàng loạt
-            </AppButton>
-          </View>
+          <div role="tablist" style={styles.tabStrip as React.CSSProperties}>
+            {TABS.map(t => (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.key}
+                onClick={() => setTab(t.key)}
+                style={
+                  (tab === t.key
+                    ? { ...styles.tab, ...styles.tabActive }
+                    : styles.tab) as React.CSSProperties
+                }>
+                {t.label}
+              </button>
+            ))}
+          </div>
+          {tab === 'members' && !!classId && (
+            <ClassMembersTab
+              classId={classId}
+              archived={classInfo?.status === 'archived'}
+            />
+          )}
+          {tab === 'courses' && !!classId && (
+            <ClassCoursesTab
+              classId={classId}
+              archived={classInfo?.status === 'archived'}
+            />
+          )}
+          {tab === 'progress' && !!classId && (
+            <ClassProgressTab classId={classId} />
+          )}
+          {tab === 'assignments' && (
+            <>
+              {renderAssignments()}
+              <View style={styles.footer}>
+                <AppButton
+                  type="primary"
+                  style={buttonStyle}
+                  loading={isReminding}
+                  disabled={!assignment || !notSubmitted || isReminding}
+                  onClick={handleRemind}>
+                  Nhắc hàng loạt
+                </AppButton>
+              </View>
+            </>
+          )}
         </View>
       </View>
     </Modal>

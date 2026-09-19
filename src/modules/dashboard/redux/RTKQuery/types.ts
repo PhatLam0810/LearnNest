@@ -488,3 +488,24 @@ export interface MyQuizResultDetail {
   hasAnswers: boolean;
   questions: MyQuizResultQuestion[];
 }
+
+// "Lớp của tôi" (BE GET classes/mine): lớp đang hoạt động học viên thuộc, kèm
+// khóa được phân và tiến độ của riêng mình ở từng khóa.
+export interface MyClassCourse {
+  lessonId: string;
+  title: string;
+  thumbnail: string;
+  startAt: string | null;
+  endAt: string | null;
+  percent: number;
+  doneItems: number;
+  totalItems: number;
+}
+
+export interface MyClassItem {
+  classId: string;
+  code: string;
+  name: string;
+  termLabel: string;
+  courses: MyClassCourse[];
+}

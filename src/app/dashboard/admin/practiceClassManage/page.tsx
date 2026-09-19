@@ -1,66 +1,123 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Skeleton } from 'antd';
+import { Modal, Segmented, Skeleton } from 'antd';
 import type { TableProps } from 'antd';
-import dayjs from 'dayjs';
 import AppButton from '@components/AppButton';
+import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
-import { ClassOverviewItem } from '~mdAdmin/redux/RTKQuery/type';
+import { ClassItem, ClassStatusValue } from '~mdAdmin/redux/RTKQuery/type';
 import {
   ContentToolbar,
   FilteredEmptyState,
   ThemedTable,
 } from '~mdAdmin/components';
+import ClassFormModal from '~mdAdmin/components/ClassFormModal';
 import CreateClassModal from '~mdAdmin/components/CreateClassModal';
 import PracticeClassDetailModal from '~mdAdmin/components/PracticeClassDetailModal';
 import StateTag from '~mdAdmin/components/StateTag';
 import {
-  CLASS_STATUS,
-  classStatus,
+  CLASS_ENTITY_STATUS,
+  apiErrorMessage,
 } from '~mdAdmin/components/practiceClassShared';
 import styles from './styles';
 
+type StatusFilter = 'all' | ClassStatusValue;
+
+const PAGE_SIZE = 10;
 const buttonStyle = { width: 'auto', height: 40 } as const;
+
+const STATUS_OPTIONS: { label: string; value: StatusFilter }[] = [
+  { label: 'Tất cả', value: 'all' },
+  { label: CLASS_ENTITY_STATUS.active.label, value: 'active' },
+  { label: CLASS_ENTITY_STATUS.archived.label, value: 'archived' },
+];
 
 const PracticeClassManage: React.FC = () => {
   const [search, setSearch] = useState('');
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [status, setStatus] = useState<StatusFilter>('all');
+  const [pageNum, setPageNum] = useState(1);
+  const [isAssignOpen, setIsAssignOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editing, setEditing] = useState<ClassItem | undefined>();
   const [detailId, setDetailId] = useState<string | undefined>();
 
-  const { data, isFetching, isError, refetch } =
-    adminQuery.useGetPracticeClassOverviewQuery(search || undefined);
-  const items = data ?? [];
+  const { data, isFetching, isError, refetch } = adminQuery.useGetClassesQuery({
+    status: status === 'all' ? undefined : status,
+    search: search || undefined,
+    pageNum,
+    pageSize: PAGE_SIZE,
+  });
+  const [updateClass] = adminQuery.useUpdateClassMutation();
+  const items = data?.items ?? [];
   const isInitialLoading = isFetching && !data;
+  const isFiltered = !!search || status !== 'all';
 
-  const columns: TableProps<ClassOverviewItem>['columns'] = [
+  // Lưu trữ/lọc làm trang hiện tại hết dòng thì lùi về trang trước.
+  useEffect(() => {
+    if (data && !data.items.length && pageNum > 1) setPageNum(pageNum - 1);
+  }, [data, pageNum]);
+
+  const changeSearch = (value: string) => {
+    setSearch(value);
+    setPageNum(1);
+  };
+  const changeStatus = (value: StatusFilter) => {
+    setStatus(value);
+    setPageNum(1);
+  };
+  const clearFilters = () => {
+    setSearch('');
+    setStatus('all');
+    setPageNum(1);
+  };
+
+  const setArchived = async (item: ClassItem, archived: boolean) => {
+    try {
+      await updateClass({
+        classId: item._id,
+        body: { status: archived ? 'archived' : 'active' },
+      }).unwrap();
+      messageApi.success(
+        archived ? 'Đã lưu trữ lớp học' : 'Đã khôi phục lớp học',
+      );
+    } catch (err: unknown) {
+      messageApi.error(apiErrorMessage(err, 'Cập nhật lớp học thất bại'));
+    }
+  };
+
+  const confirmArchive = (item: ClassItem) =>
+    Modal.confirm({
+      title: `Lưu trữ lớp ${item.code}?`,
+      content:
+        'Lớp đã lưu trữ không thêm được học viên mới. Dữ liệu học viên và bài giao vẫn được giữ, bạn có thể khôi phục lớp bất cứ lúc nào.',
+      okText: 'Lưu trữ',
+      cancelText: 'Hủy',
+      onOk: () => setArchived(item, true),
+    });
+
+  const openEdit = (item: ClassItem) => {
+    setEditing(item);
+    setIsFormOpen(true);
+  };
+
+  const columns: TableProps<ClassItem>['columns'] = [
     {
       title: 'Mã lớp',
       key: 'code',
       render: (_: unknown, r) => (
-        <View>
-          <Text style={styles.cellStrong}>{r.code}</Text>
-          {r.name !== r.code && <Text style={styles.cellMuted}>{r.name}</Text>}
-        </View>
+        <Text style={styles.cellStrong}>{r.code}</Text>
       ),
     },
     {
-      title: 'Bài thực hành',
-      key: 'task',
-      render: (_: unknown, r) =>
-        r.assignment ? (
-          <View>
-            <Text style={styles.cellStrong}>{r.assignment.taskTitle}</Text>
-            {r.assignmentCount > 1 && (
-              <Text
-                style={
-                  styles.cellMuted
-                }>{`+${r.assignmentCount - 1} bài khác`}</Text>
-            )}
-          </View>
-        ) : (
-          '—'
-        ),
+      title: 'Tên lớp',
+      key: 'name',
+      render: (_: unknown, r) => r.name,
+    },
+    {
+      title: 'Học kỳ',
+      key: 'termLabel',
+      render: (_: unknown, r) => r.termLabel || '—',
     },
     {
       title: 'Số học viên',
@@ -69,25 +126,16 @@ const PracticeClassManage: React.FC = () => {
       render: (_: unknown, r) => r.memberCount,
     },
     {
-      title: 'Hạn nộp',
-      key: 'due',
-      render: (_: unknown, r) =>
-        r.assignment
-          ? dayjs(r.assignment.dueDate).format('HH:mm DD/MM/YYYY')
-          : '—',
-    },
-    {
-      title: 'Đã nộp / Tổng',
-      key: 'submitted',
+      title: 'Số khóa',
+      key: 'courses',
       align: 'right',
-      render: (_: unknown, r) =>
-        r.assignment ? `${r.submittedCount}/${r.memberCount}` : '—',
+      render: (_: unknown, r) => r.courseCount,
     },
     {
       title: 'Trạng thái',
       key: 'status',
       render: (_: unknown, r) => {
-        const s = CLASS_STATUS[classStatus(r)];
+        const s = CLASS_ENTITY_STATUS[r.status];
         return <StateTag label={s.label} color={s.color} bg={s.bg} />;
       },
     },
@@ -96,15 +144,31 @@ const PracticeClassManage: React.FC = () => {
       key: 'action',
       align: 'right',
       render: (_: unknown, r) => (
-        <button
-          type="button"
-          style={styles.actionButton as React.CSSProperties}
-          onClick={e => {
-            e.stopPropagation();
-            setDetailId(r._id);
-          }}>
-          Xem chi tiết
-        </button>
+        // Bấm nút không được lọt lên onClick của dòng (mở chi tiết).
+        <View style={styles.actionGroup} onClick={e => e.stopPropagation()}>
+          <button
+            type="button"
+            style={styles.actionButton as React.CSSProperties}
+            onClick={() => setDetailId(r._id)}>
+            Xem chi tiết
+          </button>
+          <button
+            type="button"
+            style={styles.actionButton as React.CSSProperties}
+            onClick={() => openEdit(r)}>
+            Sửa
+          </button>
+          <button
+            type="button"
+            style={styles.actionButton as React.CSSProperties}
+            onClick={() =>
+              r.status === 'archived'
+                ? setArchived(r, false)
+                : confirmArchive(r)
+            }>
+            {r.status === 'archived' ? 'Khôi phục' : 'Lưu trữ'}
+          </button>
+        </View>
       ),
     },
   ];
@@ -123,7 +187,7 @@ const PracticeClassManage: React.FC = () => {
       return (
         <View style={{ ...styles.stateWrap, ...styles.errorWrap }}>
           <Text style={styles.errorText}>
-            Không tải được danh sách lớp thực hành.
+            Không tải được danh sách lớp học.
           </Text>
           <AppButton style={buttonStyle} onClick={() => refetch()}>
             Thử lại
@@ -131,30 +195,47 @@ const PracticeClassManage: React.FC = () => {
         </View>
       );
     }
-    if (!items.length && !search) {
+    if (!items.length && !isFiltered) {
       return (
         <View style={styles.stateWrap}>
-          <Text style={styles.emptyText}>Chưa có lớp thực hành nào.</Text>
+          <Text style={styles.emptyText}>Chưa có lớp học nào.</Text>
           <AppButton
             type="primary"
             style={buttonStyle}
-            onClick={() => setIsCreateOpen(true)}>
-            Tạo lớp thực hành
+            onClick={() => {
+              setEditing(undefined);
+              setIsFormOpen(true);
+            }}>
+            Tạo lớp học
           </AppButton>
         </View>
       );
     }
+    const activeFilter = [
+      search,
+      status !== 'all' ? CLASS_ENTITY_STATUS[status].label : '',
+    ]
+      .filter(Boolean)
+      .join(' · ');
     return (
       <ThemedTable
         rowKey="_id"
         loading={isFetching}
         columns={columns}
         dataSource={items}
-        pagination={{ pageSize: 10 }}
+        scroll={{ x: 'max-content' }}
+        pagination={{
+          current: pageNum,
+          pageSize: PAGE_SIZE,
+          total: data?.totalRecords ?? 0,
+          showSizeChanger: false,
+          hideOnSinglePage: true,
+        }}
+        onChange={p => setPageNum(p.current ?? 1)}
         onRow={r => ({ onClick: () => setDetailId(r._id) })}
         locale={{
           emptyText: (
-            <FilteredEmptyState query={search} onClear={() => setSearch('')} />
+            <FilteredEmptyState query={activeFilter} onClear={clearFilters} />
           ),
         }}
       />
@@ -164,21 +245,41 @@ const PracticeClassManage: React.FC = () => {
   return (
     <View style={styles.page}>
       <View style={styles.headerBlock}>
-        <Text style={styles.title}>Quản lý lớp thực hành</Text>
+        <Text style={styles.title}>Quản lý lớp học</Text>
         <Text style={styles.subtitle}>
-          Theo dõi tiến độ nộp bài của từng lớp, nhắc học viên và tạo lớp mới.
+          Tạo lớp theo học kỳ, quản lý học viên và theo dõi bài giao của từng
+          lớp.
         </Text>
       </View>
       <ContentToolbar
-        searchPlaceholder="Tìm theo mã lớp hoặc tên lớp"
-        onSearch={setSearch}
-        addLabel="Tạo lớp thực hành"
-        onAdd={() => setIsCreateOpen(true)}
+        searchPlaceholder="Tìm theo mã lớp, tên lớp hoặc học kỳ"
+        onSearch={changeSearch}
+        addLabel="Tạo lớp học"
+        onAdd={() => {
+          setEditing(undefined);
+          setIsFormOpen(true);
+        }}
       />
+      <View style={styles.filterRow}>
+        <Segmented
+          aria-label="Lọc theo trạng thái"
+          options={STATUS_OPTIONS}
+          value={status}
+          onChange={v => changeStatus(v as StatusFilter)}
+        />
+        <AppButton style={buttonStyle} onClick={() => setIsAssignOpen(true)}>
+          Tạo lớp và giao bài
+        </AppButton>
+      </View>
       {renderContent()}
+      <ClassFormModal
+        open={isFormOpen}
+        classItem={editing}
+        onClose={() => setIsFormOpen(false)}
+      />
       <CreateClassModal
-        open={isCreateOpen}
-        onClose={() => setIsCreateOpen(false)}
+        open={isAssignOpen}
+        onClose={() => setIsAssignOpen(false)}
       />
       <PracticeClassDetailModal
         classId={detailId}

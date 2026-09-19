@@ -182,6 +182,51 @@ const styles = StyleSheet.create({
     borderColor: 'var(--color-vhu-primary)',
     color: 'var(--color-text-on-primary)',
   },
+  classCard: {
+    ...CARD_BASE,
+    padding: 20,
+    gap: 12,
+  },
+  classCardHeader: {
+    gap: 4,
+  },
+  className: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: 'var(--color-text-primary)',
+  },
+  classMeta: {
+    fontSize: 13,
+    color: 'var(--color-text-muted)',
+  },
+  classCourseRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: 'var(--color-border-subtle)',
+  },
+  classCourseInfo: {
+    flexGrow: 1,
+    flexBasis: 220,
+    gap: 4,
+    minWidth: 0,
+  },
+  classCourseTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'var(--color-text-primary)',
+  },
+  classCourseProgress: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flexGrow: 1,
+    flexBasis: 200,
+  },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',

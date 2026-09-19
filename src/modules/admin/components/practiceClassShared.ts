@@ -1,4 +1,8 @@
-import { ClassLearnerState, ClassOverviewItem } from '../redux/RTKQuery/type';
+import {
+  ClassLearnerState,
+  ClassOverviewItem,
+  ClassStatusValue,
+} from '../redux/RTKQuery/type';
 
 export type ClassStatus = 'unassigned' | 'open' | 'overdue' | 'done';
 
@@ -60,5 +64,28 @@ export const LEARNER_STATE: Record<
     label: 'Chưa đạt',
     color: 'var(--color-error)',
     bg: 'var(--color-error-bg)',
+  },
+};
+
+// Đọc lỗi 4xx của BE ({message: string | string[]}) thành 1 chuỗi hiển thị.
+export const apiErrorMessage = (err: unknown, fallback: string): string => {
+  const message = (err as { data?: { message?: string | string[] } })?.data
+    ?.message;
+  return (Array.isArray(message) ? message.join('. ') : message) || fallback;
+};
+
+export const CLASS_ENTITY_STATUS: Record<
+  ClassStatusValue,
+  { label: string; color: string; bg: string }
+> = {
+  active: {
+    label: 'Đang hoạt động',
+    color: 'var(--color-success)',
+    bg: 'var(--color-success-bg)',
+  },
+  archived: {
+    label: 'Đã lưu trữ',
+    color: 'var(--color-text-muted)',
+    bg: 'var(--color-surface-subtle)',
   },
 };

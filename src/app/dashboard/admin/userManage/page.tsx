@@ -12,6 +12,7 @@ import {
   Form,
   Input,
   Card,
+  Select,
 } from 'antd';
 import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
@@ -21,16 +22,24 @@ import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
 import { authQuery } from '~mdAuth/redux/RTKQuery';
 import dynamic from 'next/dynamic';
 import StatCard from '../../home/_components/StatCard';
+import StateTag from '~mdAdmin/components/StateTag';
 
 const TrafficChart = dynamic(() => import('./components/TrafficChart'), {
   ssr: false,
   loading: () => <Card style={{ height: 350, marginBottom: 16 }} loading />,
 });
 const UserManage = () => {
-  const { listItem, setListItem, currentData, refresh, search, fetchData } =
-    useAppPagination<UserItem>({
-      apiUrl: 'user/getListUser',
-    });
+  const {
+    listItem,
+    setListItem,
+    currentData,
+    refresh,
+    search,
+    fetchData,
+    filter,
+  } = useAppPagination<UserItem>({
+    apiUrl: 'user/getListUser',
+  });
 
   const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
   const [createUserForm] = Form.useForm<CreateUserParams>();
@@ -88,6 +97,25 @@ const UserManage = () => {
       title: 'Họ và tên',
       dataIndex: 'fullName',
       key: 'fullName',
+    },
+    {
+      title: 'Loại',
+      dataIndex: 'userType',
+      key: 'userType',
+      render: (v?: 'student' | 'guest') =>
+        v === 'guest' ? (
+          <StateTag
+            label="Khách"
+            color="var(--color-warning)"
+            bg="var(--color-warning-bg)"
+          />
+        ) : (
+          <StateTag
+            label="Sinh viên VHU"
+            color="var(--color-info)"
+            bg="var(--color-info-bg)"
+          />
+        ),
     },
     {
       title: 'Mã sinh viên',
@@ -183,6 +211,18 @@ const UserManage = () => {
           placeholder="Tìm kiếm"
           onSearch={search}
           style={{ width: '100%' }}
+        />
+        <Select
+          allowClear
+          placeholder="Loại tài khoản"
+          style={{ minWidth: 180 }}
+          onChange={(v?: 'student' | 'guest') =>
+            filter(v ? { userType: v } : undefined)
+          }
+          options={[
+            { value: 'student', label: 'Sinh viên VHU' },
+            { value: 'guest', label: 'Khách' },
+          ]}
         />
         <Button type="primary" onClick={() => setIsModalCreateUserOpen(true)}>
           Tạo tài khoản

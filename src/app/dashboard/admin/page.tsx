@@ -96,7 +96,7 @@ const buildItems = (qnaPendingCount: number): TabsProps['items'] => [
   },
   {
     key: '14',
-    label: 'Lớp Thực Hành',
+    label: 'Lớp Học',
     children: <PracticeClassManage />,
   },
 ];

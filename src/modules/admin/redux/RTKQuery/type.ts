@@ -19,6 +19,7 @@ export interface CreateUserParams {
   phoneNumber?: string;
   class?: string;
   faculty?: string;
+  major?: string;
 }
 
 export interface ImportUserItem {
@@ -34,29 +35,54 @@ export interface ImportUserPreviewRequest {
   fileUrl: string;
 }
 
-export interface ImportUsersRequest {
+// Body thô của 3 route import: {statusCode, message, data} - statusCode nằm
+// trong body chứ không phải HTTP status.
+export interface ImportEnvelope<T> {
+  statusCode: number;
+  message: string;
+  data: T | null;
+}
+
+export interface ImportUserPreviewResponse {
+  statusCode: number;
+  message: string;
   users: ImportUserItem[];
 }
 
+export interface ImportUsersRequest {
+  users: ImportUserItem[];
+  // Có classId thì BE thêm luôn các user tạo thành công vào lớp đó.
+  classId?: string;
+}
+
+export interface ImportedAccount {
+  email: string;
+  fullName: string;
+  username: string;
+  password: string;
+}
+
+export interface ImportFailedRow {
+  fullName: string;
+  studentId: string;
+  email: string;
+  error: string;
+}
+
 export interface ImportUsersResponse {
-  successful: Array<{
-    email: string;
-    fullName: string;
-    username: string;
-    password: string;
-  }>;
-  failed: Array<{
-    fullName: string;
-    studentId: string;
-    email: string;
-    error: string;
-  }>;
-  accounts: Array<{
-    email: string;
-    fullName: string;
-    username: string;
-    password: string;
-  }>;
+  // statusCode/message nằm TRONG body (controller import luôn trả HTTP 201):
+  // 201 = thành công hết, 207 = có dòng lỗi, >= 400 = cả lô bị từ chối
+  // (khi đó các mảng bên dưới rỗng) - xem transformResponse importUsersBulk.
+  statusCode: number;
+  message: string;
+  successful: ImportedAccount[];
+  failed: ImportFailedRow[];
+  accounts: ImportedAccount[];
+  addedToClass?: number;
+  classError?: string;
+  // BE Pha 2: học viên đã có tài khoản sẵn (chưa tạo lại, chỉ thêm vào lớp).
+  existing?: Array<{ email?: string; fullName?: string; studentId?: string }>;
+  addedExisting?: number;
 }
 
 export interface SendImportEmailsRequest {
@@ -69,6 +95,8 @@ export interface SendImportEmailsRequest {
 }
 
 export interface SendImportEmailsResponse {
+  statusCode?: number;
+  message?: string;
   successful: number;
   failed: number;
   details: Array<{
@@ -551,6 +579,86 @@ export interface ClassCodeOption {
   name: string;
 }
 
+// ---- "Lớp học" (GET/POST/PUT /admin/classes) ----
+
+export type ClassStatusValue = 'active' | 'archived';
+
+export interface ClassItem {
+  _id: string;
+  code: string;
+  name: string;
+  termLabel: string;
+  note: string;
+  status: ClassStatusValue;
+  memberCount: number;
+  courseCount: number;
+  // Lớp cũ gắn 1 khóa qua lessonId, lớp mới tạo chưa gắn khóa = null.
+  lessonId: string | null;
+  createdAt: string;
+}
+
+export interface ClassListParams {
+  status?: ClassStatusValue;
+  search?: string;
+  pageNum?: number;
+  pageSize?: number;
+}
+
+export interface ClassListResponse {
+  items: ClassItem[];
+  totalRecords: number;
+  pageNum: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface CreateClassBody {
+  code: string;
+  name: string;
+  termLabel?: string;
+  note?: string;
+}
+
+// Mã lớp không đổi được; termLabel/note chuỗi rỗng = xóa giá trị.
+export interface UpdateClassBody {
+  name?: string;
+  termLabel?: string;
+  note?: string;
+  status?: ClassStatusValue;
+}
+
+export interface ClassMember {
+  _id: string;
+  fullName?: string;
+  email?: string;
+  studentId?: string;
+  class?: string;
+  major?: string;
+  faculty?: string;
+}
+
+export interface ClassMembersParams {
+  classId: string;
+  search?: string;
+  pageNum: number;
+  pageSize: number;
+}
+
+export interface ClassMembersResponse {
+  items: ClassMember[];
+  totalRecords: number;
+  pageNum: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface MoveClassMembersResult {
+  moved: number;
+  skipped: number;
+  fromCount: number;
+  toCount: number;
+}
+
 // ---- Báo cáo vi phạm bình luận ----
 
 export type CommentReportStatus = 'pending' | 'resolved' | 'dismissed';
@@ -592,4 +700,55 @@ export interface CommentReportList {
   totalRecords: number;
   pageNum: number;
   pageSize: number;
+}
+
+// Khóa học được phân cho lớp (BE admin/classes/:classId/courses).
+export interface ClassCourseItem {
+  classId: string;
+  lessonId: string;
+  title: string;
+  thumbnail: string;
+  accessMode: 'public' | 'class';
+  startAt: string | null;
+  endAt: string | null;
+  // 'legacy' = lớp thực hành cũ chỉ có lessonId (chưa migrate sang ClassCourse).
+  source: 'class' | 'legacy';
+}
+
+export interface AssignClassCourseBody {
+  lessonId: string;
+  // null = xóa mốc đã đặt; bỏ trống = giữ nguyên.
+  startAt?: string | null;
+  endAt?: string | null;
+}
+
+export type ClassProgressStatus = 'notStarted' | 'inProgress' | 'done';
+
+export interface ClassProgressRow {
+  userId: string;
+  fullName: string;
+  email: string;
+  studentId: string;
+  totalItems: number;
+  doneItems: number;
+  percent: number;
+  lastActiveAt: string | null;
+  status: ClassProgressStatus;
+}
+
+export interface ClassProgressResponse {
+  items: ClassProgressRow[];
+  summary: {
+    total: number;
+    notStarted: number;
+    inProgress: number;
+    done: number;
+  };
+}
+
+export interface RemindLearningResult {
+  dryRun: boolean;
+  candidates: number;
+  sent: number;
+  skipped: { userId: string; fullName: string; reason: string }[];
 }

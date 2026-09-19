@@ -1,28 +1,40 @@
 'use client';
 import React, { useMemo, useState } from 'react';
-import { Alert, Input, message, Space, Table, Typography, Upload } from 'antd';
+import {
+  Alert,
+  Input,
+  message,
+  Progress,
+  Select,
+  Space,
+  Table,
+  Typography,
+  Upload,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { adminQuery } from '~mdAdmin/redux';
 import {
   ImportUserItem,
   ImportUsersRequest,
   ImportUsersResponse,
+  ClassItem,
   ImportUserPreviewRequest,
   SendImportEmailsRequest,
   SendImportEmailsResponse,
 } from '~mdAdmin/redux/RTKQuery/type';
 import api from '@services/api';
-import { useAppPagination } from '@hooks';
 import { useAppSelector } from '@redux';
 import AppButton from '@components/AppButton';
-import ClassCodeSelect from '../ClassCodeSelect';
+import ClassFormModal from '../ClassFormModal';
 import './styles.scss';
 
 const { Text } = Typography;
 
-// BE chỉ đọc tối đa 50 dòng mỗi lần preview (excel-parser.service.ts) - hiện
-// rõ giới hạn này cho admin biết thay vì âm thầm cắt bớt.
-const MAX_IMPORT_ROWS = 50;
+// BE chỉ đọc tối đa 100 dòng mỗi lần preview (excel-parser.service.ts) - hiện
+// rõ giới hạn này cho admin biết thay vì âm thầm cắt bớt. Tạo user chạy theo
+// lô nhỏ nối tiếp: mỗi user bcrypt tuần tự nên lô lớn dễ nghẽn VPS 1 vCPU.
+const MAX_IMPORT_ROWS = 100;
+const IMPORT_BATCH_SIZE = 25;
 
 type PreviewUserRow = ImportUserItem & {
   key: string;
@@ -73,6 +85,15 @@ const ImportExcelCard: React.FC = () => {
     null,
   );
   const [messageApi, contextHolder] = message.useMessage();
+  const [classId, setClassId] = useState<string | undefined>();
+  const [classModalOpen, setClassModalOpen] = useState(false);
+  const [progress, setProgress] = useState<{
+    done: number;
+    total: number;
+  } | null>(null);
+  const { data: classData, refetch: refetchClasses } =
+    adminQuery.useGetClassesQuery({ status: 'active', pageSize: 100 });
+  const classOptions = classData?.items ?? [];
 
   const [previewImport, { isLoading: previewLoading }] =
     adminQuery.usePreviewImportUsersMutation();
@@ -80,10 +101,6 @@ const ImportExcelCard: React.FC = () => {
     adminQuery.useImportUsersBulkMutation();
   const [sendEmails, { isLoading: sendLoading }] =
     adminQuery.useSendImportEmailsMutation();
-  const [addNewTag] = adminQuery.useAddNewTagMutation();
-  const { listItem: listTag, refresh: refreshTags } = useAppPagination<any>({
-    apiUrl: 'tag/getAll',
-  });
   const hasPreviewData = previewRows.length > 0;
   const createdAccounts = importResult?.accounts ?? [];
 
@@ -96,7 +113,7 @@ const ImportExcelCard: React.FC = () => {
     try {
       const payload: ImportUserPreviewRequest = { fileUrl: fileUrl.trim() };
       const response = await previewImport(payload).unwrap();
-      const rows = mapPreviewResponse(response);
+      const rows = mapPreviewResponse(response.users);
       setPreviewRows(rows);
       setImportResult(null);
       setSendResult(null);
@@ -142,20 +159,51 @@ const ImportExcelCard: React.FC = () => {
       return;
     }
 
+    const items = validatedRows.map(({ key, error, status, ...item }) => item);
+    const acc: ImportUsersResponse = {
+      statusCode: 201,
+      message: '',
+      successful: [],
+      failed: [],
+      accounts: [],
+      existing: [],
+      addedToClass: 0,
+    };
     try {
-      const body: ImportUsersRequest = {
-        users: validatedRows.map(({ key, error, status, ...item }) => item),
-      };
-      const response = await importUsers(body).unwrap();
-
-      setImportResult(response);
+      setProgress({ done: 0, total: items.length });
+      for (let i = 0; i < items.length; i += IMPORT_BATCH_SIZE) {
+        const batch = items.slice(i, i + IMPORT_BATCH_SIZE);
+        const body: ImportUsersRequest = { users: batch, classId };
+        const res = await importUsers(body).unwrap();
+        // controller import trả HTTP 201 kèm statusCode trong body: >= 400 là
+        // cả lô bị từ chối (vd lớp không hợp lệ) - dừng, không thử lô sau.
+        if (res.statusCode >= 400) {
+          throw { data: { message: res.message } };
+        }
+        acc.successful.push(...res.successful);
+        acc.failed.push(...res.failed);
+        acc.accounts.push(...res.accounts);
+        acc.existing?.push(...(res.existing ?? []));
+        acc.addedToClass = (acc.addedToClass ?? 0) + (res.addedToClass ?? 0);
+        if (res.classError) acc.classError = res.classError;
+        setProgress({
+          done: Math.min(i + IMPORT_BATCH_SIZE, items.length),
+          total: items.length,
+        });
+      }
+      setImportResult(acc);
       setSendResult(null);
       messageApi.success(
-        `Tạo tài khoản thành công ${response.successful.length}/${validatedRows.length}`,
+        `Tạo tài khoản thành công ${acc.successful.length}/${validatedRows.length}`,
       );
       window.dispatchEvent(new Event('learnnest:user-created'));
     } catch (error: any) {
+      // Đã tạo được vài lô thì vẫn hiện kết quả phần đã xong để không mất
+      // danh sách tài khoản (mật khẩu) đã sinh.
+      if (acc.successful.length) setImportResult(acc);
       messageApi.error(error?.data?.message || 'Import users thất bại');
+    } finally {
+      setProgress(null);
     }
   };
 
@@ -266,8 +314,19 @@ const ImportExcelCard: React.FC = () => {
   );
 
   const invalidCount = previewRows.filter(row => !!row.error).length;
-  const handleClassSelect = (value: string) => {
-    setPreviewRows(prev => prev.map(row => ({ ...row, class: value })));
+  // Chọn lớp: gắn mã lớp vào cột Lớp của mọi dòng (User.class) và gửi classId
+  // để BE thêm học viên vào lớp ngay khi tạo.
+  const handleClassSelect = (value?: string) => {
+    setClassId(value);
+    const code = classOptions.find(c => c._id === value)?.code;
+    if (code) {
+      setPreviewRows(prev => prev.map(row => ({ ...row, class: code })));
+    }
+  };
+  const handleClassCreated = (item: ClassItem) => {
+    refetchClasses();
+    handleClassSelect(item._id);
+    setClassModalOpen(false);
   };
 
   return (
@@ -282,7 +341,7 @@ const ImportExcelCard: React.FC = () => {
             File Excel bắt buộc gồm các cột: <strong>Họ và tên</strong>,{' '}
             <strong>MSSV</strong>, <strong>Email</strong>. Có thể thêm các cột
             tùy chọn: Lớp, Khoa, Ngành. Tối đa {MAX_IMPORT_ROWS} dòng mỗi lần
-            nhập.{' '}
+            nhập; hệ thống tạo theo từng lô {IMPORT_BATCH_SIZE} người.{' '}
             <AppButton
               type="link"
               href="/templates/mau-nhap-nguoi-dung.xlsx"
@@ -341,15 +400,24 @@ const ImportExcelCard: React.FC = () => {
       </div>
 
       <div className="import-excel-card__actions">
-        <ClassCodeSelect
-          options={listTag}
+        <Select
+          allowClear
+          showSearch
+          optionFilterProp="label"
+          placeholder="Thêm vào lớp (tùy chọn)"
+          style={{ minWidth: 260 }}
+          value={classId}
           onChange={handleClassSelect}
-          onCreate={name =>
-            addNewTag({ name })
-              .unwrap()
-              .then(() => refreshTags())
-          }
+          options={classOptions.map(c => ({
+            value: c._id,
+            label: `${c.code} - ${c.name}`,
+          }))}
         />
+        <AppButton
+          style={{ width: 'auto' }}
+          onClick={() => setClassModalOpen(true)}>
+          Tạo lớp mới
+        </AppButton>
         <AppButton
           type="primary"
           style={{ width: 'auto' }}
@@ -376,15 +444,28 @@ const ImportExcelCard: React.FC = () => {
         </AppButton>
       </div>
 
+      {progress && (
+        <Progress
+          percent={Math.round((progress.done / progress.total) * 100)}
+          format={() => `Đã tạo ${progress.done}/${progress.total}`}
+        />
+      )}
+
       {importResult && (
         <Alert
           className="import-excel-card__alert"
           type={importResult.failed.length ? 'warning' : 'success'}
           message={`Tạo tài khoản ${importResult.successful.length}/${previewRows.length} users`}
-          description={`Thành công: ${importResult.successful.length}. Thất bại: ${importResult.failed.length}.`}
+          description={`Thành công: ${importResult.successful.length}. Đã có tài khoản (thêm vào lớp): ${importResult.existing?.length ?? 0}. Thất bại: ${importResult.failed.length}.${importResult.addedToClass ? ` Đã thêm ${importResult.addedToClass} người vào lớp.` : ''}${importResult.classError ? ` Lưu ý: ${importResult.classError}` : ''}`}
           showIcon
         />
       )}
+
+      <ClassFormModal
+        open={classModalOpen}
+        onClose={() => setClassModalOpen(false)}
+        onSaved={handleClassCreated}
+      />
 
       {sendResult && (
         <Alert

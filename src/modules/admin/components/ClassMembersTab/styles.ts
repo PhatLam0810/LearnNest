@@ -1,26 +1,29 @@
 import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
-  page: {
-    width: '100%',
-    gap: 24,
+  wrap: {
+    gap: 16,
   },
-  headerBlock: {
-    gap: 4,
+  toolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 12,
   },
-  title: {
-    ...typography.titleM,
-    color: 'var(--color-text-primary)',
+  searchWrap: {
+    flexGrow: 1,
+    flexBasis: 240,
+    maxWidth: 420,
   },
-  subtitle: {
-    ...typography.body2,
+  hint: {
+    ...typography.caption,
     color: 'var(--color-text-muted)',
   },
-  cellStrong: {
+  learnerName: {
     ...typography.body2,
     color: 'var(--color-text-primary)',
   },
-  cellMuted: {
+  caption: {
     ...typography.caption,
     color: 'var(--color-text-muted)',
   },
@@ -32,41 +35,33 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: 'solid',
-    borderColor: 'var(--color-vhu-primary)',
+    borderColor: 'var(--color-error)',
     backgroundColor: 'var(--color-surface)',
-    color: 'var(--color-vhu-primary)',
+    color: 'var(--color-error)',
     whiteSpace: 'nowrap',
     cursor: 'pointer',
     fontFamily: 'inherit',
   },
-  filterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  actionGroup: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  stateWrap: {
+  centerState: {
     alignItems: 'center',
     gap: 12,
     paddingTop: 44,
     paddingBottom: 44,
     paddingLeft: 20,
     paddingRight: 20,
+  },
+  skeletonWrap: {
+    gap: 16,
+    padding: 16,
     backgroundColor: 'var(--color-surface)',
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--color-border)',
     borderRadius: 12,
   },
-  errorWrap: {
+  errorState: {
     backgroundColor: 'var(--color-error-bg)',
-    borderWidth: 0,
+    borderRadius: 12,
   },
   emptyText: {
     ...typography.body2,
@@ -77,15 +72,6 @@ const styles = StyleSheet.create({
     ...typography.body2,
     color: 'var(--color-error)',
     textAlign: 'center',
-  },
-  skeletonWrap: {
-    gap: 16,
-    padding: 16,
-    backgroundColor: 'var(--color-surface)',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--color-border)',
-    borderRadius: 12,
   },
 });
 

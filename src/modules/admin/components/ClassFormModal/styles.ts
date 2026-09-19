@@ -1,0 +1,93 @@
+import { StyleSheet, typography } from '@styles';
+
+// Vỏ modal dùng chung cho ClassFormModal + 2 modal thêm/chuyển học viên
+// (ClassAddMembersModal, ClassMoveMembersModal) - cùng khung với
+// CreateClassModal.
+const styles = StyleSheet.create({
+  shell: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: 'var(--color-surface)',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 20,
+    paddingTop: 24,
+    paddingBottom: 24,
+    paddingLeft: 28,
+    paddingRight: 28,
+    backgroundColor: 'var(--color-vhu-primary)',
+  },
+  headerText: {
+    gap: 4,
+    minWidth: 0,
+    flex: 1,
+  },
+  title: {
+    ...typography.titleS,
+    color: 'var(--color-text-on-primary)',
+  },
+  subline: {
+    ...typography.body2,
+    color: 'var(--color-text-on-primary-muted)',
+  },
+  closeButton: {
+    ...typography.buttonSmall,
+    height: 36,
+    minWidth: 36,
+    paddingLeft: 12,
+    paddingRight: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-text-on-primary-muted)',
+    backgroundColor: 'transparent',
+    color: 'var(--color-text-on-primary)',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  },
+  body: {
+    paddingTop: 24,
+    paddingLeft: 28,
+    paddingRight: 28,
+    paddingBottom: 28,
+    gap: 24,
+  },
+  field: {
+    gap: 8,
+  },
+  label: {
+    ...typography.subTitle2,
+    color: 'var(--color-text-primary)',
+  },
+  required: {
+    color: 'var(--color-error)',
+  },
+  hint: {
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+  },
+  error: {
+    ...typography.caption,
+    color: 'var(--color-error)',
+  },
+  bodyText: {
+    ...typography.body2,
+    color: 'var(--color-text-body)',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+});
+
+export default styles;

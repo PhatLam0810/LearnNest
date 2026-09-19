@@ -8,6 +8,13 @@ import {
   DeleteAdminRoleParams,
   ImportUserItem,
   ImportUserPreviewRequest,
+  ImportUserPreviewResponse,
+  ImportEnvelope,
+  ClassCourseItem,
+  AssignClassCourseBody,
+  ClassProgressStatus,
+  ClassProgressResponse,
+  RemindLearningResult,
   ImportUsersRequest,
   ImportUsersResponse,
   CreateMockExamPayload,
@@ -32,6 +39,14 @@ import {
   AssignTaskBulkResult,
   LessonAssignmentItem,
   ClassCodeOption,
+  ClassItem,
+  ClassListParams,
+  ClassListResponse,
+  ClassMembersParams,
+  ClassMembersResponse,
+  CreateClassBody,
+  UpdateClassBody,
+  MoveClassMembersResult,
   CommentReportList,
   CommentReportStatus,
   ClassOverviewItem,
@@ -69,6 +84,23 @@ const reminderLogTagId = (
   type: ReminderLogType,
   targetId?: string,
 ) => `${lessonId}:${type}:${targetId ?? 'none'}`;
+
+// Đổi thành viên 1 lớp làm mới: danh sách lớp (memberCount), chi tiết + học
+// viên của lớp đó, và roster ở tab "Bài giao" (tag PracticeClassOverview).
+// Gán/đổi/gỡ khóa của lớp làm mới danh sách khóa, số khóa ở danh sách lớp và
+// bảng tiến độ (cả lớp được ghi danh lại).
+const classCourseTags = (classId: string) => [
+  { type: 'Class' as const, id: 'LIST' },
+  { type: 'Class' as const, id: classId },
+  { type: 'Class' as const, id: `courses-${classId}` },
+  { type: 'Class' as const, id: `progress-${classId}` },
+];
+
+const classMembersTags = (classId: string) => [
+  { type: 'Class' as const, id: 'LIST' },
+  { type: 'Class' as const, id: classId },
+  { type: 'PracticeClassOverview' as const, id: classId },
+];
 
 export const adminQuery = baseQuery.injectEndpoints({
   endpoints: builder => ({
@@ -287,8 +319,11 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res.data,
     }),
+    // 3 route import: controller BE luôn trả HTTP 201 kèm statusCode TRONG body
+    // (400 = lỗi nghiệp vụ, data null) nên fetchBaseQuery không coi là lỗi -
+    // gộp statusCode/message vào kết quả để nơi gọi tự kiểm.
     previewImportUsers: builder.mutation<
-      ImportUserItem[],
+      ImportUserPreviewResponse,
       ImportUserPreviewRequest
     >({
       query: body => ({
@@ -296,7 +331,11 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
         body,
       }),
-      transformResponse: (res: AxiosResponse<ImportUserItem[]>) => res.data,
+      transformResponse: (res: ImportEnvelope<ImportUserItem[]>) => ({
+        statusCode: res.statusCode,
+        message: res.message,
+        users: res.data ?? [],
+      }),
     }),
     importUsersBulk: builder.mutation<ImportUsersResponse, ImportUsersRequest>({
       query: body => ({
@@ -304,7 +343,16 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
         body,
       }),
-      transformResponse: (res: AxiosResponse<ImportUsersResponse>) => res.data,
+      transformResponse: (res: ImportEnvelope<ImportUsersResponse>) => ({
+        successful: [],
+        failed: [],
+        accounts: [],
+        ...res.data,
+        statusCode: res.statusCode,
+        message: res.message,
+      }),
+      invalidatesTags: (_r, _e, { classId }) =>
+        classId ? classMembersTags(classId) : [],
     }),
     sendImportEmails: builder.mutation<
       SendImportEmailsResponse,
@@ -315,8 +363,14 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
         body,
       }),
-      transformResponse: (res: AxiosResponse<SendImportEmailsResponse>) =>
-        res.data,
+      transformResponse: (res: ImportEnvelope<SendImportEmailsResponse>) => ({
+        successful: 0,
+        failed: 0,
+        details: [],
+        ...res.data,
+        statusCode: res.statusCode,
+        message: res.message,
+      }),
     }),
     getLessonLearnersSummary: builder.query<
       LessonLearnersSummaryResponse,
@@ -426,6 +480,7 @@ export const adminQuery = baseQuery.injectEndpoints({
         body: { userIds },
       }),
       transformResponse: (res: any) => res?.data ?? res,
+      invalidatesTags: (_r, _e, { classId }) => classMembersTags(classId),
     }),
     removePracticeClassMember: builder.mutation<
       { count: number },
@@ -436,6 +491,7 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'DELETE',
       }),
       transformResponse: (res: any) => res?.data ?? res,
+      invalidatesTags: (_r, _e, { classId }) => classMembersTags(classId),
     }),
     exportLearners: builder.mutation<Blob, { learners: any[] }>({
       query: body => ({
@@ -813,7 +869,10 @@ export const adminQuery = baseQuery.injectEndpoints({
         body,
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
-      invalidatesTags: [{ type: 'PracticeClassOverview', id: 'LIST' }],
+      invalidatesTags: [
+        { type: 'PracticeClassOverview', id: 'LIST' },
+        { type: 'Class', id: 'LIST' },
+      ],
     }),
     remindClassAssignment: builder.mutation<
       RemindClassResult,
@@ -840,6 +899,62 @@ export const adminQuery = baseQuery.injectEndpoints({
         body: { pageNum: 1, pageSize: 100 },
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data.items,
+    }),
+    // ---- "Lớp học" (nhóm học viên theo học kỳ, chưa bắt buộc gắn khóa) ----
+    getClasses: builder.query<ClassListResponse, ClassListParams>({
+      query: params => ({ url: 'admin/classes', method: 'GET', params }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'Class', id: 'LIST' }],
+    }),
+    getClassById: builder.query<ClassItem, string>({
+      query: classId => ({ url: `admin/classes/${classId}`, method: 'GET' }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, classId) => [{ type: 'Class', id: classId }],
+    }),
+    createClass: builder.mutation<ClassItem, CreateClassBody>({
+      query: body => ({ url: 'admin/classes', method: 'POST', body }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [{ type: 'Class', id: 'LIST' }],
+    }),
+    updateClass: builder.mutation<
+      ClassItem,
+      { classId: string; body: UpdateClassBody }
+    >({
+      query: ({ classId, body }) => ({
+        url: `admin/classes/${classId}`,
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, { classId }) => [
+        { type: 'Class', id: 'LIST' },
+        { type: 'Class', id: classId },
+      ],
+    }),
+    // Roster phân trang của 1 lớp (BE: POST practice-classes/:classId/users).
+    getClassMembers: builder.query<ClassMembersResponse, ClassMembersParams>({
+      query: ({ classId, ...body }) => ({
+        url: `admin/practice-classes/${classId}/users`,
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, { classId }) => [{ type: 'Class', id: classId }],
+    }),
+    moveClassMembers: builder.mutation<
+      MoveClassMembersResult,
+      { classId: string; toClassId: string; userIds: string[] }
+    >({
+      query: ({ classId, toClassId, userIds }) => ({
+        url: `admin/classes/${classId}/members/move`,
+        method: 'POST',
+        body: { userIds, toClassId },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, { classId, toClassId }) => [
+        ...classMembersTags(classId),
+        ...classMembersTags(toClassId),
+      ],
     }),
     setPracticeTaskModule: builder.mutation<
       PracticeTask,
@@ -1065,6 +1180,87 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
       providesTags: [{ type: 'QuestionBank', id: 'LIST' }],
+    }),
+    getClassCourses: builder.query<ClassCourseItem[], string>({
+      query: classId => `admin/classes/${classId}/courses`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, classId) => [
+        { type: 'Class', id: `courses-${classId}` },
+      ],
+    }),
+    assignClassCourse: builder.mutation<
+      ClassCourseItem,
+      { classId: string; body: AssignClassCourseBody }
+    >({
+      query: ({ classId, body }) => ({
+        url: `admin/classes/${classId}/courses`,
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, { classId }) => classCourseTags(classId),
+    }),
+    updateClassCourse: builder.mutation<
+      ClassCourseItem,
+      {
+        classId: string;
+        lessonId: string;
+        body: Omit<AssignClassCourseBody, 'lessonId'>;
+      }
+    >({
+      query: ({ classId, lessonId, body }) => ({
+        url: `admin/classes/${classId}/courses/${lessonId}`,
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, { classId }) => classCourseTags(classId),
+    }),
+    removeClassCourse: builder.mutation<
+      void,
+      { classId: string; lessonId: string }
+    >({
+      query: ({ classId, lessonId }) => ({
+        url: `admin/classes/${classId}/courses/${lessonId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: (_r, _e, { classId }) => classCourseTags(classId),
+    }),
+    getClassProgress: builder.query<
+      ClassProgressResponse,
+      { classId: string; lessonId: string; status?: ClassProgressStatus }
+    >({
+      query: ({ classId, lessonId, status }) => ({
+        url: `admin/classes/${classId}/progress`,
+        method: 'GET',
+        params: { lessonId, ...(status ? { status } : {}) },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, { classId }) => [
+        { type: 'Class', id: `progress-${classId}` },
+      ],
+    }),
+    remindClassLearning: builder.mutation<
+      RemindLearningResult,
+      { classId: string; lessonId: string; dryRun?: boolean }
+    >({
+      query: ({ classId, lessonId, dryRun }) => ({
+        url: `admin/classes/${classId}/remind-learning`,
+        method: 'POST',
+        body: { lessonId, dryRun },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    exportClassProgress: builder.mutation<
+      Blob,
+      { classId: string; lessonId: string }
+    >({
+      query: ({ classId, lessonId }) => ({
+        url: `admin/classes/${classId}/progress-export`,
+        method: 'POST',
+        body: { lessonId },
+        responseHandler: response => response.blob(),
+      }),
     }),
   }),
   overrideExisting: true,

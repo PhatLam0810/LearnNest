@@ -42,6 +42,16 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 12,
   },
+  saveRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 20,
+  },
+  dirtyHint: {
+    fontSize: 13,
+    color: 'var(--color-text-muted)',
+  },
   logoutLink: {
     fontSize: 14,
     fontWeight: '600',
