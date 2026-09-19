@@ -2,6 +2,7 @@
 // dùng chung giữa module admin (soạn đề) và module dashboard (học viên làm bài).
 
 export type PracticeSubject = 'Word' | 'Excel';
+export type PracticeDifficulty = 'Dễ' | 'Trung bình' | 'Nâng cao';
 
 export const PRACTICE_CRITERIA_TYPES = [
   // Excel — dựa trên exceljs.
@@ -121,6 +122,7 @@ export const PRACTICE_CRITERIA_LABELS: Record<PracticeCriteriaType, string> = {
 export interface PracticeTask {
   _id: string;
   subject: PracticeSubject;
+  difficulty?: PracticeDifficulty;
   title: string;
   description?: string;
   starterFileUrl: string;
@@ -214,6 +216,8 @@ export interface PracticeSubmission {
   totalScore: number;
   maxScore: number;
   results: PracticeSubmissionResultItem[];
+  // Có giá trị khi admin đã chấm tay (xem màn "Bài nộp học viên").
+  overriddenAt?: string;
 }
 
 // ---- Đề thi thử (mock exam) — thi có tính giờ, gộp nhiều bài thực hành

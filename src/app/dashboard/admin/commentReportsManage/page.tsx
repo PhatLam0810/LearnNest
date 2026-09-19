@@ -1,123 +1,239 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Button, Image, Pagination, Segmented, Space } from 'antd';
+import { Image, Pagination, Segmented, Skeleton } from 'antd';
+import Link from 'next/link';
 import dayjs from 'dayjs';
-import { useAppPagination } from '@hooks';
+import AppButton from '@components/AppButton';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
+import {
+  CommentReportItem,
+  CommentReportStatus,
+  CommentReportUser,
+} from '~mdAdmin/redux/RTKQuery/type';
 import styles from './styles';
 
-type ReportUser = {
-  _id?: string;
-  firstName?: string;
-  lastName?: string;
-  fullName?: string;
-  email?: string;
-  avatar?: string;
+const REASON_LABEL: Record<string, string> = {
+  spam: 'Spam',
+  inappropriate: 'Ngôn từ không phù hợp',
+  misinformation: 'Nội dung sai lệch',
+  other: 'Khác',
 };
 
-type ReportedComment = {
-  _id: string;
-  commentText: string;
-  images?: string[];
-  user?: ReportUser;
-  createdAt: string;
-} | null;
+const STATUS_OPTIONS = [
+  { label: 'Chờ xử lý', value: 'pending' },
+  { label: 'Đã ẩn', value: 'resolved' },
+  { label: 'Đã bỏ qua', value: 'dismissed' },
+];
 
-type CommentReportItem = {
-  _id: string;
-  commentId: ReportedComment;
-  reportedBy: ReportUser | null;
-  reason: 'spam' | 'inappropriate' | 'misinformation' | 'other';
-  note?: string;
-  status: 'pending' | 'resolved' | 'dismissed';
-  warnedAt?: string;
-  createdAt: string;
+const EMPTY_COPY: Record<CommentReportStatus, string> = {
+  pending: 'Không có báo cáo nào đang chờ xử lý.',
+  resolved: 'Chưa có bình luận nào bị ẩn.',
+  dismissed: 'Chưa có báo cáo nào bị bỏ qua.',
 };
 
-const REASON_META: Record<
-  string,
-  { label: string; color: string; bg: string }
-> = {
-  spam: { label: 'Spam', color: '#b45309', bg: '#fef3e2' },
-  inappropriate: {
-    label: 'Ngôn từ không phù hợp',
-    color: '#c0392b',
-    bg: '#fdeceb',
-  },
-  misinformation: {
-    label: 'Nội dung sai lệch',
-    color: '#7c3aed',
-    bg: '#f3ecff',
-  },
-  other: { label: 'Khác', color: '#5b6478', bg: '#eef0f5' },
-};
+const buttonStyle = { width: 'auto', height: 40 } as const;
 
-const userLabel = (u?: ReportUser | null) =>
+const userLabel = (u?: CommentReportUser | null) =>
   u
     ? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.fullName || '—'
     : '—';
 
+const errorMessage = (e: unknown, fallback: string) =>
+  (e as { data?: { message?: string } })?.data?.message || fallback;
+
 const CommentReportsManage: React.FC = () => {
-  const [status, setStatus] = useState<'pending' | 'resolved' | 'dismissed'>(
-    'pending',
-  );
-  const { listItem, currentData, fetchData, filter, refresh } =
-    useAppPagination<CommentReportItem>({
-      apiUrl: 'comments/admin/reports/list',
-      params: { filter: { status: 'pending' } },
-    });
+  const [status, setStatus] = useState<CommentReportStatus>('pending');
+  const [pageNum, setPageNum] = useState(1);
   const [actingId, setActingId] = useState<string | null>(null);
+
+  const { data, isFetching, isError, refetch } =
+    adminQuery.useGetCommentReportsQuery({ status, pageNum });
   const [resolveReport] = adminQuery.useResolveCommentReportMutation();
   const [warnUser] = adminQuery.useWarnCommentUserMutation();
 
-  const changeStatus = (v: 'pending' | 'resolved' | 'dismissed') => {
+  const items = data?.items ?? [];
+
+  const changeStatus = (v: CommentReportStatus) => {
     setStatus(v);
-    filter({ status: v });
+    setPageNum(1);
   };
 
-  const handleHide = async (item: CommentReportItem) => {
+  const act = async (
+    item: CommentReportItem,
+    run: () => Promise<void>,
+    fallback: string,
+  ) => {
     setActingId(item._id);
     try {
-      await resolveReport({ reportId: item._id, action: 'hide' }).unwrap();
-      messageApi.success('Đã ẩn bình luận');
-      refresh();
-    } catch (e: any) {
-      messageApi.error(e?.data?.message || 'Không xử lý được');
+      await run();
+    } catch (e: unknown) {
+      messageApi.error(errorMessage(e, fallback));
     } finally {
       setActingId(null);
     }
   };
 
-  const handleDismiss = async (item: CommentReportItem) => {
-    setActingId(item._id);
-    try {
-      await resolveReport({ reportId: item._id, action: 'dismiss' }).unwrap();
-      messageApi.success('Đã bỏ qua báo cáo');
-      refresh();
-    } catch (e: any) {
-      messageApi.error(e?.data?.message || 'Không xử lý được');
-    } finally {
-      setActingId(null);
-    }
+  const handleHide = (item: CommentReportItem) =>
+    act(
+      item,
+      async () => {
+        await resolveReport({ reportId: item._id, action: 'hide' }).unwrap();
+        messageApi.success('Đã ẩn bình luận');
+      },
+      'Không xử lý được',
+    );
+
+  const handleDismiss = (item: CommentReportItem) =>
+    act(
+      item,
+      async () => {
+        await resolveReport({ reportId: item._id, action: 'dismiss' }).unwrap();
+        messageApi.success('Đã bỏ qua báo cáo');
+      },
+      'Không xử lý được',
+    );
+
+  const handleWarn = (item: CommentReportItem) =>
+    act(
+      item,
+      async () => {
+        const res = await warnUser(item._id).unwrap();
+        messageApi.success(
+          res?.sent
+            ? 'Đã gửi email cảnh báo cho người dùng.'
+            : 'Đã ghi nhận nhưng gửi email thất bại.',
+        );
+      },
+      'Không gửi được cảnh báo',
+    );
+
+  const renderCard = (item: CommentReportItem) => {
+    const isPending = item.status === 'pending';
+    const busy = actingId === item._id;
+    const comment = item.commentId;
+    return (
+      <View key={item._id} style={styles.card}>
+        <View style={styles.headerLine}>
+          <Text style={styles.reasonTag}>
+            {REASON_LABEL[item.reason] || REASON_LABEL.other}
+          </Text>
+          <Text style={styles.metaText}>
+            {`Báo cáo bởi ${userLabel(item.reportedBy)} · ${dayjs(item.createdAt).fromNow()}`}
+          </Text>
+        </View>
+
+        <View style={styles.quoteBlock}>
+          <Text style={styles.quoteLabel}>
+            {`Bình luận bởi ${userLabel(comment?.user)}`}
+          </Text>
+          {comment ? (
+            <>
+              <Text style={styles.quoteText}>{comment.commentText}</Text>
+              {!!comment.images?.length && (
+                <View style={styles.imagesRow}>
+                  {comment.images.map(url => (
+                    <Image
+                      key={url}
+                      src={url}
+                      width={64}
+                      height={64}
+                      alt="Ảnh đính kèm bình luận"
+                      style={{ objectFit: 'cover', borderRadius: 8 }}
+                    />
+                  ))}
+                </View>
+              )}
+              {!!comment.contextTitle && !!comment.link && (
+                <Text style={styles.metaText}>
+                  {'Bài học: '}
+                  <Link href={comment.link}>{comment.contextTitle}</Link>
+                </Text>
+              )}
+            </>
+          ) : (
+            <Text style={styles.quoteText}>
+              Bình luận này đã bị ẩn/xóa trước đó.
+            </Text>
+          )}
+        </View>
+
+        {!!item.note && (
+          <Text style={styles.noteText}>{`Ghi chú: ${item.note}`}</Text>
+        )}
+
+        {isPending && (
+          <View style={styles.footer}>
+            <button
+              type="button"
+              style={styles.hideButton as React.CSSProperties}
+              disabled={busy || !comment}
+              onClick={() => handleHide(item)}>
+              Ẩn bình luận
+            </button>
+            <AppButton
+              style={buttonStyle}
+              loading={busy}
+              disabled={busy || !!item.warnedAt || !comment?.user}
+              onClick={() => handleWarn(item)}>
+              {item.warnedAt ? 'Đã cảnh báo' : 'Cảnh báo người dùng'}
+            </AppButton>
+            <AppButton
+              type="text"
+              style={buttonStyle}
+              disabled={busy}
+              onClick={() => handleDismiss(item)}>
+              Bỏ qua
+            </AppButton>
+          </View>
+        )}
+        {!isPending && !!item.warnedAt && (
+          <Text style={styles.warnedText}>
+            {`Đã cảnh báo lúc ${dayjs(item.warnedAt).format('HH:mm DD/MM/YYYY')}`}
+          </Text>
+        )}
+      </View>
+    );
   };
 
-  const handleWarn = async (item: CommentReportItem) => {
-    setActingId(item._id);
-    try {
-      const res = await warnUser(item._id).unwrap();
-      messageApi.success(
-        res?.sent
-          ? 'Đã gửi email cảnh báo cho người dùng.'
-          : 'Đã ghi nhận nhưng gửi email thất bại.',
+  const renderContent = () => {
+    if (isFetching && !data) {
+      return (
+        <View style={styles.list}>
+          {[0, 1, 2].map(k => (
+            <View key={k} style={styles.skeletonCard}>
+              <Skeleton active paragraph={{ rows: 3 }} />
+            </View>
+          ))}
+        </View>
       );
-      refresh();
-    } catch (e: any) {
-      messageApi.error(e?.data?.message || 'Không gửi được cảnh báo');
-    } finally {
-      setActingId(null);
     }
+    if (isError) {
+      return (
+        <View style={{ ...styles.stateWrap, ...styles.errorWrap }}>
+          <Text style={styles.errorText}>Không tải được báo cáo vi phạm.</Text>
+          <AppButton style={buttonStyle} onClick={() => refetch()}>
+            Thử lại
+          </AppButton>
+        </View>
+      );
+    }
+    if (!items.length) {
+      return (
+        <View style={styles.stateWrap}>
+          <Text style={styles.emptyText}>{EMPTY_COPY[status]}</Text>
+          {status === 'pending' && (
+            <AppButton
+              style={buttonStyle}
+              onClick={() => changeStatus('resolved')}>
+              Xem báo cáo đã xử lý
+            </AppButton>
+          )}
+        </View>
+      );
+    }
+    return <View style={styles.list}>{items.map(renderCard)}</View>;
   };
 
   return (
@@ -126,110 +242,23 @@ const CommentReportsManage: React.FC = () => {
         <Text style={styles.title}>Báo Cáo Vi Phạm</Text>
         <Segmented
           value={status}
-          onChange={v => changeStatus(v as typeof status)}
-          options={[
-            { label: 'Chờ xử lý', value: 'pending' },
-            { label: 'Đã ẩn', value: 'resolved' },
-            { label: 'Đã bỏ qua', value: 'dismissed' },
-          ]}
+          onChange={v => changeStatus(v as CommentReportStatus)}
+          options={STATUS_OPTIONS}
         />
       </View>
 
-      {!listItem.length && (
-        <Text style={styles.emptyText}>Không có báo cáo nào.</Text>
-      )}
+      {renderContent()}
 
-      <View style={styles.list}>
-        {listItem.map(item => {
-          const meta = REASON_META[item.reason] || REASON_META.other;
-          const isPending = item.status === 'pending';
-          return (
-            <View key={item._id} style={styles.card}>
-              <View style={styles.headerLine}>
-                <Text
-                  style={[
-                    styles.reasonTag,
-                    { color: meta.color, backgroundColor: meta.bg },
-                  ]}>
-                  {meta.label}
-                </Text>
-                <Text style={styles.metaText}>
-                  Báo cáo bởi {userLabel(item.reportedBy)} ·{' '}
-                  {dayjs(item.createdAt).fromNow()}
-                </Text>
-              </View>
-
-              <View style={styles.commentBox}>
-                <Text style={styles.commentContext}>
-                  Bình luận bởi {userLabel(item.commentId?.user)}
-                </Text>
-                {item.commentId ? (
-                  <>
-                    <Text style={styles.commentText}>
-                      {item.commentId.commentText}
-                    </Text>
-                    {!!item.commentId.images?.length && (
-                      <Space wrap style={{ marginTop: 4 }}>
-                        {item.commentId.images.map((url, idx) => (
-                          <Image
-                            key={idx}
-                            src={url}
-                            width={64}
-                            height={64}
-                            style={{ objectFit: 'cover', borderRadius: 8 }}
-                          />
-                        ))}
-                      </Space>
-                    )}
-                  </>
-                ) : (
-                  <Text style={styles.commentText}>
-                    Bình luận này đã bị ẩn/xóa trước đó.
-                  </Text>
-                )}
-              </View>
-
-              {isPending && (
-                <View style={styles.actionsRow}>
-                  <Button
-                    style={styles.hideButton}
-                    loading={actingId === item._id}
-                    disabled={!item.commentId}
-                    onClick={() => handleHide(item)}>
-                    Ẩn bình luận
-                  </Button>
-                  <Button
-                    loading={actingId === item._id}
-                    disabled={!!item.warnedAt || !item.commentId?.user}
-                    onClick={() => handleWarn(item)}>
-                    {item.warnedAt ? 'Đã cảnh báo' : 'Cảnh báo người dùng'}
-                  </Button>
-                  <Button
-                    loading={actingId === item._id}
-                    onClick={() => handleDismiss(item)}>
-                    Bỏ qua
-                  </Button>
-                </View>
-              )}
-              {!isPending && item.warnedAt && (
-                <Text style={styles.warnedText}>
-                  Đã cảnh báo lúc{' '}
-                  {dayjs(item.warnedAt).format('DD/MM/YYYY HH:mm')}
-                </Text>
-              )}
-            </View>
-          );
-        })}
-      </View>
-
-      {!!currentData?.totalRecords && (
-        <Pagination
-          current={currentData?.pageNum}
-          pageSize={currentData?.pageSize}
-          total={currentData?.totalRecords}
-          showSizeChanger={false}
-          onChange={pageNum => fetchData({ pageNum, replace: true })}
-        />
+      {!!data?.totalRecords && data.totalRecords > data.pageSize && (
+        <View style={styles.paginationRow}>
+          <Pagination
+            current={data.pageNum}
+            pageSize={data.pageSize}
+            total={data.totalRecords}
+            showSizeChanger={false}
+            onChange={setPageNum}
+          />
+        </View>
       )}
     </View>
   );

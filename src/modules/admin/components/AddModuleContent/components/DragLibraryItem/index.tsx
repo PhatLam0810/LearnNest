@@ -17,11 +17,10 @@ const DragLibraryItem: React.FC<DragLibraryItemProps> = ({
     <View style={styles.container} onClick={e => e.stopPropagation()}>
       <Text style={styles.title}>{data?.title}</Text>
       <Button
-        color="danger"
-        variant="solid"
+        style={styles.deleteButton}
         onMouseDown={onDelete}
         onTouchStart={onDelete}>
-        <DeleteOutlined />
+        <DeleteOutlined style={{ color: 'var(--color-text-on-primary)' }} />
       </Button>
     </View>
   );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Modal, Popconfirm, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
+import Link from 'next/link';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { ReminderHistory } from '~mdAdmin/components';
@@ -106,6 +107,13 @@ const PracticeSubmissionsModal: React.FC<Props> = ({ taskId, onClose }) => {
       onCancel={onClose}
       footer={null}
       width={800}>
+      {taskId && (
+        <div style={{ marginBottom: 12 }}>
+          <Link href={`/dashboard/admin?tab=13&kind=practice&id=${taskId}`}>
+            Xem chi tiết từng bài nộp
+          </Link>
+        </div>
+      )}
       <div
         style={{
           display: 'flex',

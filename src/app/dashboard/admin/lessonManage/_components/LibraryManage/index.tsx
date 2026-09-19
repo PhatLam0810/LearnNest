@@ -2,19 +2,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
-import {
-  Button,
-  Input,
-  MenuProps,
-  Modal,
-  Space,
-  Table,
-  TableProps,
-  Tag,
-} from 'antd';
+import { MenuProps, Modal, Space, TableProps } from 'antd';
 import { messageApi, useAppPagination, useWindowSize } from '@hooks';
-import { PlusOutlined } from '@ant-design/icons';
-import { AddLibraryContent } from '~mdAdmin/components';
+import {
+  AddLibraryContent,
+  ContentToolbar,
+  FilteredEmptyState,
+  ThemedTable,
+} from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import { Library } from '~mdDashboard/types';
 import { UpdateLibraryForm } from '@/app/dashboard/library/_components';
@@ -29,6 +24,7 @@ const LibraryManage = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [dataEdit, setDataEdit] = useState<any>();
   const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { listItem, currentData, refresh, fetchData, search } =
     useAppPagination<Library>({
@@ -56,24 +52,25 @@ const LibraryManage = () => {
     {
       title: 'Action',
       key: 'action',
+      width: 260,
       render: (_, record) => (
-        <Space size="middle" onClick={e => e.stopPropagation()}>
+        <Space size={10} onClick={e => e.stopPropagation()}>
           <button
-            style={styles.button}
+            style={styles.actionButton}
             onClick={() => {
               setSelectedItem(record);
               setOpenDelete(true);
             }}>
-            <a style={styles.buttonText}> Xóa</a>
+            <Text style={styles.actionButtonText}>Xóa</Text>
           </button>
           <button
-            style={styles.button}
+            style={styles.actionButton}
             onClick={() => {
               setSelectedItem(record);
               setDataEdit(record);
               setIsVisibleModalUpdate(true);
             }}>
-            <a style={styles.buttonText}> Cập nhật</a>
+            <Text style={styles.actionButtonText}>Cập nhật</Text>
           </button>
         </Space>
       ),
@@ -96,8 +93,6 @@ const LibraryManage = () => {
     setOpenDelete(false);
   };
 
-  const { Search } = Input;
-
   const items: MenuProps['items'] = [
     {
       key: '1',
@@ -111,38 +106,24 @@ const LibraryManage = () => {
     setSelectedItem(null);
   };
 
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    search(value);
+  };
+
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <Search
-          placeholder="Tìm kiếm"
-          onSearch={search}
-          style={{ width: '50%' }}
-          allowClear
-        />
-        <Button
-          onClick={() => {
-            setIsVisibleModalAdd(true);
-            setSelectedItem(null);
-          }}
-          type="primary"
-          icon={<PlusOutlined />}
-          style={{
-            alignSelf: 'flex-end',
-            alignItems: 'center',
-            flexDirection: 'row',
-            gap: 8,
-          }}>
-          <Text style={{ color: '#FFF' }}>Thêm bài học</Text>
-        </Button>
-      </View>
+      <ContentToolbar
+        searchPlaceholder="Tìm kiếm bài học"
+        onSearch={handleSearch}
+        addLabel="Thêm bài học"
+        onAdd={() => {
+          setIsVisibleModalAdd(true);
+          setSelectedItem(null);
+        }}
+      />
       <View ref={divRef} style={{ flex: 1 }}>
-        <Table
+        <ThemedTable
           rowKey="_id"
           scroll={{ y: height - 100 }}
           columns={columns}
@@ -155,6 +136,14 @@ const LibraryManage = () => {
             pageSize: currentData?.pageSize,
             total: currentData?.totalRecords,
             showSizeChanger: false,
+          }}
+          locale={{
+            emptyText: searchQuery ? (
+              <FilteredEmptyState
+                query={searchQuery}
+                onClear={() => handleSearch('')}
+              />
+            ) : undefined,
           }}
         />
       </View>

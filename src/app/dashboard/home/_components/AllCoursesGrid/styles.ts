@@ -11,7 +11,7 @@ const styles = StyleSheet.create({
   cardSkeleton: {
     height: 260,
     borderRadius: 16,
-    backgroundColor: '#eef1f6',
+    backgroundColor: 'var(--color-border-subtle)',
   },
 });
 

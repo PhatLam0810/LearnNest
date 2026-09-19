@@ -1,10 +1,11 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   moduleCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 12,
-    border: '1px solid #e2e8f0',
+    borderWidth: 1,
+    borderColor: 'var(--color-border)',
     marginBottom: 16,
     overflow: 'hidden',
   },
@@ -17,17 +18,17 @@ const styles = StyleSheet.create({
     // xác nhận bằng getComputedStyle thực tế (padding: 0px mọi cấp).
     paddingVertical: 14,
     paddingHorizontal: 18,
-    backgroundColor: '#f7f9fc',
-    borderBottom: '1px solid #e2e8f0',
+    backgroundColor: 'var(--color-surface-subtle)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'var(--color-border)',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   moduleTitle: {
-    fontSize: 15,
-    fontWeight: 700,
-    color: '#111827',
+    ...typography.subTitle1,
+    color: 'var(--color-text-primary)',
   },
   itemList: {
     display: 'flex',
@@ -44,7 +45,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    borderBottom: '1px solid #f1f5f9',
+    borderBottomWidth: 1,
+    borderBottomColor: 'var(--color-border-subtle)',
     cursor: 'pointer',
     transition: 'background 0.15s',
   },
@@ -57,8 +59,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   itemTitle: {
-    fontSize: 14,
-    color: '#111827',
+    ...typography.body2,
+    color: 'var(--color-text-primary)',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -71,16 +73,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   itemCountText: {
-    fontSize: 13,
-    color: '#6b7280',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     minWidth: 56,
     textAlign: 'right',
   },
   emptyModule: {
     paddingVertical: 10,
     paddingHorizontal: 18,
-    color: '#9ca3af',
-    fontSize: 13,
+    ...typography.caption,
+    color: 'var(--color-text-disabled)',
   },
 });
 

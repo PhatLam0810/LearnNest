@@ -151,15 +151,19 @@ const AddModuleContent: React.FC<AddModuleContentProps> = ({
           rules={[{ required: true, message: 'Vui lòng nhập tên phần học' }]}>
           <Input placeholder="Tên phần học" />
         </Form.Item>
-        <Typography.Title level={5}>Sắp xếp</Typography.Title>
-        <View>
+        <View style={styles.sortHeaderRow}>
+          <Typography.Title level={5} style={{ margin: 0 }}>
+            Sắp xếp
+          </Typography.Title>
           <Button
-            style={{ alignSelf: 'flex-end', marginBottom: 12 }}
+            style={styles.addRowButton}
             onClick={() => {
               setIsVisibleModalLibrarySelect(true);
             }}>
             <PlusOutlined />
           </Button>
+        </View>
+        <View>
           <DraggableList
             data={contentItems}
             keyExtractor={item => item?.data?._id}

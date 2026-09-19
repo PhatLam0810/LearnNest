@@ -3,7 +3,7 @@ import { StyleSheet, typography } from '@styles';
 const styles = StyleSheet.create({
   pageLayout: {
     minHeight: '100vh',
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     padding: 16,
     gap: 16,
   },
@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   mainLayout: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     gap: 16,
   },
   sider: {
@@ -21,8 +21,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 12,
     minHeight: 'calc(100vh - 80px)',
-    backgroundColor: '#ffffff',
-    borderRight: '1px solid #f0f0f0',
+    backgroundColor: 'var(--color-surface)',
+    borderRight: '1px solid var(--color-border-subtle)',
   },
   logo: {
     display: 'flex',
@@ -43,24 +43,24 @@ const styles = StyleSheet.create({
     display: 'flex',
   },
   logoMarkText: {
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
     fontWeight: '700',
     fontSize: 16,
   },
   logoText: {
-    color: '#1a1a1a',
+    color: 'var(--color-text-primary)',
     fontWeight: '700',
     fontSize: 16,
   },
   topbar: {
     paddingTop: 24,
     paddingBottom: 24,
-    backgroundColor: '#ffffff',
-    color: '#1a1a1a',
+    backgroundColor: 'var(--color-surface)',
+    color: 'var(--color-text-primary)',
     position: 'sticky',
     top: 0,
     zIndex: 10,
-    borderBottom: '1px solid #f0f0f0',
+    borderBottom: '1px solid var(--color-border-subtle)',
     minHeight: 64,
   },
   topbarRow: {
@@ -79,9 +79,9 @@ const styles = StyleSheet.create({
     marginRight: 'auto',
   },
   searchInput: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'var(--color-surface-subtle)',
     borderRadius: 999,
-    border: '1px solid #e5e7eb',
+    border: '1px solid var(--color-border)',
     height: 40,
     paddingTop: 12,
     paddingBottom: 12,
@@ -94,11 +94,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   actionBtn: {
-    color: '#1a1a1a',
+    color: 'var(--color-text-primary)',
     fontWeight: '600',
   },
   iconBtn: {
-    color: '#1a1a1a',
+    color: 'var(--color-text-primary)',
     fontSize: 20,
   },
   avatar: {
@@ -112,11 +112,11 @@ const styles = StyleSheet.create({
     borderInlineEnd: 0,
   },
   content: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     minHeight: 'calc(100vh - 80px)',
   },
   btnOpenDrawer: {
-    color: '#1a1a1a',
+    color: 'var(--color-text-primary)',
     fontSize: 20,
   },
   antSider: {
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--color-surface)',
     padding: 0,
   },
 });

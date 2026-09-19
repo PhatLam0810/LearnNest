@@ -15,9 +15,14 @@ import { PlusOutlined } from '@ant-design/icons';
 import { useAppPagination, messageApi } from '@hooks';
 import { Lesson, Module } from '~mdDashboard/redux/saga/type';
 import { adminQuery } from '~mdAdmin/redux';
-import { AddModuleContent } from '~mdAdmin/components';
+import {
+  AddModuleContent,
+  ContentToolbar,
+  FilteredEmptyState,
+  ThemedTable,
+} from '~mdAdmin/components';
 import { UpdateModuleForm } from '@/app/dashboard/module/_components';
-import styles from '../ModuleManage/styles';
+import styles from './styles';
 
 // Quản lý các Lesson type='practice' — "phần thực hành" gom bài tập theo kỹ
 // năng, KHÔNG có video, cố tình ẩn khỏi tab "Khóa học"/"Phần học" (2 tab đó
@@ -52,6 +57,7 @@ const PracticeLessonManage = () => {
   const [isCreating, setIsCreating] = useState(false);
 
   const [deleteTarget, setDeleteTarget] = useState<Lesson | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Lesson đang mở trong Drawer quản lý nội dung — đồng bộ lại theo listItem
   // mỗi khi refresh() xong (đổi tên/thêm-xoá phần), để Drawer luôn hiện đúng
@@ -78,28 +84,31 @@ const PracticeLessonManage = () => {
       title: 'Số phần',
       key: 'modulesCount',
       render: (_, record) => (
-        <p style={{ margin: 0 }}>{record.modules.length}</p>
+        <Text style={styles.metaCell}>{record.modules.length}</Text>
       ),
     },
     {
       title: 'Tổng bài tập',
       key: 'totalLibraries',
       render: (_, record) => (
-        <p style={{ margin: 0 }}>{record.totalLibraries}</p>
+        <Text style={styles.metaCell}>{record.totalLibraries}</Text>
       ),
     },
     {
       title: 'Hành động',
       key: 'action',
+      width: 260,
       render: (_, record) => (
-        <Space size="middle" onClick={e => e.stopPropagation()}>
-          <button style={styles.button} onClick={() => setDeleteTarget(record)}>
-            <a style={styles.buttonText}>Xóa</a>
+        <Space size={10} onClick={e => e.stopPropagation()}>
+          <button
+            style={styles.actionButton}
+            onClick={() => setDeleteTarget(record)}>
+            <Text style={styles.actionButtonText}>Xóa</Text>
           </button>
           <button
-            style={styles.button}
+            style={styles.actionButton}
             onClick={() => setSelectedLessonId(record._id)}>
-            <a style={styles.buttonText}>Quản lý nội dung</a>
+            <Text style={styles.actionButtonText}>Quản lý nội dung</Text>
           </button>
         </Space>
       ),
@@ -210,29 +219,21 @@ const PracticeLessonManage = () => {
     },
   ];
 
-  const { Search } = Input;
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    search(value);
+  };
+
   return (
     <View style={{ flex: 1, gap: 12 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <Search
-          placeholder="Tìm kiếm"
-          onSearch={search}
-          style={{ width: '50%' }}
-        />
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setIsCreateOpen(true)}>
-          Tạo phần thực hành mới
-        </Button>
-      </View>
+      <ContentToolbar
+        searchPlaceholder="Tìm kiếm phần thực hành"
+        onSearch={handleSearch}
+        addLabel="Tạo phần thực hành mới"
+        onAdd={() => setIsCreateOpen(true)}
+      />
 
-      <Table
+      <ThemedTable
         rowKey="_id"
         columns={columns}
         dataSource={listItem}
@@ -242,6 +243,14 @@ const PracticeLessonManage = () => {
           pageSize: currentData?.pageSize,
           total: currentData?.totalRecords,
           showSizeChanger: false,
+        }}
+        locale={{
+          emptyText: searchQuery ? (
+            <FilteredEmptyState
+              query={searchQuery}
+              onClear={() => handleSearch('')}
+            />
+          ) : undefined,
         }}
       />
 

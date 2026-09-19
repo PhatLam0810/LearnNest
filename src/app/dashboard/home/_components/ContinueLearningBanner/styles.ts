@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
     padding: 24,
     backgroundColor: 'var(--color-vhu-primary)',
     backgroundImage:
-      'linear-gradient(120deg, var(--color-vhu-primary), #2a5bb8)',
+      'linear-gradient(120deg, var(--color-vhu-primary), var(--color-vhu-primary-light))',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 148,
     borderRadius: 16,
-    backgroundColor: '#eef1f6',
+    backgroundColor: 'var(--color-border-subtle)',
   },
   textCol: {
     gap: 8,
@@ -31,8 +31,7 @@ const styles = StyleSheet.create({
   },
   headline: {
     ...typography.titleM,
-    fontSize: 22,
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
   },
   subtitle: {
     ...typography.body2,
@@ -79,13 +78,13 @@ const styles = StyleSheet.create({
     width: 'auto',
     backgroundColor: 'var(--color-vhu-secondary)',
     borderColor: 'var(--color-vhu-secondary)',
-    color: '#1a1a1a',
+    color: 'var(--color-text-primary)',
   },
   secondaryButton: {
     width: 'auto',
     backgroundColor: 'transparent',
     borderColor: 'rgba(255,255,255,0.6)',
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
   },
 });
 

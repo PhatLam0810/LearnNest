@@ -30,9 +30,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 12,
     flexWrap: 'wrap',
-    backgroundColor: '#fff8f0',
+    backgroundColor: 'var(--color-warning-bg)',
     borderWidth: 1,
-    borderColor: '#ffe0b2',
+    borderColor: 'var(--color-warning-bg)',
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -41,14 +41,14 @@ const styles = StyleSheet.create({
   retryBannerText: {
     ...typography.body2,
     fontSize: 14,
-    color: '#7a5a2e',
+    color: 'var(--color-warning)',
     flexShrink: 1,
   },
   retryBannerCta: {
     ...typography.body2,
     fontSize: 13,
     fontWeight: '700',
-    color: '#b26a00',
+    color: 'var(--color-warning)',
     flexShrink: 0,
   },
   miniRow: {
@@ -62,11 +62,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderWidth: 1,
-    borderColor: '#f0f0f0',
+    borderColor: 'var(--color-border-subtle)',
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     cursor: 'pointer',
   },
   miniIcon: {
@@ -74,15 +74,14 @@ const styles = StyleSheet.create({
   },
   miniLabel: {
     ...typography.body2,
-    fontSize: 13,
-    color: '#5b6478',
+    color: 'var(--color-text-muted)',
     flex: 1,
   },
   miniValue: {
     ...typography.body2,
     fontSize: 16,
     fontWeight: '800',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   statIcon: {
     color: 'var(--color-vhu-primary)',
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
   },
   email: {
     ...typography.body2,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
 });
 

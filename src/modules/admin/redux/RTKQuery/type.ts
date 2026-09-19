@@ -345,6 +345,55 @@ export interface AssignTaskBulkResult {
   failed: { classId: string; message: string }[];
 }
 
+// ---- Tạo Bài Tập (quiz trắc nghiệm nhiều đáp án đúng, TASK 4) ----
+export interface QuizAnswer {
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface QuizQuestion {
+  questionText: string;
+  answers: QuizAnswer[];
+  explanation?: string;
+  // Chỉ có ý nghĩa lúc GỬI lên BE (chèn từ ngân hàng câu hỏi) - BE dùng để
+  // tăng usageCount thay vì tạo bản ghi bank mới trùng nội dung. Không có ở
+  // dữ liệu đọc về từ 1 Quiz đã lưu.
+  bankItemId?: string;
+}
+
+export interface Quiz {
+  _id: string;
+  title: string;
+  libraryId: string | { _id: string; title: string };
+  questions: QuizQuestion[];
+  timeLimitMinutes?: number;
+  passThresholdPercent: number;
+  maxAttempts?: number;
+  shuffleQuestions: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateQuizPayload {
+  title: string;
+  libraryId: string;
+  questions: QuizQuestion[];
+  timeLimitMinutes?: number;
+  passThresholdPercent: number;
+  maxAttempts?: number;
+  shuffleQuestions: boolean;
+}
+
+export interface QuestionBankItem {
+  _id: string;
+  questionText: string;
+  answers: QuizAnswer[];
+  explanation?: string;
+  libraryId?: string | { _id: string; title: string };
+  usageCount: number;
+  createdAt: string;
+}
+
 export interface LessonAssignmentItem {
   assignmentId: string;
   classId: string;
@@ -353,4 +402,194 @@ export interface LessonAssignmentItem {
   taskTitle: string;
   subject: 'Word' | 'Excel';
   dueDate: string;
+}
+
+// ---- Xem bài nộp của học viên ----
+
+export type SubmissionKind = 'quiz' | 'practice';
+export type SubmissionState = 'passed' | 'failed' | 'ungraded';
+
+export interface SubmissionLearner {
+  _id?: string;
+  fullName?: string;
+  email?: string;
+  studentId?: string;
+  class?: string;
+  avatar?: string;
+}
+
+// Hàng của danh sách bên trái - chuẩn hóa chung cho trắc nghiệm và thực hành.
+export interface SubmissionListItem {
+  id: string;
+  learner: SubmissionLearner | null;
+  submittedAt: string;
+  scoreLabel: string;
+  state: SubmissionState;
+  isOverridden: boolean;
+}
+
+export interface QuizResultDetailQuestion {
+  _id: string;
+  question: string;
+  answerList: string[];
+  correctAnswer: string;
+  selected: string | null;
+  isCorrect: boolean | null;
+}
+
+export interface QuizResultDetail {
+  _id: string;
+  quizTitle: string;
+  correctCount: number;
+  totalQuestions: number;
+  score: number;
+  isPass: boolean;
+  feedback?: string;
+  createdAt: string;
+  user: SubmissionLearner | null;
+  hasAnswers: boolean;
+  questions: QuizResultDetailQuestion[];
+}
+
+export interface PracticeSubmissionDetailResult {
+  criteriaId: string;
+  passed: boolean;
+  detail?: string;
+  instruction?: string;
+  type: string | null;
+  points: number | null;
+}
+
+export interface PracticeSubmissionDetail {
+  _id: string;
+  fileUrl: string;
+  submittedAt: string;
+  totalScore: number;
+  maxScore: number;
+  aiSummary?: string;
+  autoScore?: number;
+  overrideComment?: string;
+  overriddenAt?: string;
+  user: SubmissionLearner | null;
+  task: { _id: string; title: string; subject: 'Word' | 'Excel' } | null;
+  results: PracticeSubmissionDetailResult[];
+}
+
+export interface OverridePracticePayload {
+  id: string;
+  score: number;
+  comment?: string;
+}
+
+export interface RegradeTaskResult {
+  regraded: number;
+  failed: number;
+}
+
+// ---- Quản lý lớp thực hành ----
+
+export interface ClassOverviewAssignment {
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  subject: string;
+  dueDate: string;
+}
+
+export interface ClassOverviewItem {
+  _id: string;
+  code: string;
+  name: string;
+  lessonTitle: string;
+  memberCount: number;
+  assignmentCount: number;
+  assignment: ClassOverviewAssignment | null;
+  submittedCount: number;
+}
+
+export type ClassLearnerState = 'not_submitted' | 'passed' | 'failed';
+
+export interface ClassRosterLearner {
+  user: SubmissionLearner & { _id: string };
+  state: ClassLearnerState;
+  totalScore: number | null;
+  maxScore: number | null;
+  submittedAt: string | null;
+}
+
+export interface ClassRoster {
+  class: { _id: string; code: string; name: string };
+  assignments: ClassOverviewAssignment[];
+  assignment: ClassOverviewAssignment | null;
+  learners: ClassRosterLearner[];
+}
+
+export interface CreateClassWithAssignmentPayload {
+  class: string;
+  practiceClassName?: string;
+  taskId: string;
+  dueDate: string;
+  userIds?: string[];
+  classCode?: string;
+}
+
+export interface RemindClassResult {
+  reminded: number;
+  total: number;
+}
+
+export interface SelectableUser {
+  _id: string;
+  fullName?: string;
+  email?: string;
+  studentId?: string;
+  class?: string;
+}
+
+export interface ClassCodeOption {
+  _id: string;
+  name: string;
+}
+
+// ---- Báo cáo vi phạm bình luận ----
+
+export type CommentReportStatus = 'pending' | 'resolved' | 'dismissed';
+export type CommentReportReason =
+  'spam' | 'inappropriate' | 'misinformation' | 'other';
+
+export interface CommentReportUser {
+  _id?: string;
+  firstName?: string;
+  lastName?: string;
+  fullName?: string;
+  email?: string;
+  avatar?: string;
+}
+
+export interface CommentReportComment {
+  _id: string;
+  commentText: string;
+  images?: string[];
+  user?: CommentReportUser;
+  createdAt: string;
+  contextTitle?: string;
+  link?: string;
+}
+
+export interface CommentReportItem {
+  _id: string;
+  commentId: CommentReportComment | null;
+  reportedBy: CommentReportUser | null;
+  reason: CommentReportReason;
+  note?: string;
+  status: CommentReportStatus;
+  warnedAt?: string;
+  createdAt: string;
+}
+
+export interface CommentReportList {
+  items: CommentReportItem[];
+  totalRecords: number;
+  pageNum: number;
+  pageSize: number;
 }

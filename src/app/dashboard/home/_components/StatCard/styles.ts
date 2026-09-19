@@ -4,7 +4,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     minWidth: 0,
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 12,
     padding: 16,
     gap: 6,
@@ -17,15 +17,14 @@ const styles = StyleSheet.create({
   },
   label: {
     ...typography.body2,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
   value: {
     ...typography.titleM,
-    fontSize: 24,
   },
   caption: {
     ...typography.body2,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
 });
 

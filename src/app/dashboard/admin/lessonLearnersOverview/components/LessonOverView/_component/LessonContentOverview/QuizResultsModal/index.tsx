@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Modal, Popconfirm, Table, Tag } from 'antd';
 import dayjs from 'dayjs';
+import Link from 'next/link';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { ReminderHistory } from '~mdAdmin/components';
@@ -101,6 +102,13 @@ const QuizResultsModal: React.FC<Props> = ({
       onCancel={onClose}
       footer={null}
       width={800}>
+      {libraryId && (
+        <div style={{ marginBottom: 12 }}>
+          <Link href={`/dashboard/admin?tab=13&kind=quiz&id=${libraryId}`}>
+            Xem chi tiết từng bài nộp
+          </Link>
+        </div>
+      )}
       <div
         style={{
           display: 'flex',

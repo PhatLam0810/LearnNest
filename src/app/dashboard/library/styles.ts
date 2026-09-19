@@ -11,8 +11,7 @@ const styles = StyleSheet.create({
     height: '90vh',
   },
   title: {
-    ...typography.body2,
-    fontWeight: '500',
+    ...typography.subTitle2,
   },
   sortColumn: {
     gap: 4,
@@ -27,7 +26,7 @@ const styles = StyleSheet.create({
   },
   pageSubtitle: {
     ...typography.body1,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
   filterRow: {
     flexDirection: 'row',
@@ -40,9 +39,9 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: 999,
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderWidth: 1,
-    borderColor: '#eef0f5',
+    borderColor: 'var(--color-border-subtle)',
     cursor: 'pointer',
   },
   filterPillActive: {
@@ -57,18 +56,16 @@ const styles = StyleSheet.create({
     cursor: 'pointer',
   },
   filterPillText: {
-    ...typography.body2,
-    fontWeight: '500',
-    color: '#212121',
+    ...typography.subTitle2,
+    color: 'var(--color-text-primary)',
   },
   filterPillTextActive: {
-    ...typography.body2,
-    fontWeight: '500',
-    color: '#fff',
+    ...typography.subTitle2,
+    color: 'var(--color-text-on-primary)',
   },
   table: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 16,
     overflow: 'hidden',
     boxShadow: '0 8px 16px rgba(0, 0, 0, 0.04)',
@@ -84,7 +81,7 @@ const styles = StyleSheet.create({
   tableHeaderCell: {
     ...typography.body2,
     fontWeight: '600',
-    color: '#fff',
+    color: 'var(--color-table-header-text)',
   },
   tableRow: {
     flexDirection: 'row',
@@ -94,7 +91,7 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'var(--color-border-subtle)',
     cursor: 'pointer',
   },
   tableCell: {
@@ -121,14 +118,13 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     ...typography.subTitle2,
-    color: '#212121',
+    color: 'var(--color-text-primary)',
     flexShrink: 1,
   },
   typeBadge: {
-    ...typography.body2,
-    fontSize: 12,
+    ...typography.caption,
     color: 'var(--color-vhu-primary)',
-    backgroundColor: '#eff6ff',
+    backgroundColor: 'var(--color-info-bg)',
     borderRadius: 999,
     paddingLeft: 10,
     paddingRight: 10,
@@ -137,7 +133,7 @@ const styles = StyleSheet.create({
   },
   rowDate: {
     ...typography.body2,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
   loadMoreWrap: {
     alignItems: 'center',

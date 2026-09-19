@@ -6,6 +6,7 @@ import {
   Form,
   Input,
   Modal,
+  Segmented,
   Select,
   Space,
   Switch,
@@ -18,20 +19,27 @@ import {
   ExperimentOutlined,
   PlusOutlined,
   RobotOutlined,
-  UploadOutlined,
 } from '@ant-design/icons';
 import { messageApi, useAppPagination } from '@hooks';
 import api from '@services/api';
 import { useAppSelector } from '@redux';
+import { DraggableList } from '@components';
 import { adminQuery } from '~mdAdmin/redux';
 import { dashboardQuery } from '~mdDashboard/redux';
 import {
   PracticeCriteria,
+  PracticeDifficulty,
   PracticeInstructionItem,
   PracticeSubject,
   PracticeSubmissionResultItem,
 } from '~mdDashboard/types/practice';
 import CriteriaListItem from './CriteriaListItem';
+
+const DIFFICULTY_OPTIONS: PracticeDifficulty[] = [
+  'Dễ',
+  'Trung bình',
+  'Nâng cao',
+];
 
 type LessonOption = { _id: string; title: string };
 
@@ -122,6 +130,17 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     { id: selectedLessonId },
     { skip: !selectedLessonId },
   );
+
+  // Tổng điểm sống theo dữ liệu ĐANG có trên form (kể cả chưa lưu) - phải
+  // bằng đúng 100 mới cho lưu (TASK 5). Không chặn khi danh sách rỗng (task
+  // vừa tạo, chưa kịp thêm tiêu chí nào).
+  const criteriaWatch = Form.useWatch('criteria', criteriaForm) as
+    { points?: number }[] | undefined;
+  const criteriaTotal = (criteriaWatch || []).reduce(
+    (sum, c) => sum + (c?.points ?? 1),
+    0,
+  );
+  const isCriteriaTotalValid = !criteriaWatch?.length || criteriaTotal === 100;
 
   useEffect(() => {
     if (!open) return;
@@ -352,15 +371,15 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
           layout="vertical"
           onFinish={handleSaveTask}
           initialValues={{ subject: 'Excel', isPublished: false }}>
-          <Form.Item label="Môn" name="subject" rules={[{ required: true }]}>
-            <Select
+          <Form.Item label="Loại" name="subject" rules={[{ required: true }]}>
+            <Segmented
               disabled={!!currentTaskId}
-              onChange={v => setSubject(v)}
-              options={[
-                { value: 'Excel', label: 'Excel' },
-                { value: 'Word', label: 'Word' },
-              ]}
+              onChange={v => setSubject(v as PracticeSubject)}
+              options={['Excel', 'Word']}
             />
+          </Form.Item>
+          <Form.Item label="Độ khó" name="difficulty">
+            <Segmented options={DIFFICULTY_OPTIONS} />
           </Form.Item>
           <Form.Item
             label="Tiêu đề đề bài"
@@ -413,6 +432,7 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
             rules={[{ required: true, message: 'Tải lên file đề gốc' }]}>
             <Upload
               maxCount={1}
+              listType="picture-card"
               accept=".xlsx,.docx"
               fileList={starterFileList}
               action={api.defaults.baseURL + '/upload'}
@@ -432,7 +452,12 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                   if (url) taskForm.setFieldsValue({ starterFileUrl: url });
                 }
               }}>
-              <Button icon={<UploadOutlined />}>Tải lên file đề gốc</Button>
+              {starterFileList.length === 0 && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Tải lên</div>
+                </div>
+              )}
             </Upload>
           </Form.Item>
           <Form.Item
@@ -468,18 +493,43 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                   Dùng AI tạo tiêu chí từ mô tả đề bài
                 </Button>
                 <Form.List name="criteria">
-                  {(fields, { add, remove }) => (
+                  {(fields, { add, remove, move }) => (
                     <>
-                      {fields.map(({ key, name, ...restField }) => (
-                        <CriteriaListItem
-                          key={key}
-                          form={criteriaForm}
-                          name={name}
-                          restField={restField}
-                          remove={remove}
-                          subject={subject}
-                        />
-                      ))}
+                      <DraggableList
+                        data={fields}
+                        keyExtractor={f => String(f.key)}
+                        handleUpdatedList={newFields => {
+                          // dnd-kit chỉ di chuyển ĐÚNG 1 phần tử mỗi lần kéo
+                          // thả - so 2 mảng key để tìm đúng cặp (from, to)
+                          // rồi gọi move() của chính Form.List (giữ nguyên
+                          // state/validate của antd Form thay vì tự quản lý
+                          // mảng criteria song song, dễ lệch dữ liệu).
+                          const oldKeys = fields.map(f => f.key);
+                          const newKeys = newFields.map((f: any) => f.key);
+                          for (let i = 0; i < oldKeys.length; i++) {
+                            if (oldKeys[i] !== newKeys[i]) {
+                              move(i, newKeys.indexOf(oldKeys[i]));
+                              break;
+                            }
+                          }
+                        }}
+                        renderItem={({ item }) => {
+                          const { key, name, ...restField } = item as {
+                            key: number;
+                            name: number;
+                          };
+                          return (
+                            <CriteriaListItem
+                              key={key}
+                              form={criteriaForm}
+                              name={name}
+                              restField={restField}
+                              remove={remove}
+                              subject={subject}
+                            />
+                          );
+                        }}
+                      />
                       <Button
                         type="dashed"
                         block
@@ -491,11 +541,38 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                     </>
                   )}
                 </Form.List>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginBottom: 4,
+                  }}>
+                  <span>Tổng điểm</span>
+                  <b
+                    style={{
+                      color: isCriteriaTotalValid
+                        ? 'var(--color-text-primary)'
+                        : 'var(--color-error)',
+                    }}>
+                    {criteriaTotal} / 100
+                  </b>
+                </div>
+                {!isCriteriaTotalValid && (
+                  <div
+                    style={{
+                      color: 'var(--color-error)',
+                      fontSize: 12,
+                      marginBottom: 8,
+                    }}>
+                    Tổng điểm các tiêu chí phải bằng 100 mới lưu được.
+                  </div>
+                )}
                 <Space wrap>
                   <Button
                     type="primary"
                     htmlType="submit"
-                    loading={isSavingCriteria}>
+                    loading={isSavingCriteria}
+                    disabled={!isCriteriaTotalValid}>
                     Lưu tiêu chí
                   </Button>
                   <Button
@@ -517,7 +594,9 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
               <div
                 style={{
                   marginTop: 16,
-                  border: '1px solid #f0f0f0',
+                  borderWidth: 1,
+                  borderStyle: 'solid',
+                  borderColor: 'var(--color-border)',
                   borderRadius: 8,
                   padding: 12,
                 }}>
@@ -534,16 +613,26 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                         gap: 8,
                         alignItems: 'flex-start',
                         padding: '6px 0',
-                        borderBottom: '1px solid #f5f5f5',
+                        borderBottomWidth: 1,
+                        borderBottomStyle: 'solid',
+                        borderBottomColor: 'var(--color-border-subtle)',
                       }}>
                       {item.passed ? (
-                        <CheckCircleFilled style={{ color: '#52c41a' }} />
+                        <CheckCircleFilled
+                          style={{ color: 'var(--color-success)' }}
+                        />
                       ) : (
-                        <CloseCircleFilled style={{ color: '#ff4d4f' }} />
+                        <CloseCircleFilled
+                          style={{ color: 'var(--color-error)' }}
+                        />
                       )}
                       <div>
                         <div>Tiêu chí {idx + 1}</div>
-                        <div style={{ color: '#666', fontSize: 13 }}>
+                        <div
+                          style={{
+                            color: 'var(--color-text-muted)',
+                            fontSize: 13,
+                          }}>
                           {item.detail}
                         </div>
                       </div>
@@ -556,21 +645,26 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
               <div
                 style={{
                   marginTop: 16,
-                  background: '#fafafa',
+                  background: 'var(--color-surface-subtle)',
                   padding: 12,
                   borderRadius: 8,
                 }}>
                 {instructions.map((it, idx) => (
                   <div key={it.criteriaId} style={{ marginBottom: 12 }}>
                     <b>Tiêu chí {idx + 1}:</b>
-                    <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: 'var(--color-text-muted)',
+                        marginTop: 2,
+                      }}>
                       Học viên thấy TRƯỚC khi nộp (Yêu cầu đề bài):
                     </div>
                     <div>{it.summary}</div>
                     <div
                       style={{
                         fontSize: 12,
-                        color: '#888',
+                        color: 'var(--color-text-muted)',
                         marginTop: 4,
                       }}>
                       Học viên thấy SAU khi nộp sai (gợi ý sửa):

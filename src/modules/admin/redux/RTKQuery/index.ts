@@ -11,6 +11,9 @@ import {
   ImportUsersRequest,
   ImportUsersResponse,
   CreateMockExamPayload,
+  CreateQuizPayload,
+  Quiz,
+  QuestionBankItem,
   CreatePracticeClassPayload,
   CreatePracticeClassResponse,
   CreatePracticeTaskPayload,
@@ -28,6 +31,18 @@ import {
   AssignTaskBulkPayload,
   AssignTaskBulkResult,
   LessonAssignmentItem,
+  ClassCodeOption,
+  CommentReportList,
+  CommentReportStatus,
+  ClassOverviewItem,
+  ClassRoster,
+  CreateClassWithAssignmentPayload,
+  RemindClassResult,
+  SelectableUser,
+  OverridePracticePayload,
+  PracticeSubmissionDetail,
+  QuizResultDetail,
+  RegradeTaskResult,
   ReminderLogItem,
   ReminderLogType,
   RemindLearnersBulkResponse,
@@ -682,6 +697,140 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'GET',
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'PracticeSubmission', id: 'LIST' }],
+    }),
+    getPracticeSubmissionDetail: builder.query<
+      PracticeSubmissionDetail,
+      string
+    >({
+      query: id => `practice/admin/submissions/${id}`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, id) => [{ type: 'PracticeSubmission', id }],
+    }),
+    overridePracticeSubmission: builder.mutation<
+      PracticeSubmissionDetail,
+      OverridePracticePayload
+    >({
+      query: ({ id, score, comment }) => ({
+        url: `practice/admin/submissions/${id}/override`,
+        method: 'PUT',
+        body: { score, comment },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, { id }) => [
+        { type: 'PracticeSubmission', id },
+        { type: 'PracticeSubmission', id: 'LIST' },
+      ],
+    }),
+    regradePracticeSubmission: builder.mutation<
+      PracticeSubmissionDetail,
+      string
+    >({
+      query: id => ({
+        url: `practice/admin/submissions/${id}/regrade`,
+        method: 'POST',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_r, _e, id) => [
+        { type: 'PracticeSubmission', id },
+        { type: 'PracticeSubmission', id: 'LIST' },
+      ],
+    }),
+    regradePracticeTask: builder.mutation<RegradeTaskResult, string>({
+      query: taskId => ({
+        url: `practice/admin/tasks/${taskId}/regrade`,
+        method: 'POST',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [{ type: 'PracticeSubmission' }],
+    }),
+    exportPracticeSubmissions: builder.mutation<Blob, string>({
+      query: taskId => ({
+        url: `practice/admin/tasks/${taskId}/submissions/export`,
+        method: 'GET',
+        responseHandler: response => response.blob(),
+      }),
+    }),
+    downloadPracticeSubmissions: builder.mutation<Blob, string>({
+      query: taskId => ({
+        url: `practice/admin/tasks/${taskId}/submissions/download`,
+        method: 'GET',
+        responseHandler: response => response.blob(),
+      }),
+    }),
+    getQuizResultDetail: builder.query<QuizResultDetail, string>({
+      query: id => `lesson/admin/results/${id}`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    exportQuizResults: builder.mutation<Blob, string>({
+      query: libraryId => ({
+        url: `lesson/admin/library/${libraryId}/results/export`,
+        method: 'GET',
+        responseHandler: response => response.blob(),
+      }),
+    }),
+    getPracticeClassOverview: builder.query<ClassOverviewItem[], string | void>(
+      {
+        query: search => ({
+          url: 'admin/practice-classes/overview',
+          method: 'GET',
+          params: search ? { search } : undefined,
+        }),
+        transformResponse: (res: AxiosResponse<any>) => res.data,
+        providesTags: [{ type: 'PracticeClassOverview', id: 'LIST' }],
+      },
+    ),
+    getPracticeClassRoster: builder.query<
+      ClassRoster,
+      { classId: string; assignmentId?: string }
+    >({
+      query: ({ classId, assignmentId }) => ({
+        url: `admin/practice-classes/${classId}/roster`,
+        method: 'GET',
+        params: assignmentId ? { assignmentId } : undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_r, _e, { classId }) => [
+        { type: 'PracticeClassOverview', id: classId },
+      ],
+    }),
+    createClassWithAssignment: builder.mutation<
+      { _id: string; memberCount: number },
+      CreateClassWithAssignmentPayload
+    >({
+      query: body => ({
+        url: 'admin/practice-classes/with-assignment',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [{ type: 'PracticeClassOverview', id: 'LIST' }],
+    }),
+    remindClassAssignment: builder.mutation<
+      RemindClassResult,
+      { classId: string; assignmentId: string }
+    >({
+      query: ({ classId, assignmentId }) => ({
+        url: `admin/practice-classes/${classId}/assignments/${assignmentId}/remind`,
+        method: 'POST',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    searchSelectableUsers: builder.query<SelectableUser[], string>({
+      query: search => ({
+        url: 'user/getListUser',
+        method: 'POST',
+        body: { pageNum: 1, pageSize: 20, search },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data.items,
+    }),
+    getClassCodeOptions: builder.query<ClassCodeOption[], void>({
+      query: () => ({
+        url: 'tag/getAll',
+        method: 'POST',
+        body: { pageNum: 1, pageSize: 100 },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data.items,
     }),
     setPracticeTaskModule: builder.mutation<
       PracticeTask,
@@ -794,6 +943,18 @@ export const adminQuery = baseQuery.injectEndpoints({
     }),
 
     // ---- Báo Cáo Vi Phạm (bình luận) ----
+    getCommentReports: builder.query<
+      CommentReportList,
+      { status: CommentReportStatus; pageNum: number }
+    >({
+      query: ({ status, pageNum }) => ({
+        url: '/comments/admin/reports/list',
+        method: 'POST',
+        body: { pageNum, pageSize: 10, filter: { status } },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'CommentReport' }],
+    }),
     resolveCommentReport: builder.mutation<
       any,
       { reportId: string; action: 'hide' | 'dismiss' }
@@ -803,6 +964,7 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'POST',
         body: { action },
       }),
+      invalidatesTags: [{ type: 'CommentReport' }],
     }),
     // CommentService.warnUser (BE) trả thẳng {sent, warnedAt}, không bọc
     // qua responseService.single() như các API khác trong file này.
@@ -814,6 +976,7 @@ export const adminQuery = baseQuery.injectEndpoints({
         url: `/comments/admin/reports/${reportId}/warn`,
         method: 'POST',
       }),
+      invalidatesTags: [{ type: 'CommentReport' }],
     }),
 
     // ---- Phản Hồi Người Dùng ----
@@ -836,6 +999,63 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (
         res: AxiosResponse<FeedbackItem & { sent: boolean }>,
       ) => res.data,
+    }),
+
+    // ---- Tạo Bài Tập (quiz trắc nghiệm nhiều đáp án đúng) ----
+    getQuizzes: builder.query<Quiz[], string | void>({
+      query: libraryId => ({
+        url: 'quiz',
+        method: 'GET',
+        params: libraryId ? { libraryId } : undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: result =>
+        result
+          ? [
+              ...result.map(q => ({ type: 'Quiz' as const, id: q._id })),
+              { type: 'Quiz' as const, id: 'LIST' },
+            ]
+          : [{ type: 'Quiz' as const, id: 'LIST' }],
+    }),
+    getQuizDetail: builder.query<Quiz, string>({
+      query: id => ({ url: `quiz/${id}`, method: 'GET' }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_result, _error, id) => [{ type: 'Quiz', id }],
+    }),
+    createQuiz: builder.mutation<Quiz, CreateQuizPayload>({
+      query: body => ({ url: 'quiz', method: 'POST', body }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [
+        { type: 'Quiz', id: 'LIST' },
+        { type: 'QuestionBank', id: 'LIST' },
+      ],
+    }),
+    updateQuiz: builder.mutation<
+      Quiz,
+      { id: string; body: Partial<CreateQuizPayload> }
+    >({
+      query: ({ id, body }) => ({ url: `quiz/${id}`, method: 'PUT', body }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: 'Quiz', id },
+        { type: 'Quiz', id: 'LIST' },
+      ],
+    }),
+    deleteQuiz: builder.mutation<void, string>({
+      query: id => ({ url: `quiz/${id}`, method: 'DELETE' }),
+      invalidatesTags: (_result, _error, id) => [
+        { type: 'Quiz', id },
+        { type: 'Quiz', id: 'LIST' },
+      ],
+    }),
+    getQuestionBank: builder.query<QuestionBankItem[], string | void>({
+      query: search => ({
+        url: 'quiz/question-bank',
+        method: 'GET',
+        params: search ? { search } : undefined,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'QuestionBank', id: 'LIST' }],
     }),
   }),
   overrideExisting: true,

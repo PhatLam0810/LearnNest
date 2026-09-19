@@ -71,6 +71,77 @@ const WORD_TYPES: PracticeCriteriaType[] = [
   'word_smartart_bevel',
 ];
 
+// Gom ~49 loại kiểm tra chi tiết (đủ để engine chấm điểm thật hoạt động,
+// không đổi) về đúng 5 danh mục theo skillUI TASK 5 - chỉ là 1 lớp gom nhóm
+// hiển thị trên Select, KHÔNG thay dữ liệu/engine chấm điểm bên dưới.
+const CRITERIA_CATEGORIES = [
+  'Giá trị ô',
+  'Công thức',
+  'Định dạng',
+  'SmartArt',
+  'Thuộc tính tệp',
+] as const;
+
+const TYPE_CATEGORY: Record<
+  PracticeCriteriaType,
+  (typeof CRITERIA_CATEGORIES)[number]
+> = {
+  excel_cell_value: 'Giá trị ô',
+  word_find_replace_result: 'Giá trị ô',
+  word_symbol_inserted: 'Giá trị ô',
+
+  excel_cell_formula: 'Công thức',
+
+  excel_cell_number_format: 'Định dạng',
+  excel_freeze_panes: 'Định dạng',
+  excel_column_width: 'Định dạng',
+  excel_cell_style: 'Định dạng',
+  excel_wrap_text: 'Định dạng',
+  excel_table_name: 'Định dạng',
+  excel_table_banded_rows: 'Định dạng',
+  excel_sparkline_exists: 'Định dạng',
+  excel_chart_title: 'Định dạng',
+  excel_chart_axis_title: 'Định dạng',
+  excel_chart_data_labels: 'Định dạng',
+  excel_table_converted_to_range: 'Định dạng',
+  excel_named_range_exists: 'Định dạng',
+  excel_hyperlink: 'Định dạng',
+  excel_row_height: 'Định dạng',
+  excel_sheet_tab_color: 'Định dạng',
+  excel_merged_cells: 'Định dạng',
+  excel_table_style_name: 'Định dạng',
+  excel_print_area: 'Định dạng',
+  excel_fit_to_page: 'Định dạng',
+  excel_chart_trendline: 'Định dạng',
+  excel_chart_secondary_axis: 'Định dạng',
+  word_margins: 'Định dạng',
+  word_paragraph_style: 'Định dạng',
+  word_table_structure: 'Định dạng',
+  word_bookmark_exists: 'Định dạng',
+  word_line_spacing: 'Định dạng',
+  word_header_different_first_page: 'Định dạng',
+  word_table_cell_spacing: 'Định dạng',
+  word_footnotes_to_endnotes: 'Định dạng',
+  word_text_shadow_color: 'Định dạng',
+  word_highlight_color: 'Định dạng',
+  word_paragraph_spacing: 'Định dạng',
+  word_table_caption: 'Định dạng',
+  word_table_cell_merged: 'Định dạng',
+  word_no_headers_footers: 'Định dạng',
+  word_table_style_name: 'Định dạng',
+  word_track_changes_resolved: 'Định dạng',
+
+  excel_smartart_text: 'SmartArt',
+  excel_smartart_alt_text: 'SmartArt',
+  excel_smartart_bevel: 'SmartArt',
+  word_smartart_text: 'SmartArt',
+  word_smartart_alt_text: 'SmartArt',
+  word_smartart_bevel: 'SmartArt',
+
+  excel_document_property: 'Thuộc tính tệp',
+  word_document_property: 'Thuộc tính tệp',
+};
+
 type Props = {
   form: FormInstance;
   name: number;
@@ -97,6 +168,14 @@ const CriteriaListItem: React.FC<Props> = ({
   const typeOptions = (subject === 'Excel' ? EXCEL_TYPES : WORD_TYPES).map(
     t => ({ value: t, label: PRACTICE_CRITERIA_LABELS[t] }),
   );
+  // Nhóm theo 5 danh mục cho Select hiện dạng optgroup - chỉ ẩn/hiện nhóm có
+  // ít nhất 1 loại phù hợp môn đang chọn (VD Word không có nhóm "Công thức").
+  const groupedTypeOptions = CRITERIA_CATEGORIES.map(category => ({
+    label: category,
+    options: typeOptions.filter(
+      o => TYPE_CATEGORY[o.value as PracticeCriteriaType] === category,
+    ),
+  })).filter(group => group.options.length > 0);
 
   const renderParamsFields = () => {
     if (!typeValue) return null;
@@ -1052,10 +1131,11 @@ const CriteriaListItem: React.FC<Props> = ({
   return (
     <div
       style={{
-        border: '1px solid #f0f0f0',
+        border: '1px solid var(--color-border)',
         borderRadius: 8,
         padding: 12,
         marginBottom: 12,
+        backgroundColor: 'var(--color-surface)',
       }}>
       <div
         style={{
@@ -1074,7 +1154,12 @@ const CriteriaListItem: React.FC<Props> = ({
           name={[name, 'type']}
           style={{ flex: 2 }}
           rules={[{ required: true, message: 'Chọn loại tiêu chí' }]}>
-          <Select placeholder="Chọn loại tiêu chí" options={typeOptions} />
+          <Select
+            placeholder="Chọn loại tiêu chí"
+            options={groupedTypeOptions}
+            showSearch
+            optionFilterProp="label"
+          />
         </Form.Item>
         <Form.Item
           {...restField}

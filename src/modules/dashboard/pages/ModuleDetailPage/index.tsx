@@ -1,30 +1,19 @@
 'use client';
 
-import React, {
-  CSSProperties,
-  useRef,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
-import {
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-} from 'react-native-web';
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import { ScrollView, Text, View } from 'react-native-web';
 import styles from './styles';
 import {
-  CaretRightOutlined,
+  CheckCircleFilled,
   FilePdfOutlined,
   FileTextOutlined,
   LeftOutlined,
+  LockOutlined,
   PictureOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { Button, Collapse, CollapseProps, Modal, Tabs, Tag } from 'antd';
+import { Button, Modal, Skeleton, Tabs } from 'antd';
 import { convertDurationToTime } from '@utils/time';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { useResponsive } from '@/styles/responsive';
@@ -38,16 +27,6 @@ import LessonNotesPanel from '~mdDashboard/components/LessonNotesPanel';
 import { isTaskAccessible as checkTaskAccessible } from '~mdDashboard/utils/isTaskAccessible';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-// Style tĩnh, không phụ thuộc props/state gì - hoisted ra ngoài component để
-// không bị tạo mới mỗi lần render (autoloading object literal mới mỗi render
-// sẽ làm vô hiệu useMemo bên dưới, vì nó đứng trong danh sách phụ thuộc).
-const PANEL_STYLE: CSSProperties = {
-  marginBottom: 12,
-  background: '#f5f5f5',
-  borderRadius: 12,
-  border: 'none',
-};
-
 const ModuleDetailPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -58,10 +37,14 @@ const ModuleDetailPage = () => {
   // /dashboard/practice/[id] nữa) — chọn bài nào thì đổi query param này,
   // y hệt cách subLessonId hoạt động cho video.
   const taskId = searchParams.get('taskId') || '';
-  const { data: lessonDetail, isLoading: isLoadingData } =
-    dashboardQuery.useGetLessonIdQuery({
-      id: lessonId,
-    });
+  const {
+    data: lessonDetail,
+    isLoading: isLoadingData,
+    isError: isLessonError,
+    refetch: refetchLesson,
+  } = dashboardQuery.useGetLessonIdQuery({
+    id: lessonId,
+  });
   // 1 khóa học có thể chứa cả bài học video và bài thực hành trong cùng 1
   // phần — lấy thêm danh sách bài thực hành đã publish của khóa này để
   // trộn vào đúng chỗ (theo order) khi hiện "Nội dung khóa học".
@@ -238,146 +221,118 @@ const ModuleDetailPage = () => {
       quizPassedByLibrary,
     });
 
-  const getItems = (panelStyle: CSSProperties): CollapseProps['items'] => {
-    const lessonSeq = getLessonContentItems();
-    return (
-      lessonDetail?.modules?.map((item, index) => {
-        const contentItems = getModuleContentItems(item);
-        return {
-          key: index,
-          label: (
-            <div style={styles.moduleContentHeader}>
-              <p style={styles.moduleTitleText} title={item.title}>
-                {item.title}
-              </p>
-              <p style={styles.moduleCountText}>
-                Tổng số bài học: {contentItems.length}
-              </p>
-            </div>
-          ),
-          children: (
-            <View style={styles.contentGap8Margin8}>
-              {contentItems.map((contentItem, subIndex) => {
-                if (contentItem.kind === 'task') {
-                  const task = contentItem.data;
-                  const isTaskSelected = taskId === task._id;
-                  const globalIdx = lessonSeq.findIndex(
-                    it => it.kind === 'task' && it.data._id === task._id,
-                  );
-                  const isTaskDisabled = !isTaskAccessible(
-                    lessonSeq,
-                    globalIdx,
-                  );
-                  return (
-                    <TouchableOpacity
-                      key={task._id}
-                      style={[
-                        isTaskDisabled &&
-                          !isTaskSelected &&
-                          styles.disabledButton,
-                      ]}>
-                      <View
-                        onClick={() => {
-                          if (isTaskDisabled) return;
-                          handleSelectTask(task);
-                        }}
-                        style={[
-                          styles.buttonModule,
-                          isTaskSelected && {
-                            backgroundColor: 'var(--color-vhu-primary)',
-                            color: '#FFF',
-                          },
-                        ]}>
-                        <FileTextOutlined
-                          style={isTaskSelected ? { color: '#FFF' } : undefined}
-                        />
-                        <View style={styles.libraryItemPadding}>
-                          <Text
-                            numberOfLines={1}
-                            style={[
-                              styles.moduleItemTitle,
-                              isTaskSelected && { color: '#FFF' },
-                            ]}>
-                            {task.title}
-                          </Text>
-                          <Tag
-                            color={task.subject === 'Excel' ? 'green' : 'blue'}
-                            style={{ marginTop: 2 }}>
-                            Bài thực hành {task.subject}
-                            {task.hasPassed ? ' · Đạt' : ''}
-                          </Tag>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                }
-
-                const subItem = contentItem.data;
-                const isDisabled = !hasAccess(subItem);
-                const isSelected = selectedLibrary?._id === subItem._id;
-
-                return (
-                  <TouchableOpacity
-                    key={subIndex}
-                    style={[
-                      isDisabled && !isSelected && styles.disabledButton,
-                    ]}>
-                    <View
-                      onClick={() => {
-                        if (isDisabled) return;
-                        handleSelectLibrary(subItem);
-                      }}
-                      style={[
-                        styles.buttonModule,
-                        isSelected && {
-                          backgroundColor: 'var(--color-vhu-primary)',
-                          color: '#FFF',
-                        },
-                      ]}>
-                      <PlayCircleOutlined />
-                      <View style={styles.libraryItemPadding}>
-                        <Text
-                          numberOfLines={1}
-                          style={[
-                            styles.moduleItemTitle,
-                            isSelected && {
-                              color: '#FFF',
-                            },
-                          ]}>
-                          {subItem.title}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.moduleItemTime,
-                            isSelected && {
-                              color: '#FFF',
-                            },
-                          ]}>
-                          {subItem.type !== 'Text'
-                            ? convertDurationToTime(subItem.duration)
-                            : 'Trắc nghiệm'}
-                        </Text>
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          ),
-          style: PANEL_STYLE,
-        };
-      }) || []
-    );
+  const isContentDone = (item: { kind: 'library' | 'task'; data: any }) => {
+    if (item.kind === 'task') return !!item.data.hasPassed;
+    if (item.data.type === 'Text') {
+      return !!quizPassedByLibrary?.[item.data._id];
+    }
+    return !!videoCompletedBySubLesson?.[item.data._id];
   };
 
-  // getItems() duyệt qua MỌI module × MỌI bài học/bài thực hành để dựng lại
-  // toàn bộ cây JSX sidebar "Nội dung bài học" - trước đây gọi thẳng trong
-  // JSX (getItems(panelStyle)) nên chạy lại ở MỌI lần ModuleDetailPage
-  // render, kể cả khi lý do render chẳng liên quan gì tới sidebar (vd mở
-  // modal kết quả trắc nghiệm, đổi dataQuestion...). useMemo chỉ tính lại
-  // khi 1 trong các dữ liệu THỰC SỰ ảnh hưởng tới sidebar đổi.
-  const sidebarItems = useMemo(
-    () => getItems(PANEL_STYLE),
+  // Danh sách phẳng theo từng phần: mỗi mục là 1 <button> thật (Tab/Enter
+  // hoạt động), mục đang học tô nền vàng nhạt + nhãn "Đang học", mục đã xong
+  // có dấu tích + nhãn — trạng thái không chỉ dựa vào màu.
+  const renderCurriculum = () => {
+    const lessonSeq = getLessonContentItems();
+    return (lessonDetail?.modules || []).map(moduleItem => {
+      const contentItems = getModuleContentItems(moduleItem);
+      return (
+        <View key={moduleItem._id}>
+          <View style={styles.moduleHeader}>
+            <Text style={styles.moduleTitle} numberOfLines={2}>
+              {moduleItem.title}
+            </Text>
+            <Text style={styles.moduleCount}>{contentItems.length} bài</Text>
+          </View>
+          {contentItems.map(contentItem => {
+            const isTask = contentItem.kind === 'task';
+            const data = contentItem.data;
+            const isSelected = isTask
+              ? taskId === data._id
+              : !taskId && selectedLibrary?._id === data._id;
+            const isLocked = isTask
+              ? !isTaskAccessible(
+                  lessonSeq,
+                  lessonSeq.findIndex(
+                    it => it.kind === 'task' && it.data._id === data._id,
+                  ),
+                )
+              : !hasAccess(data);
+            const isDone = isContentDone(contentItem);
+            const meta = isTask
+              ? `Bài thực hành ${data.subject}`
+              : data.type === 'Text'
+                ? 'Trắc nghiệm'
+                : convertDurationToTime(data.duration);
+            const stateLabel = isSelected
+              ? 'Đang học'
+              : isDone
+                ? isTask
+                  ? 'Đạt'
+                  : 'Đã xong'
+                : isLocked
+                  ? 'Chưa mở'
+                  : '';
+            const blocked = isLocked && !isSelected;
+            return (
+              <button
+                key={`${contentItem.kind}-${data._id}`}
+                type="button"
+                disabled={blocked}
+                aria-current={isSelected ? 'true' : undefined}
+                onClick={() =>
+                  isTask ? handleSelectTask(data) : handleSelectLibrary(data)
+                }
+                style={{
+                  ...styles.lessonRow,
+                  ...(isSelected ? styles.lessonRowActive : null),
+                  ...(blocked ? styles.lessonRowLocked : null),
+                }}>
+                <span
+                  aria-hidden="true"
+                  style={{
+                    ...styles.lessonIcon,
+                    ...(isDone ? styles.lessonIconDone : null),
+                  }}>
+                  {isDone ? (
+                    <CheckCircleFilled />
+                  ) : blocked ? (
+                    <LockOutlined />
+                  ) : isTask || data.type === 'Text' ? (
+                    <FileTextOutlined />
+                  ) : (
+                    <PlayCircleOutlined />
+                  )}
+                </span>
+                <View style={styles.lessonText}>
+                  <Text numberOfLines={2} style={styles.lessonTitle}>
+                    {data.title}
+                  </Text>
+                  <Text style={styles.lessonMeta}>{meta}</Text>
+                </View>
+                {!!stateLabel && (
+                  <Text
+                    style={[
+                      styles.lessonState,
+                      isDone && styles.lessonStateDone,
+                      isSelected && styles.lessonStateCurrent,
+                    ]}>
+                    {stateLabel}
+                  </Text>
+                )}
+              </button>
+            );
+          })}
+        </View>
+      );
+    });
+  };
+
+  // renderCurriculum() duyệt MỌI phần × MỌI mục để dựng lại danh sách — bọc
+  // useMemo để không chạy lại ở mỗi lần render không liên quan tới nó (vd mở
+  // modal kết quả trắc nghiệm, đổi dataQuestion...).
+  const curriculum = useMemo(
+    () => renderCurriculum(),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       lessonDetail?.modules,
@@ -518,26 +473,58 @@ const ModuleDetailPage = () => {
 
   if (isLoadingData && !selectedLibrary && !taskId) {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 12,
-          height: '80vh',
-        }}>
-        <ActivityIndicator size="large" color="var(--color-vhu-primary)" />
-        <Text style={{ color: '#8c8c8c' }}>Đang tải nội dung khóa học...</Text>
+      <View style={[styles.container, isMobile && styles.containerMobile]}>
+        <View
+          style={[
+            styles.layoutRow,
+            isMobile && { flexDirection: 'column', gap: 16 },
+          ]}>
+          <View style={[styles.mainColumn, styles.skeletonColumn]}>
+            <Skeleton.Image
+              active
+              style={{ width: '100%', height: isMobile ? 200 : 400 }}
+            />
+            <Skeleton active paragraph={{ rows: 3 }} />
+          </View>
+          <View style={[styles.rail, isMobile && styles.railMobile]}>
+            <View style={styles.railHeader}>
+              <Skeleton active paragraph={{ rows: 6 }} />
+            </View>
+          </View>
+        </View>
       </View>
     );
   }
 
   if (!selectedLibrary && !taskId) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ color: '#999' }}>
-          Không tìm thấy dữ liệu bài học yêu cầu
-        </Text>
+      <View style={[styles.container, isMobile && styles.containerMobile]}>
+        <View style={styles.stateBox}>
+          {isLessonError ? (
+            <>
+              <Text style={styles.errorText}>
+                Không tải được nội dung khóa học.
+              </Text>
+              <Button type="primary" onClick={() => refetchLesson()}>
+                Thử lại
+              </Button>
+            </>
+          ) : (
+            <>
+              <Text style={styles.emptyText}>
+                Không tìm thấy bài học yêu cầu.
+              </Text>
+              {!!lessonId && (
+                <Button
+                  onClick={() =>
+                    router.push(`/dashboard/home/lesson/${lessonId}`)
+                  }>
+                  Quay lại chi tiết khóa học
+                </Button>
+              )}
+            </>
+          )}
+        </View>
       </View>
     );
   }
@@ -564,31 +551,13 @@ const ModuleDetailPage = () => {
     isMobile && { position: 'relative', top: 0 },
   ] as any;
 
-  const sideColumnStyle = [
-    styles.sideColumn,
-    isMobile && {
-      width: '100%',
-      minWidth: '100%',
-      maxWidth: '100%',
-      position: 'relative',
-      top: 0,
-      gap: 12,
-    },
-    !isMobile && { maxHeight: '100%', overflow: 'hidden' },
+  const railStyle = [
+    styles.rail,
+    isMobile && styles.railMobile,
+    !isMobile && { maxHeight: '100%' },
   ] as any;
 
-  const lessonScrollStyle = [
-    styles.lessonScroll,
-    { scrollbarWidth: 'none' },
-    isMobile && { maxHeight: 'none', overflowY: 'visible', padding: 0 },
-  ] as any;
-
-  const lessonScrollContentStyle = [
-    styles.lessonScrollContent,
-    isMobile && { paddingBottom: 0 },
-  ] as any;
-
-  // Mobile: xếp tiêu đề và nút "Hỏi đáp" chồng lên nhau theo cột thay vì
+  // Mobile: xếp tiêu đề và nút thao tác chồng lên nhau theo cột thay vì
   // cùng 1 hàng - title dài (vd "Word - Giới thiệu Tổng quan Bài thi MOS
   // 2019") kèm nút cạnh nhau trên màn hình hẹp sẽ bị bóp chật, khó đọc.
   const titleRowStyle = [
@@ -606,6 +575,10 @@ const ModuleDetailPage = () => {
     it => it.kind === currentContentKind && it.data._id === currentContentId,
   );
   const totalContentCount = currentContentSeq.length;
+  const doneContentCount = currentContentSeq.filter(isContentDone).length;
+  const progressPercent = totalContentCount
+    ? Math.round((doneContentCount / totalContentCount) * 100)
+    : 0;
   const watchedMinutes = videoProgress
     ? Math.floor((videoProgress.lastPosition || 0) / 60)
     : 0;
@@ -629,12 +602,13 @@ const ModuleDetailPage = () => {
   // nằm trong videoStickyStyle) nên luôn là thứ đầu tiên nhìn thấy, kể cả
   // trước khi cuộn.
   const backToLessonBar = lessonId ? (
-    <View
+    <button
+      type="button"
       style={styles.backBar}
       onClick={() => router.push(`/dashboard/home/lesson/${lessonId}`)}>
       <LeftOutlined style={styles.backBarIcon} />
       <Text style={styles.backBarText}>Quay lại chi tiết khóa học</Text>
-    </View>
+    </button>
   ) : null;
 
   return (
@@ -691,7 +665,6 @@ const ModuleDetailPage = () => {
                 onClickSubmit={handleSubmit}
               />
               <Tabs
-                style={styles.contentTabs}
                 items={[
                   {
                     key: 'my-notes',
@@ -751,15 +724,16 @@ const ModuleDetailPage = () => {
                 </Text>
                 {!taskId && selectedLibrary && (
                   <Tabs
-                    style={styles.contentTabs}
                     items={[
                       {
                         key: 'note',
                         label: 'Ghi chú bài học',
                         children: selectedLibrary.note ? (
-                          <Text style={styles.noteBoxText}>
-                            {selectedLibrary.note}
-                          </Text>
+                          <View style={styles.noteCallout}>
+                            <Text style={styles.noteBoxText}>
+                              {selectedLibrary.note}
+                            </Text>
+                          </View>
                         ) : (
                           <Text style={styles.tabEmptyText}>
                             Bài học này chưa có ghi chú.
@@ -790,8 +764,9 @@ const ModuleDetailPage = () => {
                           moduleDocuments.length > 0 ? (
                             <View style={styles.documentList}>
                               {moduleDocuments.map((doc: any) => (
-                                <View
+                                <button
                                   key={doc._id}
+                                  type="button"
                                   onClick={() => handleSelectLibrary(doc)}
                                   style={styles.documentRow}>
                                   {doc.type === 'PDF' ? (
@@ -808,7 +783,10 @@ const ModuleDetailPage = () => {
                                     numberOfLines={1}>
                                     {doc.title}
                                   </Text>
-                                </View>
+                                  <Text style={styles.documentKind}>
+                                    {doc.type === 'PDF' ? 'PDF' : 'Hình ảnh'}
+                                  </Text>
+                                </button>
                               ))}
                             </View>
                           ) : (
@@ -833,53 +811,44 @@ const ModuleDetailPage = () => {
                 )}
                 {totalContentCount > 0 && (
                   <View style={styles.contentNavRow}>
-                    <View
-                      onClick={() =>
-                        currentContentIndex > 0 && goToRelativeContentItem(-1)
-                      }
-                      style={
-                        currentContentIndex <= 0
-                          ? styles.contentNavButtonDisabled
-                          : styles.contentNavButtonBack
-                      }>
-                      <Text
-                        style={
-                          currentContentIndex <= 0
-                            ? styles.contentNavButtonTextDisabled
-                            : styles.contentNavButtonTextBack
-                        }
-                        numberOfLines={1}>
+                    <button
+                      type="button"
+                      disabled={currentContentIndex <= 0}
+                      onClick={() => goToRelativeContentItem(-1)}
+                      style={{
+                        ...styles.navButton,
+                        ...(currentContentIndex <= 0
+                          ? styles.navButtonDisabled
+                          : null),
+                      }}>
+                      <Text style={styles.navTextBack} numberOfLines={1}>
                         {currentContentIndex > 0
                           ? `← Bài ${currentContentIndex}: ${currentContentSeq[currentContentIndex - 1]?.data?.title || ''}`
                           : '← Bài trước'}
                       </Text>
-                    </View>
-                    <View
-                      onClick={() =>
-                        currentContentIndex >= 0 &&
-                        currentContentIndex < totalContentCount - 1 &&
-                        goToRelativeContentItem(1)
-                      }
-                      style={
+                    </button>
+                    <button
+                      type="button"
+                      disabled={
                         currentContentIndex < 0 ||
                         currentContentIndex >= totalContentCount - 1
-                          ? styles.contentNavButtonDisabled
-                          : styles.contentNavButtonForward
-                      }>
-                      <Text
-                        style={
-                          currentContentIndex < 0 ||
-                          currentContentIndex >= totalContentCount - 1
-                            ? styles.contentNavButtonTextDisabled
-                            : styles.contentNavButtonTextForward
-                        }
-                        numberOfLines={1}>
+                      }
+                      onClick={() => goToRelativeContentItem(1)}
+                      style={{
+                        ...styles.navButton,
+                        ...styles.navButtonForward,
+                        ...(currentContentIndex < 0 ||
+                        currentContentIndex >= totalContentCount - 1
+                          ? styles.navButtonDisabled
+                          : null),
+                      }}>
+                      <Text style={styles.navTextForward} numberOfLines={1}>
                         {currentContentIndex >= 0 &&
                         currentContentIndex < totalContentCount - 1
                           ? `Bài ${currentContentIndex + 2}: ${currentContentSeq[currentContentIndex + 1]?.data?.title || ''} →`
                           : 'Bài tiếp theo →'}
                       </Text>
-                    </View>
+                    </button>
                   </View>
                 )}
               </View>
@@ -888,45 +857,36 @@ const ModuleDetailPage = () => {
         </View>
 
         {lessonDetail?.modules?.length > 0 && (
-          <View style={sideColumnStyle}>
-            <View style={styles.faceWrapper}>
-              {/* <FaceDetection onPauseVideo={handlePauseVideo} /> */}
-            </View>
-            <View style={styles.lessonContentHeader}>
-              <Text style={styles.lessonContentTitle}>Nội dụng bài học</Text>
+          <View style={railStyle}>
+            <View style={styles.railHeader}>
+              <Text style={styles.railTitle}>Nội dung khóa học</Text>
+              <Text style={styles.railProgressLabel}>
+                {doneContentCount}/{totalContentCount} bài đã hoàn thành ·{' '}
+                {progressPercent}%
+              </Text>
+              <div
+                role="progressbar"
+                aria-label="Tiến độ khóa học"
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={progressPercent}
+                style={styles.progressTrack}>
+                <div
+                  style={{
+                    ...styles.progressFill,
+                    width: `${progressPercent}%`,
+                  }}
+                />
+              </div>
             </View>
             {isMobile ? (
               // Plain View on mobile — react-native-web's ScrollView still
               // attaches its own JS touch handling even with overflow
               // disabled via style, which fights the page's native scroll
               // and makes scrolling feel like it randomly stops working.
-              <View style={lessonScrollStyle}>
-                <View style={styles.libraryGap}>
-                  <Collapse
-                    bordered={false}
-                    defaultActiveKey={[0]}
-                    expandIcon={({ isActive }) => (
-                      <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                    )}
-                    items={sidebarItems}
-                  />
-                </View>
-              </View>
+              <View>{curriculum}</View>
             ) : (
-              <ScrollView
-                style={lessonScrollStyle}
-                contentContainerStyle={lessonScrollContentStyle}>
-                <View style={styles.libraryGap}>
-                  <Collapse
-                    bordered={false}
-                    defaultActiveKey={[0]}
-                    expandIcon={({ isActive }) => (
-                      <CaretRightOutlined rotate={isActive ? 90 : 0} />
-                    )}
-                    items={sidebarItems}
-                  />
-                </View>
-              </ScrollView>
+              <ScrollView style={styles.railScroll}>{curriculum}</ScrollView>
             )}
           </View>
         )}
@@ -936,9 +896,8 @@ const ModuleDetailPage = () => {
         open={isModalOpen}
         onCancel={handleClose}
         centered
-        footer={null} // Tắt footer mặc định để custom nút bấm
-        width={600}
-        height={600}>
+        footer={null}
+        width={520}>
         <div style={styles.modalContent}>
           <div style={styles.resultCard}>
             <div style={styles.row}>
@@ -969,22 +928,12 @@ const ModuleDetailPage = () => {
 
           {resultData.feedback && (
             <div style={styles.aiFeedbackBox}>
-              <strong>🤖 Nhận xét từ AI:</strong>
+              <strong>Nhận xét từ AI</strong>
               <p style={{ margin: '4px 0 0' }}>{resultData.feedback}</p>
             </div>
           )}
 
-          {/* Custom Buttons */}
-          <Button
-            block
-            size="large"
-            style={{
-              backgroundColor: 'var(--color-vhu-primary)',
-              borderColor: 'var(--color-vhu-primary)',
-              color: '#fff',
-              marginBottom: '8px',
-            }}
-            onClick={handleClose}>
+          <Button type="primary" block size="large" onClick={handleClose}>
             {resultData.isPass ? 'Tiếp tục bài học' : 'Làm lại bài tập'}
           </Button>
 

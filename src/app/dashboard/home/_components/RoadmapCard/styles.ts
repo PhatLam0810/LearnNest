@@ -2,7 +2,7 @@ import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#eaf2ff',
+    backgroundColor: 'var(--color-info-bg)',
     borderRadius: 12,
     padding: 16,
     gap: 8,
@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
   },
   summary: {
     ...typography.body2,
-    color: '#3a4256',
+    color: 'var(--color-text-body)',
     lineHeight: 20,
   },
   link: {

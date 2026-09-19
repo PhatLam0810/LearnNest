@@ -1,22 +1,18 @@
 'use client';
 import React, { useState } from 'react';
-import {
-  Button,
-  DatePicker,
-  Empty,
-  message,
-  Select,
-  Spin,
-  Table,
-  Tag,
-} from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { Text, View } from 'react-native-web';
+import { DatePicker, Modal, Select, Skeleton } from 'antd';
+import type { TableProps } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
-import type { ColumnsType } from 'antd/es/table';
+import AppButton from '@components/AppButton';
+import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { LessonAssignmentItem } from '~mdAdmin/redux/RTKQuery/type';
-import './styles.scss';
+import { ThemedTable } from '~mdAdmin/components';
+import styles from './styles';
+
+const buttonStyle = { width: 'auto', height: 44 } as const;
 
 // Trang giao bài thực hành cho lớp - tách riêng khỏi modal "Tổng Quan Người
 // Học" (chọn lớp -> mở modal -> cuộn xuống mới thấy) vì quá khó tìm. Luồng:
@@ -42,6 +38,7 @@ const GiaoBaiPage: React.FC = () => {
   const {
     data: assignments,
     isFetching: isLoadingAssignments,
+    isError: isAssignmentsError,
     refetch: refetchAssignments,
   } = adminQuery.useGetLessonAssignmentsQuery(lessonId || '', {
     skip: !lessonId,
@@ -68,169 +65,239 @@ const GiaoBaiPage: React.FC = () => {
         dueDate: dueDate.toISOString(),
       }).unwrap();
       if (result.failed.length) {
-        message.warning(
+        messageApi.warning(
           `Giao thành công ${result.succeeded.length}/${classIds.length} lớp. ${result.failed.length} lớp lỗi: ${result.failed
             .map(f => f.message)
             .join('; ')}`,
         );
       } else {
-        message.success(`Đã giao bài cho ${result.succeeded.length} lớp`);
+        messageApi.success(`Đã giao bài cho ${result.succeeded.length} lớp`);
       }
       setClassIds([]);
       setTaskId(undefined);
       setDueDate(null);
       refetchAssignments();
-    } catch (err: any) {
-      message.error(
-        err?.data?.message || 'Giao bài thất bại, vui lòng thử lại',
+    } catch (err: unknown) {
+      messageApi.error(
+        (err as { data?: { message?: string } })?.data?.message ||
+          'Giao bài thất bại, vui lòng thử lại',
       );
     }
   };
 
-  const handleRemove = async (item: LessonAssignmentItem) => {
-    try {
-      await removeAssignment({
-        classId: item.classId,
-        assignmentId: item.assignmentId,
-      }).unwrap();
-      refetchAssignments();
-    } catch {
-      message.error('Xóa bài giao thất bại');
-    }
+  const handleRemove = (item: LessonAssignmentItem) => {
+    Modal.confirm({
+      title: 'Xóa bài đã giao?',
+      content: `Bài "${item.taskTitle}" sẽ không còn được giao cho lớp ${item.className}. Bài nộp của học viên vẫn được giữ lại. Không thể hoàn tác.`,
+      okText: 'Xóa bài giao',
+      cancelText: 'Hủy',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await removeAssignment({
+            classId: item.classId,
+            assignmentId: item.assignmentId,
+          }).unwrap();
+          refetchAssignments();
+        } catch {
+          messageApi.error('Xóa bài giao thất bại');
+        }
+      },
+    });
   };
 
-  const columns: ColumnsType<LessonAssignmentItem> = [
-    { title: 'Lớp', dataIndex: 'className', key: 'className' },
+  const columns: TableProps<LessonAssignmentItem>['columns'] = [
+    {
+      title: 'Lớp',
+      key: 'className',
+      render: (_: unknown, r) => (
+        <Text style={styles.cellStrong}>{r.className}</Text>
+      ),
+    },
     {
       title: 'Đề thực hành',
-      dataIndex: 'taskTitle',
       key: 'taskTitle',
-      render: (v, r) => (
-        <>
-          {v}{' '}
-          <Tag color={r.subject === 'Excel' ? 'green' : 'blue'}>
+      render: (_: unknown, r) => (
+        <View style={styles.taskCell}>
+          <Text style={styles.cellStrong}>{r.taskTitle}</Text>
+          <Text
+            style={{
+              ...styles.subjectTag,
+              ...(r.subject === 'Excel'
+                ? styles.subjectExcel
+                : styles.subjectWord),
+            }}>
             {r.subject}
-          </Tag>
-        </>
+          </Text>
+        </View>
       ),
     },
     {
       title: 'Hạn nộp',
-      dataIndex: 'dueDate',
       key: 'dueDate',
-      render: (v: string) => dayjs(v).format('DD/MM/YYYY HH:mm'),
+      render: (_: unknown, r) => dayjs(r.dueDate).format('HH:mm DD/MM/YYYY'),
     },
     {
-      title: '',
+      title: 'Hành động',
       key: 'action',
-      width: 60,
-      render: (_, r) => (
-        <Button
-          danger
-          type="text"
-          icon={<DeleteOutlined />}
-          onClick={() => handleRemove(r)}
-        />
+      align: 'right',
+      width: 120,
+      render: (_: unknown, r) => (
+        <button
+          type="button"
+          style={styles.deleteButton as React.CSSProperties}
+          onClick={() => handleRemove(r)}>
+          Xóa
+        </button>
       ),
     },
   ];
 
-  return (
-    <div className="giao-bai-page">
-      <h1 className="giao-bai-heading">Giao Bài</h1>
-      <p className="giao-bai-sub">
-        Giao đề thực hành kèm hạn nộp cho 1 hoặc nhiều lớp thuộc cùng 1 khóa
-        học. Học viên xem ở mục &quot;Bài được giao&quot;.
-      </p>
-
-      <Select
-        className="giao-bai-lesson-select"
-        placeholder="Chọn khóa học"
-        loading={isLoadingCourses}
-        value={lessonId}
-        onChange={handleChangeLesson}
-        showSearch
-        optionFilterProp="label"
-        options={(courses || []).map(c => ({
-          value: c.lessonId,
-          label: `${c.title} (${c.subject} · ${c.taskCount} đề)`,
-        }))}
+  const renderAssignments = () => {
+    if (isLoadingAssignments && !assignments) {
+      return (
+        <View style={styles.skeletonWrap}>
+          {[0, 1, 2].map(k => (
+            <Skeleton.Input key={k} active block style={{ height: 40 }} />
+          ))}
+        </View>
+      );
+    }
+    if (isAssignmentsError) {
+      return (
+        <View style={{ ...styles.stateWrap, ...styles.errorWrap }}>
+          <Text style={styles.errorText}>
+            Không tải được danh sách bài đã giao.
+          </Text>
+          <AppButton style={buttonStyle} onClick={() => refetchAssignments()}>
+            Thử lại
+          </AppButton>
+        </View>
+      );
+    }
+    if (!assignments?.length) {
+      return (
+        <View style={styles.stateWrap}>
+          <Text style={styles.stateText}>
+            Chưa giao bài nào cho khóa này. Chọn lớp, đề và hạn nộp ở trên để
+            giao bài đầu tiên.
+          </Text>
+        </View>
+      );
+    }
+    return (
+      <ThemedTable
+        rowKey="assignmentId"
+        columns={columns}
+        dataSource={assignments}
+        pagination={false}
       />
+    );
+  };
+
+  return (
+    <View style={styles.page}>
+      <View style={styles.headerBlock}>
+        <Text style={styles.title}>Giao bài</Text>
+        <Text style={styles.subtitle}>
+          Giao đề thực hành kèm hạn nộp cho 1 hoặc nhiều lớp thuộc cùng 1 khóa
+          học. Học viên xem ở mục &quot;Bài được giao&quot;.
+        </Text>
+      </View>
+
+      <View style={styles.lessonField}>
+        <Text style={styles.label}>Khóa học</Text>
+        <Select
+          size="large"
+          aria-label="Khóa học"
+          placeholder="Chọn khóa học"
+          loading={isLoadingCourses}
+          value={lessonId}
+          onChange={handleChangeLesson}
+          showSearch
+          optionFilterProp="label"
+          options={(courses || []).map(c => ({
+            value: c.lessonId,
+            label: `${c.title} (${c.subject} · ${c.taskCount} đề)`,
+          }))}
+        />
+      </View>
 
       {!lessonId ? (
-        <Empty
-          className="giao-bai-empty"
-          description="Chọn khóa học để bắt đầu giao bài"
-        />
+        <View style={styles.stateWrap}>
+          <Text style={styles.stateText}>
+            Chọn khóa học để bắt đầu giao bài.
+          </Text>
+        </View>
       ) : (
         <>
-          <div className="giao-bai-form">
-            <Select
-              mode="multiple"
-              className="giao-bai-form__classes"
-              placeholder="Chọn 1 hoặc nhiều lớp"
-              loading={isLoadingClasses}
-              value={classIds}
-              onChange={setClassIds}
-              options={classes.map(c => ({
-                value: c._id,
-                label: c.practiceClassName || c.className || c._id,
-              }))}
-              notFoundContent={
-                isLoadingClasses ? (
-                  <Spin size="small" />
-                ) : (
-                  <Empty
-                    description="Khóa này chưa có lớp thực hành nào — tạo ở tab Tổng Quan Người Học"
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  />
-                )
-              }
-            />
-            <Select
-              className="giao-bai-form__task"
-              placeholder="Chọn đề thực hành"
-              loading={isLoadingTasks}
-              value={taskId}
-              onChange={setTaskId}
-              showSearch
-              optionFilterProp="label"
-              options={(tasks || []).map(t => ({
-                value: t._id,
-                label: `${t.title} (${t.subject})`,
-              }))}
-            />
-            <DatePicker
-              placeholder="Hạn nộp"
-              value={dueDate}
-              onChange={setDueDate}
-              format="DD/MM/YYYY HH:mm"
-              showTime={{ format: 'HH:mm' }}
-            />
-            <Button
+          <View style={styles.formCard}>
+            <View style={styles.field}>
+              <Text style={styles.label}>Lớp thực hành</Text>
+              <Select
+                mode="multiple"
+                size="large"
+                aria-label="Lớp thực hành"
+                placeholder="Chọn 1 hoặc nhiều lớp"
+                loading={isLoadingClasses}
+                value={classIds}
+                onChange={setClassIds}
+                options={classes.map(c => ({
+                  value: c._id,
+                  label: c.practiceClassName || c.className || c._id,
+                }))}
+                notFoundContent="Khóa này chưa có lớp thực hành nào. Tạo lớp ở tab Lớp Thực Hành."
+              />
+            </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>Đề thực hành</Text>
+              <Select
+                size="large"
+                aria-label="Đề thực hành"
+                placeholder="Chọn đề thực hành"
+                loading={isLoadingTasks}
+                value={taskId}
+                onChange={setTaskId}
+                showSearch
+                optionFilterProp="label"
+                options={(tasks || []).map(t => ({
+                  value: t._id,
+                  label: `${t.title} (${t.subject})`,
+                }))}
+              />
+            </View>
+            <View style={styles.field}>
+              <Text style={styles.label}>Hạn nộp</Text>
+              <DatePicker
+                size="large"
+                aria-label="Hạn nộp"
+                style={{ width: '100%' }}
+                placeholder="Chọn ngày giờ"
+                value={dueDate}
+                onChange={setDueDate}
+                format="DD/MM/YYYY HH:mm"
+                showTime={{ format: 'HH:mm' }}
+              />
+            </View>
+            <AppButton
               type="primary"
+              style={buttonStyle}
               loading={isAssigning}
-              disabled={!classIds.length || !taskId || !dueDate}
+              disabled={!classIds.length || !taskId || !dueDate || isAssigning}
               onClick={handleAssign}>
               Giao bài
-            </Button>
-          </div>
+            </AppButton>
+          </View>
 
-          <div className="giao-bai-list-heading">
-            Bài đã giao ({assignments?.length ?? 0})
-          </div>
-          <Table
-            className="giao-bai-table"
-            rowKey="assignmentId"
-            columns={columns}
-            dataSource={assignments || []}
-            loading={isLoadingAssignments}
-            pagination={false}
-            locale={{ emptyText: 'Chưa giao bài nào cho khóa này' }}
-          />
+          <View style={styles.section}>
+            <Text style={styles.listHeading}>
+              {`Bài đã giao (${assignments?.length ?? 0})`}
+            </Text>
+            {renderAssignments()}
+          </View>
         </>
       )}
-    </div>
+    </View>
   );
 };
 

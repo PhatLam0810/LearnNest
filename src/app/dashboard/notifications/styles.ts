@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     ...typography.titleM,
     fontSize: 28,
     fontWeight: '700',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
     marginBottom: 20,
   },
 });

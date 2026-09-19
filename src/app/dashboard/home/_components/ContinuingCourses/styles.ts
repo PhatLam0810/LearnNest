@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 12,
     padding: 12,
     gap: 8,
@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
   cardSkeleton: {
     height: 180,
     borderRadius: 12,
-    backgroundColor: '#eef1f6',
+    backgroundColor: 'var(--color-border-subtle)',
   },
   thumbWrap: {
     position: 'relative',
@@ -27,15 +27,15 @@ const styles = StyleSheet.create({
     aspectRatio: '16 / 9',
     borderRadius: 8,
     overflow: 'hidden',
-    backgroundColor: '#f5f5f7',
+    backgroundColor: 'var(--color-surface-page)',
   },
   title: {
     ...typography.subTitle2,
-    color: '#212121',
+    color: 'var(--color-text-primary)',
   },
   time: {
     ...typography.body2,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
 });
 

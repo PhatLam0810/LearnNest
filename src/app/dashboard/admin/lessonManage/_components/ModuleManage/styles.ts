@@ -1,20 +1,28 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 8,
+    gap: 16,
   },
-  button: {
+  metaCell: {
+    ...typography.body2,
+    color: 'var(--color-text-body)',
+  },
+  actionButton: {
+    height: 32,
+    paddingLeft: 12,
+    paddingRight: 12,
     backgroundColor: 'var(--color-vhu-primary)',
-    padding: 4,
-    minWidth: 70,
     borderColor: 'var(--color-vhu-primary)',
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
+    borderStyle: 'solid',
+    cursor: 'pointer',
   },
-  buttonText: {
-    color: '#FFF',
+  actionButtonText: {
+    ...typography.buttonSmall,
+    color: 'var(--color-text-on-primary)',
   },
 });
 

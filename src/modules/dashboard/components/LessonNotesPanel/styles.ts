@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
 
+import { typography } from '@styles';
+
 const styles: Record<string, CSSProperties> = {
   wrap: {
     display: 'flex',
@@ -20,12 +22,14 @@ const styles: Record<string, CSSProperties> = {
   center: {
     display: 'flex',
     justifyContent: 'center',
-    padding: '16px 0',
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   empty: {
-    color: '#9aa5b8',
+    color: 'var(--color-text-disabled)',
     fontSize: 13,
-    padding: '12px 0',
+    paddingTop: 12,
+    paddingBottom: 12,
   },
   list: {
     display: 'flex',
@@ -33,10 +37,12 @@ const styles: Record<string, CSSProperties> = {
     gap: 12,
   },
   item: {
-    border: '1px solid #eef0f5',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border-subtle)',
     borderRadius: 10,
     padding: 12,
-    background: '#fff',
+    background: 'var(--color-surface)',
   },
   itemHead: {
     display: 'flex',
@@ -45,26 +51,31 @@ const styles: Record<string, CSSProperties> = {
     marginBottom: 6,
   },
   tsChip: {
-    border: '1px solid #d6e4ff',
-    background: '#f0f5ff',
-    color: '#1d418a',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-vhu-accent)',
+    background: 'var(--color-info-bg)',
+    color: 'var(--color-info)',
     borderRadius: 999,
-    fontSize: 12,
+    ...typography.caption,
     fontWeight: 600,
-    padding: '2px 10px',
+    paddingTop: 2,
+    paddingBottom: 2,
+    paddingLeft: 10,
+    paddingRight: 10,
     cursor: 'pointer',
   },
   actionIcon: {
-    color: '#8a94a6',
+    color: 'var(--color-text-disabled)',
     cursor: 'pointer',
     fontSize: 14,
     marginLeft: 8,
   },
   content: {
+    ...typography.body2,
     whiteSpace: 'pre-wrap',
-    fontSize: 14,
     lineHeight: 1.5,
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   editRow: {
     display: 'flex',

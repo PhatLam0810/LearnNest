@@ -16,10 +16,8 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   title: {
-    ...typography.titleS,
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#1c2536',
+    ...typography.titleM,
+    color: 'var(--color-text-primary)',
   },
   statsRow: {
     flexDirection: 'row',
@@ -38,20 +36,17 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   statNumber: {
-    ...typography.titleS,
-    fontSize: 22,
-    fontWeight: '600',
-    color: '#111827',
+    ...typography.titleM,
+    color: 'var(--color-text-primary)',
   },
   statLabel: {
     ...typography.caption,
-    fontSize: 12,
-    color: '#6b7280',
+    color: 'var(--color-text-muted)',
   },
   statDivider: {
     width: 1,
     height: 34,
-    backgroundColor: '#e9edf4',
+    backgroundColor: 'var(--color-border)',
   },
   // Layout chính: danh sách 390px cố định + panel chi tiết chiếm phần còn lại.
   mainGrid: {

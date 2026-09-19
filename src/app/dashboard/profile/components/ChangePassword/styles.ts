@@ -3,21 +3,21 @@ import { StyleSheet } from '@styles';
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#eef0f5',
+    borderColor: 'var(--color-border-subtle)',
     boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
     padding: 24,
   },
   title: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   hint: {
     fontSize: 13,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
     marginTop: 4,
     marginBottom: 16,
   },
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   labelText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#5b6478',
+    color: 'var(--color-text-muted)',
   },
   actionsRow: {
     flexDirection: 'row',
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     width: 'auto',
     backgroundColor: 'var(--color-vhu-primary)',
     borderColor: 'var(--color-vhu-primary)',
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
   },
 });
 export default styles;

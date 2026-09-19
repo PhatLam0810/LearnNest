@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   buttonText: {
-    color: '#FFF',
+    color: 'var(--color-text-on-primary)',
   },
   subTitle: {
     ...typography.body1,

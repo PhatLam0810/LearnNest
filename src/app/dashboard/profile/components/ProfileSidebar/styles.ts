@@ -3,10 +3,10 @@ import { StyleSheet } from '@styles';
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#eef0f5',
+    borderColor: 'var(--color-border-subtle)',
     boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
     padding: 24,
     alignItems: 'center',
@@ -14,13 +14,13 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
     marginTop: 14,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 13,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
     marginTop: 4,
     textAlign: 'center',
   },
@@ -30,18 +30,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#d7dbe4',
+    borderColor: 'var(--color-border-strong)',
     cursor: 'pointer',
   },
   changeAvatarText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#212121',
+    color: 'var(--color-text-primary)',
   },
   divider: {
     width: '100%',
     height: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'var(--color-border-subtle)',
     marginTop: 20,
     marginBottom: 16,
   },
@@ -52,12 +52,12 @@ const styles = StyleSheet.create({
   },
   joinedLabel: {
     fontSize: 13,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
   joinedValue: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
 });
 

@@ -1,4 +1,4 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
@@ -12,9 +12,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#1c2536',
+    ...typography.titleM,
+    color: 'var(--color-text-primary)',
   },
   list: {
     gap: 14,
@@ -23,10 +22,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 14,
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#eef0f5',
+    borderColor: 'var(--color-border)',
     boxShadow: '0 4px 12px rgba(15, 23, 42, 0.05)',
     padding: 20,
   },
@@ -42,24 +41,22 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   name: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1c2536',
+    ...typography.subTitle1,
+    color: 'var(--color-text-primary)',
   },
   time: {
-    fontSize: 13,
-    color: '#8D8D8D',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
   },
   tag: {
-    fontSize: 12,
-    fontWeight: '600',
+    ...typography.caption,
     borderRadius: 999,
     paddingVertical: 3,
     paddingHorizontal: 10,
   },
   content: {
-    fontSize: 14,
-    color: '#333',
+    ...typography.body2,
+    color: 'var(--color-text-body)',
     lineHeight: 20,
   },
   imagesRow: {
@@ -69,20 +66,19 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   replyBox: {
-    backgroundColor: '#f5f7fb',
+    backgroundColor: 'var(--color-surface-page)',
     borderRadius: 10,
     padding: 12,
     marginTop: 6,
     gap: 4,
   },
   replyLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1d418a',
+    ...typography.caption,
+    color: 'var(--color-vhu-primary)',
   },
   replyText: {
-    fontSize: 13,
-    color: '#333',
+    ...typography.body2,
+    color: 'var(--color-text-body)',
   },
   actionsCol: {
     flexDirection: 'row',
@@ -90,8 +86,8 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   emptyText: {
-    fontSize: 14,
-    color: '#8D8D8D',
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
     textAlign: 'center',
     paddingVertical: 40,
   },

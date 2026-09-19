@@ -1,10 +1,10 @@
 import { StyleSheet, typography } from '@styles';
 
 const CARD_BASE = {
-  backgroundColor: '#fff',
+  backgroundColor: 'var(--color-surface)',
   borderRadius: 14,
   borderWidth: 1,
-  borderColor: '#eef0f5',
+  borderColor: 'var(--color-border-subtle)',
   boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
 } as const;
 
@@ -18,11 +18,11 @@ const styles = StyleSheet.create({
     ...typography.titleM,
     fontSize: 28,
     fontWeight: '700',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   pageSubtitle: {
     ...typography.body1,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
     marginTop: 4,
   },
   topRow: {
@@ -53,11 +53,11 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   cardMeta: {
-    fontSize: 13,
-    color: '#8D8D8D',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
   },
   barsRow: {
     flexDirection: 'row',
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   barFill: {
     width: '100%',
     borderRadius: 8,
-    backgroundColor: '#dfe4ee',
+    backgroundColor: 'var(--color-border-strong)',
     minHeight: 4,
   },
   barFillActive: {
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   barLabel: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#5b6478',
+    color: 'var(--color-text-muted)',
   },
   resultRow: {
     flexDirection: 'row',
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f3f6',
+    borderBottomColor: 'var(--color-border-subtle)',
   },
   resultNameRow: {
     flexDirection: 'row',
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   resultName: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   resultTypeTag: {
     fontSize: 11,
@@ -118,20 +118,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   resultTypeTagQuiz: {
-    color: '#1d4ed8',
-    backgroundColor: '#eef2ff',
+    color: 'var(--color-info)',
+    backgroundColor: 'var(--color-info-bg)',
   },
   resultTypeTagPractice: {
-    color: '#c2410c',
-    backgroundColor: '#fff3e8',
+    color: 'var(--color-warning)',
+    backgroundColor: 'var(--color-warning-bg)',
   },
   resultTypeTagMockExam: {
-    color: '#7c3aed',
-    backgroundColor: '#f3ecff',
+    color: 'var(--color-success)',
+    backgroundColor: 'var(--color-success-bg)',
   },
   resultDate: {
-    fontSize: 12,
-    color: '#8D8D8D',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     marginTop: 2,
   },
   resultScore: {
@@ -139,17 +139,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   scoreGood: {
-    color: '#16a34a',
+    color: 'var(--color-success)',
   },
   scoreOk: {
-    color: '#d97706',
+    color: 'var(--color-warning)',
   },
   scoreBad: {
-    color: '#dc2626',
+    color: 'var(--color-error)',
   },
   emptyText: {
-    fontSize: 13,
-    color: '#8D8D8D',
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
     paddingVertical: 8,
   },
   viewAllLink: {
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     cursor: 'pointer',
   },
   aiSuggestionBox: {
-    backgroundColor: '#eaf2ff',
+    backgroundColor: 'var(--color-info-bg)',
     borderRadius: 14,
     padding: 20,
     gap: 10,
@@ -168,11 +168,11 @@ const styles = StyleSheet.create({
   aiTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1d418a',
+    color: 'var(--color-vhu-primary)',
   },
   aiText: {
-    fontSize: 14,
-    color: '#28406e',
+    ...typography.body2,
+    color: 'var(--color-info)',
     lineHeight: 20,
   },
   aiButton: {
@@ -180,12 +180,12 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     backgroundColor: 'var(--color-vhu-primary)',
     borderColor: 'var(--color-vhu-primary)',
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   tableCard: {
     ...CARD_BASE,
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   tableHeaderCell: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#fff',
+    color: 'var(--color-table-header-text)',
   },
   tableRow: {
     flexDirection: 'row',
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f3f6',
+    borderBottomColor: 'var(--color-border-subtle)',
     cursor: 'pointer',
     gap: 20,
   },
@@ -229,11 +229,11 @@ const styles = StyleSheet.create({
   courseNameCell: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   completedCell: {
-    fontSize: 14,
-    color: '#5b6478',
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
   },
   progressCellRow: {
     flexDirection: 'row',
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 8,
     borderRadius: 999,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'var(--color-border-subtle)',
     overflow: 'hidden',
   },
   progressFill: {
@@ -253,21 +253,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'var(--color-vhu-primary)',
   },
   progressFillDone: {
-    backgroundColor: '#16a34a',
+    backgroundColor: 'var(--color-success)',
   },
   progressPct: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#5b6478',
+    color: 'var(--color-text-muted)',
     width: 60,
     textAlign: 'right' as const,
   },
   progressPctDone: {
-    color: '#16a34a',
+    color: 'var(--color-success)',
   },
   lastStudiedCell: {
-    fontSize: 13,
-    color: '#8D8D8D',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
   },
   emptyState: {
     minHeight: 200,

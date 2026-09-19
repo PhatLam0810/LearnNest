@@ -2,11 +2,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, Text, View } from 'react-native-web';
 import styles from './styles';
-import { Button, Input, Modal, Space, Table, TableProps, Tag } from 'antd';
+import { Modal, Space, TableProps } from 'antd';
 import { messageApi, useAppPagination, useWindowSize } from '@hooks';
 import { Module } from '~mdDashboard/redux/saga/type';
-import { PlusOutlined } from '@ant-design/icons';
-import { AddModuleContent } from '~mdAdmin/components';
+import {
+  AddModuleContent,
+  ContentToolbar,
+  FilteredEmptyState,
+  ThemedTable,
+} from '~mdAdmin/components';
 import { adminQuery } from '~mdAdmin/redux';
 import api from '@services/api';
 import { ModalModuleOverview } from './_components';
@@ -25,6 +29,7 @@ const ModuleManage = () => {
   const [dataEdit, setDataEdit] = useState<any>();
   const [openDelete, setOpenDelete] = useState(false);
   const [data, setData] = useState<Module>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const { listItem, currentData, fetchData, refresh, search } =
     useAppPagination<Module>({
       apiUrl: 'lesson/getAllModule',
@@ -55,33 +60,34 @@ const ModuleManage = () => {
       dataIndex: 'Library',
       key: 'Library',
       render: (_, record) => (
-        <p style={{ margin: 0 }}>
+        <Text style={styles.metaCell}>
           {record.libraries.length + (taskCountByModule[record._id] || 0)} bài
           học
-        </p>
+        </Text>
       ),
     },
     {
       title: 'Hành động',
       key: 'action',
+      width: 260,
       render: (_, record) => (
-        <Space size="middle" onClick={e => e.stopPropagation()}>
+        <Space size={10} onClick={e => e.stopPropagation()}>
           <button
-            style={styles.button}
+            style={styles.actionButton}
             onClick={() => {
               setSelectedItem(record);
               setOpenDelete(true);
             }}>
-            <a style={styles.buttonText}> Xóa</a>
+            <Text style={styles.actionButtonText}>Xóa</Text>
           </button>
           <button
-            style={styles.button}
+            style={styles.actionButton}
             onClick={() => {
               setSelectedItem(record);
               setDataEdit(record);
               setIsVisibleModalUpdate(true);
             }}>
-            <a style={styles.buttonText}> Cập nhật</a>
+            <Text style={styles.actionButtonText}>Cập nhật</Text>
           </button>
         </Space>
       ),
@@ -110,31 +116,21 @@ const ModuleManage = () => {
     setIsVisibleModalAdd(false);
   };
 
-  const { Search } = Input;
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+    search(value);
+  };
+
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <Search
-          placeholder="Tìm kiếm"
-          onSearch={search}
-          style={{ width: '50%' }}
-        />
-        <View style={{ alignSelf: 'flex-end', flexDirection: 'row', gap: 8 }}>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsVisibleModalAdd(true)}>
-            Tạo phần học
-          </Button>
-        </View>
-      </View>
+      <ContentToolbar
+        searchPlaceholder="Tìm kiếm phần học"
+        onSearch={handleSearch}
+        addLabel="Tạo phần học"
+        onAdd={() => setIsVisibleModalAdd(true)}
+      />
       <View ref={divRef} style={{ flex: 1 }}>
-        <Table
+        <ThemedTable
           rowKey="_id"
           scroll={{ y: height - 100 }}
           columns={columns}
@@ -148,6 +144,14 @@ const ModuleManage = () => {
             pageSize: currentData?.pageSize,
             total: currentData?.totalRecords,
             showSizeChanger: false,
+          }}
+          locale={{
+            emptyText: searchQuery ? (
+              <FilteredEmptyState
+                query={searchQuery}
+                onClear={() => handleSearch('')}
+              />
+            ) : undefined,
           }}
         />
       </View>

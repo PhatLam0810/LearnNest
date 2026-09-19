@@ -1,341 +1,290 @@
-import { lexend, inter, StyleSheet, typography } from '@styles';
+import { StyleSheet, typography } from '@styles';
+
+const CARD = {
+  backgroundColor: 'var(--color-surface)',
+  borderWidth: 1,
+  borderStyle: 'solid',
+  borderColor: 'var(--color-border)',
+  borderRadius: 12,
+  padding: 24,
+  gap: 16,
+} as const;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingLeft: 20,
-    paddingRight: 20,
-    backgroundColor: '#f5f5f5',
+    width: '100%',
+    paddingTop: 24,
+    paddingBottom: 48,
+    paddingLeft: 24,
+    paddingRight: 24,
   },
-  pageWrapper: {
-    gap: 16,
+  containerMobile: {
+    paddingLeft: 16,
+    paddingRight: 16,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingBottom: 20,
+  grid: {
+    display: 'grid',
+    alignItems: 'start',
+    gap: 24,
   },
-  headerTitle: {
-    fontWeight: '600',
-    fontSize: 22.78,
+  column: {
+    gap: 24,
+    minWidth: 0,
   },
-  chip: {
-    ...typography.titleS,
+  rail: {
+    gap: 24,
+    minWidth: 0,
   },
-  categoryItem: {
-    paddingTop: 7,
-    paddingBottom: 7,
-    paddingLeft: 12,
-    paddingRight: 12,
-    borderRadius: 8,
-    backgroundColor: '#FFF',
+  railSticky: {
+    position: 'sticky',
+    top: 88,
+    maxHeight: 'calc(100vh - 104px)',
+    overflowY: 'auto',
   },
-  categoryItemName: {
-    ...typography.subTitle2,
-    color: '#212121',
+  cover: {
+    position: 'relative',
+    height: 240,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: 'var(--color-surface-subtle)',
+  },
+  headerBlock: {
+    gap: 12,
   },
   title: {
     ...typography.titleM,
-    fontWeight: '600',
-    letterSpacing: 0.01,
-    color: '#000',
+    color: 'var(--color-text-primary)',
+    lineHeight: 30,
+  },
+  titleMobile: {
+    ...typography.titleMMobile,
+    color: 'var(--color-text-primary)',
+    lineHeight: 24,
+  },
+  metaLine: {
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  ratingStars: {
+    color: 'var(--color-vhu-secondary)',
+  },
+  ratingText: {
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
   },
   description: {
     ...typography.body1,
-    color: '#8D8D8D',
-    paddingBottom: 12,
-    whiteSpace: 'normal',
+    color: 'var(--color-text-body)',
+    lineHeight: 28,
   },
-  contentRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 24,
+  card: {
+    ...CARD,
   },
-  mainColumn: {
-    flex: 4,
-    minWidth: 0,
-  },
-  sideColumn: {
-    flex: 1,
-    minWidth: 260,
-  },
-  thumbnailCard: {
-    flex: 1,
-    minHeight: 260,
-    width: '100%',
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: 'gray',
-    position: 'relative',
-  },
-  whatLearnTitle: {
+  cardTitle: {
     ...typography.titleS,
-    fontWeight: '600',
-    color: '#000',
+    color: 'var(--color-text-primary)',
   },
-  learnedSkillText: {
+  cardSubTitle: {
     ...typography.subTitle1,
-    margin: 0,
-    fontWeight: '400',
-  },
-  moduleContentHeader: {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
-  },
-  moduleTitleText: {
-    ...typography.subTitle1,
-    margin: 0,
-    fontWeight: '400',
-    flex: 1,
-    minWidth: 0,
-  },
-  moduleCountText: {
-    ...typography.subTitle1,
-    margin: 0,
-    fontWeight: '400',
-    flexShrink: 0,
-  },
-  skillLearnedItem: {
-    ...typography.body2,
-    color: '#21212199',
-  },
-  premium: {
-    position: 'absolute',
-    top: 8,
-    zIndex: 2,
-    left: 8,
-    height: 34,
-    alignItems: 'center',
-    alignContent: 'center',
-    justifyContent: 'center',
-    ...typography.body2,
-    backgroundColor: '#f05123',
-    borderRadius: 8,
-    paddingLeft: 8,
-    paddingRight: 8,
-    paddingTop: 2,
-    paddingBottom: 2,
-    borderWidth: 1,
-    borderColor: '#f05123',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  totalLibrary: {
-    ...typography.subTitle2,
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  metaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  metaText: {
-    ...typography.body2,
-    color: '#8D8D8D',
-  },
-  metaDot: {
-    ...typography.body2,
-    color: '#8D8D8D',
-  },
-  metaStarIcon: {
-    color: '#f0c356',
-    fontSize: 13,
-  },
-  progressWrap: {
-    width: '100%',
-    gap: 8,
-    marginBottom: 12,
+    color: 'var(--color-text-primary)',
   },
   progressRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
   },
   progressLabel: {
     ...typography.body2,
-    color: '#212121',
+    color: 'var(--color-text-body)',
   },
   progressPercent: {
-    ...typography.subTitle1,
+    ...typography.subTitle2,
     color: 'var(--color-vhu-primary)',
   },
   progressTrack: {
-    width: '100%',
     height: 8,
     borderRadius: 999,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'var(--color-border-subtle)',
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     borderRadius: 999,
-    backgroundColor: '#FFA726',
+    backgroundColor: 'var(--color-vhu-primary)',
   },
-  lessonContent: {
+  skillRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: 12,
-    width: '100%',
   },
-  lessonContentTitle: {
-    ...typography.titleM,
-    fontSize: 32,
-    fontWeight: '600',
-    color: '#000',
-  },
-  contentListCard: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
-  },
-  disabledButton: {
-    opacity: 0.5,
-  },
-  buttonModule: {
-    flexDirection: 'row',
-    padding: 16,
-    borderRadius: 16,
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#eef0f5',
-    boxShadow: '0 1px 3px rgba(15, 23, 42, 0.06)',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  taskIconBadgeWord: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: '#eaf2ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexShrink: 0,
-  },
-  taskIconBadgeExcel: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: '#eafaf0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexShrink: 0,
-  },
-  taskTagRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
+  skillIcon: {
+    color: 'var(--color-success)',
     marginTop: 4,
   },
-
-  moduleItemContainer: {
-    width: '100%',
-    flex: 1,
-  },
-  moduleItemTitle: {
-    fontFamily: lexend.style.fontFamily,
-    fontWeight: '500',
-    fontSize: 16,
-    letterSpacing: 0.01,
-  },
-  moduleItemTime: {
+  skillText: {
     ...typography.body2,
-    color: '#8D8D8D',
+    color: 'var(--color-text-body)',
+    flex: 1,
+    lineHeight: 21,
   },
-  // Inline style consolidations
-  marginTop12: {
-    marginTop: 12,
-  },
-  sideColumnGap: {
-    gap: 16,
-  },
-  contentGap8Margin8: {
-    gap: 8,
-    marginTop: 8,
-  },
-  rowGap10: {
-    flexDirection: 'row',
-    gap: 10,
-    width: '100%',
-  },
-  rowActionsGap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    flexShrink: 0,
-  },
-  paddingBottom10: {
-    paddingBottom: 10,
-  },
-  premiumIcon: {
-    color: '#FFF',
-    // fontSize: isMobile ? 20 : 24, // Handled dynamically
-  },
-  // "table1" = thẻ ảnh + tiêu đề + đánh giá + mô tả khóa học, gộp chung 1
-  // card theo design - trước đây ảnh nằm riêng ở sidebar, tiêu đề/mô tả
-  // đứng ngoài row 2 cột, tách rời trông không giống design.
-  table1Card: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
-    marginBottom: 24,
-  },
-  table1Thumbnail: {
-    width: '100%',
-    maxWidth: 720,
-    aspectRatio: 16 / 9,
-    borderRadius: 12,
+  curriculum: {
+    ...CARD,
+    padding: 0,
+    gap: 0,
     overflow: 'hidden',
-    backgroundColor: 'gray',
-    marginBottom: 16,
-    alignSelf: 'center',
   },
-  // "table2" = % tiến độ + nút tiếp tục, "table3" = kỹ năng đạt được - 2
-  // card riêng trong sidebar theo design (trước đây gộp chung 1 khối
-  // không viền/không nền với ảnh khóa học).
-  table2Card: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
+  curriculumHeader: {
+    paddingTop: 24,
+    paddingBottom: 16,
+    paddingLeft: 24,
+    paddingRight: 24,
   },
-  table3Card: {
-    width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.06)',
+  moduleHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 12,
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: 20,
+    paddingRight: 20,
+    backgroundColor: 'var(--color-surface-subtle)',
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: 'var(--color-border-subtle)',
   },
-  table3SkillList: {
-    gap: 10,
+  moduleTitle: {
+    ...typography.subTitle2,
+    color: 'var(--color-text-primary)',
+    flex: 1,
+    minWidth: 0,
   },
-  table3SkillRow: {
+  moduleCount: {
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+    whiteSpace: 'nowrap',
+  },
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingLeft: 20,
+    paddingRight: 20,
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: 'var(--color-border-subtle)',
   },
-  premiumInline: {
+  rowMain: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f05123',
-    borderRadius: 8,
+    gap: 12,
+    flex: 1,
+    minWidth: 0,
+    minHeight: 44,
+    padding: 0,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+    textAlign: 'left',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  },
+  rowMainLocked: {
+    cursor: 'not-allowed',
+    opacity: 0.6,
+  },
+  chip: {
     width: 32,
     height: 32,
-    marginBottom: 12,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    backgroundColor: 'var(--color-surface-selected)',
   },
-  premiumIconInline: {
-    color: '#fff',
-    fontSize: 18,
+  chipDone: {
+    backgroundColor: 'var(--color-success-bg)',
+  },
+  chipCurrent: {
+    backgroundColor: 'var(--color-vhu-primary)',
+  },
+  chipText: {
+    ...typography.caption,
+    fontWeight: '500',
+    color: 'var(--color-text-body)',
+  },
+  chipTextCurrent: {
+    color: 'var(--color-text-on-primary)',
+  },
+  chipTextDone: {
+    color: 'var(--color-success)',
+  },
+  rowText: {
+    gap: 4,
+    flex: 1,
+    minWidth: 0,
+  },
+  rowTitle: {
+    ...typography.body2,
+    color: 'var(--color-text-primary)',
+  },
+  rowMeta: {
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+  },
+  rowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 0,
+  },
+  stateText: {
+    ...typography.caption,
+    fontWeight: '500',
+    whiteSpace: 'nowrap',
+    minWidth: 56,
+    textAlign: 'right',
+  },
+  stateDone: {
+    color: 'var(--color-success)',
+  },
+  stateCurrent: {
+    color: 'var(--color-vhu-primary)',
+  },
+  stateIdle: {
+    color: 'var(--color-text-muted)',
+  },
+  emptyBox: {
+    alignItems: 'center',
+    paddingTop: 44,
+    paddingBottom: 44,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  emptyText: {
+    ...typography.body2,
+    color: 'var(--color-text-disabled)',
+    textAlign: 'center',
+  },
+  errorBox: {
+    alignItems: 'center',
+    gap: 12,
+    padding: 24,
+    backgroundColor: 'var(--color-error-bg)',
+    borderRadius: 12,
+  },
+  errorText: {
+    ...typography.body2,
+    color: 'var(--color-error)',
+    textAlign: 'center',
   },
 });
 

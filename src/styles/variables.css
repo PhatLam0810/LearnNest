@@ -2,8 +2,11 @@
   /* Brand */
   --color-vhu-primary: #1d418a;
   --color-vhu-primary-hover: #15316b;
+  --color-vhu-primary-light: #2a5bb8;
   --color-vhu-secondary: #f0c356;
+  --color-secondary-tint: #fdf6e0;
   --color-vhu-accent: #88c1e9;
+  --color-premium: #f05123;
 
   /* Text */
   --color-text-primary: #111827;
@@ -11,6 +14,7 @@
   --color-text-muted: #6b7280;
   --color-text-disabled: #9ca3af;
   --color-text-on-primary: #fff;
+  --color-text-on-primary-muted: rgba(255, 255, 255, 0.72);
 
   /* Surface */
   --color-surface: #fff;
@@ -39,4 +43,8 @@
   --color-error-bg: #fdecec;
   --color-info: #1d418a;
   --color-info-bg: #eef3fb;
+
+  /* Overlay / scrim */
+  --color-text-scrim: rgba(33, 33, 33, 0.6);
+  --color-overlay-subtle: rgba(0, 0, 0, 0.06);
 }

@@ -25,14 +25,14 @@ const styles = StyleSheet.create({
   },
   fabText: {
     fontFamily: font,
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
     fontSize: 14,
     fontWeight: '600',
   },
   fabBadge: {
     fontFamily: font,
-    backgroundColor: '#e74c3c',
-    color: '#fff',
+    backgroundColor: 'var(--color-error)',
+    color: 'var(--color-text-on-primary)',
     fontSize: 11,
     fontWeight: '700',
     borderRadius: 9999,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     cursor: 'pointer',
-    color: '#9aa5b8',
+    color: 'var(--color-text-disabled)',
     fontSize: 18,
     display: 'flex',
     zIndex: 1,
@@ -95,11 +95,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#c0392b',
+    backgroundColor: 'var(--color-error)',
     borderRadius: 9999,
     width: 18,
     height: 18,
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
     fontSize: 11,
     lineHeight: '18px',
     textAlign: 'center',
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#eaf2ff',
+    backgroundColor: 'var(--color-info-bg)',
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 14,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   replyingText: {
     fontFamily: font,
     fontSize: 13,
-    color: '#1d418a',
+    color: 'var(--color-vhu-primary)',
   },
   // Khung nhập dạng "hỏi đáp" dùng riêng cho tab Thảo luận (inline) - có
   // avatar người dùng hiện tại bên trái, hint + nút "Gửi bình luận" dạng
@@ -142,12 +142,12 @@ const styles = StyleSheet.create({
   composerHint: {
     fontFamily: font,
     fontSize: 12.5,
-    color: '#9aa5b8',
+    color: 'var(--color-text-disabled)',
   },
   sendTextButton: {
     backgroundColor: 'var(--color-vhu-primary)',
     borderColor: 'var(--color-vhu-primary)',
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
     borderRadius: 999,
     height: 36,
     paddingLeft: 20,
@@ -164,16 +164,16 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   commentCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderWidth: 1,
-    borderColor: '#eef0f5',
+    borderColor: 'var(--color-border)',
     borderRadius: 12,
     padding: 16,
     boxShadow: '0 4px 12px rgba(15, 23, 42, 0.05)',
   },
   empty: {
     fontFamily: font,
-    color: '#9aa5b8',
+    color: 'var(--color-text-disabled)',
     fontSize: 14,
     paddingVertical: 16,
     textAlign: 'center',
@@ -191,14 +191,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginLeft: 24,
     borderLeftWidth: 2,
-    borderLeftColor: '#eef0f5',
+    borderLeftColor: 'var(--color-border)',
     paddingLeft: 14,
   },
   // Highlight riêng cho trả lời của giảng viên - nền xanh nhạt để nổi bật
   // giữa các trả lời thường.
   teacherReplyRow: {
-    backgroundColor: '#f2f6ff',
-    borderLeftColor: '#c7d6f2',
+    backgroundColor: 'var(--color-surface-selected)',
+    borderLeftColor: 'var(--color-border-strong)',
     borderRadius: 10,
     paddingRight: 12,
     paddingTop: 10,
@@ -225,14 +225,14 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
   },
   commentAuthorOwn: {
-    color: '#1d418a',
+    color: 'var(--color-vhu-primary)',
   },
   teacherBadge: {
     fontFamily: font,
     fontSize: 11,
     fontWeight: '700',
-    color: '#8a5d00',
-    backgroundColor: '#fdf1d9',
+    color: 'var(--color-warning)',
+    backgroundColor: 'var(--color-warning-bg)',
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   commentText: {
     fontFamily: font,
     fontSize: 14,
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
     lineHeight: 20,
   },
   commentImagesRow: {
@@ -258,12 +258,12 @@ const styles = StyleSheet.create({
   commentTime: {
     fontFamily: font,
     fontSize: 12,
-    color: '#9aa5b8',
+    color: 'var(--color-text-disabled)',
   },
   actionLink: {
     fontFamily: font,
     fontSize: 12,
-    color: '#5b6478',
+    color: 'var(--color-text-muted)',
     cursor: 'pointer',
     fontWeight: '500',
   },
@@ -272,13 +272,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   deleteLink: {
-    color: '#c0392b',
+    color: 'var(--color-error)',
   },
   moreBtn: {
     cursor: 'pointer',
-    color: '#9aa5b8',
+    color: 'var(--color-text-disabled)',
     fontSize: 16,
-    padding: '0 4px',
+    paddingLeft: 4,
+    paddingRight: 4,
   },
   editRow: {
     flexDirection: 'row',
@@ -288,7 +289,7 @@ const styles = StyleSheet.create({
   viewMoreReplies: {
     fontFamily: font,
     fontSize: 12.5,
-    color: '#1d418a',
+    color: 'var(--color-vhu-primary)',
     fontWeight: '600',
     cursor: 'pointer',
     marginTop: 8,
@@ -301,7 +302,7 @@ const styles = StyleSheet.create({
   reportOption: {
     fontFamily: font,
     fontSize: 13,
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
     paddingVertical: 4,
   },
   reportActions: {

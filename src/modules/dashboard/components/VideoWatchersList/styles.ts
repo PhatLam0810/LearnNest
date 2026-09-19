@@ -1,4 +1,4 @@
-import { StyleSheet, typography, lexend } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   header: {
@@ -8,16 +8,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 16,
     paddingBottom: 12,
-    borderBottom: '1px solid #f0f0f0',
+    borderBottom: '1px solid var(--color-border-subtle)',
   },
   headerTitle: {
-    fontFamily: lexend.style.fontFamily,
+    ...typography.subTitle1,
     fontWeight: '600',
-    fontSize: 16,
-    color: '#212121',
+    color: 'var(--color-text-primary)',
   },
   countTag: {
-    fontSize: 12,
+    ...typography.caption,
     fontWeight: 600,
     borderRadius: 999,
   },
@@ -39,8 +38,8 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: '12px 14px',
     borderRadius: 12,
-    border: '1px solid #f0f0f0',
-    backgroundColor: '#fff',
+    border: '1px solid var(--color-border-subtle)',
+    backgroundColor: 'var(--color-surface)',
   },
   avatar: {
     width: 40,
@@ -60,10 +59,9 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   name: {
-    ...typography.body1,
+    ...typography.body2,
     fontWeight: '600',
-    fontSize: 14,
-    color: '#212121',
+    color: 'var(--color-text-primary)',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
@@ -83,9 +81,8 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   email: {
-    ...typography.body2,
-    fontSize: 12,
-    color: '#8D8D8D',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     marginBottom: 6,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -101,8 +98,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   progressLabel: {
-    fontSize: 12,
-    color: '#8D8D8D',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     minWidth: 34,
     textAlign: 'right',
   },
@@ -115,7 +112,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 11,
-    color: '#a3a3a3',
+    color: 'var(--color-text-disabled)',
   },
   emptyWrap: {
     padding: '32px 0',
@@ -128,11 +125,11 @@ const styles = StyleSheet.create({
     gap: 12,
     marginTop: 16,
     paddingTop: 12,
-    borderTop: '1px solid #f0f0f0',
+    borderTop: '1px solid var(--color-border-subtle)',
   },
   pageText: {
-    fontSize: 12,
-    color: '#595959',
+    ...typography.caption,
+    color: 'var(--color-text-body)',
     minWidth: 60,
     textAlign: 'center',
   },

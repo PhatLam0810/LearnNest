@@ -1,11 +1,11 @@
-import { lexend, StyleSheet, typography } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
     minWidth: 0,
     padding: 0,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: 'var(--color-surface-subtle)',
     borderRadius: 16,
   },
   content: {
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   premiumIcon: {
-    color: '#FFF',
+    color: 'var(--color-text-on-primary)',
     fontSize: 24,
   },
   inProgressBadge: {
@@ -42,28 +42,24 @@ const styles = StyleSheet.create({
     paddingBottom: 3,
   },
   inProgressBadgeText: {
-    ...typography.body2,
-    fontSize: 12,
+    ...typography.caption,
     fontWeight: '600',
-    color: '#fff',
+    color: 'var(--color-text-on-primary)',
   },
   title: {
-    color: '#212121',
     ...typography.subTitle1,
+    color: 'var(--color-text-primary)',
     marginBottom: 8,
     marginTop: 12,
   },
   desc: {
-    color: '#8D8D8D',
-    fontFamily: lexend.style.fontFamily,
-    fontWeight: '400',
-    fontSize: 14,
-    letterSpacing: 0.01,
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
     lineHeight: 20,
   },
   price: {
     ...typography.titleS,
-    color: '#f05123',
+    color: 'var(--color-premium)',
   },
   statsRow: {
     flexDirection: 'row',
@@ -78,20 +74,19 @@ const styles = StyleSheet.create({
   },
   statIcon: {
     fontSize: 16,
-    color: '#1d418a',
+    color: 'var(--color-vhu-primary)',
   },
   ratingStarIcon: {
-    color: '#f0c356',
+    color: 'var(--color-vhu-secondary)',
   },
   statValue: {
     ...typography.subTitle1,
-    color: '#000',
+    color: 'var(--color-text-primary)',
     marginBottom: 2,
   },
   statLabel: {
-    ...typography.body2,
-    fontSize: 12,
-    color: '#8D8D8D',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
   },
   premium: {
     position: 'absolute',
@@ -103,14 +98,14 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     justifyContent: 'center',
     ...typography.body2,
-    backgroundColor: '#f05123',
+    backgroundColor: 'var(--color-premium)',
     borderRadius: 8,
     paddingLeft: 8,
     paddingRight: 8,
     paddingTop: 2,
     paddingBottom: 2,
     borderWidth: 1,
-    borderColor: '#f05123',
+    borderColor: 'var(--color-premium)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,

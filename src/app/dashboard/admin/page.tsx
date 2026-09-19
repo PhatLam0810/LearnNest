@@ -19,6 +19,9 @@ import CommentReportsManage from './commentReportsManage/page';
 import QaInbox from './qaInbox/page';
 import PassRateReport from './passRateReport/page';
 import MockExamManage from './mockExamManage/page';
+import QuizManagePage from './quizManage/page';
+import SubmissionsManage from './submissionsManage/page';
+import PracticeClassManage from './practiceClassManage/page';
 import { ADMIN_PRIMARY } from './adminTheme';
 
 const buildItems = (qnaPendingCount: number): TabsProps['items'] => [
@@ -80,6 +83,21 @@ const buildItems = (qnaPendingCount: number): TabsProps['items'] => [
     key: '10',
     label: 'Đề Thi Thử',
     children: <MockExamManage />,
+  },
+  {
+    key: '12',
+    label: 'Tạo Bài Tập',
+    children: <QuizManagePage />,
+  },
+  {
+    key: '13',
+    label: 'Bài Nộp Học Viên',
+    children: <SubmissionsManage />,
+  },
+  {
+    key: '14',
+    label: 'Lớp Thực Hành',
+    children: <PracticeClassManage />,
   },
 ];
 

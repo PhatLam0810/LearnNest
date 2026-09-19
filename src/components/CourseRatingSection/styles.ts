@@ -1,42 +1,34 @@
 import { StyleSheet, typography } from '@styles';
-import { lexend } from '@/styles/typography';
-
-const font = lexend.style.fontFamily;
 
 const CARD_BASE = {
   width: '100%',
-  backgroundColor: '#fff',
-  borderRadius: 14,
+  backgroundColor: 'var(--color-surface)',
+  borderRadius: 12,
   borderWidth: 1,
-  borderColor: '#eef0f5',
-  boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
+  borderStyle: 'solid',
+  borderColor: 'var(--color-border)',
 } as const;
 
 const styles = StyleSheet.create({
   wrapper: {
     width: '100%',
-    marginTop: 28,
-    paddingBottom: 20,
-    gap: 20,
+    gap: 24,
   },
   // "Đánh giá của bạn" — tablet riêng, tách khỏi khối tổng kết/danh sách
-  // nhận xét theo đúng yêu cầu, cho phép sửa lại đánh giá cũ (title đổi
-  // thành "Sửa đánh giá của bạn" khi đã có myRating).
+  // nhận xét, cho phép sửa lại đánh giá cũ (title đổi thành "Sửa đánh giá
+  // của bạn" khi đã có myRating).
   formCard: {
     ...CARD_BASE,
     padding: 24,
-    gap: 12,
+    gap: 16,
   },
   formTitle: {
-    fontFamily: font,
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1c2536',
+    ...typography.titleS,
+    color: 'var(--color-text-primary)',
   },
   formHint: {
-    fontFamily: font,
-    fontSize: 14,
-    color: '#8D8D8D',
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
   },
   starsRow: {
     flexDirection: 'row',
@@ -46,26 +38,19 @@ const styles = StyleSheet.create({
     cursor: 'pointer',
   },
   starFilledIconLarge: {
-    color: '#f0c356',
-    fontSize: 30,
+    color: 'var(--color-vhu-secondary)',
+    fontSize: 32,
   },
   starOutlineIconLarge: {
-    color: '#c7ccd6',
-    fontSize: 30,
+    color: 'var(--color-text-disabled)',
+    fontSize: 32,
   },
   submitButton: {
     width: '100%',
-    marginTop: 4,
-    borderRadius: 999,
     height: 48,
-    backgroundColor: 'var(--color-vhu-primary)',
-    borderColor: 'var(--color-vhu-primary)',
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
+    borderRadius: 8,
   },
-  // "Đánh giá khóa học" — tổng kết điểm trung bình + phân bố theo sao,
-  // cũng là 1 tablet riêng.
+  // "Đánh giá khóa học" — tổng kết điểm trung bình + phân bố theo sao.
   summaryCard: {
     ...CARD_BASE,
     padding: 24,
@@ -80,87 +65,80 @@ const styles = StyleSheet.create({
   },
   title: {
     ...typography.titleS,
-    fontSize: 22,
-    fontWeight: '700',
+    color: 'var(--color-text-primary)',
   },
   countLabel: {
-    fontFamily: font,
-    fontSize: 14,
-    color: '#8D8D8D',
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
   },
   summaryRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 32,
+    gap: 24,
     alignItems: 'center',
   },
   averageBlock: {
     alignItems: 'flex-start',
-    gap: 6,
-    minWidth: 140,
+    gap: 8,
+    minWidth: 120,
   },
   averageNumber: {
-    fontFamily: font,
-    fontSize: 44,
-    fontWeight: '700',
+    ...typography.titleM,
     color: 'var(--color-vhu-primary)',
   },
   averageStarsRow: {
     flexDirection: 'row',
-    gap: 2,
+    gap: 4,
   },
   starFilledIcon: {
-    color: '#f0c356',
-    fontSize: 18,
+    color: 'var(--color-vhu-secondary)',
+    fontSize: 16,
   },
   starOutlineIcon: {
-    color: '#c7ccd6',
-    fontSize: 18,
+    color: 'var(--color-text-disabled)',
+    fontSize: 16,
   },
   breakdownBlock: {
     flex: 1,
-    minWidth: 260,
+    minWidth: 200,
     gap: 8,
   },
   breakdownRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
   },
   breakdownLabel: {
-    fontFamily: font,
-    fontSize: 13,
-    color: '#8D8D8D',
-    width: 30,
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+    width: 32,
   },
   breakdownTrack: {
     flex: 1,
     height: 8,
     borderRadius: 999,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'var(--color-border-subtle)',
     overflow: 'hidden',
   },
   breakdownFill: {
     height: '100%',
     borderRadius: 999,
-    backgroundColor: '#f0c356',
+    backgroundColor: 'var(--color-vhu-secondary)',
   },
   breakdownPct: {
-    fontFamily: font,
-    fontSize: 13,
-    color: '#8D8D8D',
-    width: 38,
-    textAlign: 'right' as const,
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+    width: 40,
+    textAlign: 'right',
   },
-  // Danh sách nhận xét - mỗi review 1 khung riêng (nền/viền/bo góc rõ ràng),
-  // không còn chỉ ngăn cách bằng border-bottom mờ nhạt như trước.
+  // Danh sách nhận xét - mỗi review 1 khung riêng.
   reviewList: {
-    gap: 14,
+    gap: 16,
   },
   reviewCard: {
     ...CARD_BASE,
-    padding: 18,
-    gap: 10,
+    padding: 16,
+    gap: 12,
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -168,35 +146,54 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   reviewName: {
-    fontFamily: font,
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#1c2536',
+    ...typography.subTitle2,
+    color: 'var(--color-text-primary)',
   },
   reviewStarsRow: {
     flexDirection: 'row',
-    gap: 2,
-    marginTop: 2,
+    gap: 4,
+    marginTop: 4,
   },
   reviewStarIcon: {
-    color: '#f0c356',
-    fontSize: 13,
+    color: 'var(--color-vhu-secondary)',
+    fontSize: 12,
   },
   reviewStarOutlineIcon: {
-    color: '#c7ccd6',
-    fontSize: 13,
+    color: 'var(--color-text-disabled)',
+    fontSize: 12,
   },
   reviewDate: {
-    fontFamily: font,
-    fontSize: 13,
-    color: '#8D8D8D',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     flexShrink: 0,
   },
   reviewComment: {
-    fontFamily: font,
-    fontSize: 15,
-    lineHeight: '22px',
-    color: '#333',
+    ...typography.body2,
+    color: 'var(--color-text-body)',
+    lineHeight: 21,
+  },
+  stateBox: {
+    ...CARD_BASE,
+    alignItems: 'center',
+    gap: 12,
+    paddingTop: 44,
+    paddingBottom: 44,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  errorBox: {
+    backgroundColor: 'var(--color-error-bg)',
+    borderWidth: 0,
+  },
+  emptyText: {
+    ...typography.body2,
+    color: 'var(--color-text-disabled)',
+    textAlign: 'center',
+  },
+  errorText: {
+    ...typography.body2,
+    color: 'var(--color-error)',
+    textAlign: 'center',
   },
 });
 

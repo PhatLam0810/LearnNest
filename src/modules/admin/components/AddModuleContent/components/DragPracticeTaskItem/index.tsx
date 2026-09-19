@@ -36,11 +36,10 @@ const DragPracticeTaskItem: React.FC<Props> = ({ data, onDelete }) => {
         </Text>
       </View>
       <Button
-        color="danger"
-        variant="solid"
+        style={styles.deleteButton}
         onMouseDown={onDelete}
         onTouchStart={onDelete}>
-        <DeleteOutlined />
+        <DeleteOutlined style={{ color: 'var(--color-text-on-primary)' }} />
       </Button>
     </View>
   );

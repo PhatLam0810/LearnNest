@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
     ...typography.titleM,
     fontSize: 28,
     fontWeight: '700',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   filterRow: {
     flexDirection: 'row',
@@ -23,13 +23,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   scoreGood: {
-    color: '#16a34a',
+    color: 'var(--color-success)',
   },
   scoreOk: {
-    color: '#d97706',
+    color: 'var(--color-warning)',
   },
   scoreBad: {
-    color: '#dc2626',
+    color: 'var(--color-error)',
   },
 });
 

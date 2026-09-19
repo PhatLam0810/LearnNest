@@ -3,7 +3,7 @@ import { StyleSheet, typography } from '@styles';
 const styles = StyleSheet.create({
   container: {
     display: 'flex',
-    backgroundColor: '#0059c7',
+    backgroundColor: 'var(--color-vhu-primary)',
     height: 200,
     borderRadius: 12,
     padding: 16,
@@ -13,25 +13,25 @@ const styles = StyleSheet.create({
 
   title: {
     margin: 0,
-    color: 'white',
+    color: 'var(--color-text-on-primary)',
     ...typography.titleM,
   },
   subTitle: {
-    color: 'white',
+    color: 'var(--color-text-on-primary)',
     ...typography.subTitle1,
   },
   desc: {
-    color: '#FFFFFF99',
+    color: 'var(--color-text-on-primary)',
     ...typography.body2,
   },
   button: {
     alignSelf: 'flex-start',
-    backgroundColor: 'white',
+    backgroundColor: 'var(--color-surface)',
     padding: 16,
     borderRadius: 8,
   },
   buttonTitle: {
-    color: '#212121',
+    color: 'var(--color-text-primary)',
     ...typography.buttonSmall,
   },
 });

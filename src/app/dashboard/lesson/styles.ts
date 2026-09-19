@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
   },
   pageSubtitle: {
     ...typography.body1,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
   filterRow: {
     flexDirection: 'row',
@@ -32,9 +32,9 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 8,
     borderRadius: 999,
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderWidth: 1,
-    borderColor: '#eef0f5',
+    borderColor: 'var(--color-border-subtle)',
     cursor: 'pointer',
   },
   filterPillActive: {
@@ -49,14 +49,12 @@ const styles = StyleSheet.create({
     cursor: 'pointer',
   },
   filterPillText: {
-    ...typography.body2,
-    fontWeight: '500',
-    color: '#212121',
+    ...typography.subTitle2,
+    color: 'var(--color-text-primary)',
   },
   filterPillTextActive: {
-    ...typography.body2,
-    fontWeight: '500',
-    color: '#fff',
+    ...typography.subTitle2,
+    color: 'var(--color-text-on-primary)',
   },
   list: {
     overflow: 'visible',
@@ -76,8 +74,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   title: {
-    ...typography.body2,
-    fontWeight: '500',
+    ...typography.subTitle2,
   },
 });
 

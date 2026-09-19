@@ -1,12 +1,13 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Button, Image, Modal, Space, Input, Pagination } from 'antd';
+import { Button, Image, Space, Pagination } from 'antd';
 import dayjs from 'dayjs';
 import { useAppPagination } from '@hooks';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { UserAvatar } from '@components';
+import FeedbackReplyModal from '~mdAdmin/components/FeedbackReplyModal';
 import { FeedbackItem } from '~mdDashboard/types';
 import styles from './styles';
 
@@ -27,11 +28,8 @@ const FeedbackManage: React.FC = () => {
       apiUrl: 'feedback/getAllFeedback',
     });
   const [replyTarget, setReplyTarget] = useState<FeedbackItem | null>(null);
-  const [replyText, setReplyText] = useState('');
-  const [sending, setSending] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [toggleResolved] = adminQuery.useToggleFeedbackResolvedMutation();
-  const [replyFeedback] = adminQuery.useReplyFeedbackMutation();
 
   const handleToggleResolve = async (item: FeedbackItem) => {
     setTogglingId(item._id);
@@ -44,31 +42,6 @@ const FeedbackManage: React.FC = () => {
       messageApi.error(e?.data?.message || 'Không cập nhật được trạng thái');
     } finally {
       setTogglingId(null);
-    }
-  };
-
-  const handleSendReply = async () => {
-    if (!replyTarget || !replyText.trim()) return;
-    setSending(true);
-    try {
-      const updated = await replyFeedback({
-        id: replyTarget._id,
-        message: replyText.trim(),
-      }).unwrap();
-      setListItem(prev =>
-        prev.map(f => (f._id === replyTarget._id ? { ...f, ...updated } : f)),
-      );
-      messageApi.success(
-        updated?.sent
-          ? 'Đã gửi email trả lời cho người dùng.'
-          : 'Đã lưu trả lời nhưng gửi email thất bại.',
-      );
-      setReplyTarget(null);
-      setReplyText('');
-    } catch (e: any) {
-      messageApi.error(e?.data?.message || 'Không gửi được trả lời');
-    } finally {
-      setSending(false);
     }
   };
 
@@ -137,7 +110,6 @@ const FeedbackManage: React.FC = () => {
                 <Button
                   onClick={() => {
                     setReplyTarget(item);
-                    setReplyText('');
                   }}>
                   Trả lời
                 </Button>
@@ -163,29 +135,15 @@ const FeedbackManage: React.FC = () => {
         />
       )}
 
-      <Modal
-        title={`Trả lời ${replyTarget?.fullName || ''}`}
-        open={!!replyTarget}
-        onCancel={() => setReplyTarget(null)}
-        onOk={handleSendReply}
-        confirmLoading={sending}
-        okText="Gửi email trả lời"
-        cancelText="Hủy">
-        {replyTarget && (
-          <View style={{ gap: 10 }}>
-            <View style={styles.replyBox}>
-              <Text style={styles.replyLabel}>Nội dung gốc</Text>
-              <Text style={styles.replyText}>{replyTarget.content}</Text>
-            </View>
-            <Input.TextArea
-              rows={4}
-              placeholder="Nhập nội dung trả lời - sẽ gửi qua email cho người dùng..."
-              value={replyText}
-              onChange={e => setReplyText(e.target.value)}
-            />
-          </View>
-        )}
-      </Modal>
+      <FeedbackReplyModal
+        item={replyTarget}
+        onClose={() => setReplyTarget(null)}
+        onUpdated={updated =>
+          setListItem(prev =>
+            prev.map(f => (f._id === updated._id ? { ...f, ...updated } : f)),
+          )
+        }
+      />
     </View>
   );
 };

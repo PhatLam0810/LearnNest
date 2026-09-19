@@ -1,9 +1,9 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   page: {
     padding: 20,
-    backgroundColor: '#f7f9fc',
+    backgroundColor: 'var(--color-surface-subtle)',
     borderRadius: 12,
   },
   header: {
@@ -13,9 +13,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 700,
-    color: '#111827',
+    ...typography.titleM,
+    color: 'var(--color-text-primary)',
     margin: 0,
   },
   statsRow: {
@@ -25,9 +24,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   statCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 12,
-    border: '1px solid #e2e8f0',
+    borderWidth: 1,
+    borderColor: 'var(--color-border)',
     boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
     padding: 20,
     display: 'flex',
@@ -37,8 +37,8 @@ const styles = StyleSheet.create({
     minWidth: 160,
   },
   statLabel: {
-    fontSize: 13,
-    color: '#6b7280',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     textAlign: 'center',
   },
   toolbar: {
@@ -63,9 +63,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   learnerCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 12,
-    border: '1px solid #e2e8f0',
+    borderWidth: 1,
+    borderColor: 'var(--color-border)',
     padding: '14px 18px',
     display: 'flex',
     alignItems: 'center',
@@ -77,14 +78,13 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   learnerName: {
-    fontSize: 15,
-    fontWeight: 600,
-    color: '#111827',
+    ...typography.subTitle1,
+    color: 'var(--color-text-primary)',
     marginBottom: 2,
   },
   learnerMeta: {
-    fontSize: 13,
-    color: '#6b7280',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
   },
   learnerProgressWrap: {
     flex: '1 1 200px',
@@ -92,8 +92,8 @@ const styles = StyleSheet.create({
   },
   learnerLastStudied: {
     flex: '0 0 160px',
-    fontSize: 13,
-    color: '#6b7280',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     textAlign: 'right',
   },
   learnerStatus: {
@@ -105,8 +105,8 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   reminderHint: {
-    fontSize: 12,
-    color: '#9ca3af',
+    ...typography.caption,
+    color: 'var(--color-text-disabled)',
   },
   paginationWrap: {
     display: 'flex',
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   emptyState: {
     padding: 48,
     textAlign: 'center',
-    color: '#6b7280',
+    color: 'var(--color-text-muted)',
   },
 });
 

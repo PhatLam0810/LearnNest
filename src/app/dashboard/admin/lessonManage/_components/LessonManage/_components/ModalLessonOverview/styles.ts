@@ -1,9 +1,9 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   modalBody: {
     padding: 20,
-    backgroundColor: '#f7f8fa',
+    backgroundColor: 'var(--color-surface-subtle)',
     borderRadius: 12,
   },
 
@@ -12,14 +12,13 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 20,
-    fontWeight: '700',
+    ...typography.titleS,
     marginBottom: 4,
   },
 
   subtitle: {
-    fontSize: 13,
-    color: '#666',
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
   },
 
   layout: {
@@ -40,7 +39,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 14,
     padding: 16,
     boxShadow: '0 6px 18px rgba(0,0,0,0.06)',
@@ -48,9 +47,9 @@ const styles = StyleSheet.create({
   },
 
   desc: {
-    fontSize: 14,
+    ...typography.body2,
     lineHeight: 20,
-    color: '#444',
+    color: 'var(--color-text-body)',
     marginBottom: 14,
   },
 
@@ -62,9 +61,9 @@ const styles = StyleSheet.create({
   },
 
   skillText: {
+    ...typography.body2,
     marginLeft: 5,
-    fontSize: 13,
-    color: '#333',
+    color: 'var(--color-text-body)',
   },
 
   thumbnailWrap: {
@@ -72,12 +71,12 @@ const styles = StyleSheet.create({
     aspectRatio: 16 / 9,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#eee',
+    backgroundColor: 'var(--color-surface-subtle)',
     marginBottom: 12,
   },
 
   moduleCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 12,
     marginBottom: 10,
     overflow: 'hidden',
@@ -85,13 +84,12 @@ const styles = StyleSheet.create({
   },
 
   moduleHeader: {
-    fontWeight: '600',
-    fontSize: 14,
+    ...typography.subTitle2,
   },
 
   libraryItem: {
     padding: 10,
-    borderBottom: '1px solid #f1f1f1',
+    borderBottom: '1px solid var(--color-border-subtle)',
   },
 });
 

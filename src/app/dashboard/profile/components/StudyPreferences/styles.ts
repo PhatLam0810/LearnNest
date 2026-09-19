@@ -3,22 +3,22 @@ import { StyleSheet } from '@styles';
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#eef0f5',
+    borderColor: 'var(--color-border-subtle)',
     boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
     padding: 24,
   },
   title: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   divider: {
     width: '100%',
     height: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: 'var(--color-border-subtle)',
     marginTop: 14,
     marginBottom: 14,
   },
@@ -30,11 +30,11 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1c2536',
+    color: 'var(--color-text-primary)',
   },
   rowSubtitle: {
     fontSize: 13,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
     marginTop: 2,
   },
   notifList: {
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   logoutLink: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#dc2626',
+    color: 'var(--color-error)',
     cursor: 'pointer',
   },
 });

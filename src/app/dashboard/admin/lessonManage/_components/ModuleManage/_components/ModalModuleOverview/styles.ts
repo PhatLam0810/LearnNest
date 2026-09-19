@@ -1,4 +1,4 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
@@ -8,21 +8,19 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    fontSize: 18,
-    fontWeight: '700',
+    ...typography.titleS,
     display: 'flex',
     flexDirection: 'column',
     gap: 4,
   },
 
   subTitle: {
-    fontSize: 12,
-    color: '#888',
-    fontWeight: '400',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
   },
 
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 14,
     padding: 12,
     boxShadow: '0 6px 18px rgba(0,0,0,0.06)',

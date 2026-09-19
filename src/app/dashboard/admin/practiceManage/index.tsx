@@ -1,13 +1,22 @@
 'use client';
 import React, { useState } from 'react';
 import { View, Text } from 'react-native-web';
-import { Button, Input, Modal, Select, Space, Table, Tag } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Modal, Select, Space, Tag } from 'antd';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
-import { PracticeSubject, PracticeTask } from '~mdDashboard/types/practice';
+import {
+  PracticeDifficulty,
+  PracticeSubject,
+  PracticeTask,
+} from '~mdDashboard/types/practice';
+import {
+  ContentToolbar,
+  FilteredEmptyState,
+  ThemedTable,
+} from '~mdAdmin/components';
 import PracticeTaskEditorDrawer from './_components/PracticeTaskEditorDrawer';
 import PracticeSubmissionsModal from './_components/PracticeSubmissionsModal';
+import styles from './styles';
 
 const PracticeManage = () => {
   const [subjectFilter, setSubjectFilter] = useState<
@@ -70,6 +79,22 @@ const PracticeManage = () => {
       key: 'title',
     },
     {
+      title: 'Độ khó',
+      dataIndex: 'difficulty',
+      key: 'difficulty',
+      render: (v?: PracticeDifficulty) =>
+        v ? (
+          <Tag
+            color={
+              v === 'Dễ' ? 'success' : v === 'Trung bình' ? 'warning' : 'error'
+            }>
+            {v}
+          </Tag>
+        ) : (
+          '—'
+        ),
+    },
+    {
       title: 'Trạng thái',
       dataIndex: 'isPublished',
       key: 'isPublished',
@@ -82,59 +107,67 @@ const PracticeManage = () => {
     {
       title: 'Hành động',
       key: 'action',
+      width: 260,
       render: (_: any, record: PracticeTask) => (
-        <Space onClick={e => e.stopPropagation()}>
-          <a onClick={() => openEdit(record)}>Sửa</a>
-          <a onClick={() => setSubmissionsTaskId(record._id)}>Bài nộp</a>
-          <a onClick={() => setDeletingTask(record)} style={{ color: 'red' }}>
-            Xoá
-          </a>
+        <Space size={10} onClick={e => e.stopPropagation()}>
+          <button style={styles.actionButton} onClick={() => openEdit(record)}>
+            <Text style={styles.actionButtonText}>Sửa</Text>
+          </button>
+          <button
+            style={styles.actionButton}
+            onClick={() => setSubmissionsTaskId(record._id)}>
+            <Text style={styles.actionButtonText}>Bài nộp</Text>
+          </button>
+          <button
+            style={styles.actionButton}
+            onClick={() => setDeletingTask(record)}>
+            <Text style={styles.actionButtonText}>Xoá</Text>
+          </button>
         </Space>
       ),
     },
   ];
 
-  return (
-    <View style={{ flex: 1, gap: 8 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: 12,
-          gap: 8,
-        }}>
-        <Space>
-          <Input.Search
-            placeholder="Tìm theo tiêu đề"
-            allowClear
-            onSearch={setSearch}
-            onChange={e => !e.target.value && setSearch('')}
-            style={{ width: 260 }}
-          />
-          <Select
-            allowClear
-            placeholder="Tất cả môn"
-            style={{ width: 140 }}
-            value={subjectFilter}
-            onChange={setSubjectFilter}
-            options={[
-              { value: 'Excel', label: 'Excel' },
-              { value: 'Word', label: 'Word' },
-            ]}
-          />
-        </Space>
-        <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-          <Text style={{ color: '#FFF' }}>Thêm đề thực hành</Text>
-        </Button>
-      </View>
+  const handleSearch = (value: string) => {
+    setSearch(value);
+  };
 
-      <Table
+  return (
+    <View style={styles.container}>
+      <View style={styles.filterRow}>
+        <Select
+          allowClear
+          placeholder="Tất cả môn"
+          style={{ width: 140 }}
+          value={subjectFilter}
+          onChange={setSubjectFilter}
+          options={[
+            { value: 'Excel', label: 'Excel' },
+            { value: 'Word', label: 'Word' },
+          ]}
+        />
+      </View>
+      <ContentToolbar
+        searchPlaceholder="Tìm theo tiêu đề"
+        onSearch={handleSearch}
+        addLabel="Thêm đề thực hành"
+        onAdd={openCreate}
+      />
+
+      <ThemedTable
         rowKey="_id"
         loading={isFetching}
         columns={columns}
         dataSource={filteredData}
         pagination={{ pageSize: 10 }}
+        locale={{
+          emptyText: search ? (
+            <FilteredEmptyState
+              query={search}
+              onClear={() => handleSearch('')}
+            />
+          ) : undefined,
+        }}
       />
 
       <PracticeTaskEditorDrawer

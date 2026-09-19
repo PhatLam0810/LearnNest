@@ -17,11 +17,11 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     ...typography.body1,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
   headerTitle: {
+    ...typography.titleM,
     fontWeight: '600',
-    fontSize: 22.78,
   },
   chip: {
     ...typography.titleS,
@@ -32,20 +32,20 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     paddingRight: 12,
     borderRadius: 8,
-    backgroundColor: '#FFF',
+    backgroundColor: 'var(--color-surface)',
   },
   categoryItemName: {
     ...typography.subTitle2,
-    color: '#212121',
+    color: 'var(--color-text-primary)',
   },
   description: {
     ...typography.body1,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
     paddingBottom: 12,
   },
   whatLearnTitle: {
     ...typography.subTitle1,
-    color: '#FFA726',
+    color: 'var(--color-vhu-secondary)',
   },
   learnedSkillText: {
     ...typography.subTitle1,
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
   skillLearnedItem: {
     ...typography.body2,
-    color: '#21212199',
+    color: 'var(--color-text-scrim)',
   },
   lessonContent: {
     flex: 1,
@@ -95,15 +95,14 @@ const styles = StyleSheet.create({
     boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', // Shadow
   },
   moduleItemTitle: {
+    ...typography.body1,
     fontFamily: lexend.style.fontFamily,
-    fontWeight: '400',
-    fontSize: 16,
     letterSpacing: 0.01,
-    color: '#212121',
+    color: 'var(--color-text-primary)',
   },
   moduleItemTime: {
     ...typography.body2,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
   layoutTitleContainer: {
     width: '100%',

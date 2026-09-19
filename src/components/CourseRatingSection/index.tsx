@@ -32,8 +32,10 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
   });
   const [submitRating, { isLoading: submitting }] =
     dashboardQuery.useSubmitCourseRatingMutation();
-  const [fetchRatings, { data: ratingsData, isLoading: loadingRatings }] =
-    dashboardQuery.useGetCourseRatingsMutation();
+  const [
+    fetchRatings,
+    { data: ratingsData, isLoading: loadingRatings, isError: ratingsError },
+  ] = dashboardQuery.useGetCourseRatingsMutation();
 
   useEffect(() => {
     if (lessonId) {
@@ -106,6 +108,7 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
           onChange={e => setComment(e.target.value)}
         />
         <AppButton
+          type="primary"
           style={styles.submitButton}
           loading={submitting}
           onClick={handleSubmit}>
@@ -161,6 +164,29 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
         </View>
       </View>
 
+      {ratingsError && (
+        <View style={{ ...styles.stateBox, ...styles.errorBox }}>
+          <Text style={styles.errorText}>
+            Không tải được danh sách đánh giá.
+          </Text>
+          <AppButton
+            style={{ width: 'auto', height: 40 }}
+            onClick={() =>
+              fetchRatings({ lessonId, pageNum: 1, pageSize: 10 })
+            }>
+            Thử lại
+          </AppButton>
+        </View>
+      )}
+      {!loadingRatings &&
+        !ratingsError &&
+        (ratingsData?.items?.length ?? 0) === 0 && (
+          <View style={styles.stateBox}>
+            <Text style={styles.emptyText}>
+              Chưa có nhận xét nào. Hãy là người đầu tiên đánh giá khóa học này.
+            </Text>
+          </View>
+        )}
       {!loadingRatings && (ratingsData?.items?.length ?? 0) > 0 && (
         <View style={styles.reviewList}>
           {ratingsData?.items.map(review => {

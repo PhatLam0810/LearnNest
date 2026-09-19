@@ -1,4 +1,4 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   searchInput: {
@@ -14,8 +14,8 @@ const styles = StyleSheet.create({
     minWidth: 240,
   },
   badgeSuccessStyle: {
-    backgroundColor: '#1677ff',
-    fontSize: '14px',
+    ...typography.buttonSmall,
+    backgroundColor: 'var(--color-vhu-primary)',
   },
   modalContentWrap: {
     width: '100%',
@@ -29,21 +29,22 @@ const styles = StyleSheet.create({
   },
   exportButtonStyle: {
     border: 'none',
-    backgroundColor: '#1677ff',
-    color: '#fff',
+    backgroundColor: 'var(--color-vhu-primary)',
+    color: 'var(--color-text-on-primary)',
     padding: '8px 12px',
     borderRadius: 6,
     cursor: 'pointer',
   },
   modalSummaryText: {
-    fontSize: 14,
-    color: '#666',
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
   },
   panel: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 12,
     padding: 16,
-    border: '1px solid #f0f0f0',
+    borderWidth: 1,
+    borderColor: 'var(--color-border-subtle)',
     boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)',
   },
   sectionHeader: {
@@ -53,29 +54,28 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 600,
-    color: '#111827',
+    ...typography.subTitle1,
+    color: 'var(--color-text-primary)',
   },
   sectionSubtitle: {
-    fontSize: 13,
-    color: '#6b7280',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     marginTop: 4,
   },
   sectionBadge: {
-    backgroundColor: '#eff6ff',
-    color: '#2563eb',
+    ...typography.caption,
+    backgroundColor: 'var(--color-info-bg)',
+    color: 'var(--color-info)',
     padding: '4px 10px',
     borderRadius: 999,
-    fontSize: 12,
-    fontWeight: 600,
   },
   practiceSectionWrap: {
     display: 'flex',
     flexDirection: 'column',
     gap: 12,
-    backgroundColor: '#f8fafc',
-    border: '1px solid #e2e8f0',
+    backgroundColor: 'var(--color-surface-page)',
+    borderWidth: 1,
+    borderColor: 'var(--color-border)',
     borderRadius: 12,
     padding: 16,
   },
@@ -86,19 +86,19 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   practiceHeaderTitle: {
-    fontSize: 18,
-    fontWeight: 600,
-    color: '#0f172a',
+    ...typography.subTitle1,
+    color: 'var(--color-text-primary)',
   },
   practiceHeaderSubtitle: {
-    fontSize: 13,
-    color: '#64748b',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     marginTop: 4,
   },
   tableCard: {
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 10,
-    border: '1px solid #e2e8f0',
+    borderWidth: 1,
+    borderColor: 'var(--color-border)',
     overflow: 'hidden',
   },
 });

@@ -3,7 +3,7 @@ import { StyleSheet, typography } from '@styles';
 const styles = StyleSheet.create({
   text: {
     ...typography.body1,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
   mediaContainer: {
     width: '100%',
@@ -11,30 +11,29 @@ const styles = StyleSheet.create({
 
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#00000010',
+    backgroundColor: 'var(--color-overlay-subtle)',
   },
   comingSoonContainer: {
     width: '100%',
     aspectRatio: 16 / 9,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#00000010',
+    backgroundColor: 'var(--color-overlay-subtle)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
   },
   comingSoonText: {
     ...typography.body1,
-    color: '#666',
+    color: 'var(--color-text-muted)',
     textAlign: 'center',
-    fontSize: 16,
   },
   shortContainer: {
     width: '100%',
     aspectRatio: 9 / 16,
     borderRadius: 12,
     overflow: 'hidden',
-    backgroundColor: '#00000010',
+    backgroundColor: 'var(--color-overlay-subtle)',
   },
   image: {
     width: '100%',
@@ -44,7 +43,7 @@ const styles = StyleSheet.create({
   pdfContainer: {
     width: '100%',
     height: '80vh',
-    backgroundColor: '#00000010',
+    backgroundColor: 'var(--color-overlay-subtle)',
     borderRadius: 12,
     position: 'relative',
     overflow: 'hidden',
@@ -56,7 +55,7 @@ const styles = StyleSheet.create({
   },
   fullscreenButton: {
     zIndex: 10,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--color-surface)',
     opacity: 0.95,
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -110,19 +109,19 @@ const styles = StyleSheet.create({
   // HEADER
   modalHeader: {
     padding: 20,
-    borderBottom: '1px solid #f0f0f0',
-    backgroundColor: '#fafafa',
+    borderBottom: '1px solid var(--color-border-subtle)',
+    backgroundColor: 'var(--color-surface-subtle)',
   },
 
   modalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111',
+    color: 'var(--color-text-primary)',
   },
 
   modalSubTitle: {
     fontSize: 13,
-    color: '#666',
+    color: 'var(--color-text-muted)',
     marginTop: 4,
   },
 
@@ -141,15 +140,15 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 14,
     borderRadius: 12,
-    border: '1px solid #eee',
+    border: '1px solid var(--color-border-subtle)',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    backgroundColor: '#fff',
+    backgroundColor: 'var(--color-surface)',
   },
 
   answerCardSelected: {
-    border: '1px solid #1d418a',
-    backgroundColor: '#e6f4ff',
+    border: '1px solid var(--color-vhu-primary)',
+    backgroundColor: 'var(--color-info-bg)',
     transform: 'scale(1.01)',
     boxShadow: '0 6px 18px rgba(29,65,138,0.15)',
   },
@@ -158,7 +157,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'var(--color-surface-subtle)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -167,22 +166,22 @@ const styles = StyleSheet.create({
 
   answerText: {
     fontSize: 14,
-    color: '#333',
+    color: 'var(--color-text-body)',
   },
 
   // FOOTER
   modalFooter: {
     padding: 16,
-    borderTop: '1px solid #f0f0f0',
+    borderTop: '1px solid var(--color-border-subtle)',
     display: 'flex',
     justifyContent: 'flex-end',
-    backgroundColor: '#fafafa',
+    backgroundColor: 'var(--color-surface-subtle)',
   },
 
   submitButton: {
-    color: '#fff',
-    backgroundColor: '#1d418a',
-    borderColor: '#1d418a',
+    color: 'var(--color-text-on-primary)',
+    backgroundColor: 'var(--color-vhu-primary)',
+    borderColor: 'var(--color-vhu-primary)',
     height: 40,
     borderRadius: 10,
     paddingLeft: 20,
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
     padding: 24,
-    backgroundColor: '#f5f7fb',
+    backgroundColor: 'var(--color-surface-page)',
     scrollbarWidth: 'none',
   },
 
@@ -202,7 +201,7 @@ const styles = StyleSheet.create({
   },
 
   quizInfoCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 16,
     padding: 20,
     marginBottom: 16,
@@ -212,12 +211,12 @@ const styles = StyleSheet.create({
   quizInfoTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111827',
+    color: 'var(--color-text-primary)',
   },
 
   quizInfoSubtitle: {
     fontSize: 13,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
     marginTop: 4,
   },
 
@@ -229,7 +228,7 @@ const styles = StyleSheet.create({
 
   quizProgressLabel: {
     fontSize: 13,
-    color: '#374151',
+    color: 'var(--color-text-body)',
     fontWeight: '500',
   },
 
@@ -237,7 +236,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 6,
     borderRadius: 999,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: 'var(--color-border)',
     overflow: 'hidden',
     marginBottom: 16,
   },
@@ -245,7 +244,7 @@ const styles = StyleSheet.create({
   quizProgressFill: {
     height: '100%',
     borderRadius: 999,
-    backgroundColor: '#1d418a',
+    backgroundColor: 'var(--color-vhu-primary)',
   },
 
   quizNavButton: {
@@ -258,7 +257,7 @@ const styles = StyleSheet.create({
   },
 
   quizNavGridCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--color-surface)',
     borderRadius: 16,
     padding: 20,
     marginTop: 16,
@@ -269,7 +268,7 @@ const styles = StyleSheet.create({
   quizNavGridTitle: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: 'var(--color-text-primary)',
     marginBottom: 12,
   },
 
@@ -284,35 +283,35 @@ const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 10,
-    backgroundColor: '#f9fafb',
+    backgroundColor: 'var(--color-surface-subtle)',
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: 'var(--color-border)',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
   },
 
   quizNavGridItemAnswered: {
-    backgroundColor: '#1d418a',
-    borderColor: '#1d418a',
+    backgroundColor: 'var(--color-vhu-primary)',
+    borderColor: 'var(--color-vhu-primary)',
   },
 
   quizNavGridItemCurrent: {
-    borderColor: '#f0c356',
+    borderColor: 'var(--color-vhu-secondary)',
     borderWidth: 2,
-    backgroundColor: '#fffbeb',
+    backgroundColor: 'var(--color-warning-bg)',
   },
 
   quizNavGridItemText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#6b7280',
+    color: 'var(--color-text-muted)',
   },
 
   quizNavGridItemTextAnswered: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#ffffff',
+    color: 'var(--color-text-on-primary)',
   },
 
   quizSubmitFromGridButton: {
@@ -321,14 +320,14 @@ const styles = StyleSheet.create({
     paddingLeft: 24,
     paddingRight: 24,
     fontWeight: '600',
-    backgroundColor: '#f0c356',
+    backgroundColor: 'var(--color-vhu-secondary)',
     border: 'none',
   },
 
   quizFlagButtonActive: {
-    color: '#b45309',
-    borderColor: '#f0c356',
-    backgroundColor: '#fffbeb',
+    color: 'var(--color-warning)',
+    borderColor: 'var(--color-vhu-secondary)',
+    backgroundColor: 'var(--color-warning-bg)',
   },
 
   emptyQuizWrap: {
@@ -336,30 +335,30 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f5f7fb',
+    backgroundColor: 'var(--color-surface-page)',
     padding: 24,
   },
 
   emptyQuizText: {
     fontSize: 15,
-    color: '#8D8D8D',
+    color: 'var(--color-text-muted)',
   },
 
   quizHeader: {
     marginBottom: 28,
-    borderBottom: '1px solid #f3f4f6',
+    borderBottom: '1px solid var(--color-border-subtle)',
   },
 
   quizTitle: {
     fontSize: 30,
     fontWeight: '700',
-    color: '#111827',
+    color: 'var(--color-text-primary)',
     marginBottom: 8,
   },
 
   quizDescription: {
-    fontSize: 14,
-    color: '#6b7280',
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
   },
 
   quizContent: {
@@ -369,10 +368,10 @@ const styles = StyleSheet.create({
   },
 
   questionCard: {
-    border: '1px solid #edf2f7',
+    border: '1px solid var(--color-border-subtle)',
     borderRadius: 20,
     padding: 22,
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--color-surface)',
     transition: 'all 0.25s ease',
   },
 
@@ -382,7 +381,7 @@ const styles = StyleSheet.create({
   },
 
   questionCardInvalid: {
-    border: '1px solid #fecaca',
+    border: '1px solid var(--color-error)',
   },
 
   questionTop: {
@@ -402,8 +401,8 @@ const styles = StyleSheet.create({
     minWidth: 38,
     height: 38,
     borderRadius: 12,
-    backgroundColor: '#1d418a',
-    color: '#ffffff',
+    backgroundColor: 'var(--color-vhu-primary)',
+    color: 'var(--color-text-on-primary)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -437,10 +436,10 @@ const styles = StyleSheet.create({
   },
 
   answerOption: {
-    border: '1px solid #e5e7eb',
+    border: '1px solid var(--color-border)',
     borderRadius: 16,
     padding: '4px 16px',
-    backgroundColor: '#ffffff',
+    backgroundColor: 'var(--color-surface)',
     transition: 'all 0.25s ease',
     cursor: 'pointer',
   },
@@ -451,8 +450,8 @@ const styles = StyleSheet.create({
   },
 
   answerOptionSelected: {
-    border: '1px solid #1d418a',
-    backgroundColor: '#e6f4ff',
+    border: '1px solid var(--color-vhu-primary)',
+    backgroundColor: 'var(--color-info-bg)',
     boxShadow: '0 6px 18px rgba(22,119,255,0.12)',
   },
 
@@ -476,8 +475,8 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: '#f3f4f6',
-    color: '#374151',
+    backgroundColor: 'var(--color-surface-selected)',
+    color: 'var(--color-text-body)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -493,13 +492,13 @@ const styles = StyleSheet.create({
   },
 
   answerLetterBoxSelected: {
-    backgroundColor: '#1d418a',
-    color: '#ffffff',
+    backgroundColor: 'var(--color-vhu-primary)',
+    color: 'var(--color-text-on-primary)',
   },
 
   answerLabel: {
     fontSize: 15,
-    color: '#374151',
+    color: 'var(--color-text-body)',
     fontWeight: '500',
   },
 
@@ -529,7 +528,7 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     paddingRight: 30,
     borderRadius: 14,
-    backgroundColor: '#1d418a',
+    backgroundColor: 'var(--color-vhu-primary)',
     border: 'none',
     fontWeight: '600',
     fontSize: 14,
