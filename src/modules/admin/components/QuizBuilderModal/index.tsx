@@ -225,7 +225,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
       destroyOnHidden
       styles={{ body: { padding: 0 }, content: { padding: 0 } }}>
       <View style={styles.shell}>
-        <View style={styles.header}>
+        <View style={[styles.header, isMobile && styles.headerMobile]}>
           <View style={styles.headerText}>
             <Text style={styles.title}>
               {isEdit ? `Cập nhật: ${editing?.title}` : 'Tạo bài tập'}
@@ -242,7 +242,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
             Đóng
           </button>
         </View>
-        <View style={styles.body}>
+        <View style={[styles.body, isMobile && styles.bodyMobile]}>
           <Form form={form} layout="vertical" onFinish={handleFinish}>
             <View style={[styles.grid, isMobile && styles.gridMobile]}>
               <View style={styles.leftCol}>
@@ -255,7 +255,12 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                   </View>
                 )}
                 {questions.map((q, qIndex) => (
-                  <View key={q.key} style={styles.questionCard}>
+                  <View
+                    key={q.key}
+                    style={[
+                      styles.questionCard,
+                      isMobile && styles.questionCardMobile,
+                    ]}>
                     <View style={styles.questionHeader}>
                       <View style={styles.indexBadge}>
                         <Text style={styles.indexBadgeText}>{qIndex + 1}</Text>
@@ -277,7 +282,11 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                       </Button>
                     </View>
 
-                    <View style={styles.answerBlock}>
+                    <View
+                      style={[
+                        styles.answerBlock,
+                        isMobile && styles.answerBlockMobile,
+                      ]}>
                       <View style={styles.answersList}>
                         {q.answers.map((a, aIndex) => (
                           <View key={aIndex} style={styles.answerRow}>

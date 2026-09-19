@@ -207,8 +207,10 @@ const LessonNotesPanel: React.FC<LessonNotesPanelProps> = ({
                 <div style={{ flex: 1 }} />
                 {editingId !== note._id && (
                   <>
-                    <EditOutlined
-                      style={styles.actionIcon}
+                    <button
+                      type="button"
+                      aria-label="Sửa ghi chú"
+                      style={styles.actionBtn}
                       onClick={() => {
                         // Đang sửa ghi chú khác: lưu nốt phần chưa lưu trước
                         // khi đổi editingId (timer tự lưu sẽ bị hủy khi đổi).
@@ -218,16 +220,23 @@ const LessonNotesPanel: React.FC<LessonNotesPanelProps> = ({
                         setEditingId(note._id);
                         setEditingText(note.content);
                         lastSentRef.current = note.content.trim();
-                      }}
-                    />
+                      }}>
+                      <EditOutlined />
+                    </button>
                     <Popconfirm
                       title="Xoá ghi chú này?"
                       okText="Xoá"
                       cancelText="Huỷ"
                       onConfirm={() => handleDelete(note._id)}>
-                      <DeleteOutlined
-                        style={{ ...styles.actionIcon, color: '#c0392b' }}
-                      />
+                      <button
+                        type="button"
+                        aria-label="Xóa ghi chú"
+                        style={{
+                          ...styles.actionBtn,
+                          ...styles.actionBtnDanger,
+                        }}>
+                        <DeleteOutlined />
+                      </button>
                     </Popconfirm>
                   </>
                 )}

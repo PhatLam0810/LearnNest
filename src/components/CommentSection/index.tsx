@@ -15,13 +15,16 @@ import {
 } from '@ant-design/icons';
 import { Text, View } from 'react-native-web';
 import dayjs from 'dayjs';
-import api from '@/services/api';
 import { messageApi } from '@hooks';
 import { useAppSelector } from '@redux';
 import { useSocket } from '@hooks/useSocket';
 import { AppInput } from '@components';
 import UserAvatar from '@components/UserAvatar';
 import { dashboardQuery } from '~mdDashboard/redux';
+import type {
+  CommentItem,
+  CommentListResponse,
+} from '~mdDashboard/redux/RTKQuery/types';
 import styles from './styles';
 
 const REPLIES_PREVIEW_COUNT = 4;
@@ -36,25 +39,6 @@ const REPORT_REASONS: { value: string; label: string }[] = [
   { value: 'other', label: 'Khác' },
 ];
 
-type CommentUser = {
-  _id: string;
-  fullName?: string;
-  avatar?: string;
-  role?: { level?: number; name?: string };
-};
-
-type CommentItem = {
-  _id: string;
-  postId: string;
-  type: string;
-  commentText: string;
-  user: CommentUser;
-  parentCommentId: string | null;
-  images?: string[];
-  likes?: string[];
-  createdAt: string;
-};
-
 interface CommentSectionProps {
   postId: string;
   type: string;
@@ -68,10 +52,10 @@ interface CommentSectionProps {
   onCountChange?: (count: number) => void;
 }
 
-const displayName = (u: CommentUser | undefined, myId?: string) =>
+const displayName = (u: CommentItem['user'] | undefined, myId?: string) =>
   u?._id === myId ? 'Bạn' : (u?.fullName ?? '').trim();
 
-const isTeacher = (u?: CommentUser) => (u?.role?.level ?? 99) <= 2;
+const isTeacher = (u?: CommentItem['user']) => (u?.role?.level ?? 99) <= 2;
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   postId,
@@ -86,14 +70,36 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const isAdmin = (userProfile as any)?.role?.level <= 2;
 
   const [open, setOpen] = useState(false);
+  // Tải qua RTK Query (2 nơi cùng postId dùng chung 1 request); currentData
+  // là undefined khi đổi postId nên không dính dữ liệu bài cũ. Luôn tải lại
+  // khi mount vì cache có thể bỏ lỡ bình luận realtime lúc chưa join phòng.
+  const { currentData, isFetching: loading } =
+    dashboardQuery.useGetCommentsQuery(postId, {
+      skip: !postId,
+      refetchOnMountOrArgChange: true,
+    });
+  // Danh sách hiển thị = bản sao cục bộ của dữ liệu tải về, để socket/like/
+  // xóa/sửa cập nhật ngay không cần refetch.
   const [comments, setComments] = useState<CommentItem[]>([]);
   // Số bình luận có trên server nhưng chưa tải (API chỉ trả tối đa pageSize).
   const [unloadedCount, setUnloadedCount] = useState(0);
+  const [syncedData, setSyncedData] = useState<CommentListResponse>();
+  // Đồng bộ ngay trong lúc render (không qua effect) để không lóe khung
+  // "chưa có bình luận" 1 nhịp sau khi dữ liệu về.
+  if (currentData !== syncedData) {
+    setSyncedData(currentData);
+    setComments(currentData?.items ?? []);
+    setUnloadedCount(
+      Math.max(
+        0,
+        (currentData?.totalRecords ?? 0) - (currentData?.items.length ?? 0),
+      ),
+    );
+  }
   const [text, setText] = useState('');
   const [replyTo, setReplyTo] = useState<CommentItem | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
-  const [loading, setLoading] = useState(false);
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -113,17 +119,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
   useEffect(() => {
     if (!postId) return;
-    setLoading(true);
-    api
-      .post('/comments/getList', { postId, pageSize: 100, pageNum: 1 })
-      .then(res => {
-        const data = res.data?.data;
-        const items = data?.items || [];
-        setComments(items);
-        setUnloadedCount(Math.max(0, (data?.totalRecords || 0) - items.length));
-      })
-      .finally(() => setLoading(false));
-
     socket.emit('joinPost', postId);
     const onReceive = (c: CommentItem) => {
       if (c.postId !== postId) return;

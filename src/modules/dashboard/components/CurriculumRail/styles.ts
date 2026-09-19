@@ -80,17 +80,15 @@ const styles = StyleSheet.create({
     ...typography.caption,
     color: 'var(--color-text-muted)',
   },
+  // Hàng = container (viền trên + vạch trái + nền) chứa nút chọn bài và nút
+  // lưu bài đứng cạnh nhau — không lồng button trong button.
   lessonRow: {
-    ...BUTTON_RESET,
+    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
     width: '100%',
     minHeight: 56,
-    paddingTop: 12,
-    paddingBottom: 12,
-    paddingLeft: 17,
-    paddingRight: 20,
+    paddingRight: 8,
     borderTopWidth: 1,
     borderTopStyle: 'solid',
     borderTopColor: 'var(--color-border-subtle)',
@@ -105,9 +103,30 @@ const styles = StyleSheet.create({
     backgroundColor: 'var(--color-secondary-tint)',
     borderLeftColor: 'var(--color-vhu-secondary)',
   },
-  lessonRowLocked: {
+  lessonSelect: {
+    ...BUTTON_RESET,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+    minWidth: 0,
+    alignSelf: 'stretch',
+    paddingTop: 12,
+    paddingBottom: 12,
+    paddingLeft: 17,
+    paddingRight: 8,
+    borderWidth: 0,
+    backgroundColor: 'transparent',
+  },
+  lessonSelectLocked: {
     cursor: 'not-allowed',
     opacity: 0.6,
+  },
+  lessonAction: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   lessonIcon: {
     display: 'flex',

@@ -57,6 +57,12 @@ const PracticeCourseDetailPage: React.FC<Props> = ({ lessonId }) => {
       { skip: !userProfile?._id || !lessonId },
     );
 
+  // Id đã lưu để dòng nào trong rail cũng hiện đúng trạng thái nút lưu bài.
+  const { data: bookmarkedSubIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('sublesson');
+  const { data: bookmarkedTaskIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
+
   const isLoading = isLoadingLesson || isLoadingTasks;
 
   // Dãy nội dung khóa học theo đúng thứ tự hiển thị (library trộn với bài
@@ -178,6 +184,9 @@ const PracticeCourseDetailPage: React.FC<Props> = ({ lessonId }) => {
           <CurriculumRail
             modules={lessonDetail.modules}
             tasks={tasks}
+            lessonId={lessonId}
+            bookmarkedSubLessonIds={bookmarkedSubIds}
+            bookmarkedTaskIds={bookmarkedTaskIds}
             videoCompletedBySubLesson={videoCompletedBySubLesson}
             quizPassedByLibrary={quizPassedByLibrary}
             isAdmin={isAdmin}

@@ -530,7 +530,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
               {lessonDetail.title.trim()}
             </Text>
             <Text style={styles.metaLine}>
-              {`${lessonDetail.totalLibraries} bài · ${convertDurationToTime(lessonDetail.totalDuration)} · Cập nhật ${dayjs(lessonDetail.updatedAt).format('DD/MM/YYYY')}`}
+              {`${lessonDetail.instructor ? `Giảng viên: ${lessonDetail.instructor} · ` : ''}${lessonDetail.totalLibraries} bài · ${convertDurationToTime(lessonDetail.totalDuration)} · Cập nhật ${dayjs(lessonDetail.updatedAt).format('DD/MM/YYYY')}`}
             </Text>
             <View style={styles.ratingRow}>
               {[1, 2, 3, 4, 5].map(n =>

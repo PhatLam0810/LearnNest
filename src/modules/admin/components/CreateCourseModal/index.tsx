@@ -60,6 +60,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
     ? {
         title: initialValues.title,
         description: initialValues.description,
+        instructor: initialValues.instructor,
         learnedSkills: initialValues.learnedSkills,
         thumbnail: initialValues.thumbnail?.includes('youtube.com/watch')
           ? getYouTubeThumbnail(initialValues.thumbnail)
@@ -92,6 +93,7 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
   const handleFinish = (values: {
     title: string;
     description: string;
+    instructor?: string;
     thumbnail?: string;
     learnedSkills?: string[];
   }) => {
@@ -148,6 +150,14 @@ const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
                 { required: true, message: 'Vui lòng nhập tên khóa học' },
               ]}>
               <Input placeholder="Nhập tên khóa học" style={styles.control} />
+            </Form.Item>
+
+            <Form.Item
+              style={styles.formItem}
+              label="Giảng viên"
+              name="instructor"
+              rules={[{ max: 100, message: 'Tối đa 100 ký tự' }]}>
+              <Input placeholder="Tên giảng viên" style={styles.control} />
             </Form.Item>
 
             <Form.Item

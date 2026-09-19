@@ -201,6 +201,7 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
               showTime={{ format: 'HH:mm' }}
               format="DD/MM/YYYY HH:mm"
               size="large"
+              popupClassName="picker-fit-mobile"
               aria-label="Hạn nộp"
               style={{ width: '100%' }}
               placeholder="Chọn ngày giờ"

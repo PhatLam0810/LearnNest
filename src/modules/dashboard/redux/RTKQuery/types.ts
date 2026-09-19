@@ -164,6 +164,31 @@ export interface AskAiResponse {
 
 // CommentSection - bình luận/hỏi đáp dưới bài học. Xem CommentController
 // (BE, module gateway/comment).
+export type CommentUser = {
+  _id: string;
+  fullName?: string;
+  avatar?: string;
+  role?: { level?: number; name?: string };
+};
+
+export type CommentItem = {
+  _id: string;
+  postId: string;
+  type: string;
+  commentText: string;
+  user: CommentUser;
+  parentCommentId: string | null;
+  images?: string[];
+  likes?: string[];
+  createdAt: string;
+};
+
+// API trả tối đa pageSize bình luận; totalRecords là tổng có trên server.
+export interface CommentListResponse {
+  items: CommentItem[];
+  totalRecords: number;
+}
+
 export interface DeleteCommentResponse {
   deletedIds: string[];
 }

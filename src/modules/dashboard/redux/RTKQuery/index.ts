@@ -11,6 +11,7 @@ import {
   LearningInsight,
   BookmarkItem,
   BookmarkItemType,
+  CommentListResponse,
   LeaderboardResponse,
   LessonNote,
   LessonNoteListResponse,
@@ -391,6 +392,19 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res.data,
     }),
+    // Danh sách bình luận của 1 bài (arg = postId). Cập nhật realtime do
+    // CommentSection tự giữ state cục bộ qua socket, không ghi ngược cache.
+    getComments: builder.query<CommentListResponse, string>({
+      query: postId => ({
+        url: '/comments/getList',
+        method: 'POST',
+        body: { postId, pageSize: 100, pageNum: 1 },
+      }),
+      transformResponse: (res: { data?: Partial<CommentListResponse> }) => ({
+        items: res.data?.items || [],
+        totalRecords: res.data?.totalRecords || 0,
+      }),
+    }),
     deleteComment: builder.mutation<DeleteCommentResponse, string>({
       query: id => ({
         url: `/comments/${id}`,
@@ -696,6 +710,7 @@ export const {
   useDeleteLessonNoteMutation,
   useGetBookmarksQuery,
   useGetBookmarkIdsQuery,
+  useGetCommentsQuery,
   useToggleBookmarkMutation,
   useGetMyRetryQueueQuery,
   useGetMyQuestionsQuery,

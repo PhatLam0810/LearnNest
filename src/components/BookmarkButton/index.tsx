@@ -30,6 +30,9 @@ interface BookmarkButtonProps {
   // state optimistic sau đó.
   bookmarked?: boolean;
   size?: number;
+  // Vùng bấm tối thiểu (px) — dùng khi nút nằm trong hàng danh sách để đạt
+  // ≥32; bỏ trống = vừa khít icon như trước.
+  hitArea?: number;
   // true = kèm chữ "Đã lưu"/"Lưu"; false = chỉ icon (mặc định).
   withLabel?: boolean;
   onToggled?: (bookmarked: boolean) => void;
@@ -41,6 +44,7 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
   lessonId,
   bookmarked = false,
   size = 18,
+  hitArea,
   withLabel = false,
   onToggled,
 }) => {
@@ -70,13 +74,25 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
 
   return (
     <Tooltip title={saved ? 'Bỏ lưu' : 'Lưu để xem lại'}>
-      <span
-        role="button"
+      <button
+        type="button"
+        aria-label={saved ? 'Bỏ lưu' : 'Lưu để xem lại'}
+        aria-pressed={saved}
         onClick={handleClick}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
+          justifyContent: 'center',
           gap: 6,
+          minWidth: hitArea,
+          minHeight: hitArea,
+          paddingTop: 0,
+          paddingRight: 0,
+          paddingBottom: 0,
+          paddingLeft: 0,
+          borderWidth: 0,
+          background: 'none',
+          fontFamily: 'inherit',
           cursor: isLoading ? 'wait' : 'pointer',
           color: saved ? '#1677ff' : '#9aa5b8',
           fontSize: size,
@@ -88,7 +104,7 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
             {saved ? 'Đã lưu' : 'Lưu'}
           </span>
         )}
-      </span>
+      </button>
     </Tooltip>
   );
 };

@@ -17,6 +17,14 @@ const styles = StyleSheet.create({
     paddingRight: 28,
     backgroundColor: 'var(--color-vhu-primary)',
   },
+  // Mobile: thu lề ngang để vùng nhập không bị bóp hẹp ở 375px.
+  headerMobile: {
+    gap: 12,
+    paddingTop: 16,
+    paddingBottom: 16,
+    paddingLeft: 16,
+    paddingRight: 16,
+  },
   headerText: {
     gap: 4,
     minWidth: 0,
@@ -51,6 +59,12 @@ const styles = StyleSheet.create({
     paddingRight: 28,
     paddingBottom: 28,
   },
+  bodyMobile: {
+    paddingTop: 16,
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingBottom: 16,
+  },
   grid: {
     display: 'grid',
     gridTemplateColumns: '1.4fr 1fr',
@@ -59,18 +73,24 @@ const styles = StyleSheet.create({
     overflowY: 'auto',
   },
   // Mobile (<600): 1 cột, cột thiết lập nằm dưới danh sách câu hỏi.
+  // minmax(0, 1fr): '1fr' có min auto nên nội dung dài đẩy cột tràn ngang.
   gridMobile: {
-    gridTemplateColumns: '1fr',
+    gridTemplateColumns: 'minmax(0, 1fr)',
+    gap: 16,
+    maxHeight: 'none',
+    overflowY: 'visible',
   },
   leftCol: {
     display: 'flex',
     flexDirection: 'column',
     gap: 16,
     paddingRight: 4,
+    minWidth: 0,
   },
   rightCol: {
     display: 'flex',
     flexDirection: 'column',
+    minWidth: 0,
   },
   emptyQuestions: {
     paddingTop: 44,
@@ -91,6 +111,9 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     gap: 12,
+  },
+  questionCardMobile: {
+    padding: 12,
   },
   questionHeader: {
     flexDirection: 'row',
@@ -114,6 +137,7 @@ const styles = StyleSheet.create({
   },
   questionInput: {
     flex: 1,
+    minWidth: 0,
     height: 44,
   },
   removeQuestionButton: {
@@ -134,6 +158,10 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingLeft: 40,
   },
+  // Mobile: bỏ thụt lề 40px để ô đáp án/giải thích chiếm đủ bề ngang thẻ.
+  answerBlockMobile: {
+    paddingLeft: 0,
+  },
   answersList: {
     display: 'flex',
     flexDirection: 'column',
@@ -146,6 +174,7 @@ const styles = StyleSheet.create({
   },
   answerInput: {
     flex: 1,
+    minWidth: 0,
   },
   answerDeleteButton: {
     width: 32,

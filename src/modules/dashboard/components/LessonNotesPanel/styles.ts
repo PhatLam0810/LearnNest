@@ -70,11 +70,23 @@ const styles: Record<string, CSSProperties> = {
     paddingRight: 10,
     cursor: 'pointer',
   },
-  actionIcon: {
-    color: 'var(--color-text-disabled)',
+  // Nút icon sửa/xóa: <button> thật, vùng bấm 32x32, giữ viền focus mặc định.
+  actionBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 32,
+    height: 32,
+    padding: 0,
+    borderWidth: 0,
+    borderRadius: 6,
+    background: 'none',
+    color: 'var(--color-text-muted)',
     cursor: 'pointer',
     fontSize: 14,
-    marginLeft: 8,
+  },
+  actionBtnDanger: {
+    color: 'var(--color-error)',
   },
   content: {
     ...typography.body2,

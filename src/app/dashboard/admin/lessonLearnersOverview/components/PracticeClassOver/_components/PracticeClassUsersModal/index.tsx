@@ -230,6 +230,7 @@ const PracticeClassUsersModal: React.FC<Props> = ({
               onChange={setPickDueDate}
               format="DD/MM/YYYY HH:mm"
               showTime={{ format: 'HH:mm' }}
+              popupClassName="picker-fit-mobile"
             />
             <Button
               type="primary"

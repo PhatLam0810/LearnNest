@@ -94,6 +94,8 @@ const ModuleDetailPage = () => {
   // Bookmark ngay khi mở bài mà không phải gọi lẻ từng bài.
   const { data: bookmarkedSubIds } =
     dashboardQuery.useGetBookmarkIdsQuery('sublesson');
+  const { data: bookmarkedTaskIds } =
+    dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
   const { isMobile, isTablet } = useResponsive();
@@ -281,6 +283,18 @@ const ModuleDetailPage = () => {
   const quizDone = searchParams.get('quizDone') === '1';
   const quizDoneHandledRef = useRef(false);
   useEffect(() => {
+    // Thư viện đang mở không phải quiz thì không có gì để mở khóa — chỉ bỏ
+    // param cho URL sạch, không cần chờ dữ liệu tiến độ.
+    if (
+      quizDone &&
+      selectedLibrary?._id === subLessonId &&
+      selectedLibrary.type !== 'Text'
+    ) {
+      router.replace(
+        `/dashboard/home/lesson/moduleDetail?lessonId=${lessonId}&subLessonId=${subLessonId}`,
+      );
+      return;
+    }
     // Chưa có tiến độ quiz thì chờ (không chạy, không bỏ param) — tránh ai đó
     // tự gõ quizDone=1 để mở khóa mục kế tiếp mà chưa đạt quiz.
     if (
@@ -304,6 +318,7 @@ const ModuleDetailPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     quizDone,
+    selectedLibrary?.type,
     isLoadingData,
     lessonDetail,
     quizPassedByLibrary,
@@ -716,6 +731,9 @@ const ModuleDetailPage = () => {
           <CurriculumRail
             modules={lessonDetail.modules}
             tasks={practiceTasksForLesson}
+            lessonId={lessonDetail?._id}
+            bookmarkedSubLessonIds={bookmarkedSubIds}
+            bookmarkedTaskIds={bookmarkedTaskIds}
             videoCompletedBySubLesson={videoCompletedBySubLesson}
             quizPassedByLibrary={quizPassedByLibrary}
             isAdmin={isAdmin}

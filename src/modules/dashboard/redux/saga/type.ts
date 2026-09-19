@@ -17,6 +17,8 @@ export interface Lesson {
   totalDuration: number;
   totalLibraries: number;
   totalLearner: number;
+  // Tên giảng viên — tùy chọn, khóa cũ chưa nhập thì không có.
+  instructor?: string;
   // 'theory' (mặc định) = khóa học video thật. 'practice' = phần thực hành
   // riêng (gom bài tập theo kỹ năng, không có video) — xem
   // PracticeLessonManage. Optional để tương thích ngược với dữ liệu cũ
@@ -40,6 +42,7 @@ export interface LessonDetailDataResponse {
   totalDuration: number;
   totalLibraries: number;
   totalLearner: number;
+  instructor?: string;
 }
 
 export interface Category {

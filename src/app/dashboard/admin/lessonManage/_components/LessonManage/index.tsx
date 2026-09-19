@@ -41,6 +41,12 @@ const LessonManage = () => {
       key: 'title',
     },
     {
+      title: 'Giảng viên',
+      dataIndex: 'instructor',
+      key: 'instructor',
+      render: (value?: string) => value || '—',
+    },
+    {
       title: 'Tổng phần học',
       dataIndex: 'Module',
       key: 'Module',

@@ -9,6 +9,7 @@ import {
   LockOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
+import BookmarkButton from '@components/BookmarkButton';
 import { convertDurationToTime } from '@utils/time';
 import { useResponsive } from '@/styles/responsive';
 import {
@@ -43,6 +44,9 @@ const CurriculumRail = ({
   tasks,
   videoCompletedBySubLesson,
   quizPassedByLibrary,
+  lessonId,
+  bookmarkedSubLessonIds,
+  bookmarkedTaskIds,
   isAdmin,
   currentUserId,
   selected,
@@ -61,8 +65,8 @@ const CurriculumRail = ({
     return !!videoCompletedBySubLesson?.[item.data._id];
   };
 
-  // Danh sách phẳng theo từng phần: mỗi mục là 1 <button> thật (Tab/Enter
-  // hoạt động), mục đang học tô nền vàng nhạt + nhãn "Đang học", mục đã xong
+  // Danh sách phẳng theo từng phần: mỗi mục là 1 hàng gồm <button> chọn bài
+  // (Tab/Enter hoạt động) + nút lưu bài riêng, mục đang học tô nền vàng nhạt + nhãn "Đang học", mục đã xong
   // có dấu tích + nhãn — trạng thái không chỉ dựa vào màu.
   const renderCurriculum = () => {
     const lessonSeq = getLessonContentItems(modules, tasks);
@@ -106,51 +110,71 @@ const CurriculumRail = ({
                   ? 'Chưa mở'
                   : '';
             const blocked = isLocked && !isSelected;
+            const bookmarkIds = isTask
+              ? bookmarkedTaskIds
+              : bookmarkedSubLessonIds;
             return (
-              <button
+              <div
                 key={`${contentItem.kind}-${data._id}`}
-                type="button"
-                disabled={blocked}
-                aria-current={isSelected ? 'true' : undefined}
-                onClick={() => onSelect(contentItem)}
                 style={{
                   ...styles.lessonRow,
                   ...(isSelected ? styles.lessonRowActive : null),
-                  ...(blocked ? styles.lessonRowLocked : null),
                 }}>
-                <span
-                  aria-hidden="true"
+                <button
+                  type="button"
+                  disabled={blocked}
+                  aria-current={isSelected ? 'true' : undefined}
+                  onClick={() => onSelect(contentItem)}
                   style={{
-                    ...styles.lessonIcon,
-                    ...(isDone ? styles.lessonIconDone : null),
+                    ...styles.lessonSelect,
+                    ...(blocked ? styles.lessonSelectLocked : null),
                   }}>
-                  {isDone ? (
-                    <CheckCircleFilled />
-                  ) : blocked ? (
-                    <LockOutlined />
-                  ) : isTask || data.type === 'Text' ? (
-                    <FileTextOutlined />
-                  ) : (
-                    <PlayCircleOutlined />
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      ...styles.lessonIcon,
+                      ...(isDone ? styles.lessonIconDone : null),
+                    }}>
+                    {isDone ? (
+                      <CheckCircleFilled />
+                    ) : blocked ? (
+                      <LockOutlined />
+                    ) : isTask || data.type === 'Text' ? (
+                      <FileTextOutlined />
+                    ) : (
+                      <PlayCircleOutlined />
+                    )}
+                  </span>
+                  <View style={styles.lessonText}>
+                    <Text numberOfLines={2} style={styles.lessonTitle}>
+                      {data.title}
+                    </Text>
+                    <Text style={styles.lessonMeta}>{meta}</Text>
+                  </View>
+                  {!!stateLabel && (
+                    <Text
+                      style={[
+                        styles.lessonState,
+                        isDone && styles.lessonStateDone,
+                        isSelected && styles.lessonStateCurrent,
+                      ]}>
+                      {stateLabel}
+                    </Text>
                   )}
-                </span>
-                <View style={styles.lessonText}>
-                  <Text numberOfLines={2} style={styles.lessonTitle}>
-                    {data.title}
-                  </Text>
-                  <Text style={styles.lessonMeta}>{meta}</Text>
-                </View>
-                {!!stateLabel && (
-                  <Text
-                    style={[
-                      styles.lessonState,
-                      isDone && styles.lessonStateDone,
-                      isSelected && styles.lessonStateCurrent,
-                    ]}>
-                    {stateLabel}
-                  </Text>
+                </button>
+                {bookmarkIds && (
+                  <div style={styles.lessonAction}>
+                    <BookmarkButton
+                      itemType={isTask ? 'practiceTask' : 'sublesson'}
+                      itemId={data._id}
+                      lessonId={isTask ? undefined : lessonId}
+                      size={18}
+                      hitArea={32}
+                      bookmarked={bookmarkIds.includes(data._id)}
+                    />
+                  </div>
                 )}
-              </button>
+              </div>
             );
           })}
         </View>
@@ -172,6 +196,9 @@ const CurriculumRail = ({
       selected.id,
       videoCompletedBySubLesson,
       quizPassedByLibrary,
+      lessonId,
+      bookmarkedSubLessonIds,
+      bookmarkedTaskIds,
       isAdmin,
       currentUserId,
     ],
