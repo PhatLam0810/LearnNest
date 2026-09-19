@@ -2,58 +2,15 @@
 import React from 'react';
 import { Text, View } from 'react-native-web';
 import { Skeleton } from 'antd';
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import AppButton from '@components/AppButton';
+import QuizAnswerReview from '@components/QuizAnswerReview';
 import { adminQuery } from '~mdAdmin/redux';
-import { QuizResultDetailQuestion } from '../../redux/RTKQuery/type';
 import SubmissionDetailHeader from '../SubmissionDetailHeader';
 import styles from './styles';
 
 interface QuizSubmissionDetailProps {
   resultId: string;
 }
-
-const LETTERS = ['A', 'B', 'C', 'D'];
-
-const Question: React.FC<{ q: QuizResultDetailQuestion; index: number }> = ({
-  q,
-  index,
-}) => (
-  <View style={styles.question}>
-    <Text
-      style={styles.questionTitle}>{`Câu ${index + 1}. ${q.question}`}</Text>
-    {q.answerList.map((text, i) => {
-      const letter = LETTERS[i];
-      const isCorrectOption = letter === q.correctAnswer;
-      const isChosen = letter === q.selected;
-      const optionStyle = isCorrectOption
-        ? styles.optionCorrect
-        : isChosen
-          ? styles.optionWrong
-          : undefined;
-      return (
-        <View key={letter} style={{ ...styles.option, ...optionStyle }}>
-          <Text style={styles.optionLetter}>{letter}</Text>
-          <Text style={styles.optionText}>{text}</Text>
-          {isCorrectOption && (
-            <Text style={{ ...styles.optionTag, ...styles.tagCorrect }}>
-              <CheckCircleFilled aria-hidden />
-              {isChosen ? ' Học viên chọn · Đúng' : ' Đáp án đúng'}
-            </Text>
-          )}
-          {isChosen && !isCorrectOption && (
-            <Text style={{ ...styles.optionTag, ...styles.tagWrong }}>
-              <CloseCircleFilled aria-hidden /> Học viên chọn · Sai
-            </Text>
-          )}
-        </View>
-      );
-    })}
-    {!q.selected && (
-      <Text style={styles.unanswered}>Học viên bỏ trống câu này.</Text>
-    )}
-  </View>
-);
 
 const QuizSubmissionDetail: React.FC<QuizSubmissionDetailProps> = ({
   resultId,
@@ -94,11 +51,7 @@ const QuizSubmissionDetail: React.FC<QuizSubmissionDetailProps> = ({
         </View>
       )}
       {data.hasAnswers ? (
-        <View style={styles.questions}>
-          {data.questions.map((q, i) => (
-            <Question key={q._id} q={q} index={i} />
-          ))}
-        </View>
+        <QuizAnswerReview questions={data.questions} />
       ) : (
         <View style={styles.notice}>
           <Text style={styles.noticeText}>

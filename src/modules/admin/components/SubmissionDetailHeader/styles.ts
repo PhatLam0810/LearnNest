@@ -19,9 +19,12 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flex: 1,
   },
+  // RNW mặc định flexShrink:0 — phải ghi 1 tường minh để tên/mô tả dài co lại
+  // thay vì đẩy tràn ngang ở mobile.
   identityText: {
     gap: 4,
     minWidth: 0,
+    flexShrink: 1,
   },
   name: {
     ...typography.titleS,

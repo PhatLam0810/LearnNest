@@ -140,6 +140,13 @@ const CreateClassModal: React.FC<CreateClassModalProps> = ({
               Tạo lớp và giao bài kèm hạn nộp trong một bước.
             </Text>
           </View>
+          <button
+            type="button"
+            aria-label="Đóng"
+            onClick={close}
+            style={styles.closeButton as React.CSSProperties}>
+            Đóng
+          </button>
         </View>
         <View style={styles.body}>
           <View style={styles.field}>

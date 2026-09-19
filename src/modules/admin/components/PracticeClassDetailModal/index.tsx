@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Modal, Select, Skeleton, Table } from 'antd';
+import { Modal, Select, Skeleton } from 'antd';
 import type { TableProps } from 'antd';
 import dayjs from 'dayjs';
 import AppButton from '@components/AppButton';
@@ -10,6 +10,7 @@ import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { ClassRosterLearner } from '../../redux/RTKQuery/type';
 import StateTag from '../StateTag';
+import ThemedTable from '../ThemedTable';
 import { LEARNER_STATE } from '../practiceClassShared';
 import styles from './styles';
 
@@ -118,7 +119,13 @@ const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
 
   const renderBody = () => {
     if (isFetching && !data) {
-      return <Skeleton active paragraph={{ rows: 6 }} />;
+      return (
+        <View style={styles.skeletonWrap}>
+          {[0, 1, 2, 3, 4, 5].map(k => (
+            <Skeleton.Input key={k} active block style={{ height: 40 }} />
+          ))}
+        </View>
+      );
     }
     if (isError || !data) {
       return (
@@ -159,7 +166,7 @@ const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
           )}
         </View>
         {total ? (
-          <Table
+          <ThemedTable
             rowKey={r => r.user._id}
             size="middle"
             pagination={false}

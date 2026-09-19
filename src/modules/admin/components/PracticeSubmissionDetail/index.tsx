@@ -1,12 +1,13 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Input, InputNumber, Modal, Skeleton, Table } from 'antd';
+import { Input, InputNumber, Modal, Skeleton } from 'antd';
 import type { TableProps } from 'antd';
 import dayjs from 'dayjs';
 import AppButton from '@components/AppButton';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
+import ThemedTable from '../ThemedTable';
 import { PracticeSubmissionDetailResult } from '../../redux/RTKQuery/type';
 import SubmissionDetailHeader from '../SubmissionDetailHeader';
 import { practiceState } from '../submissionShared';
@@ -174,13 +175,12 @@ const PracticeSubmissionDetail: React.FC<PracticeSubmissionDetailProps> = ({
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Chấm điểm theo yêu cầu</Text>
-        <Table
+        <ThemedTable
           rowKey="criteriaId"
           size="middle"
           pagination={false}
           columns={columns}
           dataSource={data.results}
-          scroll={{ x: 'max-content' }}
         />
       </View>
 

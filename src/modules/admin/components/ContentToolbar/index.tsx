@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { View } from 'react-native-web';
-import { Button, Input } from 'antd';
+import { Button, Input, Tooltip } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import styles from './styles';
 
@@ -10,6 +10,9 @@ interface ContentToolbarProps {
   onSearch: (value: string) => void;
   addLabel: string;
   onAdd: () => void;
+  addDisabled?: boolean;
+  // Lý do nút thêm đang bị khóa, hiện dạng tooltip khi rê chuột vào.
+  addDisabledReason?: string;
 }
 
 const ContentToolbar: React.FC<ContentToolbarProps> = ({
@@ -17,6 +20,8 @@ const ContentToolbar: React.FC<ContentToolbarProps> = ({
   onSearch,
   addLabel,
   onAdd,
+  addDisabled,
+  addDisabledReason,
 }) => {
   const [value, setValue] = useState('');
 
@@ -40,13 +45,19 @@ const ContentToolbar: React.FC<ContentToolbarProps> = ({
           }
         />
       </View>
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        style={styles.addButton}
-        onClick={onAdd}>
-        {addLabel}
-      </Button>
+      {/* Nút disabled không bắn sự kiện chuột nên Tooltip cần bọc thêm span. */}
+      <Tooltip title={addDisabled ? addDisabledReason : undefined}>
+        <span>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            style={styles.addButton}
+            disabled={addDisabled}
+            onClick={onAdd}>
+            {addLabel}
+          </Button>
+        </span>
+      </Tooltip>
     </View>
   );
 };

@@ -63,6 +63,9 @@ interface CommentSectionProps {
   // false/undefined (mặc định) = giữ nguyên hành vi cũ: nút "Hỏi đáp" +
   // Drawer trượt từ phải.
   inline?: boolean;
+  // Báo số bình luận (gồm cả trả lời) mỗi khi đổi - để nơi gọi hiện trên nhãn
+  // tab "Thảo luận (n)". Tùy chọn, nơi dùng khác không cần truyền.
+  onCountChange?: (count: number) => void;
 }
 
 const displayName = (u: CommentUser | undefined, myId?: string) =>
@@ -74,6 +77,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   postId,
   type,
   inline,
+  onCountChange,
 }) => {
   const socket = useSocket();
   const userProfile = useAppSelector(
@@ -144,6 +148,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       socket.off('CommentLiked', onLiked);
     };
   }, [postId, socket]);
+
+  useEffect(() => {
+    onCountChange?.(comments.length);
+  }, [comments.length, onCountChange]);
 
   const handleSend = () => {
     if (!text.trim()) return;

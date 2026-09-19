@@ -37,27 +37,39 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 8,
   },
+  // RNW mặc định flexShrink:0 nên chữ dài đẩy thẻ tràn ngang — nhãn/giá trị
+  // phải co được (flexShrink:1 + minWidth:0) và tự xuống dòng.
   mobileField: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 12,
+    minWidth: 0,
+    flexShrink: 1,
   },
   mobileLabel: {
     ...typography.caption,
     color: 'var(--color-text-muted)',
+    flexShrink: 1,
+    minWidth: 0,
   },
   mobileValue: {
     ...typography.body2,
     color: 'var(--color-text-primary)',
     textAlign: 'right',
+    flexShrink: 1,
+    minWidth: 0,
+    wordBreak: 'break-word',
+  },
+  mobileSelect: {
+    alignSelf: 'flex-start',
   },
   mobileActions: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'flex-end',
-    gap: 10,
+    gap: 12,
     marginTop: 8,
     paddingTop: 12,
     borderTopWidth: 1,

@@ -90,6 +90,14 @@ const styles = StyleSheet.create({
     cursor: 'pointer',
     fontFamily: 'inherit',
   },
+  // Nút "Giao bài" khi form chưa đủ: thay màu disabled mặc định của antd.
+  assignDisabled: {
+    color: 'var(--color-text-disabled)',
+    backgroundColor: 'var(--color-surface-selected)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border)',
+  },
   stateWrap: {
     alignItems: 'center',
     gap: 12,

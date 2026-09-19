@@ -1,12 +1,66 @@
 import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
+  shell: {
+    borderRadius: 14,
+    overflow: 'hidden',
+    backgroundColor: 'var(--color-surface)',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 20,
+    paddingTop: 24,
+    paddingBottom: 24,
+    paddingLeft: 28,
+    paddingRight: 28,
+    backgroundColor: 'var(--color-vhu-primary)',
+  },
+  headerText: {
+    gap: 4,
+    minWidth: 0,
+    flex: 1,
+  },
+  title: {
+    ...typography.titleS,
+    color: 'var(--color-text-on-primary)',
+  },
+  subline: {
+    ...typography.body2,
+    color: 'var(--color-text-on-primary-muted)',
+  },
+  closeButton: {
+    ...typography.buttonSmall,
+    height: 36,
+    minWidth: 36,
+    paddingLeft: 12,
+    paddingRight: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-text-on-primary-muted)',
+    backgroundColor: 'transparent',
+    color: 'var(--color-text-on-primary)',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+  },
+  body: {
+    paddingTop: 24,
+    paddingLeft: 28,
+    paddingRight: 28,
+    paddingBottom: 28,
+  },
   grid: {
     display: 'grid',
     gridTemplateColumns: '1.4fr 1fr',
-    gap: 28,
-    maxHeight: '70vh',
+    gap: 24,
+    maxHeight: '60vh',
     overflowY: 'auto',
+  },
+  // Mobile (<600): 1 cột, cột thiết lập nằm dưới danh sách câu hỏi.
+  gridMobile: {
+    gridTemplateColumns: '1fr',
   },
   leftCol: {
     display: 'flex',
@@ -36,7 +90,7 @@ const styles = StyleSheet.create({
     borderColor: 'var(--color-border)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 14,
+    gap: 12,
   },
   questionHeader: {
     flexDirection: 'row',
@@ -73,11 +127,17 @@ const styles = StyleSheet.create({
     padding: 0,
     flexShrink: 0,
   },
+  // Căn đáp án, lỗi và giải thích thẳng hàng với ô nội dung câu hỏi (sau badge).
+  answerBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 12,
+    paddingLeft: 40,
+  },
   answersList: {
     display: 'flex',
     flexDirection: 'column',
     gap: 8,
-    paddingLeft: 40,
   },
   answerRow: {
     flexDirection: 'row',
@@ -101,18 +161,16 @@ const styles = StyleSheet.create({
   errorText: {
     ...typography.caption,
     color: 'var(--color-error)',
-    paddingLeft: 40,
-  },
-  explanationInput: {
-    marginLeft: 40,
-    width: 'auto',
   },
   addQuestionButton: {
     height: 48,
   },
   settingsPanel: {
+    // Dính đầu vùng cuộn (grid, 60vh) — top 96 cũ đẩy panel xuống 96px.
     position: 'sticky',
-    top: 96,
+    top: 0,
+    maxHeight: '60vh',
+    overflowY: 'auto',
     padding: 20,
     borderRadius: 12,
     borderWidth: 1,
@@ -121,6 +179,12 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'column',
     gap: 4,
+  },
+  // Mobile: 1 cột nên panel không cần dính/giới hạn cao.
+  settingsPanelMobile: {
+    position: 'relative',
+    maxHeight: 'none',
+    overflowY: 'visible',
   },
   fullWidth: {
     width: '100%',
@@ -147,8 +211,11 @@ const styles = StyleSheet.create({
     ...typography.subTitle2,
     color: 'var(--color-text-primary)',
   },
-  submitButton: {
-    height: 48,
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    flexWrap: 'wrap',
+    gap: 12,
     marginTop: 20,
   },
 });

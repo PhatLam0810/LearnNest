@@ -9,7 +9,7 @@ import {
   PictureOutlined,
 } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
-import { Button, Modal, Skeleton, Tabs } from 'antd';
+import { Button, Skeleton, Tabs } from 'antd';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';
 import { useResponsive } from '@/styles/responsive';
 import LibraryDetailItem, {
@@ -19,6 +19,7 @@ import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
 import CurriculumRail, {
   CurriculumRailSkeleton,
 } from '~mdDashboard/components/CurriculumRail';
+import { messageApi } from '@hooks';
 import CommentSection from '@components/CommentSection';
 import BookmarkButton from '@components/BookmarkButton';
 import LessonNotesPanel from '~mdDashboard/components/LessonNotesPanel';
@@ -95,17 +96,11 @@ const ModuleDetailPage = () => {
     dashboardQuery.useGetBookmarkIdsQuery('sublesson');
   const [setLibraryCanPlay] = dashboardQuery.useSetLibraryCanPlayMutation();
   const [submitResultTest] = dashboardQuery.useSubmitResultTestMutation();
-  const [, contextHolder] = Modal.useModal();
   const { isMobile, isTablet } = useResponsive();
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [dataQuestion, setDataQuestion] = useState<any[]>([]);
-  const [resultData, setResultData] = useState({
-    correctCount: 0,
-    totalQuestions: 0,
-    score: 0,
-    isPass: false,
-    feedback: '',
-  });
+  // Số bình luận của bài đang xem cho nhãn tab "Thảo luận (n)" - do
+  // CommentSection (mount sẵn trong tab) báo lên.
+  const [commentCount, setCommentCount] = useState(0);
 
   // Câu hỏi lấy trực tiếp từ selectedLibrary.questionList (đã có sẵn trong
   // dữ liệu bài học tải về) — không còn fetch riêng qua generate-questions
@@ -279,27 +274,42 @@ const ModuleDetailPage = () => {
     await refetchPracticeTasks();
     await goToNextContentItem('task', taskId);
   };
-  const handleClose = () => {
-    setIsModalOpen(false);
-    if (resultData.isPass) onWatchFinish();
-  };
-
-  const showModal = (
-    correctCount: number,
-    totalQuestions: number,
-    score: number,
-    isPass: boolean,
-    feedback?: string,
-  ) => {
-    setResultData({
-      correctCount,
-      totalQuestions,
-      score,
-      isPass,
-      feedback: feedback || '',
+  // Quay về từ màn kết quả quiz (/dashboard/quiz-result/[resultId]) với
+  // quizDone=1 nghĩa là vừa ĐẠT quiz -> chạy đúng luồng "xem xong" như trước
+  // đây khi đóng modal kết quả (mở khóa + chuyển nội dung kế tiếp), một lần
+  // duy nhất rồi bỏ param khỏi URL để tải lại trang không chạy lại.
+  const quizDone = searchParams.get('quizDone') === '1';
+  const quizDoneHandledRef = useRef(false);
+  useEffect(() => {
+    // Chưa có tiến độ quiz thì chờ (không chạy, không bỏ param) — tránh ai đó
+    // tự gõ quizDone=1 để mở khóa mục kế tiếp mà chưa đạt quiz.
+    if (
+      !quizDone ||
+      quizDoneHandledRef.current ||
+      isLoadingData ||
+      !lessonDetail?.modules ||
+      !quizPassedByLibrary ||
+      selectedLibrary?._id !== subLessonId
+    )
+      return;
+    quizDoneHandledRef.current = true;
+    router.replace(
+      `/dashboard/home/lesson/moduleDetail?lessonId=${lessonId}&subLessonId=${subLessonId}`,
+    );
+    // Cache tiến độ có thể cũ (bài vừa nộp không invalidate) nên tải lại rồi
+    // mới kiểm; chưa đạt thì chỉ bỏ param, không mở khóa.
+    refetchQuizProgress().then(res => {
+      if (res.data?.[subLessonId]) onWatchFinish();
     });
-    setIsModalOpen(true);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    quizDone,
+    isLoadingData,
+    lessonDetail,
+    quizPassedByLibrary,
+    selectedLibrary?._id,
+    subLessonId,
+  ]);
 
   const handleSubmit = async (selectedAnswers: Record<string, string>) => {
     const totalQuestions = dataQuestion.length;
@@ -315,15 +325,12 @@ const ModuleDetailPage = () => {
         userName: userProfile?.fullName,
         selectedAnswers,
       }).unwrap();
-      showModal(
-        res.correctCount,
-        res.totalQuestions,
-        res.score,
-        res.isPass,
-        res.feedback,
+      router.push(
+        `/dashboard/quiz-result/${res._id}?lessonId=${lessonId}&subLessonId=${selectedLibrary._id}`,
       );
     } catch (error) {
       console.error('Lỗi khi nộp bài:', error);
+      messageApi.error('Nộp bài thất bại, vui lòng thử lại');
     }
   };
   const handlePauseVideo = () => {
@@ -458,7 +465,6 @@ const ModuleDetailPage = () => {
 
   return (
     <View style={[styles.container, isMobile && styles.containerMobile]}>
-      {contextHolder}
       <View style={layoutRowStyle}>
         <View style={mainColumnStyle}>
           {backToLessonBar}
@@ -586,25 +592,8 @@ const ModuleDetailPage = () => {
                         ),
                       },
                       {
-                        key: 'my-notes',
-                        label: 'Ghi chú của tôi',
-                        children: (
-                          <LessonNotesPanel
-                            subLessonId={selectedLibrary._id}
-                            lessonId={lessonDetail?._id}
-                            isVideo={['Youtube', 'Video', 'Short'].includes(
-                              selectedLibrary.type,
-                            )}
-                            getCurrentTimeSec={() =>
-                              libraryRef.current?.getCurrentTimeSec() ?? 0
-                            }
-                            onSeek={sec => libraryRef.current?.seekToSec(sec)}
-                          />
-                        ),
-                      },
-                      {
                         key: 'documents',
-                        label: `Tài liệu${moduleDocuments.length ? ` (${moduleDocuments.length})` : ''}`,
+                        label: `Tài liệu (${moduleDocuments.length})`,
                         children:
                           moduleDocuments.length > 0 ? (
                             <View style={styles.documentList}>
@@ -642,12 +631,34 @@ const ModuleDetailPage = () => {
                       },
                       {
                         key: 'discussion',
-                        label: 'Thảo luận',
+                        label: `Thảo luận (${commentCount})`,
+                        // Mount sẵn để CommentSection kịp báo số bình luận
+                        // cho nhãn tab kể cả khi chưa mở tab.
+                        forceRender: true,
                         children: (
                           <CommentSection
+                            key={selectedLibrary._id}
                             postId={selectedLibrary._id}
                             type={selectedLibrary.type}
                             inline
+                            onCountChange={setCommentCount}
+                          />
+                        ),
+                      },
+                      {
+                        key: 'my-notes',
+                        label: 'Ghi chú của tôi',
+                        children: (
+                          <LessonNotesPanel
+                            subLessonId={selectedLibrary._id}
+                            lessonId={lessonDetail?._id}
+                            isVideo={['Youtube', 'Video', 'Short'].includes(
+                              selectedLibrary.type,
+                            )}
+                            getCurrentTimeSec={() =>
+                              libraryRef.current?.getCurrentTimeSec() ?? 0
+                            }
+                            onSeek={sec => libraryRef.current?.seekToSec(sec)}
                           />
                         ),
                       },
@@ -722,57 +733,6 @@ const ModuleDetailPage = () => {
           />
         )}
       </View>
-      <Modal
-        title="Kết quả bài tập"
-        open={isModalOpen}
-        onCancel={handleClose}
-        centered
-        footer={null}
-        width={520}>
-        <div style={styles.modalContent}>
-          <div style={styles.resultCard}>
-            <div style={styles.row}>
-              <span>Số câu trả lời đúng:</span>
-              <strong>
-                {resultData.correctCount}/{resultData.totalQuestions}
-              </strong>
-            </div>
-            <div style={styles.row}>
-              <span>Điểm số:</span>
-              <strong
-                style={
-                  resultData.isPass ? styles.scoreSuccess : styles.scoreFail
-                }>
-                {resultData.score} / 10
-              </strong>
-            </div>
-          </div>
-
-          <div
-            style={
-              resultData.isPass ? styles.statusBoxSuccess : styles.statusBoxFail
-            }>
-            {resultData.isPass
-              ? 'Chúc mừng! Bạn đã vượt qua bài tập này thành công.'
-              : 'Bạn chưa vượt qua bài tập này. Vui lòng thử lại.'}
-          </div>
-
-          {resultData.feedback && (
-            <div style={styles.aiFeedbackBox}>
-              <strong>Nhận xét từ AI</strong>
-              <p style={{ margin: '4px 0 0' }}>{resultData.feedback}</p>
-            </div>
-          )}
-
-          <Button type="primary" block size="large" onClick={handleClose}>
-            {resultData.isPass ? 'Tiếp tục bài học' : 'Làm lại bài tập'}
-          </Button>
-
-          <Button block size="large" onClick={() => setIsModalOpen(false)}>
-            Đóng
-          </Button>
-        </div>
-      </Modal>
     </View>
   );
 };

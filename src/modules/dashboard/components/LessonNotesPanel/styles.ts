@@ -19,6 +19,11 @@ const styles: Record<string, CSSProperties> = {
     gap: 8,
     flexWrap: 'wrap',
   },
+  savedAt: {
+    ...typography.caption,
+    lineHeight: 1.5,
+    color: 'var(--color-text-muted)',
+  },
   center: {
     display: 'flex',
     justifyContent: 'center',

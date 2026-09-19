@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { Pagination, Table } from 'antd';
+import { Checkbox, Pagination, Skeleton, Table } from 'antd';
 import type { TableProps } from 'antd';
 import { Text, View } from 'react-native-web';
 import { useResponsive } from '@/styles/responsive';
@@ -20,6 +20,7 @@ function MobileCardList<T extends object>(props: TableProps<T>) {
     locale,
     onRow,
     pagination,
+    rowSelection,
   } = props;
   const dataCols = columns.filter(c => c.title !== ACTION_COLUMN_TITLE);
   const actionCol = columns.find(c => c.title === ACTION_COLUMN_TITLE);
@@ -29,6 +30,36 @@ function MobileCardList<T extends object>(props: TableProps<T>) {
     if (typeof rowKey === 'string') return (record as any)[rowKey] ?? index;
     return index;
   };
+
+  // Chọn dòng trên mobile: checkbox ở đầu card, đồng bộ với selectedRowKeys
+  // của rowSelection (bảng desktop tự lo phần này).
+  type RowKeys = NonNullable<
+    NonNullable<TableProps<T>['rowSelection']>['selectedRowKeys']
+  >;
+  const selectedKeys: RowKeys = rowSelection?.selectedRowKeys ?? [];
+  const toggleRow = (key: RowKeys[number], checked: boolean) => {
+    const nextKeys: RowKeys = checked
+      ? [...selectedKeys, key]
+      : selectedKeys.filter(k => k !== key);
+    const nextRows = dataSource.filter((r, i) =>
+      nextKeys.includes(getKey(r, i)),
+    );
+    rowSelection?.onChange?.(nextKeys, nextRows, { type: 'multiple' });
+  };
+
+  // Đang tải thì hiện khung xương thay vì "Trống" (dữ liệu chưa về không phải
+  // là rỗng).
+  if (props.loading) {
+    return (
+      <View style={styles.mobileList}>
+        {[0, 1, 2].map(i => (
+          <View key={i} style={styles.mobileCard}>
+            <Skeleton active title={false} paragraph={{ rows: 3 }} />
+          </View>
+        ))}
+      </View>
+    );
+  }
 
   if (!dataSource.length) {
     return (
@@ -42,11 +73,20 @@ function MobileCardList<T extends object>(props: TableProps<T>) {
     <View style={styles.mobileList}>
       {dataSource.map((record, index) => {
         const rowProps: any = onRow?.(record, index) ?? {};
+        const key = getKey(record, index);
         return (
-          <View
-            key={getKey(record, index)}
-            style={styles.mobileCard}
-            onClick={rowProps.onClick}>
+          <View key={key} style={styles.mobileCard} onClick={rowProps.onClick}>
+            {rowSelection && (
+              <View
+                style={styles.mobileSelect}
+                onClick={e => e.stopPropagation()}>
+                <Checkbox
+                  aria-label="Chọn dòng"
+                  checked={selectedKeys.includes(key)}
+                  onChange={e => toggleRow(key, e.target.checked)}
+                />
+              </View>
+            )}
             {dataCols.map((col, colIndex) => {
               const anyCol = col as any;
               const dataIndex = anyCol.dataIndex as string | undefined;
@@ -103,9 +143,9 @@ function ThemedTable<T extends object>(props: TableProps<T>) {
     <View style={styles.wrap}>
       <Table
         {...props}
-        // display:flex tránh khoảng trắng ~16px phía trên header do ::before
-        // của .ant-table-wrapper (display:table) trong khung có viền bo tròn.
-        style={{ display: 'flex', flexDirection: 'column', ...props.style }}
+        // Khe trắng phía trên header do `.ant-table-container{margin-top:16px}`
+        // global (admin/styles.scss) — class này ép về 0 trong src/app/styles.css.
+        className={`themed-table ${props.className ?? ''}`.trim()}
         components={{
           header: {
             cell: (cellProps: React.HTMLAttributes<HTMLTableCellElement>) => (

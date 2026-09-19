@@ -48,6 +48,8 @@ const GiaoBaiPage: React.FC = () => {
   const [removeAssignment] = adminQuery.useRemoveClassAssignmentMutation();
 
   const classes = classesRes?.items || [];
+  const isFormIncomplete = !classIds.length || !taskId || !dueDate;
+  const assignDisabled = isFormIncomplete || isAssigning;
 
   const handleChangeLesson = (value: string) => {
     setLessonId(value);
@@ -281,9 +283,12 @@ const GiaoBaiPage: React.FC = () => {
             </View>
             <AppButton
               type="primary"
-              style={buttonStyle}
+              style={{
+                ...buttonStyle,
+                ...(isFormIncomplete ? styles.assignDisabled : null),
+              }}
               loading={isAssigning}
-              disabled={!classIds.length || !taskId || !dueDate || isAssigning}
+              disabled={assignDisabled}
               onClick={handleAssign}>
               Giao bài
             </AppButton>

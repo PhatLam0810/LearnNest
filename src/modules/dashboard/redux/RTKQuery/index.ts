@@ -21,6 +21,7 @@ import {
   MyCourseItem,
   MyOverview,
   MyQuestionListResponse,
+  MyQuizResultDetail,
   MyResultsParams,
   MyResultsResponse,
   NotificationListResponse,
@@ -162,6 +163,12 @@ export const dashboardQuery = baseQuery.injectEndpoints({
         method: 'POST',
         body: params,
       }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    // Bài nộp là bản ghi bất biến (mỗi lần làm lại tạo _id mới) nên không cần
+    // tag/invalidate; BE chỉ trả cho đúng chủ bài nộp.
+    getMyQuizResult: builder.query<MyQuizResultDetail, string>({
+      query: id => `lesson/results/${id}`,
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
     getLibraryResultTest: builder.mutation({

@@ -5,8 +5,31 @@
 .ant-menu-item:not(.ant-menu-item-disabled):focus-visible {
   outline: none !important;
 }
-.ant-btn-color-primary {
+.ant-btn-color-primary:not(:disabled):not(.ant-btn-disabled) {
   background-color: #1d418a !important;
+}
+/* Nút solid (primary/danger) bị disabled dùng màu disabled thống nhất, không
+   giống nút đang bật. */
+.ant-btn.ant-btn-variant-solid:disabled,
+.ant-btn.ant-btn-variant-solid.ant-btn-disabled {
+  background-color: var(--color-surface-selected);
+  color: var(--color-text-disabled);
+  cursor: not-allowed;
+}
+/* Nút danger dùng token --color-error thay cho màu mặc định của antd. */
+.ant-btn.ant-btn-color-dangerous.ant-btn-variant-solid:not(:disabled):not(
+    .ant-btn-disabled
+  ) {
+  background-color: var(--color-error);
+}
+.ant-btn.ant-btn-color-dangerous.ant-btn-variant-solid:not(:disabled):not(
+    .ant-btn-disabled
+  ):hover {
+  opacity: 0.85;
+}
+
+.themed-table .ant-table-container {
+  margin-top: 0;
 }
 
 .ant-table-wrapper

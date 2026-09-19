@@ -438,3 +438,28 @@ export interface BookmarkItem {
   link: string;
   createdAt: string;
 }
+
+// ---- Màn kết quả quiz của học viên (GET /lesson/results/:id) ----
+export interface MyQuizResultQuestion {
+  _id: string;
+  question: string;
+  answerList: string[];
+  // null với câu học viên bỏ trống (server không lộ đáp án của câu đó).
+  correctAnswer: string | null;
+  selected: string | null;
+  isCorrect: boolean | null;
+}
+
+export interface MyQuizResultDetail {
+  _id: string;
+  quizTitle: string;
+  correctCount: number;
+  totalQuestions: number;
+  score: number;
+  isPass: boolean;
+  feedback?: string;
+  createdAt: string;
+  // false với bài nộp cũ chưa lưu đáp án từng câu -> questions không có selected.
+  hasAnswers: boolean;
+  questions: MyQuizResultQuestion[];
+}

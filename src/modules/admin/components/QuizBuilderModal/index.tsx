@@ -12,7 +12,9 @@ import {
   Switch,
 } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import AppButton from '@components/AppButton';
 import { useAppPagination } from '@hooks';
+import { useResponsive } from '@/styles/responsive';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { CreateQuizPayload, Quiz } from '~mdAdmin/redux/RTKQuery/type';
@@ -42,6 +44,8 @@ interface QuizBuilderModalProps {
   initialQuestions?: QuestionDraft[];
 }
 
+const buttonStyle = { width: 'auto', height: 44 } as const;
+
 const emptyAnswer = (): AnswerDraft => ({ text: '', isCorrect: false });
 const newQuestion = (): QuestionDraft => ({
   key: `new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -57,10 +61,12 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
   initialQuestions,
 }) => {
   const isEdit = !!editing;
+  const { isMobile } = useResponsive();
   const [form] = Form.useForm();
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [attemptedSave, setAttemptedSave] = useState(false);
+  const timeLimitMinutes = Form.useWatch('timeLimitMinutes', form);
 
   const { listItem: libraries, search: searchLibraries } =
     useAppPagination<Library>({ apiUrl: 'library/getAllLibrary' });
@@ -200,203 +206,249 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
         messageApi.success('Đã tạo bài tập');
       }
       onClose();
-    } catch (e: any) {
-      messageApi.error(e?.data?.message || 'Lưu bài tập thất bại');
+    } catch (e: unknown) {
+      messageApi.error(
+        (e as { data?: { message?: string } })?.data?.message ||
+          'Lưu bài tập thất bại',
+      );
     }
   };
 
   return (
     <Modal
-      title={isEdit ? `Cập nhật: ${editing?.title}` : 'Tạo bài tập'}
       open={isVisible}
       onCancel={onClose}
       footer={null}
+      closable={false}
       width={1120}
       centered
-      destroyOnClose>
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
-        <View style={styles.grid}>
-          <View style={styles.leftCol}>
-            {questions.length === 0 && (
-              <View style={styles.emptyQuestions}>
-                <Text style={styles.emptyQuestionsText}>
-                  Chưa có câu hỏi nào — bấm &quot;Thêm câu hỏi&quot; để bắt đầu.
-                </Text>
-              </View>
-            )}
-            {questions.map((q, qIndex) => (
-              <View key={q.key} style={styles.questionCard}>
-                <View style={styles.questionHeader}>
-                  <View style={styles.indexBadge}>
-                    <Text style={styles.indexBadgeText}>{qIndex + 1}</Text>
+      destroyOnHidden
+      styles={{ body: { padding: 0 }, content: { padding: 0 } }}>
+      <View style={styles.shell}>
+        <View style={styles.header}>
+          <View style={styles.headerText}>
+            <Text style={styles.title}>
+              {isEdit ? `Cập nhật: ${editing?.title}` : 'Tạo bài tập'}
+            </Text>
+            <Text style={styles.subline}>
+              Soạn câu hỏi ở bên trái, thiết lập bài tập ở bên phải.
+            </Text>
+          </View>
+          <button
+            type="button"
+            aria-label="Đóng"
+            onClick={onClose}
+            style={styles.closeButton as React.CSSProperties}>
+            Đóng
+          </button>
+        </View>
+        <View style={styles.body}>
+          <Form form={form} layout="vertical" onFinish={handleFinish}>
+            <View style={[styles.grid, isMobile && styles.gridMobile]}>
+              <View style={styles.leftCol}>
+                {questions.length === 0 && (
+                  <View style={styles.emptyQuestions}>
+                    <Text style={styles.emptyQuestionsText}>
+                      Chưa có câu hỏi nào — bấm &quot;Thêm câu hỏi&quot; để bắt
+                      đầu.
+                    </Text>
                   </View>
-                  <Input
-                    value={q.questionText}
-                    placeholder="Nhập nội dung câu hỏi"
-                    style={styles.questionInput}
-                    onChange={e =>
-                      patchQuestion(q.key, { questionText: e.target.value })
-                    }
-                  />
-                  <Button
-                    style={styles.removeQuestionButton}
-                    onClick={() => removeQuestion(q.key)}>
-                    <DeleteOutlined
-                      style={{ color: 'var(--color-text-on-primary)' }}
-                    />
-                  </Button>
-                </View>
-
-                <View style={styles.answersList}>
-                  {q.answers.map((a, aIndex) => (
-                    <View key={aIndex} style={styles.answerRow}>
-                      <Checkbox
-                        checked={a.isCorrect}
-                        onChange={e =>
-                          patchAnswer(q.key, aIndex, {
-                            isCorrect: e.target.checked,
-                          })
-                        }
-                      />
+                )}
+                {questions.map((q, qIndex) => (
+                  <View key={q.key} style={styles.questionCard}>
+                    <View style={styles.questionHeader}>
+                      <View style={styles.indexBadge}>
+                        <Text style={styles.indexBadgeText}>{qIndex + 1}</Text>
+                      </View>
                       <Input
-                        value={a.text}
-                        placeholder={`Đáp án ${aIndex + 1}`}
-                        style={styles.answerInput}
+                        value={q.questionText}
+                        placeholder="Nhập nội dung câu hỏi"
+                        style={styles.questionInput}
                         onChange={e =>
-                          patchAnswer(q.key, aIndex, { text: e.target.value })
+                          patchQuestion(q.key, { questionText: e.target.value })
                         }
                       />
                       <Button
-                        style={styles.answerDeleteButton}
-                        disabled={q.answers.length <= 2}
-                        onClick={() => removeAnswer(q.key, aIndex)}>
+                        style={styles.removeQuestionButton}
+                        onClick={() => removeQuestion(q.key)}>
                         <DeleteOutlined
                           style={{ color: 'var(--color-text-on-primary)' }}
                         />
                       </Button>
                     </View>
-                  ))}
-                  {q.answers.length < 6 && (
-                    <Button
-                      type="dashed"
-                      block
-                      icon={<PlusOutlined />}
-                      onClick={() => addAnswer(q.key)}>
-                      Thêm đáp án
-                    </Button>
-                  )}
-                </View>
 
-                {errors[q.key] && (
-                  <Text style={styles.errorText}>{errors[q.key]}</Text>
-                )}
+                    <View style={styles.answerBlock}>
+                      <View style={styles.answersList}>
+                        {q.answers.map((a, aIndex) => (
+                          <View key={aIndex} style={styles.answerRow}>
+                            <Checkbox
+                              checked={a.isCorrect}
+                              onChange={e =>
+                                patchAnswer(q.key, aIndex, {
+                                  isCorrect: e.target.checked,
+                                })
+                              }
+                            />
+                            <Input
+                              value={a.text}
+                              placeholder={`Đáp án ${aIndex + 1}`}
+                              style={styles.answerInput}
+                              onChange={e =>
+                                patchAnswer(q.key, aIndex, {
+                                  text: e.target.value,
+                                })
+                              }
+                            />
+                            <Button
+                              style={styles.answerDeleteButton}
+                              disabled={q.answers.length <= 2}
+                              onClick={() => removeAnswer(q.key, aIndex)}>
+                              <DeleteOutlined
+                                style={{
+                                  color: 'var(--color-text-on-primary)',
+                                }}
+                              />
+                            </Button>
+                          </View>
+                        ))}
+                        {q.answers.length < 6 && (
+                          <Button
+                            type="dashed"
+                            block
+                            icon={<PlusOutlined />}
+                            onClick={() => addAnswer(q.key)}>
+                            Thêm đáp án
+                          </Button>
+                        )}
+                      </View>
 
-                <Input.TextArea
-                  value={q.explanation}
-                  placeholder="Giải thích (hiện cho học viên sau khi nộp bài, không bắt buộc)"
-                  rows={2}
-                  style={styles.explanationInput}
-                  onChange={e =>
-                    patchQuestion(q.key, { explanation: e.target.value })
-                  }
-                />
+                      {errors[q.key] && (
+                        <Text style={styles.errorText}>{errors[q.key]}</Text>
+                      )}
+
+                      <Input.TextArea
+                        value={q.explanation}
+                        placeholder="Giải thích (hiện cho học viên sau khi nộp bài, không bắt buộc)"
+                        rows={2}
+                        onChange={e =>
+                          patchQuestion(q.key, { explanation: e.target.value })
+                        }
+                      />
+                    </View>
+                  </View>
+                ))}
+                <Button
+                  type="dashed"
+                  block
+                  icon={<PlusOutlined />}
+                  style={styles.addQuestionButton}
+                  onClick={addQuestion}>
+                  Thêm câu hỏi
+                </Button>
               </View>
-            ))}
-            <Button
-              type="dashed"
-              block
-              icon={<PlusOutlined />}
-              style={styles.addQuestionButton}
-              onClick={addQuestion}>
-              Thêm câu hỏi
-            </Button>
-          </View>
 
-          <View style={styles.rightCol}>
-            <View style={styles.settingsPanel}>
-              <Form.Item
-                label="Tên bài tập"
-                name="title"
-                rules={[
-                  { required: true, message: 'Vui lòng nhập tên bài tập' },
-                ]}>
-                <Input placeholder="Nhập tên bài tập" />
-              </Form.Item>
-              <Form.Item
-                label="Gắn vào bài học"
-                name="libraryId"
-                rules={[{ required: true, message: 'Vui lòng chọn bài học' }]}>
-                <Select
-                  showSearch
-                  placeholder="Chọn bài học"
-                  filterOption={false}
-                  onSearch={searchLibraries}
-                  options={(libraries || []).map(lib => ({
-                    value: lib._id,
-                    label: lib.title,
-                  }))}
-                />
-              </Form.Item>
-              <Form.Item
-                label="Thời gian làm bài (phút)"
-                name="timeLimitMinutes">
-                <InputNumber min={1} style={styles.fullWidth} />
-              </Form.Item>
-              <Form.Item
-                label="Điểm đạt tối thiểu (%)"
-                name="passThresholdPercent"
-                initialValue={60}
-                rules={[
-                  {
-                    required: true,
-                    message: 'Vui lòng nhập điểm đạt tối thiểu',
-                  },
-                ]}>
-                <InputNumber min={0} max={100} style={styles.fullWidth} />
-              </Form.Item>
-              <Form.Item label="Số lần làm lại" name="maxAttempts">
-                <InputNumber
-                  min={1}
-                  style={styles.fullWidth}
-                  placeholder="Không giới hạn"
-                />
-              </Form.Item>
-              <Form.Item
-                label="Trộn thứ tự câu hỏi"
-                name="shuffleQuestions"
-                valuePropName="checked">
-                <Switch />
-              </Form.Item>
+              <View style={styles.rightCol}>
+                <View
+                  style={[
+                    styles.settingsPanel,
+                    isMobile && styles.settingsPanelMobile,
+                  ]}>
+                  <Form.Item
+                    label="Tên bài tập"
+                    name="title"
+                    rules={[
+                      { required: true, message: 'Vui lòng nhập tên bài tập' },
+                    ]}>
+                    <Input placeholder="Nhập tên bài tập" />
+                  </Form.Item>
+                  <Form.Item
+                    label="Gắn vào bài học"
+                    name="libraryId"
+                    rules={[
+                      { required: true, message: 'Vui lòng chọn bài học' },
+                    ]}>
+                    <Select
+                      showSearch
+                      placeholder="Chọn bài học"
+                      filterOption={false}
+                      onSearch={searchLibraries}
+                      options={(libraries || []).map(lib => ({
+                        value: lib._id,
+                        label: lib.title,
+                      }))}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Thời gian làm bài (phút)"
+                    name="timeLimitMinutes">
+                    <InputNumber min={1} style={styles.fullWidth} />
+                  </Form.Item>
+                  <Form.Item
+                    label="Điểm đạt tối thiểu (%)"
+                    name="passThresholdPercent"
+                    initialValue={60}
+                    rules={[
+                      {
+                        required: true,
+                        message: 'Vui lòng nhập điểm đạt tối thiểu',
+                      },
+                    ]}>
+                    <InputNumber min={0} max={100} style={styles.fullWidth} />
+                  </Form.Item>
+                  <Form.Item label="Số lần làm lại" name="maxAttempts">
+                    <InputNumber
+                      min={1}
+                      style={styles.fullWidth}
+                      placeholder="Không giới hạn"
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    label="Trộn thứ tự câu hỏi"
+                    name="shuffleQuestions"
+                    valuePropName="checked">
+                    <Switch />
+                  </Form.Item>
 
-              <View style={styles.summaryBox}>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Số câu</Text>
-                  <Text style={styles.summaryValue}>{questions.length}</Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Tổng điểm</Text>
-                  <Text style={styles.summaryValue}>100</Text>
-                </View>
-                <View style={styles.summaryRow}>
-                  <Text style={styles.summaryLabel}>Thời gian</Text>
-                  <Text style={styles.summaryValue}>
-                    {Form.useWatch('timeLimitMinutes', form) || '—'} phút
-                  </Text>
+                  <View style={styles.summaryBox}>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Số câu</Text>
+                      <Text style={styles.summaryValue}>
+                        {questions.length}
+                      </Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Tổng điểm</Text>
+                      <Text style={styles.summaryValue}>100</Text>
+                    </View>
+                    <View style={styles.summaryRow}>
+                      <Text style={styles.summaryLabel}>Thời gian</Text>
+                      <Text style={styles.summaryValue}>
+                        {timeLimitMinutes || '—'} phút
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        </View>
 
-        <Button
-          type="primary"
-          htmlType="submit"
-          loading={isCreating || isUpdating}
-          block
-          style={styles.submitButton}>
-          Xác nhận
-        </Button>
-      </Form>
+            <View style={styles.footer}>
+              <AppButton
+                style={buttonStyle}
+                disabled={isCreating || isUpdating}
+                onClick={onClose}>
+                Hủy
+              </AppButton>
+              <AppButton
+                type="primary"
+                htmlType="submit"
+                style={buttonStyle}
+                loading={isCreating || isUpdating}>
+                Xác nhận
+              </AppButton>
+            </View>
+          </Form>
+        </View>
+      </View>
     </Modal>
   );
 };

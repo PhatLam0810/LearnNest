@@ -1,7 +1,8 @@
 'use client';
 import React, { useState } from 'react';
-import { Text } from 'react-native-web';
+import { Text, View } from 'react-native-web';
 import { Modal, Space } from 'antd';
+import AppButton from '@components/AppButton';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { Quiz } from '~mdAdmin/redux/RTKQuery/type';
@@ -11,11 +12,20 @@ import {
   QuizBuilderModal,
   ThemedTable,
 } from '~mdAdmin/components';
+import pageStyles from '../../styles';
 import styles from './styles';
 
+const buttonStyle = { width: 'auto', height: 40 } as const;
+
 const QuizListTab: React.FC = () => {
-  const { data: quizzes, isFetching } = adminQuery.useGetQuizzesQuery();
-  const [deleteQuiz] = adminQuery.useDeleteQuizMutation();
+  const {
+    data: quizzes,
+    isFetching,
+    isError,
+    refetch,
+  } = adminQuery.useGetQuizzesQuery();
+  const [deleteQuiz, { isLoading: isDeleting }] =
+    adminQuery.useDeleteQuizMutation();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [editing, setEditing] = useState<Quiz | undefined>();
@@ -41,8 +51,11 @@ const QuizListTab: React.FC = () => {
       await deleteQuiz(deleting._id).unwrap();
       messageApi.success('Đã xoá bài tập');
       setDeleting(null);
-    } catch (e: any) {
-      messageApi.error(e?.data?.message || 'Xoá bài tập thất bại');
+    } catch (e: unknown) {
+      messageApi.error(
+        (e as { data?: { message?: string } })?.data?.message ||
+          'Xoá bài tập thất bại',
+      );
     }
   };
 
@@ -82,14 +95,30 @@ const QuizListTab: React.FC = () => {
     },
   ];
 
-  return (
-    <>
-      <ContentToolbar
-        searchPlaceholder="Tìm kiếm bài tập"
-        onSearch={setSearchQuery}
-        addLabel="Tạo bài tập"
-        onAdd={openCreate}
-      />
+  const renderContent = () => {
+    if (isError) {
+      return (
+        <View style={{ ...pageStyles.stateWrap, ...pageStyles.errorWrap }}>
+          <Text style={pageStyles.errorText}>
+            Không tải được danh sách bài tập.
+          </Text>
+          <AppButton style={buttonStyle} onClick={() => refetch()}>
+            Thử lại
+          </AppButton>
+        </View>
+      );
+    }
+    if (!isFetching && !quizzes?.length && !searchQuery) {
+      return (
+        <View style={pageStyles.stateWrap}>
+          <Text style={pageStyles.emptyText}>Chưa có bài tập nào.</Text>
+          <AppButton type="primary" style={buttonStyle} onClick={openCreate}>
+            Tạo bài tập
+          </AppButton>
+        </View>
+      );
+    }
+    return (
       <ThemedTable
         rowKey="_id"
         loading={isFetching}
@@ -105,6 +134,18 @@ const QuizListTab: React.FC = () => {
           ) : undefined,
         }}
       />
+    );
+  };
+
+  return (
+    <View style={pageStyles.tabContent}>
+      <ContentToolbar
+        searchPlaceholder="Tìm kiếm bài tập"
+        onSearch={setSearchQuery}
+        addLabel="Tạo bài tập"
+        onAdd={openCreate}
+      />
+      {renderContent()}
 
       <QuizBuilderModal
         isVisible={isBuilderOpen}
@@ -113,13 +154,17 @@ const QuizListTab: React.FC = () => {
       />
 
       <Modal
-        title="Xóa bài tập"
+        title="Xóa bài tập?"
         open={!!deleting}
+        okText="Xóa bài tập"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true }}
+        confirmLoading={isDeleting}
         onCancel={() => setDeleting(null)}
         onOk={handleDelete}>
         <Text>{`Xóa bài tập: ${deleting?.title}? Không thể hoàn tác.`}</Text>
       </Modal>
-    </>
+    </View>
   );
 };
 

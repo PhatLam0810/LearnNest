@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
-import { messageApi } from '@hooks';
+import { Text, View } from 'react-native-web';
+import AppButton from '@components/AppButton';
 import { adminQuery } from '~mdAdmin/redux';
 import { QuestionBankItem } from '~mdAdmin/redux/RTKQuery/type';
 import {
@@ -9,12 +10,18 @@ import {
   QuizBuilderModal,
   ThemedTable,
 } from '~mdAdmin/components';
+import pageStyles from '../../styles';
+
+const buttonStyle = { width: 'auto', height: 40 } as const;
 
 const QuestionBankTab: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: items, isFetching } = adminQuery.useGetQuestionBankQuery(
-    searchQuery || undefined,
-  );
+  const {
+    data: items,
+    isFetching,
+    isError,
+    refetch,
+  } = adminQuery.useGetQuestionBankQuery(searchQuery || undefined);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [seedQuestions, setSeedQuestions] = useState<
@@ -22,10 +29,6 @@ const QuestionBankTab: React.FC = () => {
   >([]);
 
   const openBulkInsert = () => {
-    if (selectedIds.length === 0) {
-      messageApi.error('Chọn ít nhất 1 câu hỏi để chèn vào bài tập');
-      return;
-    }
     const selected = (items || []).filter(i => selectedIds.includes(i._id));
     setSeedQuestions(selected.map(toDraft));
     setIsBuilderOpen(true);
@@ -52,14 +55,42 @@ const QuestionBankTab: React.FC = () => {
     },
   ];
 
-  return (
-    <>
-      <ContentToolbar
-        searchPlaceholder="Tìm kiếm câu hỏi"
-        onSearch={setSearchQuery}
-        addLabel="Chèn vào bài tập mới"
-        onAdd={openBulkInsert}
-      />
+  // Ngân hàng trống thì chưa có gì để chọn -> mở builder không câu hỏi mồi.
+  const openEmptyBuilder = () => {
+    setSeedQuestions([]);
+    setIsBuilderOpen(true);
+  };
+
+  const renderContent = () => {
+    if (isError) {
+      return (
+        <View style={{ ...pageStyles.stateWrap, ...pageStyles.errorWrap }}>
+          <Text style={pageStyles.errorText}>
+            Không tải được ngân hàng câu hỏi.
+          </Text>
+          <AppButton style={buttonStyle} onClick={() => refetch()}>
+            Thử lại
+          </AppButton>
+        </View>
+      );
+    }
+    if (!isFetching && !items?.length && !searchQuery) {
+      return (
+        <View style={pageStyles.stateWrap}>
+          <Text style={pageStyles.emptyText}>
+            Ngân hàng chưa có câu hỏi nào. Câu hỏi được thêm khi bạn tạo bài
+            tập.
+          </Text>
+          <AppButton
+            type="primary"
+            style={buttonStyle}
+            onClick={openEmptyBuilder}>
+            Tạo bài tập
+          </AppButton>
+        </View>
+      );
+    }
+    return (
       <ThemedTable
         rowKey="_id"
         loading={isFetching}
@@ -79,6 +110,20 @@ const QuestionBankTab: React.FC = () => {
           ) : undefined,
         }}
       />
+    );
+  };
+
+  return (
+    <View style={pageStyles.tabContent}>
+      <ContentToolbar
+        searchPlaceholder="Tìm kiếm câu hỏi"
+        onSearch={setSearchQuery}
+        addLabel="Chèn vào bài tập mới"
+        addDisabled={selectedIds.length === 0}
+        addDisabledReason="Chọn ít nhất 1 câu hỏi"
+        onAdd={openBulkInsert}
+      />
+      {renderContent()}
 
       <QuizBuilderModal
         isVisible={isBuilderOpen}
@@ -88,7 +133,7 @@ const QuestionBankTab: React.FC = () => {
           setSelectedIds([]);
         }}
       />
-    </>
+    </View>
   );
 };
 

@@ -93,6 +93,15 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingRight: 20,
   },
+  skeletonWrap: {
+    gap: 16,
+    padding: 16,
+    backgroundColor: 'var(--color-surface)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border)',
+    borderRadius: 12,
+  },
   errorState: {
     backgroundColor: 'var(--color-error-bg)',
     borderRadius: 12,

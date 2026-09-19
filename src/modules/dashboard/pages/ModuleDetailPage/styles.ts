@@ -226,58 +226,6 @@ const styles = StyleSheet.create({
     color: 'var(--color-text-muted)',
     textAlign: 'center',
   },
-  modalContent: {
-    gap: 16,
-    alignItems: 'stretch',
-  },
-  resultCard: {
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderColor: 'var(--color-border-subtle)',
-    borderRadius: 8,
-    padding: 16,
-    gap: 8,
-    backgroundColor: 'var(--color-surface-subtle)',
-  },
-  row: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statusBoxSuccess: {
-    padding: 16,
-    borderRadius: 8,
-    fontWeight: 500,
-    backgroundColor: 'var(--color-success-bg)',
-    color: 'var(--color-success)',
-  },
-  statusBoxFail: {
-    padding: 16,
-    borderRadius: 8,
-    fontWeight: 500,
-    backgroundColor: 'var(--color-error-bg)',
-    color: 'var(--color-error)',
-  },
-  scoreSuccess: {
-    color: 'var(--color-success)',
-    fontWeight: 'bold',
-  },
-  scoreFail: {
-    color: 'var(--color-error)',
-    fontWeight: 'bold',
-  },
-  aiFeedbackBox: {
-    ...typography.body2,
-    paddingTop: 12,
-    paddingBottom: 12,
-    paddingLeft: 16,
-    paddingRight: 16,
-    borderRadius: 8,
-    backgroundColor: 'var(--color-info-bg)',
-    color: 'var(--color-vhu-primary)',
-    lineHeight: '20px',
-    textAlign: 'left' as const,
-  },
 });
 
 export default styles;
