@@ -12,6 +12,10 @@ const CARD = {
 
 const styles = StyleSheet.create({
   container: {
+    animationName: 'fadeInUp',
+    animationDuration: '0.32s',
+    animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+    animationFillMode: 'both',
     width: '100%',
     paddingTop: 24,
     paddingBottom: 48,
