@@ -23,6 +23,7 @@ import dynamic from 'next/dynamic';
 import StatCard from '../../home/_components/StatCard';
 import StateTag from '~mdAdmin/components/StateTag';
 import { messageApi } from '@hooks';
+import { downloadBlob } from '~mdAdmin/components/submissionShared';
 
 const TrafficChart = dynamic(() => import('./components/TrafficChart'), {
   ssr: false,
@@ -41,6 +42,10 @@ const UserManage = () => {
     apiUrl: 'user/getListUser',
   });
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState<string | undefined>();
+  const [exportUsers, { isLoading: isExporting }] =
+    adminQuery.useExportUsersMutation();
   const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
   const [createUserForm] = Form.useForm<CreateUserParams>();
   const [isModalDeleteUser, setModalDeleteUser] = useState(false);
@@ -61,6 +66,19 @@ const UserManage = () => {
     return () =>
       window.removeEventListener('learnnest:user-created', handleUserCreated);
   }, [refresh]);
+
+  // Xuất đúng tập đang lọc/tìm kiếm chứ không chỉ trang đang xem.
+  const handleExport = async () => {
+    try {
+      const blob = await exportUsers({
+        search: searchTerm || undefined,
+        filter: typeFilter ? { userType: typeFilter } : undefined,
+      }).unwrap();
+      downloadBlob(blob, 'nguoi-dung.xlsx');
+    } catch {
+      messageApi.error('Xuất Excel thất bại');
+    }
+  };
 
   const handleDeleteUser = async (_id: string) => {
     try {
@@ -210,21 +228,29 @@ const UserManage = () => {
         }}>
         <Search
           placeholder="Tìm kiếm"
-          onSearch={search}
+          onSearch={v => {
+            setSearchTerm(v);
+            search(v);
+          }}
           style={{ flex: '1 1 240px', minWidth: 0 }}
         />
         <Segmented
           aria-label="Lọc theo loại tài khoản"
           defaultValue="all"
-          onChange={v =>
-            filter(v === 'all' ? undefined : { userType: v as string })
-          }
+          onChange={v => {
+            const next = v === 'all' ? undefined : (v as string);
+            setTypeFilter(next);
+            filter(next ? { userType: next } : undefined);
+          }}
           options={[
             { value: 'all', label: 'Tất cả' },
             { value: 'student', label: 'Sinh viên VHU' },
             { value: 'guest', label: 'Khách' },
           ]}
         />
+        <Button onClick={handleExport} loading={isExporting}>
+          Xuất Excel
+        </Button>
         <Button type="primary" onClick={() => setIsModalCreateUserOpen(true)}>
           Tạo tài khoản
         </Button>

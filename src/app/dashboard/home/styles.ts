@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
   },
   mainRowMobile: {
     flexDirection: 'column',
+    alignItems: 'stretch',
   },
   continuingCol: {
     flex: 2,

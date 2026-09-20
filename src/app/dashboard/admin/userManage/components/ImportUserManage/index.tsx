@@ -17,7 +17,7 @@ const ImportUserManage: React.FC = () => {
         // giãn theo min-content của nội dung bên trong (form/bảng) thay vì
         // theo đúng tỉ lệ fr, làm tràn ngang cả trang.
         gridTemplateColumns: isMobile
-          ? '1fr'
+          ? 'minmax(0, 1fr)'
           : 'minmax(0, 1.2fr) minmax(0, 1fr)',
       }}>
       <CreateUserForm />

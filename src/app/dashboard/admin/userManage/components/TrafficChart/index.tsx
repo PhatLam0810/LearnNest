@@ -55,7 +55,13 @@ const TrafficChart: React.FC = () => {
         <Text style={{ fontSize: 16, fontWeight: 600, color: '#111827' }}>
           Lượt truy cập website
         </Text>
-        <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 8,
+            flexWrap: 'wrap',
+            maxWidth: '100%',
+          }}>
           <Radio.Group
             value={groupBy}
             onChange={e => setGroupBy(e.target.value)}

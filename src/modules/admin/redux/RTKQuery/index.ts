@@ -1287,6 +1287,17 @@ export const adminQuery = baseQuery.injectEndpoints({
         responseHandler: response => response.blob(),
       }),
     }),
+    exportUsers: builder.mutation<
+      Blob,
+      { search?: string; filter?: { userType?: string } }
+    >({
+      query: body => ({
+        url: 'user/exportUsers',
+        method: 'POST',
+        body,
+        responseHandler: response => response.blob(),
+      }),
+    }),
     exportClassesReport: builder.mutation<Blob, void>({
       query: () => ({
         url: 'admin/classes/report-export',

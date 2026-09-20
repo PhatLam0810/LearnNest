@@ -6,6 +6,7 @@ import {
   Progress,
   Select,
   Space,
+  Steps,
   Table,
   Typography,
   Upload,
@@ -313,6 +314,14 @@ const ImportExcelCard: React.FC = () => {
     [],
   );
 
+  // Bước hiện tại suy từ dữ liệu: chưa đọc file -> 0, đã xem trước -> 1, đã tạo xong -> 2.
+  const step = importResult ? 2 : hasPreviewData ? 1 : 0;
+  const resetWizard = () => {
+    setFileUrl('');
+    setPreviewRows([]);
+    setImportResult(null);
+    setSendResult(null);
+  };
   const invalidCount = previewRows.filter(row => !!row.error).length;
   // Chọn lớp: gắn mã lớp vào cột Lớp của mọi dòng (User.class) và gửi classId
   // để BE thêm học viên vào lớp ngay khi tạo.
@@ -335,120 +344,157 @@ const ImportExcelCard: React.FC = () => {
       <Text strong style={{ fontSize: 16, fontWeight: 500 }}>
         Tải lên file Excel
       </Text>
-      <div className="import-excel-card__header">
-        <div className="import-excel-card__field">
-          <Text className="import-excel-card__hint">
-            File Excel bắt buộc gồm các cột: <strong>Họ và tên</strong>,{' '}
-            <strong>MSSV</strong>, <strong>Email</strong>. Có thể thêm các cột
-            tùy chọn: Lớp, Khoa, Ngành. Tối đa {MAX_IMPORT_ROWS} dòng mỗi lần
-            nhập; hệ thống tạo theo từng lô {IMPORT_BATCH_SIZE} người.{' '}
-            <AppButton
-              type="link"
-              href="/templates/mau-nhap-nguoi-dung.xlsx"
-              download
-              style={{ width: 'auto', height: 'auto', padding: 0 }}>
-              Tải file mẫu →
-            </AppButton>
-          </Text>
-          <Upload
-            maxCount={1}
-            listType="picture-card"
-            action={api.defaults.baseURL + '/upload'}
-            headers={
-              accessToken
-                ? { Authorization: `Bearer ${accessToken}` }
-                : undefined
-            }
-            onChange={info => {
-              if (info.file.status === 'done') {
-                const responseUrl = info.file.response?.data;
-                if (responseUrl) {
-                  setFileUrl(responseUrl);
-                }
+      <Steps
+        size="small"
+        current={step}
+        items={[
+          { title: 'Tải file' },
+          { title: 'Xem trước' },
+          { title: 'Kết quả' },
+        ]}
+        style={{ marginTop: 16, marginBottom: 16 }}
+      />
+      {step === 0 && (
+        <div className="import-excel-card__header">
+          <div className="import-excel-card__field">
+            <Text className="import-excel-card__hint">
+              File Excel bắt buộc gồm các cột: <strong>Họ và tên</strong>,{' '}
+              <strong>MSSV</strong>, <strong>Email</strong>. Có thể thêm các cột
+              tùy chọn: Lớp, Khoa, Ngành. Tối đa {MAX_IMPORT_ROWS} dòng mỗi lần
+              nhập; hệ thống tạo theo từng lô {IMPORT_BATCH_SIZE} người.{' '}
+              <AppButton
+                type="link"
+                href="/templates/mau-nhap-nguoi-dung.xlsx"
+                download
+                style={{ width: 'auto', height: 'auto', padding: 0 }}>
+                Tải file mẫu →
+              </AppButton>
+            </Text>
+            <Upload
+              maxCount={1}
+              listType="picture-card"
+              action={api.defaults.baseURL + '/upload'}
+              headers={
+                accessToken
+                  ? { Authorization: `Bearer ${accessToken}` }
+                  : undefined
               }
-            }}>
-            <div>Tải lên</div>
-          </Upload>
+              onChange={info => {
+                if (info.file.status === 'done') {
+                  const responseUrl = info.file.response?.data;
+                  if (responseUrl) {
+                    setFileUrl(responseUrl);
+                  }
+                }
+              }}>
+              <div>Tải lên</div>
+            </Upload>
+            <AppButton
+              type="primary"
+              style={{ width: 'auto' }}
+              loading={previewLoading}
+              onClick={handlePreview}
+              className="import-excel-card__preview-btn">
+              Nhập dữ liệu từ file Excel
+            </AppButton>
+          </div>
+        </div>
+      )}
+
+      {step === 1 && (
+        <>
+          <div className="import-excel-card__summary">
+            {hasPreviewData ? (
+              <Space wrap>
+                <Text>{`Dữ liệu preview: ${previewRows.length} dòng`}</Text>
+                {invalidCount > 0 && (
+                  <Text type="danger">{`${invalidCount} dòng lỗi`}</Text>
+                )}
+                {previewRows.length >= MAX_IMPORT_ROWS && (
+                  <Text type="warning">
+                    Đã đạt giới hạn {MAX_IMPORT_ROWS} dòng - file có thêm dòng
+                    sẽ không được đọc.
+                  </Text>
+                )}
+              </Space>
+            ) : (
+              'Chưa nhập dữ liệu'
+            )}
+          </div>
+
+          <div className="import-excel-card__actions">
+            <Select
+              allowClear
+              showSearch
+              optionFilterProp="label"
+              placeholder="Thêm vào lớp (tùy chọn)"
+              style={{ minWidth: 260 }}
+              value={classId}
+              onChange={handleClassSelect}
+              options={classOptions.map(c => ({
+                value: c._id,
+                label: `${c.code} - ${c.name}`,
+              }))}
+            />
+            <AppButton
+              style={{ width: 'auto' }}
+              onClick={() => setClassModalOpen(true)}>
+              Tạo lớp mới
+            </AppButton>
+            <AppButton
+              type="primary"
+              style={{ width: 'auto' }}
+              disabled={!hasPreviewData}
+              loading={importLoading}
+              onClick={handleImport}>
+              Tạo tài khoản
+            </AppButton>
+            <AppButton style={{ width: 'auto' }} onClick={resetWizard}>
+              Quay lại
+            </AppButton>
+          </div>
+
+          {progress && (
+            <Progress
+              percent={Math.round((progress.done / progress.total) * 100)}
+              format={() => `Đã tạo ${progress.done}/${progress.total}`}
+            />
+          )}
+          <Table
+            className="import-excel-card__table"
+            dataSource={previewRows}
+            columns={columns}
+            rowClassName={record =>
+              record.error ? 'import-excel-card__row-error' : ''
+            }
+            pagination={false}
+            scroll={{ x: 1200, y: 460 }}
+          />
+        </>
+      )}
+
+      {step === 2 && (
+        <div className="import-excel-card__actions">
+          <AppButton style={{ width: 'auto' }} onClick={resetWizard}>
+            Nhập file khác
+          </AppButton>
           <AppButton
-            type="primary"
-            style={{ width: 'auto' }}
-            loading={previewLoading}
-            onClick={handlePreview}
-            className="import-excel-card__preview-btn">
-            Nhập dữ liệu từ file Excel
+            disabled={!createdAccounts.length}
+            loading={sendLoading}
+            onClick={handleSendEmails}
+            style={
+              createdAccounts.length
+                ? { width: 'auto' }
+                : {
+                    width: 'auto',
+                    background: '#f1f3f7',
+                    color: '#9ca3af',
+                    cursor: 'not-allowed',
+                  }
+            }>
+            Gửi email toàn bộ tài khoản đã tạo
           </AppButton>
         </div>
-      </div>
-
-      <div className="import-excel-card__summary">
-        {hasPreviewData ? (
-          <Space wrap>
-            <Text>{`Dữ liệu preview: ${previewRows.length} dòng`}</Text>
-            {invalidCount > 0 && (
-              <Text type="danger">{`${invalidCount} dòng lỗi`}</Text>
-            )}
-            {previewRows.length >= MAX_IMPORT_ROWS && (
-              <Text type="warning">
-                Đã đạt giới hạn {MAX_IMPORT_ROWS} dòng - file có thêm dòng sẽ
-                không được đọc.
-              </Text>
-            )}
-          </Space>
-        ) : (
-          'Chưa nhập dữ liệu'
-        )}
-      </div>
-
-      <div className="import-excel-card__actions">
-        <Select
-          allowClear
-          showSearch
-          optionFilterProp="label"
-          placeholder="Thêm vào lớp (tùy chọn)"
-          style={{ minWidth: 260 }}
-          value={classId}
-          onChange={handleClassSelect}
-          options={classOptions.map(c => ({
-            value: c._id,
-            label: `${c.code} - ${c.name}`,
-          }))}
-        />
-        <AppButton
-          style={{ width: 'auto' }}
-          onClick={() => setClassModalOpen(true)}>
-          Tạo lớp mới
-        </AppButton>
-        <AppButton
-          type="primary"
-          style={{ width: 'auto' }}
-          disabled={!hasPreviewData}
-          loading={importLoading}
-          onClick={handleImport}>
-          Tạo tài khoản
-        </AppButton>
-        <AppButton
-          disabled={!createdAccounts.length}
-          loading={sendLoading}
-          onClick={handleSendEmails}
-          style={
-            createdAccounts.length
-              ? { width: 'auto' }
-              : {
-                  width: 'auto',
-                  background: '#f1f3f7',
-                  color: '#9ca3af',
-                  cursor: 'not-allowed',
-                }
-          }>
-          Gửi email toàn bộ tài khoản đã tạo
-        </AppButton>
-      </div>
-
-      {progress && (
-        <Progress
-          percent={Math.round((progress.done / progress.total) * 100)}
-          format={() => `Đã tạo ${progress.done}/${progress.total}`}
-        />
       )}
 
       {importResult && (
@@ -478,19 +524,6 @@ const ImportExcelCard: React.FC = () => {
               : 'Gửi email thành công.'
           }
           showIcon
-        />
-      )}
-
-      {hasPreviewData && (
-        <Table
-          className="import-excel-card__table"
-          dataSource={previewRows}
-          columns={columns}
-          rowClassName={record =>
-            record.error ? 'import-excel-card__row-error' : ''
-          }
-          pagination={false}
-          scroll={{ x: 1200, y: 460 }}
         />
       )}
 
