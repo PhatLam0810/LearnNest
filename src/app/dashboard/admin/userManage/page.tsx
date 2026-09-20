@@ -12,7 +12,7 @@ import {
   Form,
   Input,
   Card,
-  Select,
+  Segmented,
 } from 'antd';
 import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
@@ -203,6 +203,7 @@ const UserManage = () => {
         style={{
           display: 'flex',
           flexDirection: 'row',
+          flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: 12,
@@ -210,16 +211,16 @@ const UserManage = () => {
         <Search
           placeholder="Tìm kiếm"
           onSearch={search}
-          style={{ width: '100%' }}
+          style={{ flex: '1 1 240px', minWidth: 0 }}
         />
-        <Select
-          allowClear
-          placeholder="Loại tài khoản"
-          style={{ minWidth: 180 }}
-          onChange={(v?: 'student' | 'guest') =>
-            filter(v ? { userType: v } : undefined)
+        <Segmented
+          aria-label="Lọc theo loại tài khoản"
+          defaultValue="all"
+          onChange={v =>
+            filter(v === 'all' ? undefined : { userType: v as string })
           }
           options={[
+            { value: 'all', label: 'Tất cả' },
             { value: 'student', label: 'Sinh viên VHU' },
             { value: 'guest', label: 'Khách' },
           ]}

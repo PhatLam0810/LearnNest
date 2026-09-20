@@ -45,6 +45,44 @@ const styles = StyleSheet.create({
     cursor: 'pointer',
     fontFamily: 'inherit',
   },
+  inlineWrap: {
+    gap: 24,
+  },
+  inlineHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  backButton: {
+    ...typography.titleS,
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border-strong)',
+    backgroundColor: 'var(--color-surface)',
+    color: 'var(--color-text-primary)',
+    cursor: 'pointer',
+    fontFamily: 'inherit',
+    flexShrink: 0,
+  },
+  inlineTitle: {
+    ...typography.titleM,
+    lineHeight: 30,
+    color: 'var(--color-text-primary)',
+  },
+  inlineCode: {
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
+  },
+  inlineSubline: {
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+  },
+  inlineBody: {
+    gap: 24,
+  },
   body: {
     paddingTop: 24,
     paddingLeft: 28,

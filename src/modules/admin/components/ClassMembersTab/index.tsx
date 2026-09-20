@@ -5,6 +5,7 @@ import { Input, Modal, Skeleton } from 'antd';
 import type { TableProps } from 'antd';
 import AppButton from '@components/AppButton';
 import { messageApi } from '@hooks';
+import UserAvatar from '@components/UserAvatar';
 import { adminQuery } from '~mdAdmin/redux';
 import { ClassMember } from '../../redux/RTKQuery/type';
 import ClassAddMembersModal from '../ClassAddMembersModal';
@@ -74,13 +75,16 @@ const ClassMembersTab: React.FC<ClassMembersTabProps> = ({
       title: 'Học viên',
       key: 'learner',
       render: (_: unknown, r) => (
-        <View>
-          <Text style={styles.learnerName}>
-            {r.fullName || r.email || 'Học viên'}
-          </Text>
-          {!!r.fullName && !!r.email && (
-            <Text style={styles.caption}>{r.email}</Text>
-          )}
+        <View style={styles.learnerCell}>
+          <UserAvatar size={32} fullName={r.fullName || r.email} seed={r._id} />
+          <View>
+            <Text style={styles.learnerName}>
+              {r.fullName || r.email || 'Học viên'}
+            </Text>
+            {!!r.fullName && !!r.email && (
+              <Text style={styles.caption}>{r.email}</Text>
+            )}
+          </View>
         </View>
       ),
     },
@@ -91,7 +95,7 @@ const ClassMembersTab: React.FC<ClassMembersTabProps> = ({
       render: (v?: string) => v || '—',
     },
     {
-      title: 'Lớp sinh hoạt',
+      title: 'Lớp cũ',
       dataIndex: 'class',
       key: 'class',
       render: (v?: string) => v || '—',
@@ -101,12 +105,24 @@ const ClassMembersTab: React.FC<ClassMembersTabProps> = ({
       key: 'action',
       align: 'right',
       render: (_: unknown, r) => (
-        <button
-          type="button"
-          style={styles.actionButton as React.CSSProperties}
-          onClick={() => handleRemove(r)}>
-          Gỡ khỏi lớp
-        </button>
+        <View style={styles.rowActions}>
+          <button
+            type="button"
+            style={styles.moveButton as React.CSSProperties}
+            disabled={archived}
+            onClick={() => {
+              setSelected([r._id]);
+              setIsMoveOpen(true);
+            }}>
+            Chuyển lớp
+          </button>
+          <button
+            type="button"
+            style={styles.actionButton as React.CSSProperties}
+            onClick={() => handleRemove(r)}>
+            Gỡ khỏi lớp
+          </button>
+        </View>
       ),
     },
   ];

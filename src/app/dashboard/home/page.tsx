@@ -17,6 +17,7 @@ import ContinueLearningBanner from './_components/ContinueLearningBanner';
 import StatCard from './_components/StatCard';
 import ContinuingCourses from './_components/ContinuingCourses';
 import RoadmapCard from './_components/RoadmapCard';
+import UpcomingDeadlines from './_components/UpcomingDeadlines';
 import AllCoursesGrid from './_components/AllCoursesGrid';
 
 // Trang Chủ - dashboard cá nhân hóa: banner "tiếp tục học", 3 thẻ thống kê
@@ -148,6 +149,7 @@ const HomeOverview = () => {
 
           <View style={styles.roadmapCol}>
             <RoadmapCard />
+            <UpcomingDeadlines />
           </View>
         </View>
 

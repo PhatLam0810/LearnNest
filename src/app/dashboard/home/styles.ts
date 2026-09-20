@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
   roadmapCol: {
     flex: 1,
     minWidth: 260,
+    gap: 16,
   },
   titleContainer: {
     flexDirection: 'row',

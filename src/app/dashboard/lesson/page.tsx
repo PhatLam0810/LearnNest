@@ -2,6 +2,7 @@
 import { useAppPagination } from '@hooks';
 import { FlatList, Text, View } from 'react-native-web';
 import { LessonItem } from '~mdDashboard/components';
+import MyClassCourses from '~mdDashboard/components/MyClassCourses';
 import styles from './styles';
 import './styles.scss';
 import { dashboardQuery } from '~mdDashboard/redux';
@@ -64,6 +65,7 @@ const Page = () => {
 
   return (
     <View style={styles.container}>
+      <MyClassCourses />
       <View style={styles.header}>
         <Text style={styles.pageTitle}>Khóa Học</Text>
         <Text style={styles.pageSubtitle}>

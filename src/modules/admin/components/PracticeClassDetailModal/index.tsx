@@ -20,6 +20,8 @@ import styles from './styles';
 interface PracticeClassDetailModalProps {
   classId?: string;
   onClose: () => void;
+  // true = hiện trong trang (không modal), có nút quay lại danh sách.
+  inline?: boolean;
 }
 
 const buttonStyle = { width: 'auto', height: 40 } as const;
@@ -35,6 +37,7 @@ type TabKey = (typeof TABS)[number]['key'];
 const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
   classId,
   onClose,
+  inline = false,
 }) => {
   const [tab, setTab] = useState<TabKey>('members');
   const [assignmentId, setAssignmentId] = useState<string | undefined>();
@@ -201,6 +204,91 @@ const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
     );
   };
 
+  const tabsAndBody = (
+    <>
+      <div role="tablist" style={styles.tabStrip as React.CSSProperties}>
+        {TABS.map(t => (
+          <button
+            key={t.key}
+            type="button"
+            role="tab"
+            aria-selected={tab === t.key}
+            onClick={() => setTab(t.key)}
+            style={
+              (tab === t.key
+                ? { ...styles.tab, ...styles.tabActive }
+                : styles.tab) as React.CSSProperties
+            }>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tab === 'members' && !!classId && (
+        <ClassMembersTab
+          classId={classId}
+          archived={classInfo?.status === 'archived'}
+        />
+      )}
+      {tab === 'courses' && !!classId && (
+        <ClassCoursesTab
+          classId={classId}
+          archived={classInfo?.status === 'archived'}
+        />
+      )}
+      {tab === 'progress' && !!classId && (
+        <ClassProgressTab classId={classId} />
+      )}
+      {tab === 'assignments' && (
+        <>
+          {renderAssignments()}
+          <View style={styles.footer}>
+            <AppButton
+              type="primary"
+              style={buttonStyle}
+              loading={isReminding}
+              disabled={!assignment || !notSubmitted || isReminding}
+              onClick={handleRemind}>
+              Nhắc hàng loạt
+            </AppButton>
+          </View>
+        </>
+      )}
+    </>
+  );
+
+  // Chế độ inline (theo thiết kế): chi tiết lớp mở NGAY trong tab thay cho danh
+  // sách, có nút quay lại - không phải modal.
+  if (inline) {
+    if (!classId) return null;
+    return (
+      <View style={styles.inlineWrap}>
+        <View style={styles.inlineHeader}>
+          <button
+            type="button"
+            aria-label="Quay lại danh sách lớp"
+            onClick={close}
+            style={styles.backButton as React.CSSProperties}>
+            ←
+          </button>
+          <View style={styles.headerText}>
+            <Text style={styles.inlineTitle}>
+              {classInfo?.name || 'Chi tiết lớp'}
+              {!!classInfo && (
+                <Text style={styles.inlineCode}> ({classInfo.code})</Text>
+              )}
+            </Text>
+            <Text style={styles.inlineSubline}>
+              {classInfo
+                ? `${classInfo.termLabel ? `${classInfo.termLabel} · ` : ''}${classInfo.memberCount} học viên`
+                : ' '}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.inlineBody}>{tabsAndBody}</View>
+      </View>
+    );
+  }
+
   return (
     <Modal
       open={!!classId}
@@ -228,55 +316,7 @@ const PracticeClassDetailModal: React.FC<PracticeClassDetailModalProps> = ({
             Đóng
           </button>
         </View>
-        <View style={styles.body}>
-          <div role="tablist" style={styles.tabStrip as React.CSSProperties}>
-            {TABS.map(t => (
-              <button
-                key={t.key}
-                type="button"
-                role="tab"
-                aria-selected={tab === t.key}
-                onClick={() => setTab(t.key)}
-                style={
-                  (tab === t.key
-                    ? { ...styles.tab, ...styles.tabActive }
-                    : styles.tab) as React.CSSProperties
-                }>
-                {t.label}
-              </button>
-            ))}
-          </div>
-          {tab === 'members' && !!classId && (
-            <ClassMembersTab
-              classId={classId}
-              archived={classInfo?.status === 'archived'}
-            />
-          )}
-          {tab === 'courses' && !!classId && (
-            <ClassCoursesTab
-              classId={classId}
-              archived={classInfo?.status === 'archived'}
-            />
-          )}
-          {tab === 'progress' && !!classId && (
-            <ClassProgressTab classId={classId} />
-          )}
-          {tab === 'assignments' && (
-            <>
-              {renderAssignments()}
-              <View style={styles.footer}>
-                <AppButton
-                  type="primary"
-                  style={buttonStyle}
-                  loading={isReminding}
-                  disabled={!assignment || !notSubmitted || isReminding}
-                  onClick={handleRemind}>
-                  Nhắc hàng loạt
-                </AppButton>
-              </View>
-            </>
-          )}
-        </View>
+        <View style={styles.body}>{tabsAndBody}</View>
       </View>
     </Modal>
   );

@@ -22,9 +22,15 @@ import MockExamManage from './mockExamManage/page';
 import QuizManagePage from './quizManage/page';
 import SubmissionsManage from './submissionsManage/page';
 import PracticeClassManage from './practiceClassManage/page';
+import OverviewManage from './overviewManage/page';
 import { ADMIN_PRIMARY } from './adminTheme';
 
 const buildItems = (qnaPendingCount: number): TabsProps['items'] => [
+  {
+    key: '0',
+    label: 'Tổng Quan',
+    children: <OverviewManage />,
+  },
   {
     key: '1',
     label: 'Quản Trị Người Dùng',

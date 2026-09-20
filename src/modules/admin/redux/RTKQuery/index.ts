@@ -10,6 +10,7 @@ import {
   ImportUserPreviewRequest,
   ImportUserPreviewResponse,
   ImportEnvelope,
+  AdminOverview,
   ClassCourseItem,
   AssignClassCourseBody,
   ClassProgressStatus,
@@ -1259,6 +1260,38 @@ export const adminQuery = baseQuery.injectEndpoints({
         url: `admin/classes/${classId}/progress-export`,
         method: 'POST',
         body: { lessonId },
+        responseHandler: response => response.blob(),
+      }),
+    }),
+    getAdminOverview: builder.query<AdminOverview, void>({
+      query: () => 'admin/overview',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'Class', id: 'OVERVIEW' }],
+    }),
+    emailWeeklySummary: builder.mutation<
+      { sent: boolean },
+      { dryRun?: boolean } | void
+    >({
+      query: body => ({
+        url: 'admin/overview/weekly-summary/email',
+        method: 'POST',
+        body: body ?? {},
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    exportAtRisk: builder.mutation<Blob, void>({
+      query: () => ({
+        url: 'admin/overview/at-risk-export',
+        method: 'POST',
+        body: {},
+        responseHandler: response => response.blob(),
+      }),
+    }),
+    exportClassesReport: builder.mutation<Blob, void>({
+      query: () => ({
+        url: 'admin/classes/report-export',
+        method: 'POST',
+        body: {},
         responseHandler: response => response.blob(),
       }),
     }),

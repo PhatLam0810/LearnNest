@@ -1,17 +1,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Modal, Segmented, Skeleton } from 'antd';
+import { Input, Modal, Segmented, Skeleton } from 'antd';
+import { useRouter } from 'next/navigation';
 import type { TableProps } from 'antd';
 import AppButton from '@components/AppButton';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { ClassItem, ClassStatusValue } from '~mdAdmin/redux/RTKQuery/type';
-import {
-  ContentToolbar,
-  FilteredEmptyState,
-  ThemedTable,
-} from '~mdAdmin/components';
+import { FilteredEmptyState, ThemedTable } from '~mdAdmin/components';
+import { downloadBlob } from '~mdAdmin/components/submissionShared';
 import ClassFormModal from '~mdAdmin/components/ClassFormModal';
 import CreateClassModal from '~mdAdmin/components/CreateClassModal';
 import PracticeClassDetailModal from '~mdAdmin/components/PracticeClassDetailModal';
@@ -34,6 +32,7 @@ const STATUS_OPTIONS: { label: string; value: StatusFilter }[] = [
 ];
 
 const PracticeClassManage: React.FC = () => {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
   const [pageNum, setPageNum] = useState(1);
@@ -49,6 +48,8 @@ const PracticeClassManage: React.FC = () => {
     pageSize: PAGE_SIZE,
   });
   const [updateClass] = adminQuery.useUpdateClassMutation();
+  const [exportReport, { isLoading: isExporting }] =
+    adminQuery.useExportClassesReportMutation();
   const items = data?.items ?? [];
   const isInitialLoading = isFetching && !data;
   const isFiltered = !!search || status !== 'all';
@@ -96,6 +97,14 @@ const PracticeClassManage: React.FC = () => {
       onOk: () => setArchived(item, true),
     });
 
+  const handleExport = async () => {
+    try {
+      downloadBlob(await exportReport().unwrap(), 'bao-cao-lop.xlsx');
+    } catch (err: unknown) {
+      messageApi.error(apiErrorMessage(err, 'Xuất báo cáo thất bại'));
+    }
+  };
+
   const openEdit = (item: ClassItem) => {
     setEditing(item);
     setIsFormOpen(true);
@@ -126,10 +135,23 @@ const PracticeClassManage: React.FC = () => {
       render: (_: unknown, r) => r.memberCount,
     },
     {
-      title: 'Số khóa',
+      title: 'Khóa học được phân',
       key: 'courses',
-      align: 'right',
-      render: (_: unknown, r) => r.courseCount,
+      render: (_: unknown, r) =>
+        r.courseTitles?.length ? (
+          <View style={styles.tagRow}>
+            {r.courseTitles.map(t => (
+              <StateTag
+                key={t}
+                label={t}
+                color="var(--color-vhu-primary)"
+                bg="var(--color-info-bg)"
+              />
+            ))}
+          </View>
+        ) : (
+          <Text style={styles.mutedText}>Chưa phân khóa</Text>
+        ),
     },
     {
       title: 'Trạng thái',
@@ -149,12 +171,6 @@ const PracticeClassManage: React.FC = () => {
           <button
             type="button"
             style={styles.actionButton as React.CSSProperties}
-            onClick={() => setDetailId(r._id)}>
-            Xem chi tiết
-          </button>
-          <button
-            type="button"
-            style={styles.actionButton as React.CSSProperties}
             onClick={() => openEdit(r)}>
             Sửa
           </button>
@@ -166,7 +182,7 @@ const PracticeClassManage: React.FC = () => {
                 ? setArchived(r, false)
                 : confirmArchive(r)
             }>
-            {r.status === 'archived' ? 'Khôi phục' : 'Lưu trữ'}
+            {r.status === 'archived' ? 'Bỏ lưu trữ' : 'Lưu trữ'}
           </button>
         </View>
       ),
@@ -242,34 +258,63 @@ const PracticeClassManage: React.FC = () => {
     );
   };
 
+  // Chi tiết lớp mở NGAY trong tab (theo thiết kế), có nút quay lại danh sách.
+  if (detailId) {
+    return (
+      <View style={styles.page}>
+        <PracticeClassDetailModal
+          inline
+          classId={detailId}
+          onClose={() => setDetailId(undefined)}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.page}>
-      <View style={styles.headerBlock}>
-        <Text style={styles.title}>Quản lý lớp học</Text>
-        <Text style={styles.subtitle}>
-          Tạo lớp theo học kỳ, quản lý học viên và theo dõi bài giao của từng
-          lớp.
-        </Text>
-      </View>
-      <ContentToolbar
-        searchPlaceholder="Tìm theo mã lớp, tên lớp hoặc học kỳ"
-        onSearch={changeSearch}
-        addLabel="Tạo lớp học"
-        onAdd={() => {
-          setEditing(undefined);
-          setIsFormOpen(true);
-        }}
-      />
-      <View style={styles.filterRow}>
-        <Segmented
-          aria-label="Lọc theo trạng thái"
-          options={STATUS_OPTIONS}
-          value={status}
-          onChange={v => changeStatus(v as StatusFilter)}
-        />
-        <AppButton style={buttonStyle} onClick={() => setIsAssignOpen(true)}>
-          Tạo lớp và giao bài
-        </AppButton>
+      <View style={styles.toolbarRow}>
+        <View style={styles.toolbarLeft}>
+          <Input.Search
+            allowClear
+            size="large"
+            aria-label="Tìm lớp học"
+            placeholder="Tìm theo mã lớp hoặc tên lớp"
+            onSearch={changeSearch}
+            style={{ maxWidth: 360 }}
+          />
+          <Segmented
+            aria-label="Lọc theo trạng thái"
+            options={STATUS_OPTIONS}
+            value={status}
+            onChange={v => changeStatus(v as StatusFilter)}
+          />
+        </View>
+        <View style={styles.toolbarRight}>
+          <AppButton
+            style={buttonStyle}
+            loading={isExporting}
+            onClick={handleExport}>
+            Xuất báo cáo lớp
+          </AppButton>
+          <AppButton
+            style={buttonStyle}
+            onClick={() => router.push('/dashboard/admin?tab=2')}>
+            Nhập từ Excel
+          </AppButton>
+          <AppButton style={buttonStyle} onClick={() => setIsAssignOpen(true)}>
+            Tạo lớp và giao bài
+          </AppButton>
+          <AppButton
+            type="primary"
+            style={buttonStyle}
+            onClick={() => {
+              setEditing(undefined);
+              setIsFormOpen(true);
+            }}>
+            Tạo lớp học
+          </AppButton>
+        </View>
       </View>
       {renderContent()}
       <ClassFormModal
@@ -280,10 +325,6 @@ const PracticeClassManage: React.FC = () => {
       <CreateClassModal
         open={isAssignOpen}
         onClose={() => setIsAssignOpen(false)}
-      />
-      <PracticeClassDetailModal
-        classId={detailId}
-        onClose={() => setDetailId(undefined)}
       />
     </View>
   );

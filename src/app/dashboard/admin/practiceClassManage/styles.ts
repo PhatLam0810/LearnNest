@@ -1,6 +1,36 @@
 import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
+  toolbarRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  toolbarLeft: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    gap: 12,
+    flexGrow: 1,
+    minWidth: 0,
+  },
+  toolbarRight: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  mutedText: {
+    color: 'var(--color-text-muted)',
+  },
   page: {
     width: '100%',
     gap: 24,

@@ -592,6 +592,8 @@ export interface ClassItem {
   status: ClassStatusValue;
   memberCount: number;
   courseCount: number;
+  // Tên các khóa được phân (chỉ có ở danh sách lớp).
+  courseTitles?: string[];
   // Lớp cũ gắn 1 khóa qua lessonId, lớp mới tạo chưa gắn khóa = null.
   lessonId: string | null;
   createdAt: string;
@@ -732,6 +734,7 @@ export interface ClassProgressRow {
   totalItems: number;
   doneItems: number;
   percent: number;
+  bestQuizScore: number | null;
   lastActiveAt: string | null;
   status: ClassProgressStatus;
 }
@@ -751,4 +754,51 @@ export interface RemindLearningResult {
   candidates: number;
   sent: number;
   skipped: { userId: string; fullName: string; reason: string }[];
+}
+
+// Tab "Tổng quan" của quản trị (BE GET admin/overview).
+export interface OverviewSignupDay {
+  date: string;
+  student: number;
+  guest: number;
+}
+
+export interface OverviewAtRiskLearner {
+  userId: string;
+  lessonId: string | null;
+  fullName: string;
+  email: string;
+  className: string;
+  lastActiveAt: string | null;
+  daysInactive: number | null;
+}
+
+export interface OverviewDeadline {
+  assignmentId: string;
+  classId: string;
+  className: string;
+  taskTitle: string;
+  dueDate: string;
+  submitted: number;
+  total: number;
+}
+
+export interface AdminOverview {
+  signups: {
+    total: number;
+    student: number;
+    guest: number;
+    days: OverviewSignupDay[];
+  };
+  completion: { rate: number; deltaVsLastMonth: number | null };
+  atRiskCount: number;
+  atRisk: OverviewAtRiskLearner[];
+  dueSoon: number;
+  deadlines: OverviewDeadline[];
+  weekly: {
+    activeLearners: number;
+    newSubmissions: number;
+    newClasses: number;
+    pendingFeedback: number;
+  };
 }

@@ -147,12 +147,14 @@ const ClassCoursesTab: React.FC<ClassCoursesTabProps> = ({
       ),
     },
     {
-      title: 'Thời gian học',
-      key: 'range',
-      render: (_: unknown, r) =>
-        r.startAt || r.endAt
-          ? `${formatDate(r.startAt) ?? '…'} – ${formatDate(r.endAt) ?? '…'}`
-          : 'Không giới hạn',
+      title: 'Bắt đầu',
+      key: 'startAt',
+      render: (_: unknown, r) => formatDate(r.startAt) ?? '—',
+    },
+    {
+      title: 'Kết thúc',
+      key: 'endAt',
+      render: (_: unknown, r) => formatDate(r.endAt) ?? '—',
     },
     {
       title: 'Chế độ',

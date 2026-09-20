@@ -130,6 +130,15 @@ const ClassProgressTab: React.FC<ClassProgressTabProps> = ({ classId }) => {
       ),
     },
     {
+      title: 'Điểm quiz',
+      key: 'quiz',
+      align: 'right',
+      render: (_: unknown, r) =>
+        r.bestQuizScore === null
+          ? '—'
+          : String(r.bestQuizScore).replace('.', ','),
+    },
+    {
       title: 'Trạng thái',
       key: 'status',
       render: (_: unknown, r) => <StateTag {...STATUS_TAG[r.status]} />,
