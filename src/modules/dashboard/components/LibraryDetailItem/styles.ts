@@ -134,6 +134,9 @@ const styles = StyleSheet.create({
   },
 
   answerCard: {
+    transitionProperty: 'background-color, border-color, color',
+    transitionDuration: '0.2s',
+    transitionTimingFunction: 'ease',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',

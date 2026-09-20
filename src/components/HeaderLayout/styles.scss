@@ -170,13 +170,16 @@
 }
 
 .notification-dropdown-panel {
-  background-color: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  width: 360px;
+  background-color: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(17, 24, 39, 0.14);
+  width: 340px;
+  max-width: calc(100vw - 24px);
   overflow: hidden;
-  border: 1px solid #f0f0f0;
+  border: 1px solid var(--color-border);
   line-height: normal;
+  transform-origin: top right;
+  animation: scaleIn 0.2s ease both;
 }
 
 .notification-dropdown-panel .dropdown-header {
@@ -189,9 +192,9 @@
 
 .notification-dropdown-panel .dropdown-header h3 {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #1d1d1f;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .notification-dropdown-panel .see-all-btn {
@@ -234,10 +237,42 @@
 }
 
 .notification-dropdown-panel .notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
   padding: 12px 20px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  border-bottom: 1px solid #f7f7f7;
+  transition: background-color 0.16s ease;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.notification-dropdown-panel .notification-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+
+.notification-dropdown-panel .notification-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.notification-dropdown-panel .notification-empty {
+  padding: 32px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 .notification-dropdown-panel .notification-item:last-child {
@@ -245,11 +280,11 @@
 }
 
 .notification-dropdown-panel .notification-item:hover {
-  background-color: #fafafa;
+  background-color: var(--color-surface-subtle);
 }
 
 .notification-dropdown-panel .notification-item.unread {
-  background-color: #fff8f6;
+  background-color: var(--color-surface-selected);
 }
 
 .notification-dropdown-panel .notification-item.unread .notification-title {
@@ -257,9 +292,9 @@
 }
 
 .notification-dropdown-panel .notification-title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  color: #1d1d1f;
+  color: var(--color-text-primary);
   margin-bottom: 2px;
 }
 
@@ -274,8 +309,8 @@
 }
 
 .notification-dropdown-panel .notification-time {
-  font-size: 12px;
-  color: #a0a0a5;
+  font-size: 11px;
+  color: var(--color-text-muted);
 }
 
 .notification-dropdown-panel .notification-see-all {

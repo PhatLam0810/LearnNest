@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Card, Form, message } from 'antd';
+import { Card, Form } from 'antd';
 import { MailOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import { Text, View } from 'react-native-web';
 import Image from 'next/image';
@@ -15,6 +15,7 @@ import { useAppDispatch, useAppSelector } from '@redux';
 import { authAction, authQuery } from '~mdAuth/redux';
 import { useResponsive } from '@/styles/responsive';
 import typography from '@/styles/typography';
+import { messageApi } from '@hooks';
 
 type FieldType = {
   email: string;
@@ -25,7 +26,7 @@ const SignUpPage = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [sendOtp] = authQuery.useSendOtpMutation();
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
 

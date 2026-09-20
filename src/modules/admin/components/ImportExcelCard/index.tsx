@@ -3,7 +3,6 @@ import React, { useMemo, useState } from 'react';
 import {
   Alert,
   Input,
-  message,
   Progress,
   Select,
   Space,
@@ -27,6 +26,7 @@ import { useAppSelector } from '@redux';
 import AppButton from '@components/AppButton';
 import ClassFormModal from '../ClassFormModal';
 import './styles.scss';
+import { messageApi } from '@hooks';
 
 const { Text } = Typography;
 
@@ -84,7 +84,7 @@ const ImportExcelCard: React.FC = () => {
   const [sendResult, setSendResult] = useState<SendImportEmailsResponse | null>(
     null,
   );
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
   const [classId, setClassId] = useState<string | undefined>();
   const [classModalOpen, setClassModalOpen] = useState(false);
   const [progress, setProgress] = useState<{

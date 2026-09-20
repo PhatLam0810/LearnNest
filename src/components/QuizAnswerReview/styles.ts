@@ -13,6 +13,9 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   option: {
+    transitionProperty: 'background-color, border-color, color',
+    transitionDuration: '0.2s',
+    transitionTimingFunction: 'ease',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,

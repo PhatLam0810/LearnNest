@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Card, Form, message } from 'antd';
+import { Card, Form } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Text, View } from 'react-native-web';
@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { authAction, authQuery } from '~mdAuth/redux';
 import { useResponsive } from '@/styles/responsive';
 import typography from '@/styles/typography';
+import { messageApi } from '@hooks';
 
 type resetPasswordType = {
   otp: number;
@@ -21,7 +22,7 @@ type resetPasswordType = {
 const ChangePasswordPage = () => {
   const [formResetPassword] = Form.useForm<resetPasswordType>();
   const { sendOtpInfo } = useAppSelector(state => state.authReducer);
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
   const router = useRouter();
   const [resetPassword] = authQuery.useResetPasswordMutation();
   useEffect(() => {

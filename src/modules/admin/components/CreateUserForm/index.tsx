@@ -1,11 +1,12 @@
 'use client';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Form, Input, message } from 'antd';
+import { Form, Input } from 'antd';
 import { adminQuery } from '~mdAdmin/redux';
 import AppButton from '@components/AppButton';
 import { CreateUserParams } from './type';
 import styles from './styles';
+import { messageApi } from '@hooks';
 
 const PHONE_PATTERN = /^0\d{9}$/;
 const INPUT_STYLE: React.CSSProperties = { height: 48, borderRadius: 8 };
@@ -16,7 +17,7 @@ interface CreateUserFormProps {
 
 const CreateUserForm: React.FC<CreateUserFormProps> = ({ onCreated }) => {
   const [form] = Form.useForm<CreateUserParams>();
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
   const [createUser] = adminQuery.useCreateUserMutation();
   const [sendEmails] = adminQuery.useSendImportEmailsMutation();
   const [submitting, setSubmitting] = useState(false);

@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
-import { Card, Form, message } from 'antd';
+import { Card, Form } from 'antd';
 import { ArrowLeftOutlined, LockOutlined } from '@ant-design/icons';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Text, View } from 'react-native-web';
@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { authAction, authQuery } from '~mdAuth/redux';
 import { useResponsive } from '@/styles/responsive';
 import typography from '@/styles/typography';
+import { messageApi } from '@hooks';
 
 type FieldType = {
   otp: string;
@@ -22,7 +23,7 @@ const CreateAccountPage = () => {
   const [form] = Form.useForm<FieldType>();
   const dispatch = useAppDispatch();
   const { sendOtpInfo } = useAppSelector(state => state.authReducer);
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
   const router = useRouter();
   const [verifyOtp] = authQuery.useVerifyOtpMutation();
   const [signUp] = authQuery.useSignUpMutation();

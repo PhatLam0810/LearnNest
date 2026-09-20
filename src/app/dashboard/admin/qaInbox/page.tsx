@@ -135,7 +135,10 @@ const QaInbox: React.FC = () => {
         commentText: draft.trim(),
         parentCommentId: selected._id,
       });
-      messageApi.success('Đã trả lời');
+      messageApi.success({
+        content: 'Đã gửi trả lời',
+        message: 'Học viên sẽ nhận email ngay bây giờ.',
+      });
       setDraft('');
       refresh();
       loadStats();

@@ -7,7 +7,6 @@ import {
   Table,
   TableProps,
   Modal,
-  message,
   Button,
   Form,
   Input,
@@ -23,6 +22,7 @@ import { authQuery } from '~mdAuth/redux/RTKQuery';
 import dynamic from 'next/dynamic';
 import StatCard from '../../home/_components/StatCard';
 import StateTag from '~mdAdmin/components/StateTag';
+import { messageApi } from '@hooks';
 
 const TrafficChart = dynamic(() => import('./components/TrafficChart'), {
   ssr: false,
@@ -50,7 +50,7 @@ const UserManage = () => {
   const [createUser, { isLoading: isLoadingCreateUser }] =
     adminQuery.useCreateUserMutation();
   const [sendEmails] = adminQuery.useSendImportEmailsMutation();
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
 
   // Card "Tạo người dùng mới" ở tab "Tạo Người Dùng" (CreateUserForm) là 1
   // component riêng, không share state với danh sách ở đây - bắn event khi

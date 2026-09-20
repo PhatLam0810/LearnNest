@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import '../styles/variables.css';
 import './styles.css';
+import '../styles/animations.css';
 import RootLayoutClient from './RootLayoutClient';
 
 // www. — domain thật đang serve (apex learnestvhu.com chỉ 308-redirect sang

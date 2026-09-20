@@ -14,7 +14,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     flexGrow: 1,
+    flexShrink: 1,
     minWidth: 0,
+    maxWidth: '100%',
   },
   toolbarRight: {
     flexDirection: 'row',
@@ -22,6 +24,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: 12,
+    flexShrink: 1,
+    minWidth: 0,
+    maxWidth: '100%',
   },
   tagRow: {
     flexDirection: 'row',

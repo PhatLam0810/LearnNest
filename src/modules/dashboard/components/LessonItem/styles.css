@@ -13,3 +13,17 @@
 .lesson-card.ant-card-hoverable:hover {
   z-index: 1;
 }
+
+/* Thẻ khóa học bấm được: nâng nhẹ + bóng đậm hơn khi hover (khớp motion.cardHover). */
+.lesson-card {
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.18s ease,
+    border-color 0.16s ease;
+}
+
+.lesson-card.ant-card-hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(17, 24, 39, 0.1);
+}

@@ -14,6 +14,7 @@ import AiAdvisorWidget from '@components/AiAdvisorWidget';
 import Footer from '@components/Footer';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MessageProvider from '@components/MessageProvider';
+import ToastProvider from '@components/ToastProvider';
 import PageViewTracker from '@components/PageViewTracker';
 import styles from './layoutStyles';
 import { Analytics } from '@vercel/analytics/next';
@@ -62,6 +63,7 @@ export default function RootLayoutClient({
           <QueryClientProvider client={queryClient}>
             <PersistGate persistor={persistor}>
               <MessageProvider />
+              <ToastProvider />
               <PageViewTracker />
               <View style={styles.appShell}>{children}</View>
               <AiAdvisorWidget />

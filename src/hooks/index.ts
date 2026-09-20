@@ -1,19 +1,21 @@
 'use client';
 import { message } from 'antd';
-import { MessageInstance } from 'antd/es/message/interface';
+import { toastMessageApi } from './toastStore';
 import { useEffect, useState } from 'react';
 export * from './pagination';
 
-export let messageApi: MessageInstance | null = null;
+// `messageApi` giờ đẩy vào hệ toast dùng chung (ToastProvider), cùng chữ ký với
+// antd nên các chỗ gọi cũ không đổi.
+export const messageApi = toastMessageApi;
+export * from './toastStore';
 
 export const useMessage = () => {
   const [mounted, setMounted] = useState(false);
-  const [api, context] = message.useMessage();
+  const [, context] = message.useMessage();
 
   useEffect(() => {
     setMounted(true);
-    messageApi = api;
-  }, [api]);
+  }, []);
 
   if (!mounted) {
     return null;

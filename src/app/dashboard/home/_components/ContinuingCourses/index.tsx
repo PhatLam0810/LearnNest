@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
 import { Progress } from 'antd';
 import { useRouter } from 'next/navigation';
 import { MyCourseItem } from '~mdDashboard/redux/RTKQuery/types';
 import LessonThumbnail from '~mdDashboard/components/LessonThumbnail';
 import { useResponsive } from '@/styles/responsive';
+import motion from '@/styles/motion';
 import styles from './styles';
 
 type ContinuingCoursesProps = {
@@ -24,6 +25,7 @@ const ContinuingCourses: React.FC<ContinuingCoursesProps> = ({
   formatRelativeTime,
 }) => {
   const router = useRouter();
+  const [hoverId, setHoverId] = useState<string | null>(null);
   const { isMobile } = useResponsive();
   // repeat(auto-fill, minmax(240px, 1fr)) để lại 1 cột ma bên phải trên màn
   // hẹp (auto-fill tính số cột theo bề rộng container thực tế, có thể rộng
@@ -51,7 +53,12 @@ const ContinuingCourses: React.FC<ContinuingCoursesProps> = ({
       {courses.map(course => (
         <View
           key={course.lessonId}
-          style={styles.card}
+          onMouseEnter={() => setHoverId(course.lessonId)}
+          onMouseLeave={() => setHoverId(null)}
+          style={{
+            ...styles.card,
+            ...(hoverId === course.lessonId ? motion.cardHoverOn : null),
+          }}
           onClick={() =>
             router.push(
               `/dashboard/home/lesson/moduleDetail?lessonId=${course.lessonId}&subLessonId=${course.lastSubLessonId || 'first-lesson'}`,

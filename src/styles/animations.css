@@ -1,0 +1,93 @@
+/* Keyframes dùng chung (khớp prototype). Không đặt class ở đây - component lấy
+   animation qua src/styles/motion.ts (StyleSheet) để giữ idiom react-native-web. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -300px 0;
+  }
+  100% {
+    background-position: 300px 0;
+  }
+}
+
+/* Mọi antd Modal: nền mờ dần + panel scaleIn (thay animation zoom mặc định của
+   antd) - áp 1 lần cho cả app, kể cả modal thêm sau này. */
+.ant-modal-mask {
+  animation: fadeIn 0.18s ease both;
+}
+
+.ant-modal .ant-modal-content {
+  animation: scaleIn 0.2s ease both;
+  box-shadow: 0 20px 44px rgba(17, 24, 39, 0.16);
+}
+
+/* antd tự zoom cả khung .ant-modal khi mở: tắt để khỏi scale 2 lần chồng nhau. */
+.ant-modal.ant-zoom-enter,
+.ant-modal.ant-zoom-appear {
+  animation-name: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Tab admin: khung nội dung mờ dần + trượt nhẹ khi đổi tab. */
+.admin-page .ant-tabs-tabpane-active {
+  animation: fadeInUp 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Người dùng bật "giảm chuyển động" ở hệ điều hành: tắt mọi animation/transition. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Độ sâu: thẻ/panel nghỉ có bóng nhẹ (bảng và dòng danh sách thì không có). */
+.ant-card {
+  box-shadow: 0 1px 3px rgba(17, 24, 39, 0.06);
+}

@@ -50,6 +50,18 @@ dayjs.extend(relativeTime);
 const { Header } = Layout;
 const { useBreakpoint } = Grid;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
+// Màu chấm "chưa đọc" theo loại thông báo (token, không hex).
+const NOTIF_DOT_COLOR: Record<string, string> = {
+  COMMENT_REPLY: 'var(--color-vhu-primary)',
+  NEW_QUESTION: 'var(--color-vhu-primary)',
+  FEEDBACK_REPLIED: 'var(--color-vhu-primary)',
+  NEW_COURSE: 'var(--color-success)',
+  COURSE_COMPLETED: 'var(--color-success)',
+  STUDY_REMINDER: 'var(--color-warning)',
+  RETRY_REMINDER: 'var(--color-warning)',
+  VIOLATION_REPORT: 'var(--color-error)',
+};
+
 const HeaderLayout: React.FC = ({}) => {
   const screens = useBreakpoint();
   const pathname = usePathname();
@@ -149,23 +161,37 @@ const HeaderLayout: React.FC = ({}) => {
       </div>
       <div className="dropdown-body">
         {notifItems.length === 0 ? (
-          <Empty
-            description="Chưa có thông báo nào"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            style={{ padding: '24px 0' }}
-          />
+          <div className="notification-empty">Không có thông báo mới.</div>
         ) : (
           notifItems.map(item => (
             <div
               key={item._id}
               className={`notification-item${item.isRead ? '' : ' unread'}`}
               onClick={() => handleNotificationClick(item)}>
-              <div className="notification-title">{item.title}</div>
-              {item.body && (
-                <div className="notification-body">{item.body}</div>
-              )}
-              <div className="notification-time">
-                {dayjs(item.createdAt).fromNow()}
+              <span
+                className="notification-dot"
+                aria-hidden="true"
+                style={{
+                  visibility: item.isRead ? 'hidden' : 'visible',
+                  backgroundColor:
+                    NOTIF_DOT_COLOR[item.type] ?? 'var(--color-vhu-primary)',
+                }}
+              />
+              <div className="notification-text">
+                <div className="notification-title">
+                  {item.isRead ? (
+                    ''
+                  ) : (
+                    <span className="sr-only">Chưa đọc: </span>
+                  )}
+                  {item.title}
+                </div>
+                {item.body && (
+                  <div className="notification-body">{item.body}</div>
+                )}
+                <div className="notification-time">
+                  {dayjs(item.createdAt).fromNow()}
+                </div>
               </div>
             </div>
           ))
@@ -348,7 +374,7 @@ const HeaderLayout: React.FC = ({}) => {
                 popupRender={renderNotificationDropdown}
                 placement="bottomRight"
                 onOpenChange={setIsNotifOpen}>
-                <Badge count={unreadCount} size="default" offset={[-2, 2]}>
+                <Badge dot={unreadCount > 0} offset={[-6, 6]}>
                   <Button
                     type="text"
                     icon={<BellOutlined style={{ fontSize: 24 }} />}

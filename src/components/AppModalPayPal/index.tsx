@@ -1,7 +1,7 @@
-// import React, { useEffect, useState } from 'react';
+import { messageApi } from '@hooks'; // import React, { useEffect, useState } from 'react';
 // import { View } from 'react-native-web';
 // import styles from './styles';
-// import { Button, message, Modal } from 'antd';
+// import { Button, Modal } from 'antd';
 // import { LessonDetailDataResponse } from '~mdDashboard/redux/saga/type';
 // import { LessonContent, VerifyOtpModal } from './components';
 // import { authAction, authQuery } from '~mdAuth/redux';
@@ -32,7 +32,7 @@
 //   accessLesson,
 // }) => {
 //   const dispatch = useAppDispatch();
-//   const [messageApi, contextHolder] = message.useMessage();
+//   const contextHolder = null;
 //   const [sendOtp] = authQuery.useSendTransactionOtpMutation();
 //   const { connectors, connect } = useConnect();
 //   const { disconnect } = useDisconnect();

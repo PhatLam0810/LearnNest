@@ -13,6 +13,7 @@ import {
 import type { ColumnsType } from 'antd/es/table';
 import { adminQuery } from '~mdAdmin/redux';
 import { useAppPagination } from '@hooks';
+import { messageApi } from '@hooks';
 import {
   CreatePracticeClassResponse,
   LessonLearnerPoolItem,
@@ -35,7 +36,7 @@ const CreatePracticeClassModal: React.FC<Props> = ({
   const [selectedUsers, setSelectedUsers] = useState<LessonLearnerPoolItem[]>(
     [],
   );
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
   const [createdPracticeClass, setCreatedPracticeClass] =
     useState<CreatePracticeClassResponse | null>(null);
   const [searchText, setSearchText] = useState('');

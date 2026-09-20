@@ -25,6 +25,10 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   card: {
+    animationName: 'fadeInUp',
+    animationDuration: '0.32s',
+    animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+    animationFillMode: 'both',
     ...CARD,
     padding: 24,
     gap: 24,

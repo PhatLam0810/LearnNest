@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { CheckOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import { Text, View } from 'react-native-web';
-import { Modal, Skeleton, message } from 'antd';
+import { Modal, Skeleton } from 'antd';
 import dayjs from 'dayjs';
 import AppButton from '@components/AppButton';
 import AppModalSuccess from '@components/AppModalSuccess';
@@ -20,6 +20,7 @@ import { authAction } from '~mdAuth/redux';
 import { useResponsive } from '@/styles/responsive';
 import { convertDurationToTime } from '@utils/time';
 import styles from './styles';
+import { messageApi } from '@hooks';
 
 interface LessonDetailPageProps {
   id: string;
@@ -33,7 +34,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
   const {
     data: lessonDetail,
     isLoading,

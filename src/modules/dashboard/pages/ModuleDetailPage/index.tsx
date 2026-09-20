@@ -340,6 +340,8 @@ const ModuleDetailPage = () => {
         userName: userProfile?.fullName,
         selectedAnswers,
       }).unwrap();
+      if (res.isPass) messageApi.success('Chính xác! Đã nộp bài');
+      else messageApi.warning('Đã nộp bài');
       router.push(
         `/dashboard/quiz-result/${res._id}?lessonId=${lessonId}&subLessonId=${selectedLibrary._id}`,
       );

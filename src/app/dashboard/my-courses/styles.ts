@@ -293,6 +293,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressFill: {
+    transitionProperty: 'width',
+    transitionDuration: '0.7s',
+    transitionTimingFunction: 'cubic-bezier(0.22, 0.9, 0.28, 1)',
     height: '100%',
     borderRadius: 999,
     backgroundColor: 'var(--color-vhu-primary)',

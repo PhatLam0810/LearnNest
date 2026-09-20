@@ -1,5 +1,5 @@
 'use client';
-import { Card, Form, message } from 'antd';
+import { Card, Form } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -11,6 +11,7 @@ import { authAction, authQuery } from '~mdAuth/redux';
 import styles from './styles';
 import { useResponsive } from '@/styles/responsive';
 import { typography } from '@/styles/typography';
+import { messageApi } from '@hooks';
 
 type FieldType = {
   email: string;
@@ -19,7 +20,7 @@ type FieldType = {
 const ForgotPasswordPage = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const [messageApi, contextHolder] = message.useMessage();
+  const contextHolder = null;
   const [form] = Form.useForm<FieldType>();
   const [sendOtp] = authQuery.useSendOtpMutation();
 

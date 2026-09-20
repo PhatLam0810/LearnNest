@@ -10,11 +10,14 @@ const styles = StyleSheet.create({
     paddingRight: 8,
     borderRadius: 6,
     alignSelf: 'flex-start',
+    maxWidth: '100%',
   },
   text: {
     ...typography.caption,
     fontWeight: '500',
-    whiteSpace: 'nowrap',
+    flexShrink: 1,
+    minWidth: 0,
+    overflowWrap: 'anywhere',
   },
 });
 

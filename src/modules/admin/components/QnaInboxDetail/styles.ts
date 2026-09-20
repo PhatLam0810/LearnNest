@@ -12,6 +12,10 @@ import { StyleSheet, typography } from '@styles';
 // chung của dự án thay vì chỉ set fontSize/color trần.
 const styles = StyleSheet.create({
   detailPanel: {
+    animationName: 'fadeInUp',
+    animationDuration: '0.32s',
+    animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+    animationFillMode: 'both',
     backgroundColor: '#fff',
     border: '1px solid #e5e9f0',
     borderRadius: 12,

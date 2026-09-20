@@ -11,6 +11,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   listItem: {
+    animationName: 'fadeInUp',
+    animationDuration: '0.32s',
+    animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+    animationFillMode: 'both',
+    transitionProperty: 'background-color, border-color',
+    transitionDuration: '0.16s',
+    transitionTimingFunction: 'ease',
     padding: '15px 18px',
     borderTop: '1px solid #f1f3f7',
     display: 'flex',

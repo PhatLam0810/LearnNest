@@ -2,6 +2,10 @@ import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   banner: {
+    animationName: 'fadeInUp',
+    animationDuration: '0.32s',
+    animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+    animationFillMode: 'both',
     width: '100%',
     borderRadius: 16,
     padding: 24,
@@ -15,6 +19,14 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   bannerSkeleton: {
+    backgroundImage:
+      'linear-gradient(90deg, var(--color-border-subtle) 0%, var(--color-surface) 50%, var(--color-border-subtle) 100%)',
+    backgroundSize: '600px 100%',
+    backgroundRepeat: 'no-repeat',
+    animationName: 'shimmer',
+    animationDuration: '1.4s',
+    animationTimingFunction: 'linear',
+    animationIterationCount: 'infinite',
     width: '100%',
     height: 148,
     borderRadius: 16,
@@ -61,6 +73,9 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   progressFill: {
+    transitionProperty: 'width',
+    transitionDuration: '0.7s',
+    transitionTimingFunction: 'cubic-bezier(0.22, 0.9, 0.28, 1)',
     height: '100%',
     borderRadius: 999,
     backgroundColor: 'var(--color-vhu-secondary)',

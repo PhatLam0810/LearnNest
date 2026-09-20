@@ -167,6 +167,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setText('');
     setReplyTo(null);
     setPendingImages([]);
+    messageApi.success('Đã gửi bình luận');
   };
 
   // Bấm icon ảnh -> mở thẳng hộp thoại chọn file hệ điều hành (input file ẩn),
