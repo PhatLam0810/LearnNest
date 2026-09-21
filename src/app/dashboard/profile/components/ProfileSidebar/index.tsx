@@ -63,9 +63,18 @@ const ProfileSidebar = () => {
             .unwrap()
             .then(res => dispatch(authAction.setCurrentUserInfo(res)))
         }>
-        <View style={styles.changeAvatarBtn}>
-          <Text style={styles.changeAvatarText}>Đổi ảnh đại diện</Text>
-        </View>
+        <button
+          type="button"
+          style={{
+            background: 'none',
+            border: 0,
+            padding: 0,
+            cursor: 'pointer',
+          }}>
+          <View style={styles.changeAvatarBtn}>
+            <Text style={styles.changeAvatarText}>Đổi ảnh đại diện</Text>
+          </View>
+        </button>
       </AppUploadToServer>
       <View style={styles.divider} />
       <View style={styles.joinedRow}>

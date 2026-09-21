@@ -1,3 +1,4 @@
+import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
 import { Input, InputProps } from 'antd';
 import type { TextAreaProps } from 'antd/es/input';
 import React from 'react';
@@ -12,8 +13,29 @@ type AppInputProps = InputProps & {
 };
 const AppInput: React.FC<AppInputProps> = ({ type, ...props }) => {
   const InputType = (Input[type] || Input) as typeof Input;
+  const passwordProps =
+    type === 'Password'
+      ? {
+          iconRender: (visible: boolean) => (
+            <button
+              type="button"
+              aria-label={visible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              aria-pressed={visible}
+              style={{
+                background: 'none',
+                border: 0,
+                padding: 0,
+                color: 'inherit',
+                cursor: 'pointer',
+              }}>
+              {visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+            </button>
+          ),
+        }
+      : {};
   return (
     <InputType
+      {...passwordProps}
       {...props}
       multiple
       style={Object.assign(

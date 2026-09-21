@@ -1,4 +1,5 @@
 'use client';
+import { asButton } from '@/utils/asButton';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
 import { StarFilled, StarOutlined } from '@ant-design/icons';
@@ -84,11 +85,17 @@ const CourseRatingSection: React.FC<CourseRatingSectionProps> = ({
         <Text style={styles.formHint}>
           Chọn số sao rồi viết nhận xét (không bắt buộc)
         </Text>
-        <View style={styles.starsRow}>
+        <View
+          style={styles.starsRow}
+          {...({ role: 'radiogroup', 'aria-label': 'Chọn số sao' } as object)}>
           {[1, 2, 3, 4, 5].map(n => (
             <Text
               key={n}
               style={styles.starPick}
+              {...asButton(() => setStars(n), `${n} sao`)}
+              {...({ role: 'radio', 'aria-checked': stars === n } as object)}
+              onFocus={() => setHoverStars(n)}
+              onBlur={() => setHoverStars(0)}
               onMouseEnter={() => setHoverStars(n)}
               onMouseLeave={() => setHoverStars(0)}
               onPress={() => setStars(n)}>
