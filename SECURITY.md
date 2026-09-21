@@ -37,17 +37,10 @@ read/verified in this codebase.
 
 ## Known gaps (audit 2026-09-21)
 
-- **Secrets still in git history (FE repo is public).** `.env.production` /
-  `.env.development` were committed early on and later untracked (commit
-  `89c93fc` on the BE, `Delete .env.*` on the FE), but every old commit still
-  contains them. The FE repo (`PhatLam0810/LearnNest`) is publicly readable,
-  and its history includes `PAYPAL_CLIENT_SECRET`, `NEXT_PUBLIC_PAYPAL_CLIENT_SECRET`,
-  the YouTube/Google API key and an Alchemy URL. The BE repo is private but its
-  history includes `JWT_SIGNING_KEY`, `MONGO_URI`, `BREVO_API_KEY`,
-  `GEMINI_API_KEY`, `SMTP_PASSWORD`, etc. Deleting the files does not remove
-  them: **rotate every one of those secrets**, restrict the Google key in
-  Cloud Console, and make the FE repo private (or rewrite history with
-  `git filter-repo`, which does not undo exposure that already happened).
+- **Credential hygiene.** This repo is public, so never describe in it what
+  is or was exposed. Track credential rotation in a private place, not here.
+  Env files must stay untracked (`.gitignore`); deleting a committed file does
+  not remove it from history.
 - **JWT in `localStorage`** (see Auth above) — an XSS would expose it.
 - **CSP only sets `frame-ancestors`**, no `script-src`; inline scripts are
   allowed. Worth tightening once inline usage is inventoried.
