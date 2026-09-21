@@ -125,7 +125,7 @@ const MyCoursesPage = () => {
               key={r._id}
               style={[styles.resultRow, r.link && { cursor: 'pointer' }]}
               onClick={() => handleOpenResult(r)}>
-              <View>
+              <View style={styles.resultInfo}>
                 <View style={styles.resultNameRow}>
                   <Text style={styles.resultName}>{r.name}</Text>
                   <Text

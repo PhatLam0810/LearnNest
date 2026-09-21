@@ -12,7 +12,6 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import FeedbackWidget from '@components/FeedbackWidget';
 import AiAdvisorWidget from '@components/AiAdvisorWidget';
 import Footer from '@components/Footer';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import MessageProvider from '@components/MessageProvider';
 import ToastProvider from '@components/ToastProvider';
 import PageViewTracker from '@components/PageViewTracker';
@@ -20,8 +19,6 @@ import styles from './layoutStyles';
 import { Analytics } from '@vercel/analytics/next';
 import { ConfigProvider } from 'antd';
 import viVN from 'antd/locale/vi_VN';
-
-const queryClient = new QueryClient();
 
 export default function RootLayoutClient({
   children,
@@ -60,18 +57,16 @@ export default function RootLayoutClient({
           lần ở gốc để sửa toàn bộ, thay vì vá từng chỗ lẻ tẻ. */}
       <ConfigProvider locale={viVN}>
         <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <PersistGate persistor={persistor}>
-              <MessageProvider />
-              <ToastProvider />
-              <PageViewTracker />
-              <View style={styles.appShell}>{children}</View>
-              <AiAdvisorWidget />
-              {showFooter && <Footer />}
-              <Authentication />
-              <LoadingScreen />
-            </PersistGate>
-          </QueryClientProvider>
+          <PersistGate persistor={persistor}>
+            <MessageProvider />
+            <ToastProvider />
+            <PageViewTracker />
+            <View style={styles.appShell}>{children}</View>
+            <AiAdvisorWidget />
+            {showFooter && <Footer />}
+            <Authentication />
+            <LoadingScreen />
+          </PersistGate>
         </Provider>
       </ConfigProvider>
       <Analytics />

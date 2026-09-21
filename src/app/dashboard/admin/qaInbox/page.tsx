@@ -211,6 +211,7 @@ const QaInbox: React.FC = () => {
           value={status}
           onChange={v => changeStatus(v as StatusFilter)}
           block={isMobile}
+          size={isMobile ? 'small' : 'middle'}
           options={FILTER_OPTIONS}
         />
       </View>

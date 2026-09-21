@@ -4,7 +4,8 @@ const styles = StyleSheet.create({
   strip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 26,
+    flexWrap: 'wrap',
+    columnGap: 26,
     borderBottomWidth: 1,
     borderBottomStyle: 'solid',
     borderBottomColor: 'var(--color-border)',

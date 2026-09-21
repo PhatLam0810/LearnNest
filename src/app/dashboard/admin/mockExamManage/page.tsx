@@ -112,6 +112,7 @@ const MockExamManage = () => {
         columns={columns}
         dataSource={data}
         pagination={{ pageSize: 10 }}
+        scroll={{ x: 'max-content' }}
       />
 
       <MockExamEditorModal

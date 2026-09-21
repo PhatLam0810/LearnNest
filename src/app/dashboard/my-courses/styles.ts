@@ -68,6 +68,7 @@ const styles = StyleSheet.create({
   },
   barCol: {
     flex: 1,
+    minWidth: 0,
     alignItems: 'center',
     justifyContent: 'flex-end',
     height: '100%',
@@ -75,6 +76,7 @@ const styles = StyleSheet.create({
   },
   barTrack: {
     width: 40,
+    maxWidth: '100%',
     height: '100%',
     justifyContent: 'flex-end',
   },
@@ -93,6 +95,7 @@ const styles = StyleSheet.create({
     color: 'var(--color-text-muted)',
   },
   resultRow: {
+    gap: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -100,10 +103,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'var(--color-border-subtle)',
   },
+  resultInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
   resultNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    flexWrap: 'wrap',
+    columnGap: 8,
+    rowGap: 4,
   },
   resultName: {
     fontSize: 14,

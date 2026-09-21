@@ -113,6 +113,23 @@ the layout is correct, and **`next dev` is not a reliable stand-in for
 production** (see the shorthand-string gotcha above — it only breaks in
 the real production build).
 
+## Smoke test & bundle size
+
+- **Smoke test** (`e2e/smoke.spec.ts`): mở từng trang học viên + 15 tab admin
+  ở 1440px và 375px, fail nếu có lỗi JS, trang trắng hoặc tràn ngang. Chạy
+  trên bản `next start` thật (không phải `next dev`); tài khoản lấy từ biến
+  môi trường, thiếu biến thì nhóm tương ứng tự bỏ qua:
+
+  ```bash
+  E2E_BASE_URL=http://localhost:3000 \
+  E2E_STUDENT_EMAIL=... E2E_STUDENT_PASSWORD=... \
+  E2E_ADMIN_EMAIL=... E2E_ADMIN_PASSWORD=... \
+  npx playwright test e2e/smoke.spec.ts
+  ```
+
+- **Bundle size**: `ANALYZE=true npx next build` ghi báo cáo vào
+  `.next/analyze/client.html`. Không đặt biến thì plugin tắt hoàn toàn.
+
 ## See also
 
 - [UI-UX.md](UI-UX.md) — mandatory UI conventions (typography, color,

@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
   },
   statsGroup: {
+    maxWidth: '100%',
     flexDirection: 'row',
     gap: 26,
     alignItems: 'flex-end',
