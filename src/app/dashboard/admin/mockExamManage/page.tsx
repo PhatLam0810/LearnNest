@@ -1,4 +1,5 @@
 'use client';
+import { asButton } from '@/utils/asButton';
 import React, { useState } from 'react';
 import { View, Text } from 'react-native-web';
 import { Button, Modal, Space, Table, Tag } from 'antd';
@@ -79,8 +80,15 @@ const MockExamManage = () => {
       key: 'action',
       render: (_: any, record: MockExam) => (
         <Space>
-          <a onClick={() => openEdit(record)}>Sửa</a>
-          <a onClick={() => setDeletingExam(record)} style={{ color: 'red' }}>
+          <a
+            {...asButton(() => openEdit(record))}
+            onClick={() => openEdit(record)}>
+            Sửa
+          </a>
+          <a
+            {...asButton(() => setDeletingExam(record))}
+            onClick={() => setDeletingExam(record)}
+            style={{ color: 'var(--color-error)' }}>
             Xoá
           </a>
         </Space>

@@ -1,4 +1,5 @@
 'use client';
+import { asButton } from '@/utils/asButton';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Empty, Spin, Tabs, Tag } from 'antd';
@@ -42,10 +43,11 @@ const SavedItemsPage: React.FC = () => {
             <div
               key={it._id}
               className="saved-item-row"
-              role="button"
-              tabIndex={0}
               onClick={() => router.push(it.link)}>
-              <div className="saved-item-main">
+              {/* Chỉ phần tên là nút focus được; cả hàng còn chứa nút dấu trang. */}
+              <div
+                className="saved-item-main"
+                {...asButton(() => router.push(it.link), it.title)}>
                 <span className="saved-item-title">{it.title}</span>
                 {it.subject && (
                   <Tag color={it.subject === 'Excel' ? 'green' : 'blue'}>
