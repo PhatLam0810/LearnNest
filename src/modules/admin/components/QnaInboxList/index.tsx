@@ -63,7 +63,7 @@ const QnaInboxList: React.FC<QnaInboxListProps> = ({
               style={{
                 color: st.color,
                 background: st.bg,
-                border: 'none',
+                borderWidth: 0,
                 margin: 0,
               }}>
               {st.label}

@@ -52,7 +52,7 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({
       render: (v: 'success' | 'error') => (
         <Tag
           style={{
-            border: 'none',
+            borderWidth: 0,
             margin: 0,
             fontWeight: 500,
             color: v === 'success' ? '#16a34a' : '#dc2626',

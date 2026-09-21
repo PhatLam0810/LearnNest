@@ -48,7 +48,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'var(--color-border-subtle)',
     cursor: 'pointer',
-    transition: 'background 0.15s',
+    transitionProperty: 'background',
+    transitionDuration: '0.15s',
   },
   itemInfo: {
     flex: 1,
@@ -66,7 +67,9 @@ const styles = StyleSheet.create({
     whiteSpace: 'nowrap',
   },
   itemCountWrap: {
-    flex: '0 0 200px',
+    flexGrow: 0,
+    flexShrink: 0,
+    flexBasis: 200,
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',

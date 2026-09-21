@@ -1131,7 +1131,9 @@ const CriteriaListItem: React.FC<Props> = ({
   return (
     <div
       style={{
-        border: '1px solid var(--color-border)',
+        borderWidth: 1,
+        borderStyle: 'solid',
+        borderColor: 'var(--color-border)',
         borderRadius: 8,
         padding: 12,
         marginBottom: 12,

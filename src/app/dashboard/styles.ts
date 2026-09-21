@@ -22,7 +22,9 @@ const styles = StyleSheet.create({
     padding: 12,
     minHeight: 'calc(100vh - 80px)',
     backgroundColor: 'var(--color-surface)',
-    borderRight: '1px solid var(--color-border-subtle)',
+    borderRightWidth: 1,
+    borderRightStyle: 'solid',
+    borderRightColor: 'var(--color-border-subtle)',
   },
   logo: {
     display: 'flex',
@@ -60,7 +62,9 @@ const styles = StyleSheet.create({
     position: 'sticky',
     top: 0,
     zIndex: 10,
-    borderBottom: '1px solid var(--color-border-subtle)',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'var(--color-border-subtle)',
     minHeight: 64,
   },
   topbarRow: {
@@ -81,7 +85,9 @@ const styles = StyleSheet.create({
   searchInput: {
     backgroundColor: 'var(--color-surface-subtle)',
     borderRadius: 999,
-    border: '1px solid var(--color-border)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border)',
     height: 40,
     paddingTop: 12,
     paddingBottom: 12,

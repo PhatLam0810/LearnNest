@@ -66,10 +66,12 @@ start` — same style, `padding: '0 28px'` computes to `0px` in the
     correctly). **Always use the longhand numeric properties**
     (`paddingTop`/`paddingRight`/`paddingBottom`/`paddingLeft`,
     `borderTopWidth`/`borderTopStyle`/`borderTopColor`, etc.), never a
-    combined shorthand string, in any `styles.ts` in this repo. ~35
-    existing `styles.ts` files use the shorthand-string form and have not
-    been individually re-verified against a real production build — don't
-    assume a screen is fine just because it looks right in `next dev`.
+    combined shorthand string, in any `styles.ts` in this repo. The ~22 files that still used the
+    shorthand-string form (padding/margin/border*/borderRadius/transition/
+    flex) were converted to longhand and compared pixel-by-pixel against
+    the old production build on 25 pages at 1440/375px — no regressions.
+    Still: don't assume a screen is fine just because it looks right in
+    `next dev`.
   - All four of the above shipped as real, visually broken (or silently
     broken) bugs in this project before being caught — always visually
     verify a new screen **against a real `next build && next start`, not

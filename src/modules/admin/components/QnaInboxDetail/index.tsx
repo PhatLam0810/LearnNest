@@ -100,7 +100,7 @@ const QnaInboxDetail: React.FC<QnaInboxDetailProps> = ({
           style={{
             color: st.color,
             background: st.bg,
-            border: 'none',
+            borderWidth: 0,
             borderRadius: 999,
             margin: 0,
           }}>
@@ -175,7 +175,10 @@ const QnaInboxDetail: React.FC<QnaInboxDetailProps> = ({
                     key={tp.key}
                     style={{
                       height: 30,
-                      padding: '0 12px',
+                      paddingTop: 0,
+                      paddingRight: 12,
+                      paddingBottom: 0,
+                      paddingLeft: 12,
                       borderRadius: 999,
                       fontSize: 12,
                       color: '#374151',

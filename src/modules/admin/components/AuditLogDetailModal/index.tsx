@@ -15,7 +15,7 @@ import styles from './styles';
 const StatusTag: React.FC<{ status: 'success' | 'error' }> = ({ status }) => (
   <Tag
     style={{
-      border: 'none',
+      borderWidth: 0,
       margin: 0,
       borderRadius: 999,
       fontWeight: 500,
@@ -154,7 +154,9 @@ const AuditLogDetailModal: React.FC<AuditLogDetailModalProps> = ({
                           paddingLeft: 18,
                           paddingRight: 18,
                           alignItems: 'center',
-                          borderBottom: '1px solid #f4f6fa',
+                          borderBottomWidth: 1,
+                          borderBottomStyle: 'solid',
+                          borderBottomColor: '#f4f6fa',
                         }}>
                         <Text style={{ fontSize: 13, color: '#6b7280' }}>
                           {label}

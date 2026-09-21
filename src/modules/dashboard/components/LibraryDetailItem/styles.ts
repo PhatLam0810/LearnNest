@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   pdfFrame: {
     width: '100%',
     height: '100%',
-    border: 'none',
+    borderWidth: 0,
   },
   fullscreenButton: {
     zIndex: 10,
@@ -109,7 +109,9 @@ const styles = StyleSheet.create({
   // HEADER
   modalHeader: {
     padding: 20,
-    borderBottom: '1px solid var(--color-border-subtle)',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'var(--color-border-subtle)',
     backgroundColor: 'var(--color-surface-subtle)',
   },
 
@@ -134,7 +136,8 @@ const styles = StyleSheet.create({
   },
 
   answerCard: {
-    transitionProperty: 'background-color, border-color, color',
+    transitionProperty:
+      'background-color, border-color, color, transform, box-shadow',
     transitionDuration: '0.2s',
     transitionTimingFunction: 'ease',
     display: 'flex',
@@ -143,14 +146,17 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 14,
     borderRadius: 12,
-    border: '1px solid var(--color-border-subtle)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border-subtle)',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
     backgroundColor: 'var(--color-surface)',
   },
 
   answerCardSelected: {
-    border: '1px solid var(--color-vhu-primary)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-vhu-primary)',
     backgroundColor: 'var(--color-info-bg)',
     transform: 'scale(1.01)',
     boxShadow: '0 6px 18px rgba(29,65,138,0.15)',
@@ -175,7 +181,9 @@ const styles = StyleSheet.create({
   // FOOTER
   modalFooter: {
     padding: 16,
-    borderTop: '1px solid var(--color-border-subtle)',
+    borderTopWidth: 1,
+    borderTopStyle: 'solid',
+    borderTopColor: 'var(--color-border-subtle)',
     display: 'flex',
     justifyContent: 'flex-end',
     backgroundColor: 'var(--color-surface-subtle)',
@@ -324,7 +332,7 @@ const styles = StyleSheet.create({
     paddingRight: 24,
     fontWeight: '600',
     backgroundColor: 'var(--color-vhu-secondary)',
-    border: 'none',
+    borderWidth: 0,
   },
 
   quizFlagButtonActive: {
@@ -349,7 +357,9 @@ const styles = StyleSheet.create({
 
   quizHeader: {
     marginBottom: 28,
-    borderBottom: '1px solid var(--color-border-subtle)',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'var(--color-border-subtle)',
   },
 
   quizTitle: {
@@ -371,11 +381,15 @@ const styles = StyleSheet.create({
   },
 
   questionCard: {
-    border: '1px solid var(--color-border-subtle)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border-subtle)',
     borderRadius: 20,
     padding: 22,
     backgroundColor: 'var(--color-surface)',
-    transition: 'all 0.25s ease',
+    transitionProperty: 'all',
+    transitionDuration: '0.25s',
+    transitionTimingFunction: 'ease',
   },
 
   questionCardMobile: {
@@ -384,7 +398,9 @@ const styles = StyleSheet.create({
   },
 
   questionCardInvalid: {
-    border: '1px solid var(--color-error)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-error)',
   },
 
   questionTop: {
@@ -439,21 +455,33 @@ const styles = StyleSheet.create({
   },
 
   answerOption: {
-    border: '1px solid var(--color-border)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border)',
     borderRadius: 16,
-    padding: '4px 16px',
+    paddingTop: 4,
+    paddingRight: 16,
+    paddingBottom: 4,
+    paddingLeft: 16,
     backgroundColor: 'var(--color-surface)',
-    transition: 'all 0.25s ease',
+    transitionProperty: 'all',
+    transitionDuration: '0.25s',
+    transitionTimingFunction: 'ease',
     cursor: 'pointer',
   },
 
   answerOptionMobile: {
     borderRadius: 12,
-    padding: '2px 10px',
+    paddingTop: 2,
+    paddingRight: 10,
+    paddingBottom: 2,
+    paddingLeft: 10,
   },
 
   answerOptionSelected: {
-    border: '1px solid var(--color-vhu-primary)',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-vhu-primary)',
     backgroundColor: 'var(--color-info-bg)',
     boxShadow: '0 6px 18px rgba(22,119,255,0.12)',
   },
@@ -466,12 +494,18 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     gap: 14,
-    padding: '10px 0',
+    paddingTop: 10,
+    paddingRight: 0,
+    paddingBottom: 10,
+    paddingLeft: 0,
   },
 
   answerContentMobile: {
     gap: 10,
-    padding: '8px 0',
+    paddingTop: 8,
+    paddingRight: 0,
+    paddingBottom: 8,
+    paddingLeft: 0,
   },
 
   answerLetterBox: {
@@ -532,7 +566,7 @@ const styles = StyleSheet.create({
     paddingRight: 30,
     borderRadius: 14,
     backgroundColor: 'var(--color-vhu-primary)',
-    border: 'none',
+    borderWidth: 0,
     fontWeight: '600',
     fontSize: 14,
     boxShadow: '0 10px 25px rgba(22,119,255,0.25)',

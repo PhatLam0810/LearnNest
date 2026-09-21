@@ -149,8 +149,13 @@ const MockExamEditorModal: React.FC<Props> = ({ open, exam, onClose }) => {
                     flexDirection: 'row',
                     alignItems: 'center',
                     gap: 10,
-                    padding: '10px 14px',
-                    border: '1px solid #f0f0f0',
+                    paddingTop: 10,
+                    paddingRight: 14,
+                    paddingBottom: 10,
+                    paddingLeft: 14,
+                    borderWidth: 1,
+                    borderStyle: 'solid',
+                    borderColor: '#f0f0f0',
                     borderRadius: 8,
                   }}>
                   <Text style={{ flex: 1, fontSize: 13 }}>

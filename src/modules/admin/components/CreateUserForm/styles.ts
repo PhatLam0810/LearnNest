@@ -3,7 +3,9 @@ import { StyleSheet } from '@styles';
 const styles = StyleSheet.create({
   card: {
     background: '#fff',
-    border: '1px solid #e5e9f0',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: '#e5e9f0',
     borderRadius: 12,
     padding: 24,
     display: 'flex',

@@ -39,7 +39,9 @@ const TrafficChart: React.FC = () => {
     <Card
       style={{
         borderRadius: 12,
-        border: '1px solid #eef1f6',
+        borderWidth: 1,
+        borderStyle: 'solid',
+        borderColor: '#eef1f6',
         boxShadow: '0 8px 20px rgba(29, 65, 138, 0.06)',
         marginBottom: 16,
       }}>
