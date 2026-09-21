@@ -1,3 +1,4 @@
+import { safeJsonLd } from '@/utils/jsonLd';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import '../styles/variables.css';
@@ -56,7 +57,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           type="application/ld+json"
           // Hằng số do chính chúng ta định nghĩa, không phải dữ liệu người dùng.
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(ORGANIZATION_JSON_LD),
+            __html: safeJsonLd(ORGANIZATION_JSON_LD),
           }}
         />
       </head>

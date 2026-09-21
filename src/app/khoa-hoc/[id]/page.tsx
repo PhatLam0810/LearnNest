@@ -1,3 +1,4 @@
+import { safeJsonLd } from '@/utils/jsonLd';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -87,7 +88,7 @@ export default async function PublicCourseDetailPage({ params }: Props) {
       <script
         type="application/ld+json"
         // Dữ liệu tự sinh từ API của chính hệ thống, không phải input người dùng.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
 
       <nav aria-label="Breadcrumb" style={styles.breadcrumb}>

@@ -8,7 +8,6 @@ import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
 } from '@ant-design/icons';
-import axios from 'axios';
 import { View, Text } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
 import { ReminderHistory } from '~mdAdmin/components';
@@ -85,8 +84,7 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
     totalPages: 0,
   });
 
-  const API_BASE_URL =
-    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+  const [loadWatchers] = adminQuery.useLazyGetVideoWatchersQuery();
 
   const formatSecondsToTime = useCallback((seconds: number): string => {
     if (!seconds || seconds <= 0) return '0:00';
@@ -135,18 +133,11 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
 
     setLoading(true);
     try {
-      const response = await axios.get<ApiResponse>(
-        `${API_BASE_URL}/lesson/sublesson/${subLessonId}/watchers`,
-        {
-          params: {
-            pageNum: pagination.pageNum,
-            pageSize: pagination.pageSize,
-          },
-          timeout: 10000,
-        },
-      );
-
-      const responseData = response.data;
+      const responseData = (await loadWatchers({
+        subLessonId,
+        pageNum: pagination.pageNum,
+        pageSize: pagination.pageSize,
+      }).unwrap()) as ApiResponse;
 
       let items: WatcherItem[] = [];
       let totalRecords = 0;
@@ -179,14 +170,13 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
     } catch (error: any) {
       console.error('Fetch error:', error);
       message.error(
-        error.response?.data?.message ||
-          'Không tải được danh sách, thử lại sau',
+        error?.data?.message || 'Không tải được danh sách, thử lại sau',
       );
       setWatchers([]);
     } finally {
       setLoading(false);
     }
-  }, [subLessonId, pagination.pageNum, pagination.pageSize, API_BASE_URL]);
+  }, [subLessonId, pagination.pageNum, pagination.pageSize, loadWatchers]);
 
   useEffect(() => {
     if (subLessonId) {

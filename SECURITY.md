@@ -35,6 +35,38 @@ read/verified in this codebase.
   third-party service that has a quota/cost attached — proxy it
   server-side instead.
 
+## Known gaps (audit 2026-09-21)
+
+- **Secrets still in git history (FE repo is public).** `.env.production` /
+  `.env.development` were committed early on and later untracked (commit
+  `89c93fc` on the BE, `Delete .env.*` on the FE), but every old commit still
+  contains them. The FE repo (`PhatLam0810/LearnNest`) is publicly readable,
+  and its history includes `PAYPAL_CLIENT_SECRET`, `NEXT_PUBLIC_PAYPAL_CLIENT_SECRET`,
+  the YouTube/Google API key and an Alchemy URL. The BE repo is private but its
+  history includes `JWT_SIGNING_KEY`, `MONGO_URI`, `BREVO_API_KEY`,
+  `GEMINI_API_KEY`, `SMTP_PASSWORD`, etc. Deleting the files does not remove
+  them: **rotate every one of those secrets**, restrict the Google key in
+  Cloud Console, and make the FE repo private (or rewrite history with
+  `git filter-repo`, which does not undo exposure that already happened).
+- **JWT in `localStorage`** (see Auth above) — an XSS would expose it.
+- **CSP only sets `frame-ancestors`**, no `script-src`; inline scripts are
+  allowed. Worth tightening once inline usage is inventoried.
+- **Regrade wipes manual scores by design** (both single and "Chấm lại tất cả");
+  the confirm dialogs say so, keep it that way.
+
+## Fixed in the 2026-09-21 audit
+
+- BE rate limiting: app runs behind nginx without `trust proxy`, so every
+  user shared one counter (login limit "10/min/IP" was really 10/min for the
+  whole site). Now `trust proxy` (1 hop) + per-user key when a valid JWT is
+  present (`UserThrottlerGuard`).
+- BE Excel import preview fetched any URL an admin sent (SSRF). Now only
+  `https` to Google Cloud Storage hosts, 5MB max, no redirects.
+- BE now refuses to email reserved/fake domains (`.test`, `.invalid`,
+  `example.*`) so QA/seed accounts cannot cause bounces.
+- FE: video-watchers panel used a bare `axios` call with no token (always
+  401); moved to RTK Query. JSON-LD blocks escape `<` (`safeJsonLd`).
+
 ## Headers (`next.config.ts`)
 
 Applied to every route: `X-Frame-Options: SAMEORIGIN` +

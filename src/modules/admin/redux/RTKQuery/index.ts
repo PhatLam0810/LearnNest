@@ -1287,6 +1287,17 @@ export const adminQuery = baseQuery.injectEndpoints({
         responseHandler: response => response.blob(),
       }),
     }),
+    // Trả nguyên thân phản hồi (không bóc data) vì component đọc cả 2 dạng
+    // { data: { items, ... } } và { items, ... }.
+    getVideoWatchers: builder.query<
+      Record<string, any>,
+      { subLessonId: string; pageNum: number; pageSize: number }
+    >({
+      query: ({ subLessonId, pageNum, pageSize }) => ({
+        url: `lesson/sublesson/${subLessonId}/watchers`,
+        params: { pageNum, pageSize },
+      }),
+    }),
     exportUsers: builder.mutation<
       Blob,
       { search?: string; filter?: { userType?: string } }
