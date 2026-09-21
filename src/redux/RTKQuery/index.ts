@@ -50,6 +50,8 @@ export const baseQuery = createApi({
     // "Lớp học": id 'LIST' = danh sách, id = classId = chi tiết + học viên
     // của lớp đó. Tạo/sửa/chuyển/thêm/gỡ học viên đều làm mới qua tag này.
     'Class',
+    // Hộp thư hỏi đáp: số liệu (chờ trả lời / quá hạn / thời gian trả lời).
+    'QuestionStats',
   ],
   endpoints: () => ({}),
 });

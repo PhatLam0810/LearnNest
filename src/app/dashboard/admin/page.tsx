@@ -6,7 +6,7 @@ import { typography } from '@styles';
 import styles from './styles';
 import './styles.scss';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { getQuestionStatsApi } from '~mdAdmin/services/api';
+import { adminQuery } from '~mdAdmin/redux';
 import UserManage from './userManage/page';
 import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
@@ -74,13 +74,9 @@ const AdminPage: React.FC = () => {
   }, [tab]);
   const selectTab = (key: string) =>
     router.replace(`/dashboard/admin?tab=${key}`, { scroll: false });
-  const [qnaPendingCount, setQnaPendingCount] = useState(0);
-
-  useEffect(() => {
-    getQuestionStatsApi()
-      .then(stats => setQnaPendingCount(stats?.openCount ?? 0))
-      .catch(() => {});
-  }, []);
+  // Dùng chung cache với tab Hộp thư: trả lời/bỏ qua xong là huy hiệu tự cập nhật.
+  const { data: qnaStats } = adminQuery.useGetQuestionStatsQuery();
+  const qnaPendingCount = qnaStats?.openCount ?? 0;
 
   const items = buildItems(qnaPendingCount);
 

@@ -1,3 +1,4 @@
+import { asButton } from '@/utils/asButton';
 import React, { useState } from 'react';
 import { Text, View } from 'react-native-web';
 import { Progress } from 'antd';
@@ -25,6 +26,10 @@ const ContinuingCourses: React.FC<ContinuingCoursesProps> = ({
   formatRelativeTime,
 }) => {
   const router = useRouter();
+  const openCourse = (course: (typeof courses)[number]) =>
+    router.push(
+      `/dashboard/home/lesson/moduleDetail?lessonId=${course.lessonId}&subLessonId=${course.lastSubLessonId || 'first-lesson'}`,
+    );
   const [hoverId, setHoverId] = useState<string | null>(null);
   const { isMobile } = useResponsive();
   // repeat(auto-fill, minmax(240px, 1fr)) để lại 1 cột ma bên phải trên màn
@@ -59,11 +64,8 @@ const ContinuingCourses: React.FC<ContinuingCoursesProps> = ({
             ...styles.card,
             ...(hoverId === course.lessonId ? motion.cardHoverOn : null),
           }}
-          onClick={() =>
-            router.push(
-              `/dashboard/home/lesson/moduleDetail?lessonId=${course.lessonId}&subLessonId=${course.lastSubLessonId || 'first-lesson'}`,
-            )
-          }>
+          {...asButton(() => openCourse(course), course.lessonName)}
+          onClick={() => openCourse(course)}>
           <View style={styles.thumbWrap}>
             <LessonThumbnail thumbnail={course.thumbnail} />
           </View>

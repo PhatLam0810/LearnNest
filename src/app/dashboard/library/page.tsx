@@ -303,7 +303,11 @@ const LibraryList = () => {
                 key={item._id}
                 onClick={() => openItem(item)}
                 style={styles.tableRow}>
-                <View style={[styles.tableCell, styles.colDoc]}>
+                {/* Chỉ ô tên là nút focus được: cả hàng còn chứa nút dấu trang nên
+                    không thể là role=button (nested-interactive). */}
+                <View
+                  style={[styles.tableCell, styles.colDoc]}
+                  {...asButton(() => openItem(item), item.title)}>
                   <span style={styles.rowIcon}>{itemMeta?.icon}</span>
                   <Text style={styles.rowTitle} numberOfLines={1}>
                     {item.title}

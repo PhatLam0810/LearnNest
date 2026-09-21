@@ -1,4 +1,5 @@
 'use client';
+import { asButton } from '@/utils/asButton';
 import React, { useState } from 'react';
 import { Card } from 'antd';
 import {
@@ -92,7 +93,10 @@ const LessonItem: React.FC<LessonItemProps> = ({
           />
         </View>
       )}
-      <View style={styles.inner} onClick={onClick}>
+      <View
+        style={styles.inner}
+        {...asButton(onClick, data.title)}
+        onClick={onClick}>
         {!accessLesson && (
           <View style={styles.premium}>
             <DollarOutlined style={styles.premiumIcon} />

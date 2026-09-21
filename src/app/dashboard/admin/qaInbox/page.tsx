@@ -7,18 +7,8 @@ import { useAppPagination } from '@hooks';
 import { messageApi } from '@hooks';
 import { useSocket } from '@hooks/useSocket';
 import { useResponsive } from '@/styles/responsive';
-import {
-  dismissQuestionApi,
-  getQuestionAnswerApi,
-  getQuestionStatsApi,
-  replyQuestionApi,
-  reopenQuestionApi,
-} from '~mdAdmin/services/api';
-import {
-  AnswerInfo,
-  QuestionItem,
-  QuestionStats,
-} from '~mdAdmin/services/api/type';
+import { adminQuery } from '~mdAdmin/redux';
+import { AnswerInfo, QuestionItem } from '~mdAdmin/services/api/type';
 import QnaInboxList from '~mdAdmin/components/QnaInboxList';
 import QnaInboxDetail from '~mdAdmin/components/QnaInboxDetail';
 import styles from './styles';
@@ -45,24 +35,19 @@ const QaInbox: React.FC = () => {
   // replace:true - trang mới THAY THẾ 5 item cũ thay vì cộng dồn.
   const changePage = (p: number) => fetchData({ pageNum: p, replace: true });
   const pageItems = listItem;
-  const [stats, setStats] = useState<QuestionStats | null>(null);
+  const { data: stats, refetch: refetchStats } =
+    adminQuery.useGetQuestionStatsQuery();
+  const [loadAnswer, { isFetching: loadingAnswer }] =
+    adminQuery.useLazyGetQuestionAnswerQuery();
+  const [replyQuestion, { isLoading: sending }] =
+    adminQuery.useReplyQuestionMutation();
+  const [dismissQuestion, { isLoading: dismissing }] =
+    adminQuery.useDismissQuestionMutation();
+  const [reopenQuestion, { isLoading: reopening }] =
+    adminQuery.useReopenQuestionMutation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answer, setAnswer] = useState<AnswerInfo | null>(null);
-  const [loadingAnswer, setLoadingAnswer] = useState(false);
   const [draft, setDraft] = useState('');
-  const [sending, setSending] = useState(false);
-  const [dismissing, setDismissing] = useState(false);
-  const [reopening, setReopening] = useState(false);
-
-  const loadStats = () => {
-    getQuestionStatsApi()
-      .then(setStats)
-      .catch(() => {});
-  };
-
-  useEffect(() => {
-    loadStats();
-  }, []);
 
   // Câu hỏi mới ở bất kỳ bài học nào cũng bắn NEW_QUESTION cho mọi admin qua
   // đúng socket này (xem CommentService.notifyOnNewComment) - tận dụng lại
@@ -71,14 +56,14 @@ const QaInbox: React.FC = () => {
     const handleNewNotification = (payload: { type?: string }) => {
       if (payload?.type === 'NEW_QUESTION') {
         refresh();
-        loadStats();
+        refetchStats();
       }
     };
     socket.on('NewNotification', handleNewNotification);
     return () => {
       socket.off('NewNotification', handleNewNotification);
     };
-  }, [socket, refresh]);
+  }, [socket, refresh, refetchStats]);
 
   const changeStatus = (v: StatusFilter) => {
     setStatus(v);
@@ -109,10 +94,12 @@ const QaInbox: React.FC = () => {
     setAnswer(null);
     setDraft('');
     if (!selected || !selected.isAnswered) return;
-    setLoadingAnswer(true);
-    getQuestionAnswerApi(selected.postId, selected._id)
+    // cancelled: chọn câu khác trước khi tải xong thì bỏ kết quả cũ.
+    let cancelled = false;
+    loadAnswer({ postId: selected.postId, questionId: selected._id })
+      .unwrap()
       .then(reply => {
-        if (reply) {
+        if (!cancelled && reply) {
           setAnswer({
             fullName: reply.user?.fullName,
             commentText: reply.commentText,
@@ -120,62 +107,52 @@ const QaInbox: React.FC = () => {
           });
         }
       })
-      .catch(() => {})
-      .finally(() => setLoadingAnswer(false));
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected?._id]);
 
   const handleReply = async () => {
     if (!selected || !draft.trim()) return;
-    setSending(true);
     try {
-      await replyQuestionApi({
+      await replyQuestion({
         postId: selected.postId,
         type: selected.type,
         commentText: draft.trim(),
         parentCommentId: selected._id,
-      });
+      }).unwrap();
       messageApi.success({
         content: 'Đã gửi trả lời',
         message: 'Học viên sẽ nhận email ngay bây giờ.',
       });
       setDraft('');
       refresh();
-      loadStats();
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không trả lời được');
-    } finally {
-      setSending(false);
+      messageApi.error(e?.data?.message || 'Không trả lời được');
     }
   };
 
   const handleDismiss = async () => {
     if (!selected) return;
-    setDismissing(true);
     try {
-      await dismissQuestionApi(selected._id);
+      await dismissQuestion(selected._id).unwrap();
       messageApi.success('Đã bỏ qua câu hỏi');
       refresh();
-      loadStats();
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không xử lý được');
-    } finally {
-      setDismissing(false);
+      messageApi.error(e?.data?.message || 'Không xử lý được');
     }
   };
 
   const handleReopen = async () => {
     if (!selected) return;
-    setReopening(true);
     try {
-      await reopenQuestionApi(selected._id);
+      await reopenQuestion(selected._id).unwrap();
       messageApi.success('Đã mở lại câu hỏi');
       refresh();
-      loadStats();
     } catch (e: any) {
-      messageApi.error(e?.response?.data?.message || 'Không xử lý được');
-    } finally {
-      setReopening(false);
+      messageApi.error(e?.data?.message || 'Không xử lý được');
     }
   };
 

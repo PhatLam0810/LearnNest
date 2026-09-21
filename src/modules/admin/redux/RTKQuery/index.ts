@@ -1,5 +1,6 @@
 import { baseQuery } from '@redux/RTKQuery';
 import { AxiosResponse } from 'axios';
+import { QuestionStats, ReplyQuestionParams } from '~mdAdmin/services/api/type';
 import { FeedbackItem } from '~mdDashboard/types';
 import { LibraryType } from '~mdDashboard/redux/RTKQuery/types';
 import { Category } from '~mdDashboard/redux/saga/type';
@@ -1297,6 +1298,57 @@ export const adminQuery = baseQuery.injectEndpoints({
         url: `lesson/sublesson/${subLessonId}/watchers`,
         params: { pageNum, pageSize },
       }),
+    }),
+    // Hộp thư hỏi đáp
+    getQuestionStats: builder.query<QuestionStats, void>({
+      query: () => 'comments/admin/questions/stats',
+      transformResponse: (res: { data?: QuestionStats } & QuestionStats) =>
+        res.data ?? res,
+      providesTags: ['QuestionStats'],
+    }),
+    // Câu trả lời đầu tiên của 1 câu hỏi: lấy các comment của bài rồi lọc theo
+    // parentCommentId (endpoint getList đã có sẵn, không có route riêng).
+    getQuestionAnswer: builder.query<
+      Record<string, any> | undefined,
+      { postId: string; questionId: string }
+    >({
+      query: ({ postId }) => ({
+        url: 'comments/getList',
+        method: 'POST',
+        body: { postId, pageSize: 50 },
+      }),
+      transformResponse: (
+        res: Record<string, any>,
+        _meta,
+        { questionId },
+      ): Record<string, any> | undefined => {
+        const items: Record<string, any>[] =
+          res?.data?.items || res?.items || [];
+        return items
+          .filter(c => c.parentCommentId === questionId)
+          .sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          )[0];
+      },
+    }),
+    replyQuestion: builder.mutation<unknown, ReplyQuestionParams>({
+      query: body => ({ url: 'comments', method: 'POST', body }),
+      invalidatesTags: ['QuestionStats'],
+    }),
+    dismissQuestion: builder.mutation<unknown, string>({
+      query: id => ({
+        url: `comments/admin/questions/${id}/dismiss`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['QuestionStats'],
+    }),
+    reopenQuestion: builder.mutation<unknown, string>({
+      query: id => ({
+        url: `comments/admin/questions/${id}/reopen`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['QuestionStats'],
     }),
     exportUsers: builder.mutation<
       Blob,

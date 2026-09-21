@@ -1,4 +1,5 @@
 'use client';
+import { asButton } from '@/utils/asButton';
 import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native-web';
 import { Switch, Checkbox, Button } from 'antd';
@@ -125,6 +126,7 @@ const StudyPreferences = () => {
       <View style={styles.divider} />
       <Text
         style={styles.logoutLink}
+        {...asButton(() => dispatch(authAction.logout()))}
         onClick={() => dispatch(authAction.logout())}>
         Đăng xuất
       </Text>
