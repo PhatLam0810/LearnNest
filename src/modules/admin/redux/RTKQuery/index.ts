@@ -1350,6 +1350,14 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       invalidatesTags: ['QuestionStats'],
     }),
+    // Mọi khóa học cho màn Giao bài (khóa chưa có đề: taskCount 0, subject '').
+    getAssignableCourses: builder.query<
+      { lessonId: string; title: string; subject: string; taskCount: number }[],
+      void
+    >({
+      query: () => 'practice/tasks/courses/all',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
     exportUsers: builder.mutation<
       Blob,
       { search?: string; filter?: { userType?: string } }

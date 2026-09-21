@@ -24,7 +24,7 @@ const GiaoBaiPage: React.FC = () => {
   const [dueDate, setDueDate] = useState<Dayjs | null>(null);
 
   const { data: courses, isFetching: isLoadingCourses } =
-    dashboardQuery.useGetPracticeCoursesQuery();
+    adminQuery.useGetAssignableCoursesQuery();
   const { data: classesRes, isFetching: isLoadingClasses } =
     adminQuery.useGetPracticeClassesQuery(
       { lessonId: lessonId || '', pageSize: 100 },
@@ -220,7 +220,9 @@ const GiaoBaiPage: React.FC = () => {
           optionFilterProp="label"
           options={(courses || []).map(c => ({
             value: c.lessonId,
-            label: `${c.title} (${c.subject} · ${c.taskCount} đề)`,
+            label: c.taskCount
+              ? `${c.title} (${c.subject} · ${c.taskCount} đề)`
+              : `${c.title} (chưa có đề thực hành)`,
           }))}
         />
       </View>
@@ -266,6 +268,7 @@ const GiaoBaiPage: React.FC = () => {
                   value: t._id,
                   label: `${t.title} (${t.subject})`,
                 }))}
+                notFoundContent="Khóa này chưa có đề thực hành nào. Thêm đề ở tab Bài Thực Hành."
               />
             </View>
             <View style={styles.field}>
