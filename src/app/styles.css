@@ -121,3 +121,9 @@
 .ant-tabs .ant-tabs-ink-bar {
   background: var(--color-vhu-primary);
 }
+
+/* Dòng đang được chọn (chọn nhiều ở danh sách người dùng): nền nhạt theo token. */
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row-selected > td,
+.ant-table-wrapper .ant-table-tbody > tr.ant-table-row-selected:hover > td {
+  background: var(--color-info-bg) !important;
+}

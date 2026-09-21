@@ -42,6 +42,8 @@ export interface UserProfile {
   // false = tài khoản tạo qua Google Sign-In, chưa từng đặt mật khẩu -
   // trang hồ sơ dùng để hiện "Đặt mật khẩu" thay vì "Đổi mật khẩu".
   hasPassword?: boolean;
+  // true = tài khoản do admin tạo/đặt lại, phải đổi mật khẩu trước khi dùng tiếp.
+  mustChangePassword?: boolean;
   role: {
     level: number;
     name: string;

@@ -1358,6 +1358,22 @@ export const adminQuery = baseQuery.injectEndpoints({
       query: () => 'practice/tasks/courses/all',
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    // Đặt lại mật khẩu hàng loạt (BE giới hạn 100 người/lần, FE chia lô 25).
+    resetUserPasswords: builder.mutation<
+      {
+        reset: number;
+        skipped: { userId: string; fullName: string; reason: string }[];
+        failed: { userId: string; fullName: string; reason: string }[];
+      },
+      { userIds: string[] }
+    >({
+      query: body => ({
+        url: 'admin/users/reset-passwords',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: any) => res?.data ?? res,
+    }),
     exportUsers: builder.mutation<
       Blob,
       { search?: string; filter?: { userType?: string } }

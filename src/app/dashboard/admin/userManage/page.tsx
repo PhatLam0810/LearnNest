@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Text, View } from 'react-native-web';
 import styles from './styles';
 import {
@@ -22,6 +22,7 @@ import { authQuery } from '~mdAuth/redux/RTKQuery';
 import dynamic from 'next/dynamic';
 import StatCard from '../../home/_components/StatCard';
 import StateTag from '~mdAdmin/components/StateTag';
+import UserBulkActions from '~mdAdmin/components/UserBulkActions';
 import { messageApi } from '@hooks';
 import { downloadBlob } from '~mdAdmin/components/submissionShared';
 
@@ -46,6 +47,8 @@ const UserManage = () => {
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [exportUsers, { isLoading: isExporting }] =
     adminQuery.useExportUsersMutation();
+  const tableWrapRef = useRef<HTMLDivElement>(null);
+  const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
   const [createUserForm] = Form.useForm<CreateUserParams>();
   const [isModalDeleteUser, setModalDeleteUser] = useState(false);
@@ -79,6 +82,29 @@ const UserManage = () => {
       messageApi.error('Xuất Excel thất bại');
     }
   };
+
+  // antd chèn 1 hàng đo lường (aria-hidden, chứa vùng cuộn focus được) khi bảng
+  // có cột chọn; axe báo aria-hidden-focus. Đánh dấu inert, theo dõi DOM vì
+  // antd vẽ lại hàng này.
+  useEffect(() => {
+    const root = tableWrapRef.current;
+    if (!root) return;
+    const strip = () =>
+      root.querySelectorAll('tr.ant-table-measure-row').forEach(el => {
+        if (el.hasAttribute('tabindex')) el.removeAttribute('tabindex');
+        // hàng đo lường chứa vùng cuộn (focus được) mà lại aria-hidden -> inert
+        if (!el.hasAttribute('inert')) el.setAttribute('inert', '');
+      });
+    strip();
+    const observer = new MutationObserver(strip);
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['tabindex'],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   const handleDeleteUser = async (_id: string) => {
     try {
@@ -255,21 +281,35 @@ const UserManage = () => {
           Tạo tài khoản
         </Button>
       </View>
-      <Table
-        columns={columns}
-        dataSource={listItem}
-        rowKey={record => record._id}
-        scroll={{ x: 'max-content' }}
-        onChange={res => {
-          fetchData({ pageNum: res.current, replace: true });
-        }}
-        pagination={{
-          current: currentData?.pageNum,
-          pageSize: currentData?.pageSize,
-          total: currentData?.totalRecords,
-          showSizeChanger: false,
-        }}
+      <UserBulkActions
+        selectedIds={selectedKeys.map(String)}
+        onClear={() => setSelectedKeys([])}
       />
+      <div ref={tableWrapRef} style={{ minWidth: 0, maxWidth: '100%' }}>
+        <Table
+          columns={columns}
+          dataSource={listItem}
+          rowKey={record => record._id}
+          rowSelection={{
+            selectedRowKeys: selectedKeys,
+            onChange: keys => setSelectedKeys(keys),
+            // Giữ lựa chọn khi chuyển trang/tìm kiếm để chọn cả lớp nhiều trang.
+            preserveSelectedRowKeys: true,
+            getCheckboxProps: record =>
+              ({ 'aria-label': `Chọn ${record.fullName}` }) as never,
+          }}
+          scroll={{ x: 'max-content' }}
+          onChange={res => {
+            fetchData({ pageNum: res.current, replace: true });
+          }}
+          pagination={{
+            current: currentData?.pageNum,
+            pageSize: currentData?.pageSize,
+            total: currentData?.totalRecords,
+            showSizeChanger: false,
+          }}
+        />
+      </div>
 
       {/* Modal hiện thông tin user */}
 

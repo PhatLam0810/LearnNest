@@ -25,10 +25,19 @@ const ChangePassword = () => {
       const response = await changePassword(value);
 
       if (response.data) {
-        messageApi.success('Đổi mật khẩu thành công');
         form.resetFields();
+        if (userProfile?.mustChangePassword) {
+          // BE đã thu hồi phiên cũ khi đổi mật khẩu -> đăng nhập lại bằng mật khẩu mới.
+          messageApi.success('Đổi mật khẩu thành công, vui lòng đăng nhập lại');
+          dispatch(authAction.logout());
+        } else {
+          messageApi.success('Đổi mật khẩu thành công');
+        }
       } else {
-        messageApi.error('Mật khẩu không đúng');
+        messageApi.error(
+          (response as { error?: { data?: { message?: string } } }).error?.data
+            ?.message || 'Mật khẩu không đúng',
+        );
       }
     } catch (error) {
       console.error('Lỗi gửi OTP:', error);
