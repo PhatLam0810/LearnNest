@@ -228,3 +228,15 @@
     order: 3;
   }
 }
+
+/* Tiêu đề bài tập là <button> nhưng trông như chữ thường (kế thừa h3). */
+.practice-task-title-btn {
+  all: unset;
+  cursor: pointer;
+}
+
+.practice-task-title-btn:focus-visible {
+  outline: 2px solid var(--color-vhu-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

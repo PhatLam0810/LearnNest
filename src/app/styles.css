@@ -89,6 +89,7 @@
   border-color: transparent;
 }
 .ant-tag.ant-tag-warning,
+.ant-tag.ant-tag-gold,
 .ant-tag.ant-tag-orange {
   color: var(--color-warning);
   background: var(--color-warning-bg);

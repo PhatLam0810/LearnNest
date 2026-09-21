@@ -327,6 +327,7 @@ const PracticeListPage = () => {
                   Tất cả bài tập ({allTasksFiltered.length})
                 </h2>
                 <Select
+                  aria-label="Sắp xếp bài tập"
                   value={sortKey}
                   onChange={setSortKey}
                   options={
@@ -345,8 +346,6 @@ const PracticeListPage = () => {
                     <div
                       key={task._id}
                       className="practice-task-card"
-                      role="button"
-                      tabIndex={0}
                       onClick={() =>
                         router.push(`/dashboard/practice/${task._id}`)
                       }>
@@ -368,7 +367,18 @@ const PracticeListPage = () => {
                           )}
                         />
                       </div>
-                      <h3 className="practice-task-title">{task.title}</h3>
+                      {/* Chỉ tiêu đề là nút focus được: cả thẻ còn chứa nút dấu trang. */}
+                      <h3 className="practice-task-title">
+                        <button
+                          type="button"
+                          className="practice-task-title-btn"
+                          onClick={e => {
+                            e.stopPropagation();
+                            router.push(`/dashboard/practice/${task._id}`);
+                          }}>
+                          {task.title}
+                        </button>
+                      </h3>
                       {task.description && (
                         <p className="practice-task-desc">{task.description}</p>
                       )}

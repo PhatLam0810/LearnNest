@@ -186,6 +186,13 @@ const styles = StyleSheet.create({
   },
   aiButton: {
     width: 'auto',
+    maxWidth: '100%',
+    height: 'auto',
+    minHeight: 40,
+    paddingTop: 8,
+    paddingBottom: 8,
+    whiteSpace: 'normal',
+    textAlign: 'left',
     alignSelf: 'flex-start',
     backgroundColor: 'var(--color-vhu-primary)',
     borderColor: 'var(--color-vhu-primary)',
