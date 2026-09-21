@@ -113,6 +113,19 @@ the layout is correct, and **`next dev` is not a reliable stand-in for
 production** (see the shorthand-string gotcha above — it only breaks in
 the real production build).
 
+## Accessibility conventions
+
+- Clickable `View`/`div` that is not a real `<button>`/`<a>`: spread
+  `asButton(onActivate, label)` from `@/utils/asButton` (import the file, not
+  the `@utils` barrel). It adds `role`, `tabIndex` and Enter/Space handling.
+- Never put `role="button"` on something that contains another button (e.g. a
+  bookmark button) — axe reports `nested-interactive`. Put the role on the
+  title/name cell instead.
+- Text colors must reach 4.5:1: use the tokens (`--color-success`,
+  `--color-error`, `--color-text-muted`), not antd preset colors or greys.
+  `e2e/smoke.spec.ts` runs axe on every page, so a regression fails it.
+- JSON-LD `<script>`: build the string with `safeJsonLd` from `@/utils/jsonLd`.
+
 ## Smoke test & bundle size
 
 - **Smoke test** (`e2e/smoke.spec.ts`): mở từng trang học viên + 15 tab admin
