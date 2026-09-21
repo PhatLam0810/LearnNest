@@ -94,7 +94,7 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
           background: 'none',
           fontFamily: 'inherit',
           cursor: isLoading ? 'wait' : 'pointer',
-          color: saved ? '#1677ff' : '#9aa5b8',
+          color: saved ? '#1d418a' : '#6b7280',
           fontSize: size,
           lineHeight: 1,
         }}>

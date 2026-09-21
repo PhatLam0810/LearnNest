@@ -5,13 +5,13 @@ import type { AvatarProps } from 'antd';
 
 const AVATAR_COLORS = [
   '#1d418a',
-  '#c2860a',
-  '#16a34a',
-  '#dc2626',
+  '#a16207',
+  '#15803d',
+  '#c81e1e',
   '#7c3aed',
-  '#0891b2',
-  '#ea580c',
-  '#0d9488',
+  '#0e7490',
+  '#c2410c',
+  '#0f766e',
 ];
 
 export const getAvatarColor = (seed?: string) => {

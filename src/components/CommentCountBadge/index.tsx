@@ -39,8 +39,8 @@ const CommentCountBadge: React.FC<CommentCountBadgeProps> = ({ postId }) => {
         alignItems: 'center',
         gap: 4,
       }}>
-      <MessageOutlined style={{ fontSize: 12, color: '#9aa5b8' }} />
-      <Text style={{ fontSize: 12, color: '#9aa5b8' }}>{count}</Text>
+      <MessageOutlined style={{ fontSize: 12, color: '#6b7280' }} />
+      <Text style={{ fontSize: 12, color: '#6b7280' }}>{count}</Text>
     </View>
   );
 };

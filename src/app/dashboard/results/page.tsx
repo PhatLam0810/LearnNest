@@ -112,6 +112,7 @@ const ResultsPage: React.FC = () => {
         <Select
           allowClear
           placeholder="Loại bài"
+          aria-label="Lọc theo loại bài"
           style={{ width: 160 }}
           value={type}
           onChange={v => {
@@ -127,6 +128,7 @@ const ResultsPage: React.FC = () => {
         <Select
           allowClear
           placeholder="Trạng thái"
+          aria-label="Lọc theo trạng thái"
           style={{ width: 160 }}
           value={isPass}
           onChange={v => {
@@ -142,6 +144,7 @@ const ResultsPage: React.FC = () => {
           allowClear
           showSearch
           placeholder="Khóa học"
+          aria-label="Lọc theo khóa học"
           style={{ width: 240 }}
           value={lessonId}
           onChange={v => {

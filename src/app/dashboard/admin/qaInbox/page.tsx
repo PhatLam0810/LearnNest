@@ -200,7 +200,7 @@ const QaInbox: React.FC = () => {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statBlock}>
-            <Text style={{ ...styles.statNumber, color: '#dc2626' }}>
+            <Text style={{ ...styles.statNumber, color: '#c81e1e' }}>
               {stats?.overdueCount ?? '—'}
             </Text>
             <Text style={styles.statLabel}>quá 24 giờ chưa trả lời</Text>

@@ -141,7 +141,7 @@ const SignUpPage = () => {
                 style={{ width: '100%', marginBottom: 16 }}
                 rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
                 <AppInput
-                  prefix={<MailOutlined style={{ color: '#9aa5b8' }} />}
+                  prefix={<MailOutlined style={{ color: '#6b7280' }} />}
                   placeholder="Nhập email của bạn"
                   style={{ width: '100%' }}
                 />

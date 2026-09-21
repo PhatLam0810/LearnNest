@@ -323,7 +323,12 @@ const CriteriaListItem: React.FC<Props> = ({
       case 'word_margins':
         return (
           <>
-            <p style={{ color: '#888', fontSize: 12, marginBottom: 4 }}>
+            <p
+              style={{
+                color: 'var(--color-text-muted)',
+                fontSize: 12,
+                marginBottom: 4,
+              }}>
               Đơn vị DXA (1440 = 1 inch = 2.54cm). Bỏ trống lề nào thì lề đó
               không bị kiểm tra.
             </p>

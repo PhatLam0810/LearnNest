@@ -289,6 +289,7 @@ const OverviewManage: React.FC = () => {
                       ...styles.chartBar,
                       height: `${(total / maxDay) * 100}%`,
                     }}
+                    {...({ role: 'img' } as Record<string, string>)}
                     accessibilityLabel={`${dayjs(d.date).format('DD/MM')}: ${d.student} sinh viên, ${d.guest} khách`}>
                     <View style={{ ...styles.barGuest, flexGrow: d.guest }} />
                     <View

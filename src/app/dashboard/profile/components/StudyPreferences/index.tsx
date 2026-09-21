@@ -90,7 +90,11 @@ const StudyPreferences = () => {
           <Text style={styles.rowTitle}>Nhắc nhở học tập</Text>
           <Text style={styles.rowSubtitle}>Email lúc 19:00 mỗi ngày</Text>
         </View>
-        <Switch checked={reminderEnabled} onChange={setReminderEnabled} />
+        <Switch
+          aria-label="Nhắc học hằng ngày qua email"
+          checked={reminderEnabled}
+          onChange={setReminderEnabled}
+        />
       </View>
       <View style={styles.divider} />
       <Text style={styles.rowTitle}>Loại thông báo muốn nhận</Text>

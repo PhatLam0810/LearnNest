@@ -136,7 +136,7 @@ const CreateAccountPage = () => {
               rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}>
               <AppInput
                 type="Password"
-                prefix={<LockOutlined style={{ color: '#9aa5b8' }} />}
+                prefix={<LockOutlined style={{ color: '#6b7280' }} />}
                 placeholder="Nhập mật khẩu của bạn"
                 style={{ width: '100%' }}
               />
@@ -167,7 +167,7 @@ const CreateAccountPage = () => {
               ]}>
               <AppInput
                 type="Password"
-                prefix={<LockOutlined style={{ color: '#9aa5b8' }} />}
+                prefix={<LockOutlined style={{ color: '#6b7280' }} />}
                 placeholder="Xác nhận mật khẩu của bạn"
                 style={{ width: '100%' }}
               />

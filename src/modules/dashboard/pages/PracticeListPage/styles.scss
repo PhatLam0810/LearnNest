@@ -9,7 +9,7 @@
 }
 
 .practice-list-subheading {
-  color: #888;
+  color: var(--color-text-muted);
   margin: 4px 0 16px;
 }
 
@@ -83,7 +83,7 @@
   margin: 0 0 4px;
   font-size: 16px;
   font-weight: 700;
-  color: #b26a00;
+  color: var(--color-warning);
 }
 
 .practice-retry-desc {
@@ -123,7 +123,7 @@
 .practice-retry-row-meta {
   margin-left: auto;
   font-size: 12px;
-  color: #9a8b78;
+  color: var(--color-text-muted);
 }
 
 .practice-task-title {
@@ -159,7 +159,7 @@
 .practice-weak-skills-desc {
   margin: 0 0 12px;
   font-size: 13px;
-  color: #8d8d8d;
+  color: var(--color-text-muted);
 }
 
 .practice-weak-skill-row {

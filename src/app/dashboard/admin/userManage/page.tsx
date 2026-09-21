@@ -206,14 +206,14 @@ const UserManage = () => {
           label="   Tổng người dùng"
           value={activitySummary?.totalUsers ?? currentData?.totalRecords}
           caption={`+${activitySummary?.newUsersLast7Days ?? 0} trong 7 ngày`}
-          captionColor="#16a34a"
+          captionColor="#15803d"
         />
         <StatCard
           icon="👥"
           label="Hoạt động hôm nay"
           value={activitySummary?.totalUsers ?? currentData?.totalRecords}
           caption={`+${activitySummary?.activeTodayPercent ?? 0}% tổng người dùng`}
-          captionColor="#8D8D8D"
+          captionColor="var(--color-text-muted)"
         />
       </View>
       <TrafficChart />

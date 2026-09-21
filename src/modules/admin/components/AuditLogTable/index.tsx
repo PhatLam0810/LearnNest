@@ -55,7 +55,7 @@ const AuditLogTable: React.FC<AuditLogTableProps> = ({
             borderWidth: 0,
             margin: 0,
             fontWeight: 500,
-            color: v === 'success' ? '#16a34a' : '#dc2626',
+            color: v === 'success' ? '#15803d' : '#c81e1e',
             background: v === 'success' ? '#f0fdf4' : '#fef2f2',
           }}>
           {v === 'success' ? 'Thành công' : 'Lỗi'}

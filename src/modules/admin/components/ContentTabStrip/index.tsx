@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { Text, View } from 'react-native-web';
+import { asButton } from '@/utils/asButton';
 import styles from './styles';
 
 export interface ContentTab {
@@ -19,12 +20,14 @@ const ContentTabStrip: React.FC<ContentTabStripProps> = ({
   activeKey,
   onChange,
 }) => (
-  <View style={styles.strip}>
+  <View style={styles.strip} {...({ role: 'tablist' } as object)}>
     {tabs.map(tab => {
       const active = tab.key === activeKey;
       return (
         <View
           key={tab.key}
+          {...asButton(() => onChange(tab.key))}
+          {...({ role: 'tab', 'aria-selected': active } as object)}
           onClick={() => onChange(tab.key)}
           style={[styles.tab, active && styles.tabActive]}>
           <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>

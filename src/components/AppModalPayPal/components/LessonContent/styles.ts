@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
   description: {
     ...typography.body1,
-    color: '#8D8D8D',
+    color: '#6b7280',
     paddingBottom: 12,
   },
   whatLearnTitle: {

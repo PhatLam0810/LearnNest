@@ -19,7 +19,7 @@ const StatusTag: React.FC<{ status: 'success' | 'error' }> = ({ status }) => (
       margin: 0,
       borderRadius: 999,
       fontWeight: 500,
-      color: status === 'success' ? '#16a34a' : '#dc2626',
+      color: status === 'success' ? '#15803d' : '#c81e1e',
       background: status === 'success' ? '#f0fdf4' : '#fef2f2',
     }}>
     {status === 'success' ? 'Thành công' : 'Lỗi'}

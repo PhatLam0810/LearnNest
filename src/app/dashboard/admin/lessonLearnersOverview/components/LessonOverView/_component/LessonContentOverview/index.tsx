@@ -57,11 +57,11 @@ const LessonContentOverview: React.FC<Props> = ({ lessonId }) => {
   }
 
   const countColor = (done: number, total: number) => {
-    if (total === 0) return '#9ca3af';
+    if (total === 0) return '#6b7280';
     const ratio = done / total;
-    if (ratio >= 0.8) return '#16a34a';
-    if (ratio >= 0.4) return '#d97706';
-    return '#dc2626';
+    if (ratio >= 0.8) return '#15803d';
+    if (ratio >= 0.4) return '#b45309';
+    return '#c81e1e';
   };
 
   return (

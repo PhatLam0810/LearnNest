@@ -37,6 +37,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { authAction } from '~mdAuth/redux';
 import { useAppSelector } from '@redux';
 import UserAvatar from '@components/UserAvatar';
+import { asButton } from '@/utils/asButton';
 import SearchBar from '@components/SearchContext/SearchBar';
 import { formatRelativeTime } from '@/utils/time';
 import CourseItem from '@/components/CourseItem';
@@ -325,6 +326,10 @@ const HeaderLayout: React.FC = ({}) => {
             {/* LOGO */}
             <div
               className="header-logo"
+              {...asButton(
+                () => router.push('/dashboard/home'),
+                'Về trang chủ',
+              )}
               onClick={() => router.push('/dashboard/home')}>
               <div className="header-logo-image-wrap">
                 <Image
@@ -383,14 +388,30 @@ const HeaderLayout: React.FC = ({}) => {
                 </Badge>
               </Dropdown>
             )}
-            <Dropdown trigger={['hover']} menu={{ items: menuItemsUser }}>
-              <UserAvatar
-                size={screens.md ? 42 : 36}
-                avatar={userProfile?.avatar}
-                fullName={userProfile?.fullName}
-                seed={userProfile?._id}
-                className="header-avatar"
-              />
+            <Dropdown
+              trigger={['hover', 'click']}
+              menu={{ items: menuItemsUser }}>
+              {/* Nút thật để Tab focus được và Enter/Space mở menu. */}
+              <button
+                type="button"
+                aria-label="Menu tài khoản"
+                aria-haspopup="menu"
+                style={{
+                  display: 'inline-flex',
+                  padding: 0,
+                  border: 0,
+                  borderRadius: '50%',
+                  background: 'none',
+                  cursor: 'pointer',
+                }}>
+                <UserAvatar
+                  size={screens.md ? 42 : 36}
+                  avatar={userProfile?.avatar}
+                  fullName={userProfile?.fullName}
+                  seed={userProfile?._id}
+                  className="header-avatar"
+                />
+              </button>
             </Dropdown>
           </Space>
         </div>

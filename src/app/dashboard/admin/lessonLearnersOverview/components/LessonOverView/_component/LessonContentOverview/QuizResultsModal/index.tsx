@@ -60,7 +60,7 @@ const QuizResultsModal: React.FC<Props> = ({
         record.user ? (
           <div>
             <div>{record.user.fullName || '—'}</div>
-            <div style={{ color: '#888', fontSize: 12 }}>
+            <div style={{ color: 'var(--color-text-muted)', fontSize: 12 }}>
               {record.user.email}
               {record.user.class ? ` · Lớp ${record.user.class}` : ''}
             </div>

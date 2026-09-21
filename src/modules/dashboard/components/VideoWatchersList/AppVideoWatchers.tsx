@@ -209,9 +209,9 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
   };
 
   const getProgressColor = (progress: number) => {
-    if (progress >= 90) return '#16a34a';
+    if (progress >= 90) return '#15803d';
     if (progress >= 50) return '#1d418a';
-    return '#d97706';
+    return '#b45309';
   };
 
   const handleRemindNotWatched = async () => {

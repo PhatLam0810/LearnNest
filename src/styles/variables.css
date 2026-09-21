@@ -12,7 +12,7 @@
   --color-text-primary: #111827;
   --color-text-body: #374151;
   --color-text-muted: #6b7280;
-  --color-text-disabled: #9ca3af;
+  --color-text-disabled: #6b7280;
   --color-text-on-primary: #fff;
   --color-text-on-primary-muted: rgba(255, 255, 255, 0.72);
 
@@ -35,11 +35,11 @@
   --color-table-row-border: #f1f3f7;
 
   /* State */
-  --color-success: #16a34a;
+  --color-success: #15803d;
   --color-success-bg: #e9f9ef;
   --color-warning: #b45309;
   --color-warning-bg: #fef3e2;
-  --color-error: #dc2626;
+  --color-error: #c81e1e;
   --color-error-bg: #fdecec;
   --color-info: #1d418a;
   --color-info-bg: #eef3fb;

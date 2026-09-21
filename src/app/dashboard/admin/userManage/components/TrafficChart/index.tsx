@@ -95,7 +95,7 @@ const TrafficChart: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-              <Text style={{ color: '#9ca3af' }}>Chưa có dữ liệu truy cập</Text>
+              <Text style={{ color: '#6b7280' }}>Chưa có dữ liệu truy cập</Text>
             </View>
           ) : (
             <ResponsiveContainer width="100%" height="100%">

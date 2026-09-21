@@ -17,7 +17,7 @@ const CATEGORY_META: Record<
 > = {
   content: { label: 'Nội dung', color: '#1d418a', bg: '#e8f0ff' },
   bug: { label: 'Lỗi hệ thống', color: '#c0392b', bg: '#fdeceb' },
-  suggestion: { label: 'Đề xuất', color: '#16a34a', bg: '#eafaf0' },
+  suggestion: { label: 'Đề xuất', color: '#15803d', bg: '#eafaf0' },
   grading: { label: 'Chấm điểm', color: '#b45309', bg: '#fef3e2' },
   other: { label: 'Khác', color: '#5b6478', bg: '#eef0f5' },
 };

@@ -284,7 +284,7 @@ const LessonAnalyticsPage: React.FC<Props> = ({ lessonId }) => {
             percent={totalRecords ? (totalCompleted / totalRecords) * 100 : 0}
             size={90}
             format={() => totalCompleted}
-            strokeColor="#16a34a"
+            strokeColor="#15803d"
           />
           <div style={styles.statLabel}>Đã Hoàn Thành</div>
         </div>

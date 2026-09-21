@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     ...typography.caption,
     fontFamily: 'Lexend, sans-serif',
     fontSize: 13,
-    color: '#9ca3af',
+    color: '#6b7280',
   },
 });
 

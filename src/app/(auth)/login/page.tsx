@@ -152,7 +152,7 @@ const LoginPage = () => {
                   style={{ width: '100%', marginBottom: 16 }} // Đảm bảo Form.Item full width
                   rules={[{ required: true, message: 'Vui lòng nhập email' }]}>
                   <AppInput
-                    prefix={<MailOutlined style={{ color: '#9aa5b8' }} />}
+                    prefix={<MailOutlined style={{ color: '#6b7280' }} />}
                     placeholder="Nhập email của bạn"
                     style={{ width: '100%' }}
                   />
@@ -171,7 +171,7 @@ const LoginPage = () => {
                   ]}>
                   <AppInput
                     type="Password"
-                    prefix={<LockOutlined style={{ color: '#9aa5b8' }} />}
+                    prefix={<LockOutlined style={{ color: '#6b7280' }} />}
                     placeholder="Nhập mật khẩu của bạn"
                     style={{ width: '100%' }}
                   />

@@ -488,7 +488,7 @@ const ImportExcelCard: React.FC = () => {
                 : {
                     width: 'auto',
                     background: '#f1f3f7',
-                    color: '#9ca3af',
+                    color: '#6b7280',
                     cursor: 'not-allowed',
                   }
             }>

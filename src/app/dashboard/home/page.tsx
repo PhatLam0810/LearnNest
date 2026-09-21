@@ -1,4 +1,5 @@
 'use client';
+import { asButton } from '@/utils/asButton';
 import React, { useMemo } from 'react';
 import {
   ClockCircleOutlined,
@@ -70,6 +71,7 @@ const HomeOverview = () => {
         {!!retryQueue?.length && (
           <View
             style={styles.retryBanner}
+            {...asButton(() => router.push('/dashboard/practice'))}
             onClick={() => router.push('/dashboard/practice')}
             aria-label="Bài cần làm lại">
             <Text style={styles.retryBannerText}>
@@ -83,6 +85,10 @@ const HomeOverview = () => {
         <View style={styles.miniRow}>
           <View
             style={styles.miniCard}
+            {...asButton(
+              () => router.push('/dashboard/achievements'),
+              'Xem thành tích',
+            )}
             onClick={() => router.push('/dashboard/achievements')}>
             <Text style={styles.miniIcon}>🏆</Text>
             <Text style={styles.miniLabel}>Thành tích</Text>
@@ -94,6 +100,10 @@ const HomeOverview = () => {
           </View>
           <View
             style={styles.miniCard}
+            {...asButton(
+              () => router.push('/dashboard/leaderboard'),
+              'Xem bảng xếp hạng',
+            )}
             onClick={() => router.push('/dashboard/leaderboard')}>
             <Text style={styles.miniIcon}>📊</Text>
             <Text style={styles.miniLabel}>Hạng của bạn</Text>
@@ -113,7 +123,7 @@ const HomeOverview = () => {
                 ? `${weeklyDelta >= 0 ? '+' : ''}${weeklyDelta.toFixed(1)} giờ so với tuần trước`
                 : undefined
             }
-            captionColor={weeklyDelta >= 0 ? '#389e0d' : undefined}
+            captionColor={weeklyDelta >= 0 ? 'var(--color-success)' : undefined}
           />
           <StatCard
             icon={<CheckCircleOutlined style={styles.statIcon} />}

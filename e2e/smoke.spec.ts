@@ -62,6 +62,22 @@ const checkPage = async (page: Page, url: string) => {
     expect(width.text, `${url} trắng trang`).toBeGreaterThan(20);
     expect(width.scroll, `${url} tràn ngang`).toBeLessThanOrEqual(width.inner);
     expect(errors, `${url} có lỗi JS`).toEqual([]);
+
+    // Truy cập: WCAG 2.x A/AA (tương phản, nhãn, tên nút...). Chỉ chạy ở màn
+    // rộng, ở 375px kết quả giống hệt nên không tốn thêm thời gian.
+    if (width.inner > 700) {
+      await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
+      const violations = await page.evaluate(async () => {
+        const r = await (window as any).axe.run(document, {
+          runOnly: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'],
+        });
+        return r.violations.map(
+          (v: any) =>
+            `${v.id} (${v.nodes.length}): ${v.nodes[0].target.join(' ')}`,
+        );
+      });
+      expect(violations, `${url} vi phạm truy cập`).toEqual([]);
+    }
   } finally {
     page.off('pageerror', onError);
     page.off('console', onConsole);

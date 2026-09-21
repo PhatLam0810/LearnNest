@@ -1,4 +1,5 @@
 'use client';
+import { asButton } from '@/utils/asButton';
 import React, { useEffect, useState } from 'react';
 import { Image, Modal, ScrollView, Text, View } from 'react-native-web';
 import { Modal as AntdModal } from 'antd';
@@ -265,6 +266,7 @@ const LibraryList = () => {
         {TYPE_FILTERS.map(f => (
           <View
             key={f.key}
+            {...asButton(() => setActiveType(f.key))}
             onClick={() => setActiveType(f.key)}
             style={
               activeType === f.key ? styles.filterPillActive : styles.filterPill

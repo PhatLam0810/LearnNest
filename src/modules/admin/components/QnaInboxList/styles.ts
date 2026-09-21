@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     textAlign: 'center',
     fontSize: 13,
-    color: '#9ca3af',
+    color: '#6b7280',
   },
 });
 

@@ -41,7 +41,7 @@ const NotificationsPage: React.FC = () => {
             {r.title}
           </Text>
           {!!r.body && (
-            <Text style={{ color: '#8D8D8D', fontSize: 13 }}>{r.body}</Text>
+            <Text style={{ color: '#6b7280', fontSize: 13 }}>{r.body}</Text>
           )}
         </View>
       ),

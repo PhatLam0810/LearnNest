@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
   },
   subTitle: {
     ...typography.body1,
-    color: '#8D8D8D',
+    color: '#6b7280',
   },
   rightContainer: {
     flex: 1,

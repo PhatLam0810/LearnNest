@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   timer: {
-    color: '#888',
+    color: 'var(--color-text-muted)',
     fontSize: 12,
   },
   expireTime: {

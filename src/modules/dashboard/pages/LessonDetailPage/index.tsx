@@ -437,6 +437,7 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
           </View>
           <div
             role="progressbar"
+            aria-label="Tiến độ khóa học"
             aria-valuenow={progressPercent}
             aria-valuemin={0}
             aria-valuemax={100}

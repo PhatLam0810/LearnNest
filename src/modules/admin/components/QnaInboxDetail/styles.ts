@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     letterSpacing: '0.08em',
-    color: '#9ca3af',
+    color: '#6b7280',
   },
   questionText: {
     ...typography.body1,
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     textAlign: 'center',
     fontSize: 13,
-    color: '#9ca3af',
+    color: '#6b7280',
   },
 });
 

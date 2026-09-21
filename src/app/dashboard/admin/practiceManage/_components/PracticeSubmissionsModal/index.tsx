@@ -67,7 +67,7 @@ const PracticeSubmissionsModal: React.FC<Props> = ({ taskId, onClose }) => {
         return (
           <div>
             <div>{user.fullName || '—'}</div>
-            <div style={{ color: '#888', fontSize: 12 }}>
+            <div style={{ color: 'var(--color-text-muted)', fontSize: 12 }}>
               {user.email} {user.class ? `· Lớp ${user.class}` : ''}
             </div>
           </div>

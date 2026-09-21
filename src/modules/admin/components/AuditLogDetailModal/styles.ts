@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 600,
     letterSpacing: '0.08em',
-    color: '#9ca3af',
+    color: '#6b7280',
   },
   actionHeadline: {
     fontSize: 17,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   userAgentText: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#6b7280',
   },
   secondaryBtnStyle: {
     width: 'auto',

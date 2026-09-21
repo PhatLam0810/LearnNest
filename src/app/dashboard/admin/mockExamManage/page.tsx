@@ -97,7 +97,7 @@ const MockExamManage = () => {
           justifyContent: 'space-between',
           marginBottom: 12,
         }}>
-        <Text style={{ color: '#8D8D8D' }}>
+        <Text style={{ color: '#6b7280' }}>
           Đề thi thử gộp nhiều bài thực hành đã có sẵn vào 1 phiên thi tính giờ,
           mô phỏng áp lực thời gian đề MOS thật.
         </Text>

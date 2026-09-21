@@ -15,9 +15,9 @@ const PassRateReport: React.FC = () => {
   const { data, isFetching } = dashboardQuery.useGetPassRateReportQuery();
 
   const passRateColor = (rate: number) => {
-    if (rate >= 70) return '#16a34a';
-    if (rate >= 40) return '#d97706';
-    return '#dc2626';
+    if (rate >= 70) return '#15803d';
+    if (rate >= 40) return '#b45309';
+    return '#c81e1e';
   };
 
   const columns: TableProps<PassRateReportRow>['columns'] = [
@@ -98,7 +98,7 @@ const PassRateReport: React.FC = () => {
             />
           </View>
         </div>
-        <Text style={{ fontSize: 13, color: '#8D8D8D' }}>
+        <Text style={{ fontSize: 13, color: '#6b7280' }}>
           Tỉ lệ đạt tính trên toàn bộ lịch sử - bài trắc nghiệm làm trước khi
           đổi ngưỡng (2/3 số câu) vẫn giữ nguyên kết quả đã chấm lúc đó, không
           tính lại theo ngưỡng 80% mới.

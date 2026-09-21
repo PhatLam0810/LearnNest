@@ -114,7 +114,12 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
       const speedText =
         liveSpeedMBps !== null ? ` — ${liveSpeedMBps.toFixed(2)} MB/s` : '';
       return (
-        <div style={{ marginTop: 8, color: '#888', fontSize: 13 }}>
+        <div
+          style={{
+            marginTop: 8,
+            color: 'var(--color-text-muted)',
+            fontSize: 13,
+          }}>
           Đang tải lên server...{speedText} ({formatElapsed(uploadElapsed)}) —
           video lớn có thể mất vài phút, vui lòng không tải lại trang.
         </div>
@@ -125,7 +130,12 @@ const AddLibraryContent: React.FC<AddLibraryContentProps> = ({
         ? `Đang xử lý video... ${uploadPercent}%`
         : 'Đang lưu lên máy chủ...';
     return (
-      <div style={{ marginTop: 8, color: '#888', fontSize: 13 }}>
+      <div
+        style={{
+          marginTop: 8,
+          color: 'var(--color-text-muted)',
+          fontSize: 13,
+        }}>
         {stageText} — video lớn có thể mất vài phút, vui lòng không tải lại
         trang.
       </div>

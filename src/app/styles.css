@@ -79,3 +79,44 @@
     overflow-x: auto;
   }
 }
+
+/* Tag preset của antd có chữ không đạt tương phản 4.5:1 (vd #52c41a trên nền
+   nhạt chỉ 2.2:1): dùng token màu của dự án, viền trong suốt. */
+.ant-tag.ant-tag-success,
+.ant-tag.ant-tag-green {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+  border-color: transparent;
+}
+.ant-tag.ant-tag-warning,
+.ant-tag.ant-tag-orange {
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+  border-color: transparent;
+}
+.ant-tag.ant-tag-error,
+.ant-tag.ant-tag-red {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+  border-color: transparent;
+}
+.ant-tag.ant-tag-blue,
+.ant-tag.ant-tag-processing {
+  color: var(--color-vhu-primary);
+  background: var(--color-info-bg);
+  border-color: transparent;
+}
+/* Nút danger dạng viền/chữ: chữ #ff4d4f mặc định chỉ đạt 3.26:1. */
+.ant-btn.ant-btn-color-dangerous.ant-btn-variant-outlined,
+.ant-btn.ant-btn-color-dangerous.ant-btn-variant-text,
+.ant-btn.ant-btn-color-dangerous.ant-btn-variant-link {
+  color: var(--color-error);
+}
+
+/* Tab đang chọn của antd: #1677ff mặc định chỉ đạt 4.1:1, dùng xanh VHU. */
+.ant-tabs .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--color-vhu-primary);
+}
+.ant-tabs .ant-tabs-ink-bar {
+  background: var(--color-vhu-primary);
+}

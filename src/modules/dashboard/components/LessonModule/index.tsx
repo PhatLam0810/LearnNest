@@ -53,7 +53,7 @@ const LessonModule: React.FC<LessonModuleProps> = ({
                           {subItem.title}
                         </span>
                       </div>
-                      <span style={{ color: '#8D8D8D' }}>5 minutes</span>
+                      <span style={{ color: '#6b7280' }}>5 minutes</span>
                     </div>
                   </Card>
                 ))}

@@ -21,9 +21,9 @@ import './styles.scss';
 // Màu thanh tiến độ theo tỉ lệ đạt — khớp quy ước đỏ/vàng/xanh đã dùng ở
 // LessonContentOverview (admin) cho cùng ý nghĩa "yếu/trung bình/tốt".
 const weakSkillColor = (passRate: number) => {
-  if (passRate >= 80) return '#16a34a';
-  if (passRate >= 40) return '#d97706';
-  return '#dc2626';
+  if (passRate >= 80) return '#15803d';
+  if (passRate >= 40) return '#b45309';
+  return '#c81e1e';
 };
 
 // Chuẩn hóa chuỗi trước khi so khớp tìm kiếm - bỏ dấu tiếng Việt để "bao

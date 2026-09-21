@@ -23,7 +23,7 @@
 }
 
 .practice-content-requirements {
-  border-left: 3px solid #1677ff;
+  border-left: 3px solid #1d418a;
   background: #f7f9ff;
   padding: 12px 16px;
   border-radius: 4px;
@@ -32,7 +32,7 @@
   h3 {
     margin: 0 0 6px;
     font-size: 14px;
-    color: #1677ff;
+    color: #1d418a;
   }
 }
 
@@ -57,7 +57,7 @@
 
 .practice-content-instruction-label {
   font-weight: 600;
-  color: #1677ff;
+  color: #1d418a;
   font-size: 14px;
 }
 
@@ -68,7 +68,7 @@
 }
 
 .practice-content-meta {
-  color: #888;
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 
@@ -94,7 +94,7 @@
 
 .practice-result-panel--hidden {
   background: #fafafa;
-  color: #888;
+  color: var(--color-text-muted);
   font-size: 13px;
 
   p {
@@ -154,7 +154,7 @@
 }
 
 .practice-history-time {
-  color: #888;
+  color: var(--color-text-muted);
   font-size: 13px;
 }
 

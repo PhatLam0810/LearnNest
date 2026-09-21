@@ -235,7 +235,7 @@ const ModalSelectLibrary: React.FC<ModalSelectLibraryProps> = ({
                           borderWidth: isSelected ? 2 : 0.5,
                           borderColor: isSelected
                             ? 'var(--color-vhu-primary)'
-                            : '#8D8D8D',
+                            : '#6b7280',
                           cursor: assignedElsewhere ? 'not-allowed' : 'pointer',
                           opacity: assignedElsewhere ? 0.5 : 1,
                         }}>

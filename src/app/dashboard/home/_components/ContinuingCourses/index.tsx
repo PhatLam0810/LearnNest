@@ -74,6 +74,7 @@ const ContinuingCourses: React.FC<ContinuingCoursesProps> = ({
             Học cách đây {formatRelativeTime(course.lastStudiedAt)}
           </Text>
           <Progress
+            aria-label={`Tiến độ ${course.lessonName}`}
             percent={Math.round(course.progress || 0)}
             size="small"
             status="active"

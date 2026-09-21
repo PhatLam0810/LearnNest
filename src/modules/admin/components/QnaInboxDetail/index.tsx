@@ -212,7 +212,7 @@ const QnaInboxDetail: React.FC<QnaInboxDetailProps> = ({
                 style={{
                   ...typography.caption,
                   fontSize: 12,
-                  color: '#9ca3af',
+                  color: '#6b7280',
                 }}>
                 {draft.trim() ? `${draft.trim().length} ký tự · ` : ''}
                 Học viên nhận email ngay khi bạn gửi trả lời
