@@ -3,12 +3,13 @@ import { StyleSheet, typography } from '@styles';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 24,
+    paddingTop: 24,
+    paddingBottom: 24,
+    paddingLeft: 24,
+    paddingRight: 24,
   },
   title: {
-    ...typography.titleM,
-    fontSize: 28,
-    fontWeight: '700',
+    ...typography.titleL,
     color: 'var(--color-text-primary)',
     marginBottom: 20,
   },

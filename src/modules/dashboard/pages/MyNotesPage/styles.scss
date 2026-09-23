@@ -10,13 +10,15 @@
 
 .my-notes-heading {
   margin: 0 0 4px;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .my-notes-sub {
-  color: #666;
-  margin: 0 0 16px;
+  color: var(--color-text-muted);
+  margin: 0 0 20px;
+  font-size: 14px;
 }
 
 .my-notes-groups {
@@ -26,10 +28,11 @@
 }
 
 .my-notes-group {
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  padding: 16px;
-  background: #fff;
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  border-radius: 16px;
+  padding: 20px 24px;
+  background: var(--color-surface, #fff);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
 }
 
 .my-notes-group-head {
@@ -37,20 +40,23 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border-subtle, #f1f5f9);
 }
 
 .my-notes-group-title {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
+  color: var(--color-text-primary);
 }
 
 .my-notes-open-link {
   border: none;
   background: none;
-  color: #1d418a;
+  color: var(--color-vhu-primary, #1d418a);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 13.5px;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -58,26 +64,30 @@
 .my-notes-items {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .my-notes-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 8px 0;
-  border-top: 1px dashed #f0f0f0;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px dashed var(--color-border-subtle, #f1f5f9);
+
+  &:first-child {
+    border-top: none;
+  }
 }
 
 .my-notes-ts {
   flex-shrink: 0;
-  color: #1d418a;
-  background: #f0f5ff;
-  border: 1px solid #d6e4ff;
+  color: var(--color-vhu-primary, #1d418a);
+  background: var(--color-info-bg, #f0f5ff);
+  border: 1px solid var(--color-vhu-accent, #d6e4ff);
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  padding: 2px 10px;
+  padding: 3px 12px;
   white-space: nowrap;
 }
 
@@ -85,13 +95,14 @@
   flex: 1;
   white-space: pre-wrap;
   font-size: 14px;
-  line-height: 1.5;
-  color: #1c2536;
+  line-height: 1.6;
+  color: var(--color-text-primary, #1c2536);
 }
 
 .my-notes-del {
-  color: #c0392b;
+  color: var(--color-error, #c0392b);
   cursor: pointer;
   flex-shrink: 0;
   margin-top: 2px;
+  font-size: 14px;
 }

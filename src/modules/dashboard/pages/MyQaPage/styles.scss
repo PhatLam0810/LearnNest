@@ -10,71 +10,76 @@
 
 .my-qa-heading {
   margin: 0 0 4px;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .my-qa-sub {
-  color: #666;
-  margin: 0 0 16px;
+  color: var(--color-text-muted);
+  margin: 0 0 20px;
+  font-size: 14px;
 }
 
 .my-qa-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .my-qa-item {
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  padding: 14px 16px;
+  border: 1px solid var(--color-border-subtle, #e2e8f0);
+  border-radius: 16px;
+  padding: 16px 20px;
   cursor: pointer;
-  background: #fff;
-  transition: box-shadow 0.15s ease;
-}
+  background: var(--color-surface, #fff);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
-.my-qa-item:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-border-strong, #cbd5e1);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  }
 }
 
 .my-qa-item-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  gap: 10px;
+  margin-bottom: 8px;
   flex-wrap: wrap;
 }
 
 .my-qa-context {
-  font-weight: 600;
-  font-size: 13px;
-  color: #1d418a;
+  font-weight: 700;
+  font-size: 13.5px;
+  color: var(--color-vhu-primary, #1d418a);
 }
 
 .my-qa-time {
   margin-left: auto;
-  font-size: 12px;
-  color: #6b7280;
+  font-size: 12.5px;
+  color: var(--color-text-muted, #6b7280);
 }
 
 .my-qa-question {
-  font-size: 14.5px;
-  color: #1c2536;
-  line-height: 1.5;
+  font-size: 15px;
+  color: var(--color-text-primary, #1c2536);
+  line-height: 1.6;
   white-space: pre-wrap;
 }
 
 .my-qa-reply {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #5b6478;
+  margin-top: 10px;
+  font-size: 13.5px;
+  color: var(--color-text-body, #5b6478);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .my-qa-reply-count {
-  font-weight: 600;
-  color: #1d418a;
+  font-weight: 700;
+  color: var(--color-vhu-primary, #1d418a);
 }
