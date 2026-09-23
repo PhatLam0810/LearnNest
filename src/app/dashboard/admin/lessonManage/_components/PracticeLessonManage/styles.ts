@@ -19,10 +19,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: 'solid',
     cursor: 'pointer',
+    flexShrink: 0,
+  },
+  actionGroup: {
+    flexWrap: 'nowrap',
   },
   actionButtonText: {
     ...typography.buttonSmall,
     color: 'var(--color-text-on-primary)',
+    whiteSpace: 'nowrap',
   },
   // Style cũ (trước khi retrofit) — vẫn dùng cho bảng "Các phần" bên trong
   // Drawer quản lý nội dung, nằm ngoài phạm vi shell swap của task này nên

@@ -101,7 +101,10 @@ const PracticeLessonManage = () => {
       key: 'action',
       width: 260,
       render: (_, record) => (
-        <Space size={10} onClick={e => e.stopPropagation()}>
+        <Space
+          size={10}
+          style={styles.actionGroup}
+          onClick={e => e.stopPropagation()}>
           <button
             style={styles.actionButton}
             onClick={() => setDeleteTarget(record)}>
