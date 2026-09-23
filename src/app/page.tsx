@@ -2,6 +2,15 @@ import Link from 'next/link';
 import Footer from '@components/Footer';
 import { lexend } from '@/styles/typography';
 import Reveal from './Reveal';
+import {
+  BookOpen,
+  Target,
+  Map,
+  Bot,
+  Library,
+  BarChart,
+  Sparkles,
+} from 'lucide-react';
 import './landing.css';
 
 type PublicStats = {
@@ -26,34 +35,34 @@ async function getPublicStats(): Promise<PublicStats | null> {
 
 const FEATURES = [
   {
-    icon: '📚',
-    title: 'Bài học theo Module',
-    desc: 'Nội dung MOS, CNTT, AI được chia thành từng Module - Bài học rõ ràng, học tới đâu chắc tới đó.',
-  },
-  {
-    icon: '✍️',
-    title: 'Luyện tập có chấm điểm',
-    desc: 'Làm bài thực hành sát đề thi thật, nộp bài và nhận đánh giá cho từng tiêu chí cụ thể.',
-  },
-  {
-    icon: '🗺️',
+    icon: <Map size={32} strokeWidth={1.5} />,
     title: 'Lộ trình học cá nhân hóa',
-    desc: 'Gợi ý lộ trình học phù hợp với tiến độ và mục tiêu của riêng bạn.',
+    desc: 'Hệ thống tự động phân tích và đưa ra lộ trình học tối ưu nhất dựa trên mục tiêu của bạn. Tự tin chinh phục MOS, CNTT & AI mà không sợ đi sai hướng.',
+    bentoClass: 'landing__feature-large',
   },
   {
-    icon: '🤖',
+    icon: <Bot size={28} strokeWidth={1.5} />,
     title: 'Trợ lý AI đồng hành',
-    desc: 'Hỏi đáp, gợi ý cách học ngay trong quá trình học - không cần rời trang.',
+    desc: 'Hỏi đáp lập tức, giải thích lỗi sai thực hành chi tiết nhờ AI tích hợp.',
+    bentoClass: '',
   },
   {
-    icon: '🗂️',
-    title: 'Thư viện tài liệu',
-    desc: 'Kho tài liệu, video tổng hợp phục vụ ôn tập MOS, Word, Excel, PowerPoint, AI.',
+    icon: <Target size={28} strokeWidth={1.5} />,
+    title: 'Thực hành chấm điểm',
+    desc: 'Làm bài thi thử sát đề thật, nhận feedback điểm số ngay lập tức.',
+    bentoClass: '',
   },
   {
-    icon: '📈',
-    title: 'Theo dõi tiến độ chi tiết',
-    desc: 'Xem % hoàn thành từng bài học, lịch sử học gần nhất, không bỏ sót nội dung nào.',
+    icon: <Library size={28} strokeWidth={1.5} />,
+    title: 'Thư viện tài nguyên',
+    desc: 'Kho tài liệu ôn tập, video bài giảng độc quyền cho sinh viên VHU.',
+    bentoClass: '',
+  },
+  {
+    icon: <BarChart size={28} strokeWidth={1.5} />,
+    title: 'Theo dõi tiến độ',
+    desc: 'Trực quan hóa dữ liệu học tập với biểu đồ. Nắm bắt chính xác tỷ lệ hoàn thành.',
+    bentoClass: '',
   },
 ];
 
@@ -62,6 +71,7 @@ export default async function HomePage() {
 
   return (
     <div className={`landing ${lexend.className}`}>
+      {/* 1. STICKY GLASSMORPHISM HEADER */}
       <header className="landing__header">
         <Link href="/" className="landing__brand">
           <img src="/images/LogoVhu.png" alt="LearnNest" />
@@ -77,18 +87,20 @@ export default async function HomePage() {
         </div>
       </header>
 
+      {/* 2. MODERN HERO SECTION WITH FLOATING ANIMATION */}
       <section className="landing__hero">
         <div className="landing__hero-text">
           <span className="landing__hero-tag">
-            Nền tảng học tập trực tuyến - Văn Hiến (VHU)
+            <Sparkles size={16} /> Nền tảng học tập trực tuyến - Văn Hiến (VHU)
           </span>
           <h1>
-            Học <span>MOS - CNTT - AI</span> hiệu quả, đúng lộ trình
+            Học <span className="text-gradient">MOS - CNTT - AI</span> hiệu quả,
+            đúng lộ trình
           </h1>
           <p>
-            LearnNest (learnestvhu.com) giúp bạn học và luyện tập Tin học văn
-            phòng (MOS), Công nghệ thông tin và AI qua bài học theo Module, bài
-            thực hành chấm điểm và theo dõi tiến độ rõ ràng từng ngày.
+            LearnNest giúp bạn học và luyện tập Tin học văn phòng (MOS), Công
+            nghệ thông tin và AI qua bài học thực chiến, module thông minh và
+            theo dõi tiến độ rõ ràng từng ngày.
           </p>
           <div className="landing__hero-ctas">
             <Link
@@ -103,49 +115,58 @@ export default async function HomePage() {
             </Link>
           </div>
         </div>
-        <div className="landing__hero-img">
+        <div className="landing__hero-img float-anim">
+          {/* Vẫn giữ ảnh cũ nhưng bọc trong class float-anim để tạo cảm giác trôi nổi 3D */}
           <img src="/images/BannerScreen1.png" alt="LearnNest - MOS, IT, AI" />
         </div>
       </section>
 
+      {/* 3. STATS (Overlapping style) */}
       {stats && (
-        <Reveal>
-          <section className="landing__stats">
-            <div className="landing__stat">
-              <strong>{stats.totalLessons}+</strong>
-              <span>Khóa học</span>
-            </div>
-            <div className="landing__stat">
-              <strong>{stats.totalVideos}+</strong>
-              <span>Bài giảng video</span>
-            </div>
-            <div className="landing__stat">
-              <strong>{stats.totalPracticeTasks}+</strong>
-              <span>Bài thực hành</span>
-            </div>
-            <div className="landing__stat">
-              <strong>{stats.totalUsers}+</strong>
-              <span>Học viên tham gia</span>
-            </div>
-          </section>
-        </Reveal>
+        <div className="landing__stats-wrapper">
+          <Reveal>
+            <section className="landing__stats">
+              <div className="landing__stat">
+                <strong>{stats.totalLessons}+</strong>
+                <span>Khóa học</span>
+              </div>
+              <div className="landing__stat">
+                <strong>{stats.totalVideos}+</strong>
+                <span>Bài giảng video</span>
+              </div>
+              <div className="landing__stat">
+                <strong>{stats.totalPracticeTasks}+</strong>
+                <span>Bài thực hành</span>
+              </div>
+              <div className="landing__stat">
+                <strong>{stats.totalUsers}+</strong>
+                <span>Học viên tham gia</span>
+              </div>
+            </section>
+          </Reveal>
+        </div>
       )}
 
+      {/* 4. FEATURES - BENTO BOX UI */}
       <section className="landing__section">
         <Reveal>
           <div className="landing__section-head">
             <h2>Mọi thứ bạn cần để học hiệu quả</h2>
-            <p>Được xây dựng riêng cho việc luyện thi MOS, CNTT và AI.</p>
+            <p>
+              Được xây dựng chuyên biệt cho việc ôn thi và nâng cao kỹ năng.
+            </p>
           </div>
         </Reveal>
         <div className="landing__container">
           <div className="landing__features">
             {FEATURES.map((f, i) => (
               <Reveal key={f.title} delay={(i % 3) * 0.1}>
-                <div className="landing__feature-card">
+                <div className={`landing__feature-card ${f.bentoClass}`}>
                   <div className="landing__feature-icon">{f.icon}</div>
-                  <h3>{f.title}</h3>
-                  <p>{f.desc}</p>
+                  <div className="landing__feature-content">
+                    <h3>{f.title}</h3>
+                    <p>{f.desc}</p>
+                  </div>
                 </div>
               </Reveal>
             ))}
@@ -153,15 +174,18 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* 5. CTA SECTION */}
       <Reveal>
         <section className="landing__cta">
-          <h2>Bắt đầu hành trình học tập hôm nay</h2>
-          <p>Đăng ký miễn phí và học ngay bài học đầu tiên.</p>
-          <Link
-            href="/signup"
-            className="landing__btn landing__btn--primary landing__btn--large">
-            Đăng ký miễn phí
-          </Link>
+          <div className="landing__cta-content">
+            <h2>Bắt đầu hành trình học tập hôm nay</h2>
+            <p>Tham gia cùng hàng ngàn sinh viên VHU bứt phá điểm số.</p>
+            <Link
+              href="/signup"
+              className="landing__btn landing__btn--primary landing__btn--large landing__btn--glow">
+              Đăng ký miễn phí
+            </Link>
+          </div>
         </section>
       </Reveal>
 

@@ -15,6 +15,7 @@ import type { ColumnsType } from 'antd/es/table';
 import styles from './styles';
 import { useAppPagination } from '@hooks/pagination';
 import { adminQuery } from '~mdAdmin/redux';
+import { ClassGradeStudent } from '~mdAdmin/redux/RTKQuery/type';
 import { dashboardQuery } from '~mdDashboard/redux';
 import AddClassMembersModal from '../AddClassMembersModal';
 
@@ -70,6 +71,13 @@ const PracticeClassUsersModal: React.FC<Props> = ({
   const [removeAssignment] = adminQuery.useRemoveClassAssignmentMutation();
   const [exportGrades, { isLoading: isExportingGrades }] =
     adminQuery.useExportClassGradesMutation();
+  const {
+    data: grades,
+    isFetching: isLoadingGrades,
+    isError: isGradesError,
+  } = adminQuery.useGetClassGradesQuery(selectedPracticeClassId, {
+    skip: !open || !selectedPracticeClassId,
+  });
 
   const [pickTaskId, setPickTaskId] = useState<string | undefined>();
   const [pickDueDate, setPickDueDate] = useState<Dayjs | null>(null);
@@ -119,6 +127,78 @@ const PracticeClassUsersModal: React.FC<Props> = ({
       message.error('Xuất điểm thất bại, vui lòng thử lại');
     }
   };
+
+  // Ngưỡng màu giống hệt trang "Tổng Quan" của học viên (my-courses/page.tsx
+  // scoreStyle) để cùng 1 điểm số luôn hiện cùng 1 màu ở mọi nơi trong app.
+  const gradeScoreStyle = (score: number) => {
+    if (score >= 8) return styles.gradeScoreGood;
+    if (score >= 5) return styles.gradeScoreOk;
+    return styles.gradeScoreBad;
+  };
+
+  const gradeColumns: ColumnsType<ClassGradeStudent> = [
+    {
+      title: 'Học viên',
+      key: 'student',
+      fixed: 'left',
+      width: 200,
+      render: (_: unknown, r) => (
+        <div>
+          <div>{r.fullName || r.email}</div>
+          <div style={styles.modalSummaryText}>{r.studentId}</div>
+        </div>
+      ),
+    },
+    ...(grades?.assignments ?? []).map(
+      (a, i): ColumnsType<ClassGradeStudent>[number] => ({
+        title: (
+          <>
+            <div>{a.title}</div>
+            {a.subject && (
+              <Tag color={a.subject === 'Excel' ? 'green' : 'blue'}>
+                {a.subject}
+              </Tag>
+            )}
+          </>
+        ),
+        key: a.assignmentId,
+        align: 'right',
+        width: 140,
+        render: (_: unknown, r) => {
+          const score = r.scores[i];
+          return score == null ? (
+            <span style={styles.gradeScoreEmpty}>-</span>
+          ) : (
+            <span style={gradeScoreStyle(score)}>{score}</span>
+          );
+        },
+      }),
+    ),
+    {
+      title: 'Điểm TB',
+      key: 'avg',
+      align: 'right',
+      fixed: 'right',
+      width: 100,
+      render: (_: unknown, r) =>
+        r.avg == null ? (
+          <span style={styles.gradeScoreEmpty}>-</span>
+        ) : (
+          <span style={{ ...styles.gradeAvg, ...gradeScoreStyle(r.avg) }}>
+            {r.avg}
+          </span>
+        ),
+    },
+    {
+      title: 'Đã nộp',
+      key: 'submitted',
+      align: 'right',
+      fixed: 'right',
+      width: 90,
+      render: (_: unknown, r) =>
+        `${r.submittedCount}/${grades?.assignments.length ?? 0}`,
+    },
+  ];
 
   const learnerColumns: ColumnsType<PracticeClassUserItem> = [
     {
@@ -263,6 +343,41 @@ const PracticeClassUsersModal: React.FC<Props> = ({
                 />
               </div>
             ))
+          )}
+        </div>
+
+        <div style={styles.assignSection}>
+          <div style={styles.sectionTitle}>Bảng điểm</div>
+          <div style={styles.sectionSubtitle}>
+            Điểm cao nhất mỗi bài (thang 10) — trước đây chỉ xem được qua file
+            CSV, nay xem trực tiếp tại đây; nút &quot;Xuất Điểm CSV&quot; ở trên
+            vẫn dùng được để lưu file.
+          </div>
+          {!grades?.assignments.length ? (
+            <div style={styles.gradesEmpty}>
+              {isLoadingGrades
+                ? 'Đang tải bảng điểm...'
+                : isGradesError
+                  ? 'Không tải được bảng điểm, vui lòng thử lại.'
+                  : 'Lớp chưa có bài giao nào để xem điểm — giao bài ở mục "Bài được giao" phía trên trước.'}
+            </div>
+          ) : (
+            <Table
+              style={{ marginTop: 12 }}
+              size="small"
+              loading={isLoadingGrades}
+              rowKey="userId"
+              dataSource={grades.students}
+              pagination={false}
+              scroll={{ x: 'max-content' }}
+              columns={gradeColumns}
+              locale={{ emptyText: 'Lớp chưa có học viên nào' }}
+            />
+          )}
+          {!!grades?.assignments.length && (
+            <div style={styles.gradesLegend}>
+              Dấu &quot;-&quot; = chưa nộp bài
+            </div>
           )}
         </div>
       </div>

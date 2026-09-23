@@ -25,7 +25,8 @@ const SignUpPage = () => {
   const [form] = Form.useForm<FieldType>();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [sendOtp] = authQuery.useSendOtpMutation();
+  const [sendOtp, { isLoading: isSendOtpLoading }] =
+    authQuery.useSendOtpMutation();
   const contextHolder = null;
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
@@ -153,7 +154,8 @@ const SignUpPage = () => {
                   return (
                     <AppButton
                       type="primary"
-                      disabled={!email}
+                      disabled={!email || isSendOtpLoading}
+                      loading={isSendOtpLoading}
                       htmlType="submit"
                       style={styles.primaryButton}>
                       Tiếp tục với Email
@@ -171,7 +173,8 @@ const SignUpPage = () => {
               <View style={styles.btnContainer}>
                 <AppButton
                   onClick={handleLoginOauth}
-                  disabled={isGoogleLoading}
+                  disabled={isGoogleLoading || isSendOtpLoading}
+                  loading={isGoogleLoading}
                   style={styles.googleButton}>
                   <Icon name="google" />
                   Đăng nhập bằng Google

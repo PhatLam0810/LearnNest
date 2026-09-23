@@ -33,7 +33,7 @@ const LoginPage = () => {
   const { signUpInfo } = useAppSelector(state => state.authReducer);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [login] = authQuery.useLoginMutation();
+  const [login, { isLoading: isLoginLoading }] = authQuery.useLoginMutation();
   const [loginOauth] = authQuery.useLoginOauthMutation();
   const handleLoginOauth = async () => {
     if (isGoogleLoading) return;
@@ -114,7 +114,7 @@ const LoginPage = () => {
                 Đăng nhập vào tài khoản của bạn — truy cập toàn bộ bài học ngay.
               </Text>
             </View>
-            <View style={{ overflow: 'hidden' }}>
+            <View>
               <Form<FieldType>
                 name="login"
                 onFinish={async data => {
@@ -122,11 +122,14 @@ const LoginPage = () => {
                   try {
                     const res = await login(data).unwrap();
                     messageApi?.destroy();
-                    messageApi.success('Login successfully!');
+                    messageApi.success('Đăng nhập thành công!');
                     dispatch(authAction.setTokenInfo(res));
-                  } catch {
+                  } catch (err: any) {
                     messageApi?.destroy();
-                    messageApi.error('Incorrect account or password.');
+                    messageApi.error(
+                      err?.data?.message ||
+                        'Tài khoản hoặc mật khẩu không chính xác.',
+                    );
                   }
                 }}
                 autoComplete="off"
@@ -191,7 +194,8 @@ const LoginPage = () => {
                         type="primary"
                         aria-label="Đăng nhập vào tài khoản của bạn"
                         style={styles.primaryButton}
-                        disabled={!email || !password}
+                        disabled={!email || !password || isLoginLoading}
+                        loading={isLoginLoading}
                         htmlType="submit">
                         Đăng nhập
                       </AppButton>
@@ -202,7 +206,8 @@ const LoginPage = () => {
                 <AppButton
                   aria-label="Đăng nhập bằng Google"
                   onClick={handleLoginOauth}
-                  disabled={isGoogleLoading}
+                  disabled={isGoogleLoading || isLoginLoading}
+                  loading={isGoogleLoading}
                   style={styles.googleButton}>
                   <Icon name="google" />
                   Đăng nhập bằng Google

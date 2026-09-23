@@ -119,6 +119,35 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     flexWrap: 'wrap',
   },
+  gradesEmpty: {
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  gradesLegend: {
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+    marginTop: 8,
+  },
+  gradeAvg: {
+    fontWeight: '600' as const,
+  },
+  gradeScoreGood: {
+    color: 'var(--color-success)',
+    fontWeight: '600' as const,
+  },
+  gradeScoreOk: {
+    color: 'var(--color-warning)',
+    fontWeight: '600' as const,
+  },
+  gradeScoreBad: {
+    color: 'var(--color-error)',
+    fontWeight: '600' as const,
+  },
+  gradeScoreEmpty: {
+    color: 'var(--color-text-muted)',
+  },
   assignRow: {
     display: 'flex',
     alignItems: 'center',

@@ -25,8 +25,11 @@ const CreateAccountPage = () => {
   const { sendOtpInfo } = useAppSelector(state => state.authReducer);
   const contextHolder = null;
   const router = useRouter();
-  const [verifyOtp] = authQuery.useVerifyOtpMutation();
-  const [signUp] = authQuery.useSignUpMutation();
+  const [verifyOtp, { isLoading: isVerifyLoading }] =
+    authQuery.useVerifyOtpMutation();
+  const [signUp, { isLoading: isSignUpLoading }] =
+    authQuery.useSignUpMutation();
+  const isSubmitting = isVerifyLoading || isSignUpLoading;
 
   useEffect(() => {
     if (sendOtpInfo) {
@@ -80,18 +83,12 @@ const CreateAccountPage = () => {
             requiredMark={false}
             onFinish={async data => {
               if (!sendOtpInfo) return;
-              messageApi?.open({
-                type: 'loading',
-                content: 'SignUp',
-                duration: 0,
-              });
               try {
                 await verifyOtp({
                   email: sendOtpInfo.email,
                   otp: data.otp,
                 }).unwrap();
               } catch (e: any) {
-                messageApi.destroy();
                 messageApi.error(e?.data?.message || 'Mã OTP không đúng');
                 return;
               }
@@ -100,13 +97,11 @@ const CreateAccountPage = () => {
                   email: sendOtpInfo.email,
                   password: data.password,
                 }).unwrap();
-                messageApi.destroy();
-                messageApi.success('SignUp successfully!');
+                messageApi.success('Đăng ký thành công! Vui lòng đăng nhập.');
                 dispatch(authAction.setSignUpInfo(signUpRes));
                 router.push('/login');
               } catch (e: any) {
-                messageApi.destroy();
-                messageApi.error(e?.data?.message || 'Email already exists');
+                messageApi.error(e?.data?.message || 'Email đã tồn tại');
               }
             }}
             layout="vertical"
@@ -179,7 +174,10 @@ const CreateAccountPage = () => {
                 return (
                   <AppButton
                     type="primary"
-                    disabled={!otp || !password || !confirmPassword}
+                    disabled={
+                      !otp || !password || !confirmPassword || isSubmitting
+                    }
+                    loading={isSubmitting}
                     style={styles.primaryButton}
                     htmlType="submit">
                     Đăng ký

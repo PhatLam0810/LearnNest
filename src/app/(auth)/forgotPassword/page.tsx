@@ -22,11 +22,11 @@ const ForgotPasswordPage = () => {
   const router = useRouter();
   const contextHolder = null;
   const [form] = Form.useForm<FieldType>();
-  const [sendOtp] = authQuery.useSendOtpMutation();
+  const [sendOtp, { isLoading: isSendOtpLoading }] =
+    authQuery.useSendOtpMutation();
 
   const handleSendOtp = async (email: string) => {
     try {
-      dispatch(authAction.setIsShowLoading(true));
       const response = await sendOtp({ email, type: 2 });
       if (response.data) {
         dispatch(authAction.sendOtpInfo({ email }));
@@ -35,8 +35,6 @@ const ForgotPasswordPage = () => {
     } catch (error: any) {
       console.error('Lỗi gửi OTP:', error);
       messageApi.error(error.message || 'Gửi OTP thất bại.');
-    } finally {
-      dispatch(authAction.setIsShowLoading(false));
     }
   };
 
@@ -115,7 +113,8 @@ const ForgotPasswordPage = () => {
                   return (
                     <AppButton
                       type="primary"
-                      disabled={!email}
+                      disabled={!email || isSendOtpLoading}
+                      loading={isSendOtpLoading}
                       style={styles.primaryButton}
                       htmlType="submit">
                       Tiếp tục xác minh

@@ -38,6 +38,7 @@ import {
   ClassAssignmentItem,
   AssignTaskPayload,
   AssignTaskBulkPayload,
+  ClassGrades,
   AssignTaskBulkResult,
   LessonAssignmentItem,
   ClassCodeOption,
@@ -1024,6 +1025,18 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'DELETE',
       }),
       invalidatesTags: (_result, _error, { classId }) => [
+        { type: 'ClassAssignment', id: classId },
+      ],
+    }),
+    // Bảng điểm trên màn hình - cùng dữ liệu với file CSV bên dưới (BE dùng
+    // chung computeClassGrades), tự làm mới khi giao/xóa bài (tag ClassAssignment).
+    getClassGrades: builder.query<ClassGrades, string>({
+      query: classId => ({
+        url: `admin/practice-classes/${classId}/grades`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: (_result, _error, classId) => [
         { type: 'ClassAssignment', id: classId },
       ],
     }),

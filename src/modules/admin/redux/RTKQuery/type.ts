@@ -361,6 +361,30 @@ export interface AssignTaskPayload {
   dueDate: string;
 }
 
+// ---- Bảng điểm cả lớp (khớp AdminService.getClassGrades ở BE) ----
+export interface ClassGradeAssignment {
+  assignmentId: string;
+  title: string;
+  subject: 'Word' | 'Excel' | null;
+  dueDate: string;
+}
+
+export interface ClassGradeStudent {
+  userId: string;
+  fullName: string;
+  email: string;
+  studentId: string;
+  // Song song với `assignments` ở trên; null = chưa nộp.
+  scores: (number | null)[];
+  avg: number | null;
+  submittedCount: number;
+}
+
+export interface ClassGrades {
+  assignments: ClassGradeAssignment[];
+  students: ClassGradeStudent[];
+}
+
 // ---- Trang "Giao Bài" (chọn 1+ lớp thuộc cùng 1 khóa, giao 1 đề) ----
 export interface AssignTaskBulkPayload {
   classIds: string[];
