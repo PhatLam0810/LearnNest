@@ -76,9 +76,9 @@ export default function DashboardLayout({
             <HomeOutlined
               size={20}
               hoverMorph={false}
-              color={isHomeSelected ? '#ffffff' : 'inherit'}
-              activeColor={isHomeSelected ? '#ffffff' : 'inherit'}
-              hoverColor={isHomeSelected ? '#ffffff' : 'inherit'}
+              color={isHomeSelected ? '#ffffff' : '#000000'}
+              activeColor={isHomeSelected ? '#ffffff' : '#000000'}
+              hoverColor={isHomeSelected ? '#ffffff' : '#000000'}
             />
           ),
         },
@@ -89,9 +89,9 @@ export default function DashboardLayout({
             <BookOpenOutlined
               size={20}
               hoverMorph={false}
-              color={isLessonSelected ? '#ffffff' : 'inherit'}
-              activeColor={isLessonSelected ? '#ffffff' : 'inherit'}
-              hoverColor={isLessonSelected ? '#ffffff' : 'inherit'}
+              color={isLessonSelected ? '#ffffff' : '#000000'}
+              activeColor={isLessonSelected ? '#ffffff' : '#000000'}
+              hoverColor={isLessonSelected ? '#ffffff' : '#000000'}
             />
           ),
         },
@@ -102,9 +102,9 @@ export default function DashboardLayout({
             <LibraryOutlined
               size={20}
               hoverMorph={false}
-              color={isLibrarySelected ? '#ffffff' : 'inherit'}
-              activeColor={isLibrarySelected ? '#ffffff' : 'inherit'}
-              hoverColor={isLibrarySelected ? '#ffffff' : 'inherit'}
+              color={isLibrarySelected ? '#ffffff' : '#000000'}
+              activeColor={isLibrarySelected ? '#ffffff' : '#000000'}
+              hoverColor={isLibrarySelected ? '#ffffff' : '#000000'}
             />
           ),
         },
@@ -115,9 +115,9 @@ export default function DashboardLayout({
             <FileTextOutlined
               size={20}
               hoverMorph={false}
-              color={isPracticeSelected ? '#ffffff' : 'inherit'}
-              activeColor={isPracticeSelected ? '#ffffff' : 'inherit'}
-              hoverColor={isPracticeSelected ? '#ffffff' : 'inherit'}
+              color={isPracticeSelected ? '#ffffff' : '#000000'}
+              activeColor={isPracticeSelected ? '#ffffff' : '#000000'}
+              hoverColor={isPracticeSelected ? '#ffffff' : '#000000'}
             />
           ),
         },
@@ -130,9 +130,9 @@ export default function DashboardLayout({
                   <IdcardOutlined
                     size={20}
                     hoverMorph={false}
-                    color={isMyCoursesSelected ? '#ffffff' : 'inherit'}
-                    activeColor={isMyCoursesSelected ? '#ffffff' : 'inherit'}
-                    hoverColor={isMyCoursesSelected ? '#ffffff' : 'inherit'}
+                    color={isMyCoursesSelected ? '#ffffff' : '#000000'}
+                    activeColor={isMyCoursesSelected ? '#ffffff' : '#000000'}
+                    hoverColor={isMyCoursesSelected ? '#ffffff' : '#000000'}
                   />
                 ),
               },
@@ -143,9 +143,9 @@ export default function DashboardLayout({
                   <RocketOutlined
                     size={20}
                     hoverMorph={false}
-                    color={isMyRoadmapSelected ? '#ffffff' : 'inherit'}
-                    activeColor={isMyRoadmapSelected ? '#ffffff' : 'inherit'}
-                    hoverColor={isMyRoadmapSelected ? '#ffffff' : 'inherit'}
+                    color={isMyRoadmapSelected ? '#ffffff' : '#000000'}
+                    activeColor={isMyRoadmapSelected ? '#ffffff' : '#000000'}
+                    hoverColor={isMyRoadmapSelected ? '#ffffff' : '#000000'}
                   />
                 ),
               },
@@ -158,9 +158,9 @@ export default function DashboardLayout({
                   <ControlOutlined
                     size={20}
                     hoverMorph={false}
-                    color={isAdminSelected ? '#ffffff' : 'inherit'}
-                    activeColor={isAdminSelected ? '#ffffff' : 'inherit'}
-                    hoverColor={isAdminSelected ? '#ffffff' : 'inherit'}
+                    color={isAdminSelected ? '#ffffff' : '#000000'}
+                    activeColor={isAdminSelected ? '#ffffff' : '#000000'}
+                    hoverColor={isAdminSelected ? '#ffffff' : '#000000'}
                   />
                 ),
               },
@@ -171,6 +171,39 @@ export default function DashboardLayout({
 
   const sidebarContent = (
     <View style={styles.sider}>
+      {/* Nút thu gọn / mở rộng Sidebar đặt ở trên đầu */}
+      <View style={styles.sidebarHeader}>
+        <View
+          style={[
+            styles.collapseToggleBtn,
+            collapsed && styles.collapseToggleBtnCollapsed,
+          ]}
+          {...asButton(
+            () => setCollapsed(!collapsed),
+            collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng',
+          )}
+          onClick={() => setCollapsed(!collapsed)}>
+          {collapsed ? (
+            <RightOutlined
+              size={18}
+              hoverMorph={false}
+              color="#000000"
+              hoverColor="var(--color-vhu-primary)"
+            />
+          ) : (
+            <>
+              <LeftOutlined
+                size={16}
+                hoverMorph={false}
+                color="#000000"
+                hoverColor="var(--color-vhu-primary)"
+              />
+              <Text style={styles.collapseToggleText}>Thu gọn</Text>
+            </>
+          )}
+        </View>
+      </View>
+
       <ScrollView
         style={{ scrollbarWidth: 'none', flex: 1 }}
         contentContainerStyle={{
@@ -190,34 +223,6 @@ export default function DashboardLayout({
           }}
         />
       </ScrollView>
-
-      {/* Nút thu gọn / mở rộng Sidebar */}
-      <View
-        style={styles.collapseToggleBtn}
-        {...asButton(
-          () => setCollapsed(!collapsed),
-          collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng',
-        )}
-        onClick={() => setCollapsed(!collapsed)}>
-        {collapsed ? (
-          <RightOutlined
-            size={18}
-            hoverMorph={false}
-            color="var(--color-text-muted)"
-            hoverColor="var(--color-vhu-primary)"
-          />
-        ) : (
-          <>
-            <LeftOutlined
-              size={18}
-              hoverMorph={false}
-              color="var(--color-text-muted)"
-              hoverColor="var(--color-vhu-primary)"
-            />
-            <Text style={styles.collapseToggleText}>Thu gọn</Text>
-          </>
-        )}
-      </View>
     </View>
   );
 

@@ -28,36 +28,40 @@ const ContentToolbar: React.FC<ContentToolbarProps> = ({
   const triggerSearch = () => onSearch(value.trim());
 
   return (
-    <View style={styles.row}>
-      <View style={styles.searchGroup}>
-        <Input
-          value={value}
-          onChange={e => setValue(e.target.value)}
-          onPressEnter={triggerSearch}
-          placeholder={searchPlaceholder}
-          style={styles.searchInput}
-        />
-        <Button
-          style={styles.searchButton}
-          onClick={triggerSearch}
-          icon={
-            <SearchOutlined style={{ color: 'var(--color-text-on-primary)' }} />
-          }
-        />
-      </View>
-      {/* Nút disabled không bắn sự kiện chuột nên Tooltip cần bọc thêm span. */}
-      <Tooltip title={addDisabled ? addDisabledReason : undefined}>
-        <span>
+    <View style={styles.container}>
+      <View style={styles.row}>
+        <View style={styles.searchGroup}>
+          <Input
+            value={value}
+            onChange={e => setValue(e.target.value)}
+            onPressEnter={triggerSearch}
+            placeholder={searchPlaceholder}
+            style={styles.searchInput}
+          />
           <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            style={styles.addButton}
-            disabled={addDisabled}
-            onClick={onAdd}>
-            {addLabel}
-          </Button>
-        </span>
-      </Tooltip>
+            style={styles.searchButton}
+            onClick={triggerSearch}
+            icon={
+              <SearchOutlined
+                style={{ color: 'var(--color-text-on-primary)' }}
+              />
+            }
+          />
+        </View>
+        {/* Nút disabled không bắn sự kiện chuột nên Tooltip cần bọc thêm span. */}
+        <Tooltip title={addDisabled ? addDisabledReason : undefined}>
+          <span>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              style={styles.addButton}
+              disabled={addDisabled}
+              onClick={onAdd}>
+              {addLabel}
+            </Button>
+          </span>
+        </Tooltip>
+      </View>
     </View>
   );
 };
