@@ -5,7 +5,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     backgroundColor: 'var(--color-surface-page)',
-    borderRadius: 12,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
     overflow: 'hidden',
   },
   toolbar: {

@@ -72,32 +72,39 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   return (
     <div className="mock-exam-page">
       <div className="mock-exam-header">
-        <div>
-          <h1 className="mock-exam-title">{data.title}</h1>
-          <Tag
-            color={
-              data.subject === 'Excel'
-                ? 'green'
-                : data.subject === 'Word'
-                  ? 'blue'
-                  : 'purple'
-            }>
-            {subjectLabel(data.subject)}
-          </Tag>
+        <div className="mock-exam-header-left">
+          <div className="mock-exam-title-row">
+            <h1 className="mock-exam-title">{data.title}</h1>
+            <Tag
+              color={
+                data.subject === 'Excel'
+                  ? 'green'
+                  : data.subject === 'Word'
+                    ? 'blue'
+                    : 'purple'
+              }>
+              {subjectLabel(data.subject)}
+            </Tag>
+          </div>
+          <p className="mock-exam-subtitle">
+            Hoàn thành và nộp bài trước khi thời gian kết thúc
+          </p>
         </div>
         <div className="mock-exam-header-right">
-          <Countdown
-            title="Thời gian còn lại"
-            value={new Date(data.deadline).getTime()}
-            onFinish={() => handleSubmit(true)}
-          />
+          <div className="mock-exam-timer-wrap">
+            <Countdown
+              title="Thời gian còn lại"
+              value={new Date(data.deadline).getTime()}
+              onFinish={() => handleSubmit(true)}
+            />
+          </div>
           <Popconfirm
             title="Nộp bài thi thử?"
             description="Sau khi nộp sẽ không làm thêm được bài nào trong đề này nữa."
             okText="Nộp bài"
             cancelText="Huỷ"
             onConfirm={() => handleSubmit(false)}>
-            <Button danger loading={isSubmitting}>
+            <Button type="primary" danger size="large" loading={isSubmitting}>
               Nộp bài thi
             </Button>
           </Popconfirm>
@@ -106,6 +113,13 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
       <div className="mock-exam-body">
         <div className="mock-exam-sidebar">
+          <div className="mock-exam-sidebar-header">
+            <span>Danh sách câu hỏi</span>
+            <span className="mock-exam-sidebar-count">
+              {data.tasks.filter(t => t.submitted).length}/{data.tasks.length}{' '}
+              đã nộp
+            </span>
+          </div>
           {data.tasks.map((t, idx) => (
             <div
               key={t.taskId}
@@ -116,11 +130,10 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
                   : '')
               }
               onClick={() => setActiveTaskId(t.taskId)}>
-              <span className="mock-exam-task-item-title">
-                Bài {idx + 1}: {t.title}
-              </span>
+              <span className="mock-exam-task-number">{idx + 1}</span>
+              <span className="mock-exam-task-item-title">{t.title}</span>
               {t.submitted && (
-                <CheckCircleFilled style={{ color: '#52c41a' }} />
+                <CheckCircleFilled style={{ color: '#52c41a', fontSize: 16 }} />
               )}
             </div>
           ))}

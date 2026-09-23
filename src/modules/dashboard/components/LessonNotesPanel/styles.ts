@@ -45,9 +45,11 @@ const styles: Record<string, CSSProperties> = {
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--color-border-subtle)',
-    borderRadius: 10,
-    padding: 12,
+    borderRadius: 14,
+    padding: 14,
     background: 'var(--color-surface)',
+    boxShadow: '0 4px 14px rgba(15, 23, 42, 0.04)',
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
   },
   itemHead: {
     display: 'flex',

@@ -2,10 +2,23 @@ import { StyleSheet, typography } from '@styles';
 
 const CARD = {
   backgroundColor: 'var(--color-surface)',
-  borderWidth: 1,
-  borderStyle: 'solid',
-  borderColor: 'var(--color-border)',
-  borderRadius: 12,
+  borderTopWidth: 1,
+  borderBottomWidth: 1,
+  borderLeftWidth: 1,
+  borderRightWidth: 1,
+  borderTopStyle: 'solid',
+  borderBottomStyle: 'solid',
+  borderLeftStyle: 'solid',
+  borderRightStyle: 'solid',
+  borderTopColor: 'var(--color-border-subtle)',
+  borderBottomColor: 'var(--color-border-subtle)',
+  borderLeftColor: 'var(--color-border-subtle)',
+  borderRightColor: 'var(--color-border-subtle)',
+  borderTopLeftRadius: 16,
+  borderTopRightRadius: 16,
+  borderBottomLeftRadius: 16,
+  borderBottomRightRadius: 16,
+  boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
 } as const;
 
 const BUTTON_RESET = {
