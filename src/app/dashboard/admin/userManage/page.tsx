@@ -220,22 +220,16 @@ const UserManage = () => {
   return (
     <View style={styles.container}>
       {contextHolder}
-      <View
-        style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          gap: 16,
-          marginBottom: 16,
-        }}>
+      <View style={styles.statsGrid}>
         <StatCard
           icon="👥"
-          label="   Tổng người dùng"
+          label="Tổng người dùng"
           value={activitySummary?.totalUsers ?? currentData?.totalRecords}
           caption={`+${activitySummary?.newUsersLast7Days ?? 0} trong 7 ngày`}
           captionColor="#15803d"
         />
         <StatCard
-          icon="👥"
+          icon="⚡"
           label="Hoạt động hôm nay"
           value={activitySummary?.totalUsers ?? currentData?.totalRecords}
           caption={`+${activitySummary?.activeTodayPercent ?? 0}% tổng người dùng`}
@@ -243,22 +237,14 @@ const UserManage = () => {
         />
       </View>
       <TrafficChart />
-      <View
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-        }}>
+      <View style={styles.controlBar}>
         <Search
-          placeholder="Tìm kiếm"
+          placeholder="Tìm kiếm theo tên, email, MSSV..."
           onSearch={v => {
             setSearchTerm(v);
             search(v);
           }}
-          style={{ flex: '1 1 240px', minWidth: 0 }}
+          style={{ flex: '1 1 240px', minWidth: 200 }}
         />
         <Segmented
           aria-label="Lọc theo loại tài khoản"
@@ -277,8 +263,11 @@ const UserManage = () => {
         <Button onClick={handleExport} loading={isExporting}>
           Xuất Excel
         </Button>
-        <Button type="primary" onClick={() => setIsModalCreateUserOpen(true)}>
-          Tạo tài khoản
+        <Button
+          type="primary"
+          style={{ borderRadius: 10, fontWeight: 600 }}
+          onClick={() => setIsModalCreateUserOpen(true)}>
+          + Tạo tài khoản
         </Button>
       </View>
       <UserBulkActions
@@ -286,29 +275,31 @@ const UserManage = () => {
         onClear={() => setSelectedKeys([])}
       />
       <div ref={tableWrapRef} style={{ minWidth: 0, maxWidth: '100%' }}>
-        <Table
-          columns={columns}
-          dataSource={listItem}
-          rowKey={record => record._id}
-          rowSelection={{
-            selectedRowKeys: selectedKeys,
-            onChange: keys => setSelectedKeys(keys),
-            // Giữ lựa chọn khi chuyển trang/tìm kiếm để chọn cả lớp nhiều trang.
-            preserveSelectedRowKeys: true,
-            getCheckboxProps: record =>
-              ({ 'aria-label': `Chọn ${record.fullName}` }) as never,
-          }}
-          scroll={{ x: 'max-content' }}
-          onChange={res => {
-            fetchData({ pageNum: res.current, replace: true });
-          }}
-          pagination={{
-            current: currentData?.pageNum,
-            pageSize: currentData?.pageSize,
-            total: currentData?.totalRecords,
-            showSizeChanger: false,
-          }}
-        />
+        <View style={styles.tableCard}>
+          <Table
+            columns={columns}
+            dataSource={listItem}
+            rowKey={record => record._id}
+            rowSelection={{
+              selectedRowKeys: selectedKeys,
+              onChange: keys => setSelectedKeys(keys),
+              // Giữ lựa chọn khi chuyển trang/tìm kiếm để chọn cả lớp nhiều trang.
+              preserveSelectedRowKeys: true,
+              getCheckboxProps: record =>
+                ({ 'aria-label': `Chọn ${record.fullName}` }) as never,
+            }}
+            scroll={{ x: 'max-content' }}
+            onChange={res => {
+              fetchData({ pageNum: res.current, replace: true });
+            }}
+            pagination={{
+              current: currentData?.pageNum,
+              pageSize: currentData?.pageSize,
+              total: currentData?.totalRecords,
+              showSizeChanger: false,
+            }}
+          />
+        </View>
       </div>
 
       {/* Modal hiện thông tin user */}
