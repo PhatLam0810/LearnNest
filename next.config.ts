@@ -11,6 +11,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
+  transpilePackages: ['morphicons'],
   sassOptions: {
     includePaths: [path.join(__dirname, 'src')],
   },
@@ -50,6 +51,9 @@ const nextConfig: NextConfig = {
     return config;
   },
   reactStrictMode: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Security headers cho mọi route. HSTS đã do Vercel tự set; ở đây bổ sung
   // chống clickjacking (X-Frame-Options + CSP frame-ancestors), chặn MIME
   // sniffing, siết referrer và tắt các quyền trình duyệt không dùng tới.

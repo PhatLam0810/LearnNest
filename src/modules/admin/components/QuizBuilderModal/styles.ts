@@ -70,7 +70,6 @@ const styles = StyleSheet.create({
     gridTemplateColumns: '1.4fr 1fr',
     gap: 24,
     maxHeight: '60vh',
-    overflowY: 'auto',
   },
   // Mobile (<600): 1 cột, cột thiết lập nằm dưới danh sách câu hỏi.
   // minmax(0, 1fr): '1fr' có min auto nên nội dung dài đẩy cột tràn ngang.

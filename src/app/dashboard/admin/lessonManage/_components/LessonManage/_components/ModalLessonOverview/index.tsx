@@ -2,7 +2,7 @@ import { Collapse, Modal } from 'antd';
 
 import { ScrollView, Text, View } from 'react-native-web';
 import { LessonThumbnail } from '~mdDashboard/components';
-import { CheckOutlined } from '@ant-design/icons';
+import { CheckOutlined } from '@components/AppIcon';
 import styles from './styles';
 const ModalLessonOverview = ({ isVisible, setIsVisible, data }: any) => {
   const items =

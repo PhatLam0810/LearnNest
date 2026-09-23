@@ -3,7 +3,7 @@ import React from 'react';
 import { Text, View } from 'react-native-web';
 import { Input, Tag } from 'antd';
 import { typography } from '@styles';
-import { PlayCircleOutlined } from '@ant-design/icons';
+import { PlayCircleOutlined } from '@components/AppIcon';
 import dayjs from 'dayjs';
 import AppButton from '@components/AppButton';
 import UserAvatar from '@components/UserAvatar';

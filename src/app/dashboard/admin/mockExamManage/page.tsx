@@ -3,7 +3,7 @@ import { asButton } from '@/utils/asButton';
 import React, { useState } from 'react';
 import { View, Text } from 'react-native-web';
 import { Button, Modal, Space, Table, Tag } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@components/AppIcon';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { MockExam } from '~mdDashboard/types/practice';

@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { Card, Form } from 'antd';
-import { ArrowLeftOutlined, LockOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, LockOutlined } from '@components/AppIcon';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Text, View } from 'react-native-web';
 import Link from 'next/link';
@@ -171,14 +171,18 @@ const CreateAccountPage = () => {
             <Form.Item shouldUpdate>
               {({ getFieldsValue }) => {
                 const { otp, password, confirmPassword } = getFieldsValue();
+                const isFormIncomplete = !otp || !password || !confirmPassword;
                 return (
                   <AppButton
                     type="primary"
-                    disabled={
-                      !otp || !password || !confirmPassword || isSubmitting
-                    }
+                    disabled={isFormIncomplete || isSubmitting}
                     loading={isSubmitting}
-                    style={styles.primaryButton}
+                    style={{
+                      ...styles.primaryButton,
+                      ...(isFormIncomplete || isSubmitting
+                        ? styles.primaryButtonDisabled
+                        : {}),
+                    }}
                     htmlType="submit">
                     Đăng ký
                   </AppButton>

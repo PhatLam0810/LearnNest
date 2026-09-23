@@ -1,18 +1,33 @@
-import { StyleSheet } from '@styles';
+import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
   container: {
     width: '100%',
     backgroundColor: 'var(--color-surface)',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: 'var(--color-border-subtle)',
-    boxShadow: '0 8px 20px rgba(15, 23, 42, 0.06)',
-    padding: 24,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopStyle: 'solid',
+    borderBottomStyle: 'solid',
+    borderLeftStyle: 'solid',
+    borderRightStyle: 'solid',
+    borderTopColor: 'var(--color-border-subtle)',
+    borderBottomColor: 'var(--color-border-subtle)',
+    borderLeftColor: 'var(--color-border-subtle)',
+    borderRightColor: 'var(--color-border-subtle)',
+    boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)',
+    paddingTop: 24,
+    paddingBottom: 24,
+    paddingLeft: 24,
+    paddingRight: 24,
   },
   title: {
-    fontSize: 17,
-    fontWeight: '700',
+    ...typography.titleM,
     color: 'var(--color-text-primary)',
   },
   divider: {
@@ -28,12 +43,12 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   rowTitle: {
-    fontSize: 14,
+    ...typography.subTitle2,
     fontWeight: '600',
     color: 'var(--color-text-primary)',
   },
   rowSubtitle: {
-    fontSize: 13,
+    ...typography.body2,
     color: 'var(--color-text-muted)',
     marginTop: 2,
   },
@@ -49,11 +64,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   dirtyHint: {
-    fontSize: 13,
+    ...typography.body2,
     color: 'var(--color-text-muted)',
   },
   logoutLink: {
-    fontSize: 14,
+    ...typography.subTitle2,
     fontWeight: '600',
     color: 'var(--color-error)',
     cursor: 'pointer',

@@ -4,7 +4,11 @@ import { usePathname, useRouter } from 'next/navigation';
 import { View, Text, TouchableOpacity } from 'react-native-web';
 import { useAppSelector } from '@redux';
 import { dashboardQuery } from '~mdDashboard/redux';
-import { CloseOutlined, RobotOutlined, SendOutlined } from '@ant-design/icons';
+import {
+  CloseOutlined,
+  RobotOutlined,
+  SendOutlined,
+} from '@components/AppIcon';
 import styles from './styles';
 
 // Chỉ hiện ở các trang học tập (home, khóa học, thư viện, lớp học của tôi,

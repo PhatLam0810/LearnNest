@@ -361,6 +361,12 @@ export interface AssignTaskPayload {
   dueDate: string;
 }
 
+export interface SendClassAnnouncementPayload {
+  title: string;
+  body: string;
+  sendEmail?: boolean;
+}
+
 // ---- Bảng điểm cả lớp (khớp AdminService.getClassGrades ở BE) ----
 export interface ClassGradeAssignment {
   assignmentId: string;

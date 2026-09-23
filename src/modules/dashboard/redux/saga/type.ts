@@ -26,6 +26,7 @@ export interface Lesson {
   // PracticeLessonManage. Optional để tương thích ngược với dữ liệu cũ
   // chưa có field này.
   type?: 'theory' | 'practice';
+  isPublished?: boolean;
 }
 export interface LessonDetailDataResponse {
   _id: string;

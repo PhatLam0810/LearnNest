@@ -19,6 +19,17 @@ const ChangePassword = () => {
   // khớp). Ẩn field đó + đổi nhãn thành "Đặt mật khẩu" cho nhóm này.
   const hasPassword = userProfile?.hasPassword !== false;
 
+  const password = Form.useWatch('password', form);
+  const newPassword = Form.useWatch('newPassword', form);
+  const confirmPassword = Form.useWatch('confirmPassword', form);
+
+  const isSubmitDisabled = hasPassword
+    ? !password ||
+      !newPassword ||
+      !confirmPassword ||
+      newPassword !== confirmPassword
+    : !newPassword || !confirmPassword || newPassword !== confirmPassword;
+
   const handleChangePassword = async (value: any) => {
     try {
       dispatch(authAction.setIsShowLoading(true));
@@ -114,7 +125,10 @@ const ChangePassword = () => {
           </Form.Item>
         </View>
         <View style={styles.actionsRow}>
-          <AppButton htmlType="submit" style={styles.saveButton}>
+          <AppButton
+            htmlType="submit"
+            disabled={isSubmitDisabled}
+            style={styles.saveButton}>
             {hasPassword ? 'Cập nhật mật khẩu' : 'Đặt mật khẩu'}
           </AppButton>
         </View>

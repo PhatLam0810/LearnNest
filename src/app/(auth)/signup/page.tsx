@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Card, Form } from 'antd';
-import { MailOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { MailOutlined, ArrowLeftOutlined } from '@components/AppIcon';
 import { Text, View } from 'react-native-web';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -151,13 +151,19 @@ const SignUpPage = () => {
               <Form.Item<FieldType> shouldUpdate>
                 {({ getFieldsValue }) => {
                   const { email } = getFieldsValue();
+                  const isFormIncomplete = !email;
                   return (
                     <AppButton
                       type="primary"
-                      disabled={!email || isSendOtpLoading}
+                      disabled={isFormIncomplete || isSendOtpLoading}
                       loading={isSendOtpLoading}
                       htmlType="submit"
-                      style={styles.primaryButton}>
+                      style={{
+                        ...styles.primaryButton,
+                        ...(isFormIncomplete || isSendOtpLoading
+                          ? styles.primaryButtonDisabled
+                          : {}),
+                      }}>
                       Tiếp tục với Email
                     </AppButton>
                   );

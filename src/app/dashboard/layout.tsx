@@ -1,24 +1,25 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GetProp, Grid, Layout, Menu, MenuProps } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  BookOpenOutlined,
   ControlOutlined,
   FileTextOutlined,
+  HomeOutlined,
   IdcardOutlined,
-  LogoutOutlined,
+  LeftOutlined,
+  LibraryOutlined,
+  RightOutlined,
   RocketOutlined,
-  SettingOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import './styles.css';
-import { useAppDispatch, useAppSelector } from '@redux';
-import { authAction } from '~mdAuth/redux';
-import { ScrollView, View } from 'react-native-web';
+import { useAppSelector } from '@redux';
+import { ScrollView, Text, View } from 'react-native-web';
 import styles from './styles';
-import Icon from '@components/icons';
-import { LessonIcon } from '@/assets/svg';
 import HeaderLayout from '@components/HeaderLayout';
 import { SearchProvider } from '@components/SearchContext';
+import { asButton } from '@/utils/asButton';
 
 const { Sider, Content } = Layout;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
@@ -31,7 +32,8 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { useBreakpoint } = Grid;
   const screens = useBreakpoint();
-  const dispatch = useAppDispatch();
+  const [collapsed, setCollapsed] = useState(false);
+
   const onClickItem = (item: string) => {
     router.replace(item);
   };
@@ -53,6 +55,14 @@ export default function DashboardLayout({
     }
   }, [isBlockedAdminRoute, router]);
 
+  const isHomeSelected = pathname === '/dashboard/home';
+  const isLessonSelected = pathname === '/dashboard/lesson';
+  const isLibrarySelected = pathname === '/dashboard/library';
+  const isPracticeSelected = pathname.startsWith('/dashboard/practice');
+  const isMyCoursesSelected = pathname === '/dashboard/my-courses';
+  const isMyRoadmapSelected = pathname === '/dashboard/my-roadmap';
+  const isAdminSelected = pathname.startsWith('/dashboard/admin');
+
   const menuItems: MenuItem[] = [
     {
       key: 'Overview',
@@ -62,11 +72,13 @@ export default function DashboardLayout({
         {
           key: '/dashboard/home',
           label: 'Trang Chủ',
-
           icon: (
-            <Icon
-              name="home"
-              color={pathname === '/dashboard/home' ? 'white' : 'black'}
+            <HomeOutlined
+              size={20}
+              hoverMorph={false}
+              color={isHomeSelected ? '#ffffff' : 'inherit'}
+              activeColor={isHomeSelected ? '#ffffff' : 'inherit'}
+              hoverColor={isHomeSelected ? '#ffffff' : 'inherit'}
             />
           ),
         },
@@ -74,8 +86,12 @@ export default function DashboardLayout({
           key: '/dashboard/lesson',
           label: 'Khóa Học',
           icon: (
-            <LessonIcon
-              color={pathname === '/dashboard/lesson' ? 'white' : 'black'}
+            <BookOpenOutlined
+              size={20}
+              hoverMorph={false}
+              color={isLessonSelected ? '#ffffff' : 'inherit'}
+              activeColor={isLessonSelected ? '#ffffff' : 'inherit'}
+              hoverColor={isLessonSelected ? '#ffffff' : 'inherit'}
             />
           ),
         },
@@ -83,51 +99,68 @@ export default function DashboardLayout({
           key: '/dashboard/library',
           label: 'Thư Viện',
           icon: (
-            <Icon
-              name="library"
-              color={pathname === '/dashboard/library' ? 'white' : 'black'}
+            <LibraryOutlined
+              size={20}
+              hoverMorph={false}
+              color={isLibrarySelected ? '#ffffff' : 'inherit'}
+              activeColor={isLibrarySelected ? '#ffffff' : 'inherit'}
+              hoverColor={isLibrarySelected ? '#ffffff' : 'inherit'}
             />
           ),
         },
         {
-          // Hub luyện tập MOS đứng riêng — chỉ để duyệt/làm bài thực hành
-          // không gắn với 1 khóa video cụ thể nào. Bài thực hành nằm TRONG
-          // 1 khóa video (nội dung trộn) thì làm ngay tại moduleDetail của
-          // khóa đó, không dùng khu vực này.
           key: '/dashboard/practice',
           label: 'Luyện Tập',
-          icon: <FileTextOutlined />,
+          icon: (
+            <FileTextOutlined
+              size={20}
+              hoverMorph={false}
+              color={isPracticeSelected ? '#ffffff' : 'inherit'}
+              activeColor={isPracticeSelected ? '#ffffff' : 'inherit'}
+              hoverColor={isPracticeSelected ? '#ffffff' : 'inherit'}
+            />
+          ),
         },
         ...(!isAdmin
           ? [
               {
                 key: '/dashboard/my-courses',
                 label: 'Tổng Quan',
-                icon: <IdcardOutlined />,
+                icon: (
+                  <IdcardOutlined
+                    size={20}
+                    hoverMorph={false}
+                    color={isMyCoursesSelected ? '#ffffff' : 'inherit'}
+                    activeColor={isMyCoursesSelected ? '#ffffff' : 'inherit'}
+                    hoverColor={isMyCoursesSelected ? '#ffffff' : 'inherit'}
+                  />
+                ),
               },
               {
                 key: '/dashboard/my-roadmap',
                 label: 'Lộ Trình AI',
-                icon: <RocketOutlined />,
+                icon: (
+                  <RocketOutlined
+                    size={20}
+                    hoverMorph={false}
+                    color={isMyRoadmapSelected ? '#ffffff' : 'inherit'}
+                    activeColor={isMyRoadmapSelected ? '#ffffff' : 'inherit'}
+                    hoverColor={isMyRoadmapSelected ? '#ffffff' : 'inherit'}
+                  />
+                ),
               },
             ]
           : [
-              // Sidebar desktop trước đây KHÔNG có link nào vào trang admin
-              // (/dashboard/admin) - admin chỉ vào được bằng cách gõ thẳng
-              // URL, hoặc qua drawer mobile (chỉ có 2 nút lẻ, thiếu hẳn các
-              // tab Nhật Ký Thao Tác/Báo Cáo Vi Phạm/Hộp Thư Hỏi Đáp/Báo Cáo
-              // Ngưỡng Đạt/Đề Thi Thử...). Thêm 1 link thẳng vào trang admin
-              // đầy đủ (đã có tab điều hướng riêng bên trong).
               {
                 key: '/dashboard/admin',
                 label: 'Quản Trị',
                 icon: (
                   <ControlOutlined
-                    style={{
-                      color: pathname.startsWith('/dashboard/admin')
-                        ? 'white'
-                        : 'black',
-                    }}
+                    size={20}
+                    hoverMorph={false}
+                    color={isAdminSelected ? '#ffffff' : 'inherit'}
+                    activeColor={isAdminSelected ? '#ffffff' : 'inherit'}
+                    hoverColor={isAdminSelected ? '#ffffff' : 'inherit'}
                   />
                 ),
               },
@@ -144,11 +177,11 @@ export default function DashboardLayout({
           flexGrow: 1,
           paddingBottom: 12,
           width: '100%',
-          height: '100%',
           scrollbarWidth: 'none',
         }}>
         <Menu
           mode="inline"
+          inlineCollapsed={collapsed}
           style={styles.menu}
           selectedKeys={[pathname]}
           items={menuItems}
@@ -157,6 +190,34 @@ export default function DashboardLayout({
           }}
         />
       </ScrollView>
+
+      {/* Nút thu gọn / mở rộng Sidebar */}
+      <View
+        style={styles.collapseToggleBtn}
+        {...asButton(
+          () => setCollapsed(!collapsed),
+          collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng',
+        )}
+        onClick={() => setCollapsed(!collapsed)}>
+        {collapsed ? (
+          <RightOutlined
+            size={18}
+            hoverMorph={false}
+            color="var(--color-text-muted)"
+            hoverColor="var(--color-vhu-primary)"
+          />
+        ) : (
+          <>
+            <LeftOutlined
+              size={18}
+              hoverMorph={false}
+              color="var(--color-text-muted)"
+              hoverColor="var(--color-vhu-primary)"
+            />
+            <Text style={styles.collapseToggleText}>Thu gọn</Text>
+          </>
+        )}
+      </View>
     </View>
   );
 
@@ -169,7 +230,11 @@ export default function DashboardLayout({
           <Sider
             theme="light"
             width={130}
-            collapsed={false}
+            collapsedWidth={68}
+            collapsible
+            trigger={null}
+            collapsed={collapsed}
+            onCollapse={value => setCollapsed(value)}
             style={styles.antSider}>
             {sidebarContent}
           </Sider>

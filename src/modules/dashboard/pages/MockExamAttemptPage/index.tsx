@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Empty, Popconfirm, Spin, Statistic, Tag } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons';
+import { CheckCircleFilled } from '@components/AppIcon';
 import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import PracticeTaskContent, {

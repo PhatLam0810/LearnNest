@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Text, View } from 'react-native-web';
 import { Button, Skeleton } from 'antd';
-import { LeftOutlined } from '@ant-design/icons';
+import { LeftOutlined } from '@components/AppIcon';
 import { useAppSelector } from '@redux';
 import { useResponsive } from '@/styles/responsive';
 import { dashboardQuery } from '~mdDashboard/redux';

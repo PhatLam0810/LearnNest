@@ -59,6 +59,7 @@ const MyAssignmentsPage: React.FC = () => {
                 onClick={() => router.push(`/dashboard/practice/${a.taskId}`)}>
                 <div className="my-assignments-item-head">
                   <Tag color={tag.color}>{tag.label}</Tag>
+                  {a.isLate && <Tag color="warning">Nộp trễ</Tag>}
                   {a.isOverdue && <Tag color="warning">Quá hạn</Tag>}
                   {a.className && (
                     <span className="my-assignments-class">{a.className}</span>

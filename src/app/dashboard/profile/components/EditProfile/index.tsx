@@ -16,6 +16,8 @@ const EditProfile = () => {
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
   const [updateCurrentInfo] = authQuery.useUpdateCurrentInfoMutation();
+  const fullName = Form.useWatch('fullName', form);
+  const isSubmitDisabled = !fullName || !fullName.trim();
 
   return (
     <View style={styles.container}>
@@ -65,7 +67,10 @@ const EditProfile = () => {
             onClick={() => form.resetFields()}>
             Hủy
           </AppButton>
-          <AppButton htmlType="submit" style={styles.saveButton}>
+          <AppButton
+            htmlType="submit"
+            disabled={isSubmitDisabled}
+            style={styles.saveButton}>
             Lưu thay đổi
           </AppButton>
         </View>

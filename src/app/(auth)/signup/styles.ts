@@ -103,6 +103,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     boxShadow: '0 2px 8px rgba(29, 65, 138, 0.28)',
   },
+  primaryButtonDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
+    boxShadow: 'none',
+  },
   googleButton: {
     borderRadius: 10,
     fontWeight: '500',

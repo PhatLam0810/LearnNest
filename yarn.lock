@@ -5393,6 +5393,11 @@ lucide-react@^0.427.0:
   resolved "https://registry.yarnpkg.com/lucide-react/-/lucide-react-0.427.0.tgz#e06974514bbd591049f9d736b3d3ae99d4ede8c9"
   integrity sha512-lv9s6c5BDF/ccuA0EgTdskTxIe11qpwBDmzRZHJAKtp8LTewAvDvOM+pTES9IpbBuTqkjiMhOmGpJ/CB+mKjFw==
 
+lucide@^1.47.0:
+  version "1.47.0"
+  resolved "https://registry.yarnpkg.com/lucide/-/lucide-1.47.0.tgz#231c0d46df4dad5a16da6ab76a0aedfa26ae2719"
+  integrity sha512-gJoVJM5fvpBDGZTvhpJS9IEurz85HbD+wgOlCkXCIw35tHrqTxSdIYUN9sXvs7Aw3NCl67A+nlotNyoU4u7zOQ==
+
 magic-string@^0.30.3, magic-string@~0.30.8:
   version "0.30.21"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.21.tgz#56763ec09a0fa8091df27879fd94d19078c00d91"
@@ -5503,6 +5508,11 @@ module-details-from-path@^1.0.3, module-details-from-path@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/module-details-from-path/-/module-details-from-path-1.0.4.tgz#b662fdcd93f6c83d3f25289da0ce81c8d9685b94"
   integrity sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==
+
+morphicons@^1.7.1:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/morphicons/-/morphicons-1.7.1.tgz#2384e48e410ba2954c3bbde69d6b0804a8127d2a"
+  integrity sha512-q5ylxy5/d7vBg0OAzanlooXf05PekovMYDuuQVpr6vAQZxl99lrJbaIi+jJ32PXQf9WEEaDO2pbNBsx1ZhEnFQ==
 
 mrmime@^2.0.0:
   version "2.0.1"

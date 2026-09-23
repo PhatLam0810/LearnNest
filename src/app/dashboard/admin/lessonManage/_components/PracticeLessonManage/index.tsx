@@ -11,7 +11,7 @@ import {
   Table,
   TableProps,
 } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@components/AppIcon';
 import { useAppPagination, messageApi } from '@hooks';
 import { Lesson, Module } from '~mdDashboard/redux/saga/type';
 import { adminQuery } from '~mdAdmin/redux';
@@ -310,7 +310,7 @@ const PracticeLessonManage = () => {
         {/* .ant-drawer-body có override toàn cục overflow-y:hidden !important;
             padding:0 !important (src/app/dashboard/styles.css) — phải tự
             quản lý padding riêng, giống PracticeTaskEditorDrawer. */}
-        <div style={{ height: '100%', overflowY: 'auto', padding: 24 }}>
+        <div style={{ height: '100%', overflowY: 'auto' }}>
           {selectedLesson && (
             <View style={{ gap: 16 }}>
               <Form

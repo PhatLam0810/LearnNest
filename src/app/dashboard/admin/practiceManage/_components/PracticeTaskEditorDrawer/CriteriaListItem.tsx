@@ -8,7 +8,7 @@ import {
   Select,
   Switch,
 } from 'antd';
-import { MinusCircleOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined } from '@components/AppIcon';
 import {
   PracticeCriteriaType,
   PRACTICE_CRITERIA_LABELS,

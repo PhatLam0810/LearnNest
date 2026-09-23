@@ -4,7 +4,7 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   UploadOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from './functions'; // Hàm cắt ảnh (chúng ta sẽ cần định nghĩa nó)
 import { View } from 'react-native-web';

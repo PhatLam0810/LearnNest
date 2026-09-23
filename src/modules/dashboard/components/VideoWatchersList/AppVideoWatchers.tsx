@@ -7,7 +7,7 @@ import {
   CheckCircleFilled,
   ArrowLeftOutlined,
   ArrowRightOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import { View, Text } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
 import { ReminderHistory } from '~mdAdmin/components';

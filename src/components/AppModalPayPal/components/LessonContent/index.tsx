@@ -4,7 +4,7 @@ import { FlatList, Text, View } from 'react-native-web';
 import styles from './styles';
 import { LessonDetailDataResponse } from '~mdDashboard/redux/saga/type';
 import { LessonThumbnail } from '~mdDashboard/components';
-import { DollarOutlined, CheckOutlined } from '@ant-design/icons';
+import { DollarOutlined, CheckOutlined } from '@components/AppIcon';
 type LessonContentProps = {
   data: Partial<LessonDetailDataResponse>;
   accessLesson: boolean;

@@ -6,7 +6,7 @@ import {
   CloseCircleFilled,
   DownloadOutlined,
   UploadOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import dayjs from 'dayjs';
 import { useAppSelector } from '@redux';
 import { messageApi } from '@hooks';

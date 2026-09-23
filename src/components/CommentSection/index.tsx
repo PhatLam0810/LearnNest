@@ -12,7 +12,7 @@ import {
   MoreOutlined,
   PictureOutlined,
   SendOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import { Text, View } from 'react-native-web';
 import dayjs from 'dayjs';
 import { messageApi } from '@hooks';

@@ -35,16 +35,22 @@
 }
 
 .practice-task-card {
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  padding: 16px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 16px;
+  padding: 18px 20px;
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
-  background: #fff;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+  background: var(--color-surface);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
 }
 
 .practice-task-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.09);
+  border-color: var(--color-border);
 }
 
 .practice-task-card-topbar {
@@ -72,11 +78,12 @@
 }
 
 .practice-retry-card {
-  border: 1px solid #ffe0b2;
-  background: #fff8f0;
-  border-radius: 12px;
-  padding: 16px 18px;
-  margin-bottom: 20px;
+  border: 1px solid #fed7aa;
+  background: #fffaf5;
+  border-radius: 16px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.05);
 }
 
 .practice-retry-title {
@@ -87,32 +94,34 @@
 }
 
 .practice-retry-desc {
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   color: #7a6a58;
   font-size: 13px;
+  line-height: 1.5;
 }
 
 .practice-retry-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .practice-retry-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
   background: #fff;
-  border: 1px solid #f0e2d0;
-  border-radius: 8px;
-  padding: 10px 12px;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 12px 14px;
   cursor: pointer;
-  transition: box-shadow 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .practice-retry-row:hover {
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.08);
+  border-color: #f59e0b;
 }
 
 .practice-retry-row-title {
@@ -143,11 +152,12 @@
 }
 
 .practice-weak-skills-card {
-  border: 1px solid #f0f0f0;
-  border-radius: 12px;
-  padding: 16px 20px;
-  background: #fff;
-  margin-bottom: 20px;
+  border: 1px solid var(--color-border-subtle);
+  border-radius: 16px;
+  padding: 18px 22px;
+  background: var(--color-surface);
+  margin-bottom: 24px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
 }
 
 .practice-weak-skills-title {

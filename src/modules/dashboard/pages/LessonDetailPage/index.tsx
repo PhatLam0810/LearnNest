@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { CheckOutlined, StarFilled, StarOutlined } from '@ant-design/icons';
+import { CheckOutlined, StarFilled, StarOutlined } from '@components/AppIcon';
 import { useRouter } from 'next/navigation';
 import { Text, View } from 'react-native-web';
 import { Modal, Skeleton } from 'antd';

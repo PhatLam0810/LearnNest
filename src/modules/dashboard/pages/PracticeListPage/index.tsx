@@ -11,7 +11,7 @@ import {
   Tabs,
   Tag,
 } from 'antd';
-import { SearchOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { SearchOutlined, ClockCircleOutlined } from '@components/AppIcon';
 import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PracticeSubject } from '~mdDashboard/types/practice';

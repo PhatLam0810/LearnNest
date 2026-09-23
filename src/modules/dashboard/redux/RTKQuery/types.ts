@@ -379,6 +379,7 @@ export interface MyAssignmentItem {
   className?: string;
   status: 'not_submitted' | 'passed' | 'failed';
   isOverdue: boolean;
+  isLate: boolean;
 }
 
 // ---- Hỏi đáp của tôi ----

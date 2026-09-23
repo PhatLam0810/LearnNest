@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Card, Form } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@components/AppIcon';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Text, View } from 'react-native-web';
 import Link from 'next/link';

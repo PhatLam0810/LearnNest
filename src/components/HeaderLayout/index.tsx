@@ -13,7 +13,7 @@ import {
   Badge,
   Empty,
 } from 'antd';
-import Icon, {
+import {
   MenuOutlined,
   UserOutlined,
   LogoutOutlined,
@@ -26,7 +26,7 @@ import Icon, {
   TrophyOutlined,
   BarChartOutlined,
   CarryOutOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import './styles.scss';
@@ -382,6 +382,7 @@ const HeaderLayout: React.FC = ({}) => {
                 <Badge dot={unreadCount > 0} offset={[-6, 6]}>
                   <Button
                     type="text"
+                    style={{ display: 'flex' }}
                     icon={<BellOutlined style={{ fontSize: 24 }} />}
                     className="notification-bell-btn"
                   />
@@ -397,7 +398,7 @@ const HeaderLayout: React.FC = ({}) => {
                 aria-label="Menu tài khoản"
                 aria-haspopup="menu"
                 style={{
-                  display: 'inline-flex',
+                  display: 'flex',
                   padding: 0,
                   border: 0,
                   borderRadius: '50%',

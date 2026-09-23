@@ -2,7 +2,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from 'antd';
-import { LeftOutlined } from '@ant-design/icons';
+import { LeftOutlined } from '@components/AppIcon';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
 import './styles.scss';
 
@@ -19,6 +19,7 @@ const PracticeTaskDetailPage: React.FC<Props> = ({ taskId }) => {
       <Button
         type="text"
         icon={<LeftOutlined />}
+        style={{ padding: 0 }}
         onClick={() => router.push('/dashboard/practice')}>
         Quay lại
       </Button>

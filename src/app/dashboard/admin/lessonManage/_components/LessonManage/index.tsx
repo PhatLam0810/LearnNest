@@ -33,6 +33,8 @@ const LessonManage = () => {
     });
 
   const [deleteItem] = adminQuery.useDeleteLessonMutation();
+  const [setLessonPublished, { isLoading: isPublishing }] =
+    adminQuery.useSetLessonPublishedMutation();
 
   const columns: TableProps<Lesson>['columns'] = [
     {
@@ -70,6 +72,24 @@ const LessonManage = () => {
               setIsVisibleModalUpdate(true);
             }}>
             <Text style={styles.actionButtonText}>Cập nhật</Text>
+          </button>
+          <button
+            style={styles.actionButton}
+            disabled={isPublishing}
+            onClick={() => {
+              setLessonPublished({
+                lessonId: record._id,
+                isPublished: record.isPublished !== true,
+              })
+                .unwrap()
+                .then(() => refresh())
+                .catch(() =>
+                  messageApi.error('Cập nhật trạng thái khóa học thất bại'),
+                );
+            }}>
+            <Text style={styles.actionButtonText}>
+              {record.isPublished === true ? 'Đưa về nháp' : 'Xuất bản'}
+            </Text>
           </button>
         </Space>
       ),

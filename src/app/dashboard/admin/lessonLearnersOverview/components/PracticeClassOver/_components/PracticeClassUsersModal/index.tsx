@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
   Button,
+  Checkbox,
   DatePicker,
   Empty,
+  Input,
   message,
   Modal,
   Select,
   Table,
   Tag,
 } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined } from '@components/AppIcon';
 import dayjs, { Dayjs } from 'dayjs';
 import type { ColumnsType } from 'antd/es/table';
 import styles from './styles';
@@ -69,6 +71,8 @@ const PracticeClassUsersModal: React.FC<Props> = ({
   const [assignTask, { isLoading: isAssigning }] =
     adminQuery.useAssignTaskToClassMutation();
   const [removeAssignment] = adminQuery.useRemoveClassAssignmentMutation();
+  const [sendClassAnnouncement, { isLoading: isSendingAnnouncement }] =
+    adminQuery.useSendClassAnnouncementMutation();
   const [exportGrades, { isLoading: isExportingGrades }] =
     adminQuery.useExportClassGradesMutation();
   const {
@@ -81,6 +85,34 @@ const PracticeClassUsersModal: React.FC<Props> = ({
 
   const [pickTaskId, setPickTaskId] = useState<string | undefined>();
   const [pickDueDate, setPickDueDate] = useState<Dayjs | null>(null);
+  const [announcementTitle, setAnnouncementTitle] = useState('');
+  const [announcementBody, setAnnouncementBody] = useState('');
+  const [announcementEmail, setAnnouncementEmail] = useState(false);
+
+  const handleSendAnnouncement = async () => {
+    if (!announcementTitle.trim() || !announcementBody.trim()) return;
+    try {
+      const result = await sendClassAnnouncement({
+        classId: selectedPracticeClassId,
+        body: {
+          title: announcementTitle.trim(),
+          body: announcementBody.trim(),
+          sendEmail: announcementEmail,
+        },
+      }).unwrap();
+      message.success(
+        `Đã gửi thông báo cho ${result.notificationCount}/${result.recipientCount} học viên`,
+      );
+      if (result.emailFailed > 0) {
+        message.warning(`${result.emailFailed} email không gửi được`);
+      }
+      setAnnouncementTitle('');
+      setAnnouncementBody('');
+      setAnnouncementEmail(false);
+    } catch {
+      message.error('Gửi thông báo thất bại, vui lòng thử lại');
+    }
+  };
 
   const handleAssign = async () => {
     if (!pickTaskId || !pickDueDate) return;
@@ -283,6 +315,44 @@ const PracticeClassUsersModal: React.FC<Props> = ({
           }}
           locale={{ emptyText: 'Không có người dùng' }}
         />
+
+        <div style={styles.assignSection}>
+          <div style={styles.sectionTitle}>Thông báo cho cả lớp</div>
+          <div style={styles.sectionSubtitle}>
+            Thông báo sẽ xuất hiện trong ứng dụng cho toàn bộ học viên hiện tại
+            của lớp.
+          </div>
+          <Input
+            style={{ marginTop: 12 }}
+            placeholder="Tiêu đề thông báo"
+            maxLength={160}
+            value={announcementTitle}
+            onChange={event => setAnnouncementTitle(event.target.value)}
+          />
+          <Input.TextArea
+            style={{ marginTop: 8 }}
+            placeholder="Nội dung thông báo"
+            autoSize={{ minRows: 3, maxRows: 8 }}
+            maxLength={5000}
+            value={announcementBody}
+            onChange={event => setAnnouncementBody(event.target.value)}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Checkbox
+              checked={announcementEmail}
+              onChange={event => setAnnouncementEmail(event.target.checked)}>
+              Gửi thêm email
+            </Checkbox>
+            <Button
+              type="primary"
+              style={{ marginLeft: 12 }}
+              loading={isSendingAnnouncement}
+              disabled={!announcementTitle.trim() || !announcementBody.trim()}
+              onClick={handleSendAnnouncement}>
+              Gửi thông báo
+            </Button>
+          </div>
+        </div>
 
         <div style={styles.assignSection}>
           <div style={styles.sectionTitle}>Bài được giao</div>

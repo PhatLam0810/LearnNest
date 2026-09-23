@@ -1,4 +1,4 @@
-import { DM_Sans, Inter, Lexend, Plus_Jakarta_Sans } from 'next/font/google';
+import { Inter, Lexend, Plus_Jakarta_Sans } from 'next/font/google';
 
 import { StyleSheet } from '../styleSheet';
 
@@ -20,6 +20,18 @@ export const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const typography = StyleSheet.create({
+  displayL: {
+    fontFamily: lexend.style.fontFamily,
+    fontWeight: '700',
+    fontSize: 32,
+    letterSpacing: 0.01,
+  },
+  titleL: {
+    fontFamily: lexend.style.fontFamily,
+    fontWeight: '700',
+    fontSize: 28,
+    letterSpacing: 0.01,
+  },
   titleM: {
     fontFamily: lexend.style.fontFamily,
     fontWeight: '500',

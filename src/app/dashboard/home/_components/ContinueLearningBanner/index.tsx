@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Text, View } from 'react-native-web';
 import { useRouter } from 'next/navigation';
 import { AppButton } from '@components';
-import { useAppSelector } from '@redux';
+import { PlayCircleOutlined, BookOpenOutlined } from '@components/AppIcon';
 import { MyCourseItem } from '~mdDashboard/redux/RTKQuery/types';
 import styles from './styles';
 
@@ -11,24 +11,14 @@ type ContinueLearningBannerProps = {
   loading: boolean;
 };
 
-const greetingByHour = () => {
-  const hour = new Date().getHours();
-  if (hour < 11) return 'Chào buổi sáng';
-  if (hour < 18) return 'Chào buổi chiều';
-  return 'Chào buổi tối';
-};
-
-// Banner cá nhân hóa đầu Trang Chủ - thay cho banner marketing cố định
-// trước đây (mockSlides trong Banner cũ). Lấy khóa học học GẦN NHẤT trong
-// useMyCourses (BE không sort sẵn, tự sort theo lastStudiedAt ở đây) để mời
-// "học tiếp" đúng chỗ đang dở.
+// Khối 'Tiếp tục bài học gần nhất' (Resume Learning):
+// Thiết kế dạng thẻ Card nổi bật (bóng đổ mềm, bo góc 16px) với thanh tiến
+// trình % gradient, nút bấm 'Học tiếp' có icon Play biến hình morphicon.
 const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
   courses,
   loading,
 }) => {
   const router = useRouter();
-  const { userProfile } =
-    useAppSelector(state => state.authReducer.tokenInfo) || {};
 
   const latestCourse = useMemo(() => {
     if (!courses?.length) return null;
@@ -39,28 +29,30 @@ const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
     )[0];
   }, [courses]);
 
-  const firstName = userProfile?.fullName?.split(' ').slice(-1)[0] || '';
-
   if (loading) {
     return <View style={styles.bannerSkeleton} />;
   }
 
   if (!latestCourse) {
-    // Chưa học khóa nào - mời khám phá thay vì hiện banner rỗng.
     return (
-      <View style={styles.banner}>
+      <View style={styles.banner} aria-label="Tiếp tục bài học">
         <View style={styles.textCol}>
-          <Text style={styles.greeting}>
-            {greetingByHour()}
-            {firstName ? `, ${firstName}` : ''}
-          </Text>
+          <View style={styles.cardTag}>
+            <BookOpenOutlined size={14} color="var(--color-vhu-secondary)" />
+            <Text style={styles.cardTagText}>Bắt đầu lộ trình</Text>
+          </View>
           <Text style={styles.headline}>
-            Bắt đầu hành trình học tập của bạn
+            Sẵn sàng bứt phá cùng chứng chỉ MOS & CNTT
+          </Text>
+          <Text style={styles.subtitle}>
+            Chọn một khóa học để bắt đầu tích lũy kiến thức và điểm rèn luyện
+            ngay hôm nay.
           </Text>
           <View style={styles.actionsRow}>
             <AppButton
               style={styles.ctaButton}
               onClick={() => router.push('/dashboard/lesson')}>
+              <PlayCircleOutlined size={16} color="var(--color-text-primary)" />
               Khám phá khóa học
             </AppButton>
           </View>
@@ -73,27 +65,25 @@ const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
   const remainingMinutes = latestCourse.lastSubLessonRemainingSeconds
     ? Math.ceil(latestCourse.lastSubLessonRemainingSeconds / 60)
     : 0;
-  // Chỉ hiện "còn N phút nữa xong bài X" khi thật sự có bài đang dở (còn
-  // thời lượng chưa xem) - nếu không, giữ nguyên câu "Tiếp tục học" chung
-  // chung thay vì bịa ra số phút/tên bài không có thật.
+
   const headline =
     remainingMinutes > 0 && latestCourse.lastSubLessonTitle
-      ? `Bạn còn ${remainingMinutes} phút nữa là xong bài "${latestCourse.lastSubLessonTitle}"`
-      : `Tiếp tục học "${latestCourse.lessonName}"`;
+      ? `Còn ${remainingMinutes} phút nữa là xong: "${latestCourse.lastSubLessonTitle}"`
+      : `Tiếp tục học: "${latestCourse.lessonName}"`;
+
   const hasLessonCount =
     !!latestCourse.totalItems && latestCourse.totalItems > 0;
 
   return (
-    <View style={styles.banner}>
+    <View style={styles.banner} aria-label="Tiếp tục bài học gần nhất">
       <View style={styles.textCol}>
-        <Text style={styles.greeting}>
-          {greetingByHour()}
-          {firstName ? `, ${firstName}` : ''}
-        </Text>
+        <View style={styles.cardTag}>
+          <Text style={styles.cardTagText}>🔥 TIẾP TỤC BÀI HỌC GẦN NHẤT</Text>
+        </View>
         <Text style={styles.headline}>{headline}</Text>
         {hasLessonCount && (
           <Text style={styles.subtitle}>
-            {latestCourse.lessonName} · đã hoàn thành{' '}
+            {latestCourse.lessonName} · Đã hoàn thành{' '}
             {latestCourse.completedItems || 0}/{latestCourse.totalItems} bài
           </Text>
         )}
@@ -105,7 +95,8 @@ const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
                 `/dashboard/home/lesson/moduleDetail?lessonId=${latestCourse.lessonId}&subLessonId=${latestCourse.lastSubLessonId || 'first-lesson'}`,
               )
             }>
-            Học tiếp
+            <PlayCircleOutlined size={18} color="var(--color-text-primary)" />
+            Học tiếp ngay
           </AppButton>
           <AppButton
             style={styles.secondaryButton}
@@ -116,10 +107,10 @@ const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
       </View>
       <View style={styles.rightCol}>
         <Text style={styles.progressPercent}>{progress}%</Text>
-        <View style={styles.progressTrack}>
+        <View style={styles.progressTrack} aria-label="Tiến độ hoàn thành">
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.progressCaption}>Tiến độ khóa học hiện tại</Text>
+        <Text style={styles.progressCaption}>Tiến độ khóa học này</Text>
       </View>
     </View>
   );

@@ -1,181 +1,141 @@
 'use client';
-import { asButton } from '@/utils/asButton';
+
 import React, { useMemo } from 'react';
-import {
-  ClockCircleOutlined,
-  CheckCircleOutlined,
-  FireOutlined,
-} from '@ant-design/icons';
+import { useRouter } from 'next/navigation';
+import { View, Text } from 'react-native-web';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { useAppSelector } from '@redux';
-import { useRouter } from 'next/navigation';
 import { AppButton } from '@components';
-import styles from './styles';
-import { View, Text } from 'react-native-web';
 import { formatRelativeTime } from '@/utils/time';
 import { useResponsive } from '@/styles/responsive';
+
+import HeroWelcomeBanner from './_components/HeroWelcomeBanner';
 import ContinueLearningBanner from './_components/ContinueLearningBanner';
-import StatCard from './_components/StatCard';
+import BentoStatsGrid from './_components/BentoStatsGrid';
+import HomeSkeleton from './_components/HomeSkeleton';
 import ContinuingCourses from './_components/ContinuingCourses';
 import RoadmapCard from './_components/RoadmapCard';
 import UpcomingDeadlines from './_components/UpcomingDeadlines';
 import AllCoursesGrid from './_components/AllCoursesGrid';
+import styles from './styles';
 
-// Trang Chủ - dashboard cá nhân hóa: banner "tiếp tục học", 3 thẻ thống kê
-// (giờ học tuần này / bài đã hoàn thành / chuỗi ngày học), danh sách khóa
-// đang học, gợi ý AI. Trước đây trang này là 1 catalog chung (banner
-// marketing cố định + lưới toàn bộ khóa học) - catalog đầy đủ đó vẫn còn
-// nguyên ở /dashboard/lesson, Trang Chủ chỉ còn nút "Xem tất cả khóa học"
-// trỏ sang đó.
-const HomeOverview = () => {
+// Trang Chủ - dashboard cá nhân hóa hiện đại phong cách EdTech (Coursera + Duolingo):
+// - Hero Welcome Banner: Chào tên, Streak 🔥 morphicon, châm ngôn học tập, Level/XP & Daily Goal
+// - Resume Learning Card: Thẻ nổi bật bo góc 16px, gradient progress, icon Play morphing
+// - Bento Grid: Trực quan hóa giờ học, bài hoàn thành, đề thi MOS, thứ hạng & huy hiệu
+// - Khóa học đang học, Lộ trình AI gợi ý, và Danh mục khóa học toàn diện
+const HomeOverview: React.FC = () => {
   const router = useRouter();
   const { isMobile, isTablet } = useResponsive();
-  const userId = useAppSelector(
-    state => state.authReducer.tokenInfo?.userProfile?._id,
-  );
+  const { userProfile } =
+    useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const userId = userProfile?._id;
 
   const { data: myCoursesData, isFetching: loadingCourses } =
     dashboardQuery.useGetMyCoursesQuery(userId || '', { skip: !userId });
   const myCourses = myCoursesData || [];
-  const { data: studyStats } = dashboardQuery.useGetStudyStatsQuery(
-    userId || '',
-    { skip: !userId },
-  );
+
+  const { data: studyStats, isFetching: loadingStats } =
+    dashboardQuery.useGetStudyStatsQuery(userId || '', { skip: !userId });
+
   const { data: retryQueue } = dashboardQuery.useGetMyRetryQueueQuery();
   const { data: achievements } = dashboardQuery.useGetMyAchievementsQuery();
   const { data: leaderboard } = dashboardQuery.useGetLeaderboardQuery();
+
   const enrolledIds = useMemo(
     () => new Set(myCourses.map(c => c.lessonId)),
     [myCourses],
   );
 
-  const containerStyle = {
-    ...styles.container,
-    padding: isMobile ? 12 : isTablet ? 16 : 20,
-  };
+  const containerPadding = isMobile ? 12 : isTablet ? 16 : 24;
 
-  const statsRowStyle = [
-    styles.statsRow,
-    isMobile ? { flexDirection: 'column' as const } : null,
-  ];
-
-  const weeklyHours = (studyStats?.weeklyMinutes || 0) / 60;
-  const weeklyHoursLastWeek = (studyStats?.weeklyMinutesLastWeek || 0) / 60;
-  const weeklyDelta = weeklyHours - weeklyHoursLastWeek;
+  const isInitialLoading =
+    (!myCoursesData && loadingCourses) || (!studyStats && loadingStats);
 
   return (
-    <View style={containerStyle} aria-label="Home dashboard overview">
-      <View style={styles.content}>
-        <ContinueLearningBanner courses={myCourses} loading={loadingCourses} />
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: containerPadding,
+          paddingRight: containerPadding,
+          paddingBottom: containerPadding + 8,
+          paddingLeft: containerPadding,
+        },
+      ]}
+      aria-label="Home dashboard overview">
+      {isInitialLoading ? (
+        <HomeSkeleton />
+      ) : (
+        <View style={styles.content}>
+          {/* 1. HERO WELCOME & GAMIFICATION BANNER */}
+          <HeroWelcomeBanner
+            fullName={userProfile?.fullName}
+            streakDays={studyStats?.streakDays ?? 0}
+            completedLessonsCount={studyStats?.completedLessonsCount ?? 0}
+            weeklyMinutes={studyStats?.weeklyMinutes ?? 0}
+          />
 
-        {!!retryQueue?.length && (
-          <View
-            style={styles.retryBanner}
-            {...asButton(() => router.push('/dashboard/practice'))}
-            onClick={() => router.push('/dashboard/practice')}
-            aria-label="Bài cần làm lại">
-            <Text style={styles.retryBannerText}>
-              Bạn có {retryQueue.length} bài thực hành chưa đạt — làm lại ngay
-              để mở khoá phần tiếp theo.
-            </Text>
-            <Text style={styles.retryBannerCta}>Xem danh sách →</Text>
-          </View>
-        )}
+          {/* 2. RESUME LEARNING CARD */}
+          <ContinueLearningBanner
+            courses={myCourses}
+            loading={loadingCourses}
+          />
 
-        <View style={styles.miniRow}>
-          <View
-            style={styles.miniCard}
-            {...asButton(
-              () => router.push('/dashboard/achievements'),
-              'Xem thành tích',
-            )}
-            onClick={() => router.push('/dashboard/achievements')}>
-            <Text style={styles.miniIcon}>🏆</Text>
-            <Text style={styles.miniLabel}>Thành tích</Text>
-            <Text style={styles.miniValue}>
-              {achievements
-                ? `${achievements.items.filter(i => i.unlocked).length}/${achievements.items.length}`
-                : '—'}
-            </Text>
-          </View>
-          <View
-            style={styles.miniCard}
-            {...asButton(
-              () => router.push('/dashboard/leaderboard'),
-              'Xem bảng xếp hạng',
-            )}
-            onClick={() => router.push('/dashboard/leaderboard')}>
-            <Text style={styles.miniIcon}>📊</Text>
-            <Text style={styles.miniLabel}>Hạng của bạn</Text>
-            <Text style={styles.miniValue}>
-              {leaderboard?.me?.rank ? `#${leaderboard.me.rank}` : 'Chưa xếp'}
-            </Text>
-          </View>
-        </View>
-
-        <View style={statsRowStyle}>
-          <StatCard
-            icon={<ClockCircleOutlined style={styles.statIcon} />}
-            label="Giờ học tuần này"
-            value={`${weeklyHours.toFixed(1)} giờ`}
-            caption={
-              studyStats
-                ? `${weeklyDelta >= 0 ? '+' : ''}${weeklyDelta.toFixed(1)} giờ so với tuần trước`
-                : undefined
+          {/* 3. BENTO STATS GRID */}
+          <BentoStatsGrid
+            weeklyMinutes={studyStats?.weeklyMinutes ?? 0}
+            weeklyMinutesLastWeek={studyStats?.weeklyMinutesLastWeek ?? 0}
+            completedLessonsCount={studyStats?.completedLessonsCount ?? 0}
+            retryQueueCount={retryQueue?.length ?? 0}
+            leaderboardRank={leaderboard?.me?.rank ?? null}
+            unlockedAchievementsCount={
+              achievements?.items?.filter(i => i.unlocked)?.length ?? 0
             }
-            captionColor={weeklyDelta >= 0 ? 'var(--color-success)' : undefined}
+            totalAchievementsCount={achievements?.items?.length ?? 0}
           />
-          <StatCard
-            icon={<CheckCircleOutlined style={styles.statIcon} />}
-            label="Bài đã hoàn thành"
-            value={`${studyStats?.completedLessonsCount ?? 0}`}
-          />
-          <StatCard
-            icon={<FireOutlined style={styles.statIcon} />}
-            label="Chuỗi ngày học"
-            value={`${studyStats?.streakDays ?? 0} ngày`}
-          />
-        </View>
 
-        <View style={[styles.mainRow, isMobile ? styles.mainRowMobile : null]}>
-          <View style={styles.continuingCol}>
+          {/* 4. MAIN INTERACTIVE CONTENT: CONTINUING COURSES & AI ROADMAP */}
+          <View
+            style={[styles.mainRow, isMobile ? styles.mainRowMobile : null]}>
+            <View style={styles.continuingCol}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>Đang học</Text>
+                <AppButton
+                  type="text"
+                  style={styles.seeAllBtn}
+                  onClick={() => router.push('/dashboard/my-courses')}>
+                  Xem tất cả →
+                </AppButton>
+              </View>
+              <ContinuingCourses
+                courses={myCourses}
+                loading={loadingCourses}
+                formatRelativeTime={formatRelativeTime}
+              />
+            </View>
+
+            <View style={styles.roadmapCol}>
+              <RoadmapCard />
+              <UpcomingDeadlines />
+            </View>
+          </View>
+
+          {/* 5. ALL COURSES CATALOG PREVIEW */}
+          <View style={[styles.section, styles.sectionSpacing]}>
             <View style={styles.titleContainer}>
-              <Text style={{ ...styles.title, fontSize: isMobile ? 18 : 20 }}>
-                Đang học
-              </Text>
+              <Text style={styles.title}>Khám phá khóa học khác</Text>
               <AppButton
                 type="text"
                 style={styles.seeAllBtn}
-                onClick={() => router.push('/dashboard/my-courses')}>
-                Xem tất cả
+                onClick={() => router.push('/dashboard/lesson')}>
+                Xem tất cả →
               </AppButton>
             </View>
-            <ContinuingCourses
-              courses={myCourses}
-              loading={loadingCourses}
-              formatRelativeTime={formatRelativeTime}
-            />
-          </View>
-
-          <View style={styles.roadmapCol}>
-            <RoadmapCard />
-            <UpcomingDeadlines />
+            <AllCoursesGrid enrolledIds={enrolledIds} />
           </View>
         </View>
-
-        <View style={styles.titleContainer}>
-          <Text style={{ ...styles.title, fontSize: isMobile ? 18 : 20 }}>
-            Tất cả khóa học
-          </Text>
-          <AppButton
-            type="text"
-            style={styles.seeAllBtn}
-            onClick={() => router.push('/dashboard/lesson')}>
-            Xem tất cả
-          </AppButton>
-        </View>
-        <AllCoursesGrid enrolledIds={enrolledIds} />
-      </View>
+      )}
     </View>
   );
 };

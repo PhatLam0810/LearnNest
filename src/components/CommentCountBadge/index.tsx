@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { MessageOutlined } from '@ant-design/icons';
+import { MessageOutlined } from '@components/AppIcon';
 import { Text, View } from 'react-native-web';
 import api from '@/services/api';
 

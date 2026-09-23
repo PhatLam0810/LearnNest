@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Divider, Input, Select, Space } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@components/AppIcon';
 import AppButton from '@components/AppButton';
 
 interface ClassOption {

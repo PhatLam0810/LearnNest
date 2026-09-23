@@ -12,7 +12,7 @@ import {
   Tag,
   Tooltip,
 } from 'antd';
-import { CheckCircleFilled } from '@ant-design/icons';
+import { CheckCircleFilled } from '@components/AppIcon';
 import { Library } from '~mdDashboard/types';
 import { PracticeTask, PracticeSubject } from '~mdDashboard/types/practice';
 import AddLibraryContent from '~mdAdmin/components/AddLibraryContent';

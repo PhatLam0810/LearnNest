@@ -5,21 +5,8 @@ import { messageApi } from '@hooks';
 import { useToggleBookmarkMutation } from '~mdDashboard/redux';
 import type { BookmarkItemType } from '~mdDashboard/redux/RTKQuery/types';
 
-// @ant-design/icons không có icon bookmark (icon lưu) dạng ruy băng thật sự,
-// nên dùng SVG tự vẽ hình bookmark cho đúng ý nghĩa "lưu bài" thay vì icon ngôi sao.
-const BookmarkIcon: React.FC<{ filled: boolean }> = ({ filled }) => (
-  <svg
-    viewBox="0 0 24 24"
-    width="1em"
-    height="1em"
-    fill={filled ? 'currentColor' : 'none'}
-    stroke="currentColor"
-    strokeWidth={filled ? 0 : 2}
-    strokeLinejoin="round"
-    strokeLinecap="round">
-    <path d="M6 3.5h12a1 1 0 0 1 1 1V21l-7-4.2L5 21V4.5a1 1 0 0 1 1-1z" />
-  </svg>
-);
+import { AppIcon } from '@components/AppIcon';
+import { Bookmark, BookmarkCheck } from 'lucide';
 
 interface BookmarkButtonProps {
   itemType: BookmarkItemType;
@@ -98,7 +85,13 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
           fontSize: size,
           lineHeight: 1,
         }}>
-        <BookmarkIcon filled={saved} />
+        <AppIcon
+          icon={saved ? BookmarkCheck : Bookmark}
+          size={size}
+          color={saved ? 'var(--color-vhu-primary)' : '#6b7280'}
+          active={saved}
+          activeColor="var(--color-vhu-primary)"
+        />
         {withLabel && (
           <span style={{ fontSize: 13, fontWeight: 500 }}>
             {saved ? 'Đã lưu' : 'Lưu'}

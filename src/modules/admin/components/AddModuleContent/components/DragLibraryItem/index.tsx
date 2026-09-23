@@ -3,7 +3,7 @@ import { Text, TouchableOpacity, View } from 'react-native-web';
 import styles from './styles';
 import { Library } from '~mdDashboard/types';
 import { Button } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined } from '@components/AppIcon';
 
 type DragLibraryItemProps = {
   data: Library;

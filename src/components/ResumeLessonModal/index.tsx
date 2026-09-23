@@ -4,7 +4,7 @@ import {
   InfoCircleOutlined,
   ReloadOutlined,
   PlayCircleOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import './styles.scss';
 
 const ResumeLessonModal = ({ open, resumeInfo, onRestart, onResume }) => {

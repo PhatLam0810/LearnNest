@@ -28,7 +28,7 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
   UploadOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import { getVideoDuration, getYouTubeVideoDuration } from './functions';
 import debounce from 'lodash-es/debounce';
 import { TimePicker } from 'antd';

@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Empty, Popconfirm, Spin } from 'antd';
-import { ClockCircleOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, DeleteOutlined } from '@components/AppIcon';
 import { messageApi } from '@hooks';
 import {
   useDeleteLessonNoteMutation,

@@ -18,7 +18,7 @@ import {
   RightOutlined,
   ZoomInOutlined,
   ZoomOutOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import api from '@/services/api';
 import { messageApi } from '@hooks';
 import { Library } from '~mdDashboard/types';

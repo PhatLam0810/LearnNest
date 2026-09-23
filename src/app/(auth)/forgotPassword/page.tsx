@@ -1,6 +1,6 @@
 'use client';
 import { Card, Form } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@components/AppIcon';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';

@@ -5,7 +5,7 @@ import { FlatList, ScrollView, Text, View } from 'react-native-web';
 import { Lesson } from '~mdDashboard/redux/saga/type';
 import styles from './styles';
 import { LessonThumbnail } from '~mdDashboard/components';
-import { CheckOutlined } from '@ant-design/icons';
+import { CheckOutlined } from '@components/AppIcon';
 import LibraryDetailItem from '~mdDashboard/components/LibraryDetailItem';
 
 type ModalLessonOverviewProps = {

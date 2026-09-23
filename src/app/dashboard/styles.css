@@ -27,6 +27,17 @@
 .ant-menu-inline .ant-menu-submenu-title {
   padding-inline: 0 !important;
 }
+.ant-menu-inline-collapsed .ant-menu-item {
+  width: 48px !important;
+  height: 48px !important;
+  margin: 0 auto 8px auto !important;
+  padding: 0 !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.ant-menu-inline-collapsed .ant-menu-title-content {
+  display: none !important;
+}
 .ant-menu-title-content {
   margin: 0 !important;
   font-family: 'Lexend', sans-serif;

@@ -19,7 +19,7 @@ import {
   ExperimentOutlined,
   PlusOutlined,
   RobotOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import { messageApi, useAppPagination } from '@hooks';
 import api from '@services/api';
 import { useAppSelector } from '@redux';

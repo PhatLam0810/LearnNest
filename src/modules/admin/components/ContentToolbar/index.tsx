@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View } from 'react-native-web';
 import { Button, Input, Tooltip } from 'antd';
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, SearchOutlined } from '@components/AppIcon';
 import styles from './styles';
 
 interface ContentToolbarProps {

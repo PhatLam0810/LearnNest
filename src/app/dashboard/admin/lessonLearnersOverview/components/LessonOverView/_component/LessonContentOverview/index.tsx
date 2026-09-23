@@ -6,7 +6,7 @@ import {
   FileTextOutlined,
   PlayCircleOutlined,
   QuestionCircleOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import { View, Text } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
 import { useAppSelector } from '@redux';

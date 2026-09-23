@@ -5,7 +5,7 @@ import { ScrollView, Text, View } from 'react-native-web';
 import { adminQuery } from '~mdAdmin/redux';
 import { Module } from '~mdDashboard/redux/saga/type';
 import { PracticeTask } from '~mdDashboard/types/practice';
-import { PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@components/AppIcon';
 import { messageApi } from '@hooks';
 import styles from './styles';
 import {

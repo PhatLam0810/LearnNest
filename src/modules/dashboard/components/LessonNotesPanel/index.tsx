@@ -5,7 +5,7 @@ import {
   ClockCircleOutlined,
   DeleteOutlined,
   EditOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import dayjs from 'dayjs';
 import { messageApi } from '@hooks';
 import {

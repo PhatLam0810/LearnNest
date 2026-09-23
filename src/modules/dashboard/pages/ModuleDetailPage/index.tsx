@@ -7,7 +7,7 @@ import {
   FilePdfOutlined,
   LeftOutlined,
   PictureOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import { useAppDispatch, useAppSelector } from '@redux';
 import { Button, Skeleton, Tabs } from 'antd';
 import { dashboardAction, dashboardQuery } from '~mdDashboard/redux';

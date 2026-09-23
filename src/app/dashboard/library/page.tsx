@@ -9,7 +9,7 @@ import {
   FileTextOutlined,
   PictureOutlined,
   PlayCircleOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import styles from './styles';
 import AppButton from '@components/AppButton';
 import { useAppPagination } from '@hooks';
@@ -266,8 +266,7 @@ const LibraryList = () => {
         {TYPE_FILTERS.map(f => (
           <View
             key={f.key}
-            {...asButton(() => setActiveType(f.key))}
-            onClick={() => setActiveType(f.key)}
+            {...asButton(() => setActiveType(f.key), f.label)}
             style={
               activeType === f.key ? styles.filterPillActive : styles.filterPill
             }>
@@ -295,56 +294,76 @@ const LibraryList = () => {
             </Text>
           </View>
         )}
-        <ScrollView>
-          {listItem.map(item => {
-            const itemMeta = TYPE_META[item.type];
-            return (
-              <View
-                key={item._id}
-                onClick={() => openItem(item)}
-                style={styles.tableRow}>
-                {/* Chỉ ô tên là nút focus được: cả hàng còn chứa nút dấu trang nên
-                    không thể là role=button (nested-interactive). */}
+        {listItem.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyTitle}>Chưa có tài liệu nào</Text>
+            <Text style={styles.emptyDesc}>
+              {activeType
+                ? 'Không tìm thấy tài liệu nào thuộc danh mục này.'
+                : 'Thư viện hiện chưa có tài liệu nào được công bố.'}
+            </Text>
+            {activeType ? (
+              <AppButton
+                onClick={() => setActiveType('')}
+                style={{ width: 'auto' }}>
+                Xem tất cả tài liệu
+              </AppButton>
+            ) : null}
+          </View>
+        ) : (
+          <ScrollView>
+            {listItem.map(item => {
+              const itemMeta = TYPE_META[item.type];
+              return (
                 <View
-                  style={[styles.tableCell, styles.colDoc]}
-                  {...asButton(() => openItem(item), item.title)}>
-                  <span style={styles.rowIcon}>{itemMeta?.icon}</span>
-                  <Text style={styles.rowTitle} numberOfLines={1}>
-                    {item.title}
-                  </Text>
-                </View>
-                {!isMobile && (
-                  <View style={[styles.tableCell, styles.colType]}>
-                    <Text style={styles.typeBadge}>
-                      {itemMeta?.label || item.type}
+                  key={item._id}
+                  onClick={() => openItem(item)}
+                  style={styles.tableRow}>
+                  {/* Chỉ ô tên là nút focus được: cả hàng còn chứa nút dấu trang nên
+                      không thể là role=button (nested-interactive). */}
+                  <View
+                    style={[styles.tableCell, styles.colDoc]}
+                    {...asButton(() => openItem(item), item.title)}>
+                    <span style={styles.rowIcon}>{itemMeta?.icon}</span>
+                    <Text style={styles.rowTitle} numberOfLines={1}>
+                      {item.title}
                     </Text>
                   </View>
-                )}
-                <View style={[styles.tableCell, styles.colDate]}>
-                  <Text style={styles.rowDate}>
-                    {formatDate(item.updatedAt)}
-                  </Text>
+                  {!isMobile && (
+                    <View style={[styles.tableCell, styles.colType]}>
+                      <Text style={styles.typeBadge}>
+                        {itemMeta?.label || item.type}
+                      </Text>
+                    </View>
+                  )}
+                  <View style={[styles.tableCell, styles.colDate]}>
+                    <Text style={styles.rowDate}>
+                      {formatDate(item.updatedAt)}
+                    </Text>
+                  </View>
+                  <View
+                    style={styles.tableCell}
+                    onClick={(e: any) => e.stopPropagation()}>
+                    <BookmarkButton
+                      itemType="library"
+                      itemId={item._id}
+                      bookmarked={(bookmarkedLibIds || []).includes(item._id)}
+                    />
+                  </View>
                 </View>
-                <View
-                  style={styles.tableCell}
-                  onClick={(e: any) => e.stopPropagation()}>
-                  <BookmarkButton
-                    itemType="library"
-                    itemId={item._id}
-                    bookmarked={(bookmarkedLibIds || []).includes(item._id)}
-                  />
-                </View>
+              );
+            })}
+            {hasMore && (
+              <View style={styles.loadMoreWrap}>
+                <AppButton
+                  style={{ width: 'auto' }}
+                  onClick={() => fetchData()}>
+                  Xem thêm
+                </AppButton>
               </View>
-            );
-          })}
-          {hasMore && (
-            <View style={styles.loadMoreWrap}>
-              <AppButton style={{ width: 'auto' }} onClick={() => fetchData()}>
-                Xem thêm
-              </AppButton>
-            </View>
-          )}
-        </ScrollView>
+            )}
+          </ScrollView>
+        )}
       </View>
 
       <Modal

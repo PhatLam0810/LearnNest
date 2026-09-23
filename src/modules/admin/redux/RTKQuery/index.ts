@@ -37,6 +37,7 @@ import {
   PracticeClassUsersResponse,
   ClassAssignmentItem,
   AssignTaskPayload,
+  SendClassAnnouncementPayload,
   AssignTaskBulkPayload,
   ClassGrades,
   AssignTaskBulkResult,
@@ -180,6 +181,17 @@ export const adminQuery = baseQuery.injectEndpoints({
         url: 'lesson',
         method: 'PUT',
         body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    setLessonPublished: builder.mutation<
+      any,
+      { lessonId: string; isPublished: boolean }
+    >({
+      query: ({ lessonId, isPublished }) => ({
+        url: `lesson/${lessonId}/publish`,
+        method: 'PUT',
+        body: { isPublished },
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
@@ -1039,6 +1051,23 @@ export const adminQuery = baseQuery.injectEndpoints({
       providesTags: (_result, _error, classId) => [
         { type: 'ClassAssignment', id: classId },
       ],
+    }),
+    sendClassAnnouncement: builder.mutation<
+      {
+        classId: string;
+        recipientCount: number;
+        notificationCount: number;
+        emailSent: number;
+        emailFailed: number;
+      },
+      { classId: string; body: SendClassAnnouncementPayload }
+    >({
+      query: ({ classId, body }) => ({
+        url: `admin/classes/${classId}/announcements`,
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
     // File CSV, giống hệt pattern exportLearners (blob) ở trên nhưng khác
     // định dạng (điểm số theo bài giao thay vì roster).

@@ -2,7 +2,7 @@
 import React from 'react';
 import { Text, View } from 'react-native-web';
 import { Skeleton } from 'antd';
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled } from '@components/AppIcon';
 import dayjs from 'dayjs';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import AppButton from '@components/AppButton';

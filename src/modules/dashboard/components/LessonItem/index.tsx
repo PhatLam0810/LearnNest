@@ -5,9 +5,10 @@ import { Card } from 'antd';
 import {
   BookOutlined,
   DollarOutlined,
+  PlayCircleOutlined,
   StarFilled,
   TeamOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import './styles.css';
 import styles from './styles';
 import { Text, View } from 'react-native-web';
@@ -144,6 +145,15 @@ const LessonItem: React.FC<LessonItemProps> = ({
                 </Text>
               </View>
             )}
+          </View>
+
+          <View style={styles.actionRow}>
+            <View style={styles.enterBtn}>
+              <PlayCircleOutlined size={14} color="var(--color-vhu-primary)" />
+              <Text style={styles.enterBtnText}>
+                {isInProgress ? 'Học tiếp' : 'Vào học'}
+              </Text>
+            </View>
           </View>
         </View>
       </View>

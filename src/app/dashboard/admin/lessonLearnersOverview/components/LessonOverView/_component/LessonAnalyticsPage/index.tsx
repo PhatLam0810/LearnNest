@@ -15,7 +15,7 @@ import {
   Tag,
   message,
 } from 'antd';
-import { ArrowLeftOutlined, FilterOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, FilterOutlined } from '@components/AppIcon';
 import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';

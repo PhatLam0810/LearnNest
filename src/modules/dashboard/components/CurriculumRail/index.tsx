@@ -8,7 +8,7 @@ import {
   FileTextOutlined,
   LockOutlined,
   PlayCircleOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import BookmarkButton from '@components/BookmarkButton';
 import { convertDurationToTime } from '@utils/time';
 import { useResponsive } from '@/styles/responsive';

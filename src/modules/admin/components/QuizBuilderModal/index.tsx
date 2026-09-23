@@ -11,7 +11,7 @@ import {
   Select,
   Switch,
 } from 'antd';
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, PlusOutlined } from '@components/AppIcon';
 import AppButton from '@components/AppButton';
 import { useAppPagination } from '@hooks';
 import { useResponsive } from '@/styles/responsive';

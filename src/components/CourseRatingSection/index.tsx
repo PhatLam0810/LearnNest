@@ -2,7 +2,7 @@
 import { asButton } from '@/utils/asButton';
 import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { StarFilled, StarOutlined } from '@ant-design/icons';
+import { StarFilled, StarOutlined } from '@components/AppIcon';
 import AppButton from '@components/AppButton';
 import { AppInput, UserAvatar } from '@components';
 import { messageApi } from '@hooks';

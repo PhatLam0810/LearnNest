@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { Text, View } from 'react-native-web';
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { CheckCircleFilled, CloseCircleFilled } from '@components/AppIcon';
 import styles from './styles';
 import { QuizAnswerReviewProps, QuizAnswerReviewQuestion } from './types';
 

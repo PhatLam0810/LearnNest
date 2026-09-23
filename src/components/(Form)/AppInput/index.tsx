@@ -1,4 +1,5 @@
-import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+import { AppIcon } from '@components/AppIcon';
+import { Eye, EyeOff } from 'lucide';
 import { Input, InputProps } from 'antd';
 import type { TextAreaProps } from 'antd/es/input';
 import React from 'react';
@@ -27,8 +28,16 @@ const AppInput: React.FC<AppInputProps> = ({ type, ...props }) => {
                 padding: 0,
                 color: 'inherit',
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}>
-              {visible ? <EyeOutlined /> : <EyeInvisibleOutlined />}
+              <AppIcon
+                icon={visible ? Eye : EyeOff}
+                size={18}
+                color="#6b7280"
+                hoverColor="var(--color-vhu-primary)"
+              />
             </button>
           ),
         }

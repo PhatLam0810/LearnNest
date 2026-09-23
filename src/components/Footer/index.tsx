@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import FeedbackFormModal from '@components/FeedbackWidget/FeedbackFormModal';
-import { CommentOutlined } from '@ant-design/icons';
+import { CommentOutlined } from '@components/AppIcon';
 import './styles.scss';
 
 const Footer: React.FC = () => {

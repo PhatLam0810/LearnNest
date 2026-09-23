@@ -7,7 +7,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
   UnorderedListOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import { AppUploadImageCrop, DraggableList } from '@components';
 import { adminQuery } from '~mdAdmin/redux';
 import { Lesson, Module } from '~mdDashboard/redux/saga/type';

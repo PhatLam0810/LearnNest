@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Button, Tooltip } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import { EyeOutlined } from '@components/AppIcon';
 
 interface AppVideoWatchersButtonProps {
   subLessonId: string;

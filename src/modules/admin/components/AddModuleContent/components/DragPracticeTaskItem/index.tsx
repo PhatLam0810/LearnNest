@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native-web';
 import { Button, Tag } from 'antd';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined } from '@components/AppIcon';
 import { PracticeTask } from '~mdDashboard/types/practice';
 import styles from '../DragLibraryItem/styles';
 

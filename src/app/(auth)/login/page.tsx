@@ -6,7 +6,7 @@ import {
   MailOutlined,
   LockOutlined,
   ArrowLeftOutlined,
-} from '@ant-design/icons';
+} from '@components/AppIcon';
 import Link from 'next/link';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from '@utils/firebase';
@@ -189,12 +189,18 @@ const LoginPage = () => {
                 <Form.Item<FieldType> shouldUpdate style={{ marginBottom: 12 }}>
                   {({ getFieldsValue }) => {
                     const { email, password } = getFieldsValue();
+                    const isFormIncomplete = !email || !password;
                     return (
                       <AppButton
                         type="primary"
                         aria-label="Đăng nhập vào tài khoản của bạn"
-                        style={styles.primaryButton}
-                        disabled={!email || !password || isLoginLoading}
+                        style={{
+                          ...styles.primaryButton,
+                          ...(isFormIncomplete || isLoginLoading
+                            ? styles.primaryButtonDisabled
+                            : {}),
+                        }}
+                        disabled={isFormIncomplete || isLoginLoading}
                         loading={isLoginLoading}
                         htmlType="submit">
                         Đăng nhập
