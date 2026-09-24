@@ -633,7 +633,9 @@ export const adminQuery = baseQuery.injectEndpoints({
         method: 'GET',
         params: params ?? undefined,
       }),
-      transformResponse: (res: AxiosResponse<any>) => res.data,
+      // BE có thể trả array trực tiếp hoặc bọc trong { data: [...] }
+      transformResponse: (res: any) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
       providesTags: result =>
         result
           ? [

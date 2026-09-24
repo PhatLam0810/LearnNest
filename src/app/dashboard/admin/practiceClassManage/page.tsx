@@ -40,6 +40,7 @@ const PracticeClassManage: React.FC = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<ClassItem | undefined>();
   const [detailId, setDetailId] = useState<string | undefined>();
+  const [archivingItem, setArchivingItem] = useState<ClassItem | null>(null);
 
   const { data, isFetching, isError, refetch } = adminQuery.useGetClassesQuery({
     status: status === 'all' ? undefined : status,
@@ -87,15 +88,7 @@ const PracticeClassManage: React.FC = () => {
     }
   };
 
-  const confirmArchive = (item: ClassItem) =>
-    Modal.confirm({
-      title: `Lưu trữ lớp ${item.code}?`,
-      content:
-        'Lớp đã lưu trữ không thêm được học viên mới. Dữ liệu học viên và bài giao vẫn được giữ, bạn có thể khôi phục lớp bất cứ lúc nào.',
-      okText: 'Lưu trữ',
-      cancelText: 'Hủy',
-      onOk: () => setArchived(item, true),
-    });
+  const confirmArchive = (item: ClassItem) => setArchivingItem(item);
 
   const handleExport = async () => {
     try {
@@ -326,6 +319,23 @@ const PracticeClassManage: React.FC = () => {
         open={isAssignOpen}
         onClose={() => setIsAssignOpen(false)}
       />
+      {/* Declarative archive confirmation — thay thế Modal.confirm() để render
+          trong đúng ConfigProvider context của trang admin. */}
+      <Modal
+        title={`Lưu trữ lớp ${archivingItem?.code}?`}
+        open={!!archivingItem}
+        okText="Lưu trữ"
+        cancelText="Hủy"
+        onCancel={() => setArchivingItem(null)}
+        onOk={async () => {
+          if (archivingItem) await setArchived(archivingItem, true);
+          setArchivingItem(null);
+        }}>
+        <Text style={styles.mutedText}>
+          Lớp đã lưu trữ không thêm được học viên mới. Dữ liệu học viên và bài
+          giao vẫn được giữ, bạn có thể khôi phục lớp bất cứ lúc nào.
+        </Text>
+      </Modal>
     </View>
   );
 };

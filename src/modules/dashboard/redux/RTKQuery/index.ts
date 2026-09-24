@@ -258,10 +258,14 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
-    getPracticeTaskDetailStudent: builder.query<PracticeTaskDetail, string>({
-      query: taskId => ({
+    getPracticeTaskDetailStudent: builder.query<
+      PracticeTaskDetail,
+      { taskId: string; mockExamAttemptId?: string }
+    >({
+      query: ({ taskId, mockExamAttemptId }) => ({
         url: `/practice/tasks/${taskId}`,
         method: 'GET',
+        params: mockExamAttemptId ? { mockExamAttemptId } : undefined,
       }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),

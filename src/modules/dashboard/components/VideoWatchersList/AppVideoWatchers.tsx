@@ -40,6 +40,7 @@ interface PaginationData {
   pageNum: number;
   pageSize: number;
   totalPages: number;
+  completedCount?: number;
 }
 
 interface ApiResponse {
@@ -48,6 +49,7 @@ interface ApiResponse {
   data: PaginationData;
   items?: WatcherItem[];
   totalRecords?: number;
+  completedCount?: number;
 }
 
 interface AppVideoWatchersProps {
@@ -82,6 +84,7 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
     pageSize: 10,
     total: 0,
     totalPages: 0,
+    completedCount: 0,
   });
 
   const [loadWatchers] = adminQuery.useLazyGetVideoWatchersQuery();
@@ -159,6 +162,14 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
       const validItems = items.filter(
         item => item && item.userId && item.progress != null,
       );
+      // Backend trả completedCount trong data nếu có, fallback đếm từ trang hiện tại.
+      // Khi phân trang nhiều trang thì completedCount từ server chính xác hơn.
+      const serverCompleted =
+        responseData.data?.completedCount ?? responseData.completedCount;
+      const completedCount =
+        serverCompleted != null
+          ? serverCompleted
+          : validItems.filter(i => i.completed).length;
 
       setWatchers(validItems);
       setPagination({
@@ -166,6 +177,7 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
         pageSize,
         total: totalRecords,
         totalPages: totalPages || Math.ceil(totalRecords / pageSize),
+        completedCount,
       });
     } catch (error: any) {
       console.error('Fetch error:', error);
@@ -234,9 +246,14 @@ const AppVideoWatchers: React.FC<AppVideoWatchersProps> = ({
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Người đã xem</Text>
         <View style={styles.headerActions}>
-          <Tag color="blue" style={styles.countTag}>
-            {pagination.total} người
+          <Tag color="green" style={styles.countTag}>
+            {pagination.completedCount} đã xem xong
           </Tag>
+          {pagination.total > pagination.completedCount && (
+            <Tag color="default" style={styles.countTag}>
+              {pagination.total} đã mở
+            </Tag>
+          )}
           {lessonId && (
             <Popconfirm
               title="Gửi email nhắc nhở?"

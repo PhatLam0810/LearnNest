@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Empty, Popconfirm, Spin, Statistic, Tag } from 'antd';
-import { CheckCircleFilled } from '@components/AppIcon';
+import { Button, Empty, Modal, Popconfirm, Spin, Statistic, Tag } from 'antd';
+import { ArrowLeftOutlined, CheckCircleFilled } from '@components/AppIcon';
 import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import PracticeTaskContent, {
@@ -23,6 +23,7 @@ const subjectLabel = (s: string) => (s === 'Mixed' ? 'Word + Excel' : s);
 // để hết giờ/nộp bài xong không cần điều hướng, chỉ cần refetch.
 const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   const router = useRouter();
+  const [showExitWarning, setShowExitWarning] = useState(false);
   const { data, isFetching, refetch } =
     dashboardQuery.useGetMockExamAttemptQuery(attemptId, {
       skip: !attemptId,
@@ -30,6 +31,18 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   const [submitAttempt, { isLoading: isSubmitting }] =
     dashboardQuery.useSubmitMockExamAttemptMutation();
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+
+  const isInProgress = data?.status === 'in_progress';
+
+  // Chặn close tab / reload khi đang thi
+  useEffect(() => {
+    if (!isInProgress) return;
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [isInProgress]);
 
   useEffect(() => {
     if (data?.tasks?.length && !activeTaskId) {
@@ -71,8 +84,32 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
   return (
     <div className="mock-exam-page">
+      {/* Modal cảnh báo thoát */}
+      <Modal
+        title="Thoát bài thi?"
+        open={showExitWarning}
+        okText="Thoát"
+        cancelText="Tiếp tục thi"
+        okButtonProps={{ danger: true }}
+        onCancel={() => setShowExitWarning(false)}
+        onOk={() => router.push('/dashboard/practice')}>
+        <p>
+          Bài thi đang trong tiến trình. Nếu thoát bây giờ,{' '}
+          <strong>kết quả các bài chưa nộp sẽ không được ghi nhận</strong>. Thời
+          gian vẫn tiếp tục chạy.
+        </p>
+      </Modal>
       <div className="mock-exam-header">
         <div className="mock-exam-header-left">
+          {/* Nút Back: hiện modal cảnh báo thay vì chuyển hướng ngay */}
+          <button
+            type="button"
+            className="mock-exam-back-btn"
+            onClick={() => setShowExitWarning(true)}
+            aria-label="Thoát bài thi">
+            <ArrowLeftOutlined />
+            <span>Thoát</span>
+          </button>
           <div className="mock-exam-title-row">
             <h1 className="mock-exam-title">{data.title}</h1>
             <Tag

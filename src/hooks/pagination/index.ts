@@ -50,7 +50,8 @@ export const useAppPagination = <T>(props: {
         props.method === 'GET'
           ? await api.get(props.apiUrl, { params: requestParams })
           : await api.post(props.apiUrl, requestParams);
-      if (status === 201) {
+      // BE trả 200 (query) hoặc 201 (mutation-style), chấp nhận cả hai.
+      if (status === 200 || status === 201) {
         // fetchData mặc định CỘNG DỒN (dùng cho các màn "tải thêm" khi
         // cuộn - onEndReached). Bảng antd Table thì khác: nó tự cắt
         // dataSource theo (current-1)*pageSize nếu length đã tích luỹ vượt

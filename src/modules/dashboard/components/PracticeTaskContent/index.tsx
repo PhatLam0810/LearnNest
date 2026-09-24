@@ -64,12 +64,13 @@ const PracticeTaskContent: React.FC<Props> = ({
     data: detail,
     isFetching,
     error: detailError,
-  } = dashboardQuery.useGetPracticeTaskDetailStudentQuery(taskId, {
-    skip: !taskId,
-  });
+  } = dashboardQuery.useGetPracticeTaskDetailStudentQuery(
+    { taskId, mockExamAttemptId },
+    { skip: !taskId },
+  );
   const { data: submissions, refetch: refetchSubmissions } =
     dashboardQuery.useGetMyPracticeSubmissionsQuery(taskId, {
-      skip: !taskId,
+      skip: !taskId || !!mockExamAttemptId, // không cần lịch sử khi đang thi
     });
   // Hướng dẫn "Bước 1,2,3..." của TỪNG yêu cầu — hiện ngay từ đầu (không đợi
   // nộp sai mới thấy) để học viên biết chính xác cần làm gì cho mỗi tiêu chí
@@ -128,6 +129,7 @@ const PracticeTaskContent: React.FC<Props> = ({
   // thực hành bình thường (ngoài thi thử vẫn xem kết quả/lịch sử/thảo luận
   // như cũ).
   const isMockExam = !!mockExamAttemptId;
+  const isExcelMockExam = isMockExam && task.subject === 'Excel';
 
   const handleDownloadStarter = async () => {
     try {
@@ -196,6 +198,146 @@ const PracticeTaskContent: React.FC<Props> = ({
       }
     },
   };
+
+  // Layout đặc biệt cho thi thử Excel: 2 cột (yêu cầu + công thức | upload)
+  if (isExcelMockExam) {
+    return (
+      <div className="practice-content practice-excel-mock">
+        {/* Panel trái: đề bài + formula bar + danh sách yêu cầu */}
+        <div className="practice-excel-mock-left">
+          <h2 className="practice-excel-mock-title">{task.title}</h2>
+
+          {/* Formula bar — giả lập thanh công thức Excel */}
+          <div className="practice-excel-formula-bar">
+            <span className="practice-excel-formula-cell">fx</span>
+            <span className="practice-excel-formula-text">
+              {task.description?.match(/=\w+\(/)?.[0]
+                ? (task.description
+                    .split(/\r?\n/)
+                    .find(l => l.trim().startsWith('=')) ??
+                  'Nập công thức vào ô được yêu cầu')
+                : 'Thực hiện yêu cầu theo đề bài'}
+            </span>
+          </div>
+
+          {/* Preview bảng dữ liệu mẫu (dùng tiêu đề từ tiêu chí) */}
+          <div className="practice-excel-table-wrap">
+            <table className="practice-excel-table">
+              <thead>
+                <tr>
+                  <th className="practice-excel-table-idx"></th>
+                  {['A', 'B', 'C', 'D', 'E'].map(col => (
+                    <th key={col}>{col}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {instructions?.slice(0, 5).map((it, i) => (
+                  <tr key={it.criteriaId}>
+                    <td className="practice-excel-table-idx">{i + 1}</td>
+                    <td colSpan={5} className="practice-excel-table-req">
+                      <span className="practice-excel-req-num">
+                        Yêu cầu {i + 1}:
+                      </span>{' '}
+                      {it.summary}
+                    </td>
+                  </tr>
+                ))}
+                {(instructions?.length ?? 0) > 5 && (
+                  <tr>
+                    <td
+                      className="practice-excel-table-idx"
+                      style={{ color: 'var(--color-text-muted)' }}>
+                      ...
+                    </td>
+                    <td
+                      colSpan={5}
+                      style={{
+                        color: 'var(--color-text-muted)',
+                        fontSize: 12,
+                      }}>
+                      +{(instructions?.length ?? 0) - 5} yêu cầu khác
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {task.description && (
+            <p className="practice-content-desc" style={{ marginTop: 16 }}>
+              {task.description}
+            </p>
+          )}
+        </div>
+
+        {/* Panel phải: upload + trạng thái */}
+        <div className="practice-excel-mock-right">
+          <div className="practice-excel-upload-card">
+            <div className="practice-excel-upload-icon">
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 40 40"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true">
+                <rect width="40" height="40" rx="10" fill="#217346" />
+                <text
+                  x="50%"
+                  y="56%"
+                  dominantBaseline="middle"
+                  textAnchor="middle"
+                  fill="white"
+                  fontSize="18"
+                  fontWeight="bold"
+                  fontFamily="Arial">
+                  X
+                </text>
+              </svg>
+            </div>
+            <div className="practice-excel-upload-title">Nộp bài làm Excel</div>
+            <div className="practice-excel-upload-hint">
+              File .xlsx, tối đa 50MB
+            </div>
+            <div className="practice-excel-upload-actions">
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={handleDownloadStarter}
+                style={{ width: '100%' }}>
+                Tải file đề gốc
+              </Button>
+              <Upload {...uploadProps}>
+                <Button
+                  type="primary"
+                  icon={<UploadOutlined />}
+                  loading={isSubmitting}
+                  style={{ width: '100%' }}>
+                  Nộp bài (.xlsx)
+                </Button>
+              </Upload>
+            </div>
+            {isMockExam && latestResult && (
+              <div className="practice-excel-submitted-badge">
+                <CheckCircleFilled style={{ color: '#52c41a' }} />
+                <span>Đã nộp bài — kết quả hiện sau khi nộp bài thi</span>
+              </div>
+            )}
+          </div>
+
+          {/* Tóm tắt số tiêu chí */}
+          <div className="practice-excel-criteria-summary">
+            <span className="practice-excel-criteria-count">
+              {criteria.length}
+            </span>
+            <span className="practice-excel-criteria-label">
+              tiêu chí chấm điểm
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="practice-content">

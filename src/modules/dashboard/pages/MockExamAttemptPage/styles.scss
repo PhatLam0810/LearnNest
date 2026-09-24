@@ -34,6 +34,25 @@
   gap: 6px;
 }
 
+.mock-exam-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  transition: color 0.15s;
+  width: fit-content;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+}
+
 .mock-exam-title-row {
   display: flex;
   align-items: center;
@@ -163,6 +182,13 @@
   color: var(--color-vhu-primary);
 
   .mock-exam-task-number {
+    background: var(--color-vhu-primary);
+    border-color: var(--color-vhu-primary);
+    color: #fff;
+  }
+
+  // Khi active + hover: giữ số navy/trắng, không bị ghi đè bởi rule :hover chung
+  &:hover .mock-exam-task-number {
     background: var(--color-vhu-primary);
     border-color: var(--color-vhu-primary);
     color: #fff;
