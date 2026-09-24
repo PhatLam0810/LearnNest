@@ -24,6 +24,9 @@ const subjectLabel = (s: string) => (s === 'Mixed' ? 'Word + Excel' : s);
 const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   const router = useRouter();
   const [showExitWarning, setShowExitWarning] = useState(false);
+  const allowExitRef = React.useRef(false);
+  const pendingNavUrl = React.useRef<string | null>(null);
+
   const { data, isFetching, refetch } =
     dashboardQuery.useGetMockExamAttemptQuery(attemptId, {
       skip: !attemptId,
@@ -34,14 +37,125 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
   const isInProgress = data?.status === 'in_progress';
 
-  // Chặn close tab / reload khi đang thi
+  // 1. Chặn close tab / reload khi đang thi
   useEffect(() => {
     if (!isInProgress) return;
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (allowExitRef.current) return;
       e.preventDefault();
+      e.returnValue = '';
     };
     window.addEventListener('beforeunload', onBeforeUnload);
     return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [isInProgress]);
+
+  // 2. Chặn nút Back / Forward của Chrome (popstate)
+  useEffect(() => {
+    if (!isInProgress) return;
+
+    window.history.pushState({ mockExamGuard: true }, '', window.location.href);
+
+    const onPopState = () => {
+      if (allowExitRef.current) return;
+      window.history.pushState(
+        { mockExamGuard: true },
+        '',
+        window.location.href,
+      );
+      pendingNavUrl.current = '/dashboard/practice';
+      setShowExitWarning(true);
+    };
+
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, [isInProgress]);
+
+  // 3. Chặn mọi router navigation (cả khi click item trong sidebar dashboard, header, hay code gọi router.push/replace)
+  useEffect(() => {
+    if (!isInProgress) return;
+
+    const originalPushState = window.history.pushState.bind(window.history);
+    const originalReplaceState = window.history.replaceState.bind(
+      window.history,
+    );
+
+    const checkAndIntercept = (
+      originalFn: (
+        data: any,
+        unused: string,
+        url?: string | URL | null,
+      ) => void,
+      data: any,
+      unused: string,
+      url?: string | URL | null,
+    ) => {
+      if (allowExitRef.current) {
+        return originalFn(data, unused, url);
+      }
+
+      if (url) {
+        const dest = typeof url === 'string' ? url : url.toString();
+        const currentPath = window.location.pathname;
+        let destPath = dest;
+        try {
+          const parsed = new URL(dest, window.location.origin);
+          destPath = parsed.pathname;
+        } catch {
+          destPath = dest.split('?')[0];
+        }
+
+        if (destPath !== currentPath) {
+          pendingNavUrl.current = dest;
+          setShowExitWarning(true);
+          return;
+        }
+      }
+
+      return originalFn(data, unused, url);
+    };
+
+    window.history.pushState = function (data, unused, url) {
+      return checkAndIntercept(originalPushState, data, unused, url);
+    };
+
+    window.history.replaceState = function (data, unused, url) {
+      return checkAndIntercept(originalReplaceState, data, unused, url);
+    };
+
+    const onDocumentClick = (e: MouseEvent) => {
+      if (allowExitRef.current) return;
+      const anchor = (e.target as HTMLElement)?.closest('a');
+      if (!anchor) return;
+      const href = anchor.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:'))
+        return;
+
+      let destPath = href;
+      try {
+        const parsed = new URL(href, window.location.origin);
+        destPath = parsed.pathname;
+      } catch {
+        destPath = href.split('?')[0];
+      }
+
+      if (destPath !== window.location.pathname) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        pendingNavUrl.current = href;
+        setShowExitWarning(true);
+      }
+    };
+
+    document.addEventListener('click', onDocumentClick, true);
+
+    return () => {
+      window.history.pushState = originalPushState;
+      window.history.replaceState = originalReplaceState;
+      document.removeEventListener('click', onDocumentClick, true);
+    };
   }, [isInProgress]);
 
   useEffect(() => {
@@ -51,6 +165,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   }, [data, activeTaskId]);
 
   const handleSubmit = async (auto: boolean) => {
+    allowExitRef.current = true;
     try {
       // submitMockExamAttempt đã invalidatesTags MockExamAttempt - không
       // cần tự refetch(), useGetMockExamAttemptQuery tự tải lại.
@@ -65,6 +180,18 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
         );
       }
     }
+  };
+
+  const handleConfirmExit = () => {
+    allowExitRef.current = true;
+    setShowExitWarning(false);
+    const dest = pendingNavUrl.current || '/dashboard/practice';
+    router.push(dest);
+  };
+
+  const handleCancelExit = () => {
+    pendingNavUrl.current = null;
+    setShowExitWarning(false);
   };
 
   if (isFetching && !data) {
@@ -91,8 +218,8 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
         okText="Thoát"
         cancelText="Tiếp tục thi"
         okButtonProps={{ danger: true }}
-        onCancel={() => setShowExitWarning(false)}
-        onOk={() => router.push('/dashboard/practice')}>
+        onCancel={handleCancelExit}
+        onOk={handleConfirmExit}>
         <p>
           Bài thi đang trong tiến trình. Nếu thoát bây giờ,{' '}
           <strong>kết quả các bài chưa nộp sẽ không được ghi nhận</strong>. Thời

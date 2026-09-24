@@ -63,10 +63,10 @@ test('mục trước là quiz — khoá nếu chưa đạt (isPass)', () => {
   );
 });
 
-test('mục trước là bài thực hành — dựa vào hasPassed', () => {
+test('mục trước là bài thực hành — không bị khóa, thoải mái luyện tập', () => {
   assert.equal(
     isTaskAccessible([task(false), task(false)], 1, { isAdmin: false }),
-    false,
+    true,
   );
   assert.equal(
     isTaskAccessible([task(true), task(false)], 1, { isAdmin: false }),

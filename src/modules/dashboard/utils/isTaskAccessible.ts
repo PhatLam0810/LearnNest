@@ -37,7 +37,8 @@ export function isTaskAccessible(
   if (ctx.isAdmin) return true;
   if (idx <= 0) return true;
   const prev = seq[idx - 1];
-  if (prev.kind === 'task') return !!prev.data.hasPassed;
+  // Bỏ rào cản bài thực hành trước đó: người dùng có thể thoải mái làm mọi bài thực hành (Word & Excel)
+  if (prev.kind === 'task') return true;
   if (prev.data.type === 'Text') {
     return !!ctx.quizPassedByLibrary?.[prev.data._id];
   }
