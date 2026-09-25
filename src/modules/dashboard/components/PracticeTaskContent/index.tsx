@@ -129,7 +129,6 @@ const PracticeTaskContent: React.FC<Props> = ({
   // thực hành bình thường (ngoài thi thử vẫn xem kết quả/lịch sử/thảo luận
   // như cũ).
   const isMockExam = !!mockExamAttemptId;
-  const isExcelMockExam = isMockExam && task.subject === 'Excel';
 
   const handleDownloadStarter = async () => {
     try {
@@ -199,70 +198,81 @@ const PracticeTaskContent: React.FC<Props> = ({
     },
   };
 
-  // Layout đặc biệt cho thi thử Excel: 2 cột (yêu cầu + công thức | upload)
-  if (isExcelMockExam) {
+  // Layout đặc biệt khi làm bài TRONG 1 phiên thi thử (Excel lẫn Word): 2
+  // cột trái yêu cầu | phải upload. Bên trái: Excel mô phỏng thanh công thức
+  // + bảng tính (đủ toàn bộ yêu cầu, không rút gọn); Word dùng danh sách yêu
+  // cầu dạng văn bản như trang thực hành thường. Bên phải dùng chung 1 thiết
+  // kế "nộp bài" cho cả 2 môn, chỉ đổi icon/nhãn theo subject.
+  if (isMockExam) {
+    const isExcel = task.subject === 'Excel';
+    const subjectColor = isExcel ? '#217346' : '#2b579a';
+    const subjectLetter = isExcel ? 'X' : 'W';
+
     return (
-      <div className="practice-content practice-excel-mock">
-        {/* Panel trái: đề bài + formula bar + danh sách yêu cầu */}
-        <div className="practice-excel-mock-left">
-          <h2 className="practice-excel-mock-title">{task.title}</h2>
+      <div className="practice-content practice-mock-exam">
+        {/* Panel trái: đề bài + (Excel: formula bar + bảng) hoặc danh sách yêu cầu */}
+        <div className="practice-mock-exam-left">
+          <h2 className="practice-mock-exam-title">{task.title}</h2>
 
-          {/* Formula bar — giả lập thanh công thức Excel */}
-          <div className="practice-excel-formula-bar">
-            <span className="practice-excel-formula-cell">fx</span>
-            <span className="practice-excel-formula-text">
-              {task.description?.match(/=\w+\(/)?.[0]
-                ? (task.description
-                    .split(/\r?\n/)
-                    .find(l => l.trim().startsWith('=')) ??
-                  'Nập công thức vào ô được yêu cầu')
-                : 'Thực hiện yêu cầu theo đề bài'}
-            </span>
-          </div>
+          {isExcel && (
+            <div className="practice-excel-formula-bar">
+              <span className="practice-excel-formula-cell">fx</span>
+              <span className="practice-excel-formula-text">
+                {task.description?.match(/=\w+\(/)?.[0]
+                  ? (task.description
+                      .split(/\r?\n/)
+                      .find(l => l.trim().startsWith('=')) ??
+                    'Nhập công thức vào ô được yêu cầu')
+                  : 'Thực hiện yêu cầu theo đề bài'}
+              </span>
+            </div>
+          )}
 
-          {/* Preview bảng dữ liệu mẫu (dùng tiêu đề từ tiêu chí) */}
-          <div className="practice-excel-table-wrap">
-            <table className="practice-excel-table">
-              <thead>
-                <tr>
-                  <th className="practice-excel-table-idx"></th>
-                  {['A', 'B', 'C', 'D', 'E'].map(col => (
-                    <th key={col}>{col}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {instructions?.slice(0, 5).map((it, i) => (
-                  <tr key={it.criteriaId}>
-                    <td className="practice-excel-table-idx">{i + 1}</td>
-                    <td colSpan={5} className="practice-excel-table-req">
-                      <span className="practice-excel-req-num">
-                        Yêu cầu {i + 1}:
-                      </span>{' '}
-                      {it.summary}
-                    </td>
-                  </tr>
-                ))}
-                {(instructions?.length ?? 0) > 5 && (
+          {isExcel ? (
+            <div className="practice-excel-table-wrap">
+              <table className="practice-excel-table">
+                <thead>
                   <tr>
-                    <td
-                      className="practice-excel-table-idx"
-                      style={{ color: 'var(--color-text-muted)' }}>
-                      ...
-                    </td>
-                    <td
-                      colSpan={5}
-                      style={{
-                        color: 'var(--color-text-muted)',
-                        fontSize: 12,
-                      }}>
-                      +{(instructions?.length ?? 0) - 5} yêu cầu khác
-                    </td>
+                    <th className="practice-excel-table-idx"></th>
+                    {['A', 'B', 'C', 'D', 'E'].map(col => (
+                      <th key={col}>{col}</th>
+                    ))}
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {instructions?.map((it, i) => (
+                    <tr key={it.criteriaId}>
+                      <td className="practice-excel-table-idx">{i + 1}</td>
+                      <td colSpan={5} className="practice-excel-table-req">
+                        <span className="practice-excel-req-num">
+                          Yêu cầu {i + 1}:
+                        </span>{' '}
+                        {it.summary}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="practice-content-requirements">
+              <h3>Yêu cầu đề bài</h3>
+              {instructions && instructions.length > 0 && (
+                <ol className="practice-content-instruction-list">
+                  {instructions.map((it, idx) => (
+                    <li key={it.criteriaId}>
+                      <span className="practice-content-instruction-label">
+                        Yêu cầu {idx + 1}:
+                      </span>{' '}
+                      <span className="practice-content-instruction-text">
+                        {it.summary}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          )}
 
           {task.description && (
             <p className="practice-content-desc" style={{ marginTop: 16 }}>
@@ -271,10 +281,10 @@ const PracticeTaskContent: React.FC<Props> = ({
           )}
         </div>
 
-        {/* Panel phải: upload + trạng thái */}
-        <div className="practice-excel-mock-right">
-          <div className="practice-excel-upload-card">
-            <div className="practice-excel-upload-icon">
+        {/* Panel phải: upload + trạng thái — dùng chung cho Excel/Word */}
+        <div className="practice-mock-exam-right">
+          <div className="practice-mock-exam-upload-card">
+            <div className="practice-mock-exam-upload-icon">
               <svg
                 width="40"
                 height="40"
@@ -282,7 +292,7 @@ const PracticeTaskContent: React.FC<Props> = ({
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true">
-                <rect width="40" height="40" rx="10" fill="#217346" />
+                <rect width="40" height="40" rx="10" fill={subjectColor} />
                 <text
                   x="50%"
                   y="56%"
@@ -292,15 +302,17 @@ const PracticeTaskContent: React.FC<Props> = ({
                   fontSize="18"
                   fontWeight="bold"
                   fontFamily="Arial">
-                  X
+                  {subjectLetter}
                 </text>
               </svg>
             </div>
-            <div className="practice-excel-upload-title">Nộp bài làm Excel</div>
-            <div className="practice-excel-upload-hint">
-              File .xlsx, tối đa 50MB
+            <div className="practice-mock-exam-upload-title">
+              Nộp bài làm {task.subject}
             </div>
-            <div className="practice-excel-upload-actions">
+            <div className="practice-mock-exam-upload-hint">
+              File {accept}, tối đa 50MB
+            </div>
+            <div className="practice-mock-exam-upload-actions">
               <Button
                 icon={<DownloadOutlined />}
                 onClick={handleDownloadStarter}
@@ -313,12 +325,12 @@ const PracticeTaskContent: React.FC<Props> = ({
                   icon={<UploadOutlined />}
                   loading={isSubmitting}
                   style={{ width: '100%' }}>
-                  Nộp bài (.xlsx)
+                  Nộp bài ({accept})
                 </Button>
               </Upload>
             </div>
-            {isMockExam && latestResult && (
-              <div className="practice-excel-submitted-badge">
+            {latestResult && (
+              <div className="practice-mock-exam-submitted-badge">
                 <CheckCircleFilled style={{ color: '#52c41a' }} />
                 <span>Đã nộp bài — kết quả hiện sau khi nộp bài thi</span>
               </div>
@@ -326,11 +338,11 @@ const PracticeTaskContent: React.FC<Props> = ({
           </div>
 
           {/* Tóm tắt số tiêu chí */}
-          <div className="practice-excel-criteria-summary">
-            <span className="practice-excel-criteria-count">
+          <div className="practice-mock-exam-criteria-summary">
+            <span className="practice-mock-exam-criteria-count">
               {criteria.length}
             </span>
-            <span className="practice-excel-criteria-label">
+            <span className="practice-mock-exam-criteria-label">
               tiêu chí chấm điểm
             </span>
           </div>

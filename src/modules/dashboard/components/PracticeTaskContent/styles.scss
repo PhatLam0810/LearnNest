@@ -208,21 +208,21 @@
   }
 }
 
-// ---- Excel Mock Exam: layout 2 c\u1ed9t ----
+// ---- Mock Exam (Excel + Word): layout 2 c\u1ed9t ----
 
-.practice-excel-mock {
+.practice-mock-exam {
   display: flex;
   gap: 24px;
   align-items: flex-start;
   min-height: 480px;
 }
 
-.practice-excel-mock-left {
+.practice-mock-exam-left {
   flex: 1;
   min-width: 0;
 }
 
-.practice-excel-mock-title {
+.practice-mock-exam-title {
   margin: 0 0 16px;
   font-size: 18px;
   font-weight: 700;
@@ -341,7 +341,7 @@
 }
 
 // Panel ph\u1ea3i: upload card
-.practice-excel-mock-right {
+.practice-mock-exam-right {
   width: 260px;
   flex-shrink: 0;
   display: flex;
@@ -351,7 +351,7 @@
   top: 88px;
 }
 
-.practice-excel-upload-card {
+.practice-mock-exam-upload-card {
   border: 1.5px solid #d0d7de;
   border-radius: 16px;
   padding: 24px 20px;
@@ -364,30 +364,30 @@
   text-align: center;
 }
 
-.practice-excel-upload-icon {
+.practice-mock-exam-upload-icon {
   line-height: 0;
 }
 
-.practice-excel-upload-title {
+.practice-mock-exam-upload-title {
   font-size: 15px;
   font-weight: 700;
   color: var(--color-text-primary);
 }
 
-.practice-excel-upload-hint {
+.practice-mock-exam-upload-hint {
   font-size: 12.5px;
   color: var(--color-text-muted);
   margin-top: -6px;
 }
 
-.practice-excel-upload-actions {
+.practice-mock-exam-upload-actions {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
 }
 
-.practice-excel-submitted-badge {
+.practice-mock-exam-submitted-badge {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -402,7 +402,7 @@
   justify-content: center;
 }
 
-.practice-excel-criteria-summary {
+.practice-mock-exam-criteria-summary {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -414,14 +414,14 @@
   text-align: center;
 }
 
-.practice-excel-criteria-count {
+.practice-mock-exam-criteria-count {
   font-size: 28px;
   font-weight: 800;
   color: #217346;
   line-height: 1;
 }
 
-.practice-excel-criteria-label {
+.practice-mock-exam-criteria-label {
   font-size: 12.5px;
   color: var(--color-text-muted);
   font-weight: 500;
@@ -429,11 +429,11 @@
 
 // Responsive: m\u00e0n nh\u1ecf stack d\u1ecdc
 @media (max-width: 700px) {
-  .practice-excel-mock {
+  .practice-mock-exam {
     flex-direction: column;
   }
 
-  .practice-excel-mock-right {
+  .practice-mock-exam-right {
     width: 100%;
     position: static;
   }
