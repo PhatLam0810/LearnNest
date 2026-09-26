@@ -80,10 +80,6 @@ const PracticeListPage = () => {
   const [keyword, setKeyword] = useState('');
   const subject = SUBJECT_TABS.find(t => t.key === activeTab)?.subject;
 
-  const { data: courses, isFetching: isLoadingCourses } =
-    dashboardQuery.useGetPracticeCoursesQuery();
-  // Bài tập chưa gắn vào khóa thực hành nào (chưa có lessonId) — vẫn hiện
-  // riêng bên dưới để không "mất" đề cũ nếu admin chưa kịp gán khóa/phần.
   const { data: allTasks, isFetching: isLoadingTasks } =
     dashboardQuery.useGetPracticeTasksStudentQuery();
   const { data: weakSkills } = dashboardQuery.useGetMyWeakSkillsQuery();
@@ -115,9 +111,6 @@ const PracticeListPage = () => {
     !normalizedKeyword ||
     texts.some(t => t && normalize(t).includes(normalizedKeyword));
 
-  const filteredCourses = (courses || []).filter(
-    c => (!subject || c.subject === subject) && matchesKeyword(c.title),
-  );
   // Toàn bộ bài tập (kể cả bài gắn vào khóa học) — học viên có thể luyện
   // riêng lẻ bất kỳ bài nào, không cần phải học theo lộ trình mới làm được.
   const allTasksFiltered = [...(allTasks || [])]
@@ -134,7 +127,7 @@ const PracticeListPage = () => {
         : a.title.localeCompare(b.title),
     );
 
-  const isLoading = isLoadingCourses || isLoadingTasks;
+  const isLoading = isLoadingTasks;
 
   return (
     <div className="practice-list-page">
@@ -278,7 +271,7 @@ const PracticeListPage = () => {
 
       {isLoading ? (
         <Spin />
-      ) : filteredCourses.length === 0 && allTasksFiltered.length === 0 ? (
+      ) : allTasksFiltered.length === 0 ? (
         <Empty
           description={
             keyword.trim()
@@ -288,33 +281,6 @@ const PracticeListPage = () => {
         />
       ) : (
         <>
-          {filteredCourses.length > 0 && (
-            <div className="practice-task-grid">
-              {filteredCourses.map(course => (
-                <div
-                  // 1 lesson có thể chứa cả bài Word lẫn Excel (VD: phần
-                  // thực hành gộp nhiều môn) — BE trả về 2 dòng riêng cho
-                  // cùng 1 lessonId, phải ghép thêm subject mới ra key
-                  // duy nhất, tránh trùng key React.
-                  key={`${course.lessonId}-${course.subject}`}
-                  className="practice-task-card"
-                  role="button"
-                  tabIndex={0}
-                  onClick={() =>
-                    router.push(`/dashboard/practice/course/${course.lessonId}`)
-                  }>
-                  <Tag color={course.subject === 'Excel' ? 'green' : 'blue'}>
-                    {course.subject}
-                  </Tag>
-                  <h3 className="practice-task-title">{course.title}</h3>
-                  <p className="practice-task-desc">
-                    {course.taskCount} bài tập
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-
           {allTasksFiltered.length > 0 && (
             <>
               <div className="practice-list-toolbar">
