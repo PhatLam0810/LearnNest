@@ -45,7 +45,7 @@ const buildItems = (qnaPendingCount: number): TabItem[] => [
     children: <LessonLearnersOverview />,
   },
   { key: '11', label: 'Giao Bài', children: <GiaoBaiPage /> },
-  { key: '12', label: 'Tạo Bài Tập', children: <QuizManagePage /> },
+  { key: '12', label: 'Ngân Hàng Câu Hỏi', children: <QuizManagePage /> },
   { key: '13', label: 'Bài Nộp Học Viên', children: <SubmissionsManage /> },
   { key: '10', label: 'Đề Thi Thử', children: <MockExamManage /> },
   { key: '9', label: 'Báo Cáo Ngưỡng Đạt', children: <PassRateReport /> },

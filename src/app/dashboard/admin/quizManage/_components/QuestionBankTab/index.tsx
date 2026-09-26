@@ -100,6 +100,7 @@ const QuestionBankTab: React.FC = () => {
         rowSelection={{
           selectedRowKeys: selectedIds,
           onChange: keys => setSelectedIds(keys as string[]),
+          getCheckboxProps: () => ({ 'aria-label': 'Chọn câu hỏi' }) as never,
         }}
         locale={{
           emptyText: searchQuery ? (

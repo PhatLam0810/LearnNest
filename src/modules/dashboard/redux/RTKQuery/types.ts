@@ -372,9 +372,14 @@ export interface SearchResults {
 // ---- Bài được giao (admin giao qua lớp thực hành) ----
 export interface MyAssignmentItem {
   assignmentId: string;
-  taskId: string;
+  assignmentType: 'practice' | 'quiz' | 'mockExam';
+  // Chỉ 1 trong 3 id có giá trị, tùy assignmentType. lessonId chỉ có với quiz.
+  taskId: string | null;
+  quizId: string | null;
+  mockExamId: string | null;
+  lessonId: string | null;
   taskTitle: string;
-  subject: 'Word' | 'Excel';
+  subject?: 'Word' | 'Excel';
   dueDate: string;
   className?: string;
   status: 'not_submitted' | 'passed' | 'failed';
