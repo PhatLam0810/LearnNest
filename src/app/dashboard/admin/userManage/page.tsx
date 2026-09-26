@@ -23,6 +23,7 @@ import dynamic from 'next/dynamic';
 import StatCard from '../../home/_components/StatCard';
 import StateTag from '~mdAdmin/components/StateTag';
 import UserBulkActions from '~mdAdmin/components/UserBulkActions';
+import StudentProfileDrawer from '~mdAdmin/components/StudentProfileDrawer';
 import { messageApi } from '@hooks';
 import { downloadBlob } from '~mdAdmin/components/submissionShared';
 
@@ -53,6 +54,7 @@ const UserManage = () => {
   const [createUserForm] = Form.useForm<CreateUserParams>();
   const [isModalDeleteUser, setModalDeleteUser] = useState(false);
   const [infoUser, setInfoUser] = useState<UserItem>(null);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [deleteAccount] = authQuery.useDeleteAccountMutation();
   const { Search } = Input;
   const [createUser, { isLoading: isLoadingCreateUser }] =
@@ -203,6 +205,9 @@ const UserManage = () => {
       key: 'action',
       render: (record: UserItem) => (
         <Space>
+          <Button onClick={() => setProfileUserId(record._id)}>
+            Hồ sơ học tập
+          </Button>
           <Button
             danger
             onClick={() => {
@@ -220,6 +225,10 @@ const UserManage = () => {
   return (
     <View style={styles.container}>
       {contextHolder}
+      <StudentProfileDrawer
+        userId={profileUserId}
+        onClose={() => setProfileUserId(null)}
+      />
       <View style={styles.statsGrid}>
         <StatCard
           icon="👥"

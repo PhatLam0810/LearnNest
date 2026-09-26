@@ -12,6 +12,7 @@ import ClassAddMembersModal from '../ClassAddMembersModal';
 import ClassMoveMembersModal from '../ClassMoveMembersModal';
 import FilteredEmptyState from '../FilteredEmptyState';
 import ThemedTable from '../ThemedTable';
+import StudentProfileDrawer from '../StudentProfileDrawer';
 import { apiErrorMessage } from '../practiceClassShared';
 import styles from './styles';
 
@@ -33,6 +34,7 @@ const ClassMembersTab: React.FC<ClassMembersTabProps> = ({
   const [selected, setSelected] = useState<string[]>([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isMoveOpen, setIsMoveOpen] = useState(false);
+  const [profileUserId, setProfileUserId] = useState<string | null>(null);
 
   const { data, isFetching, isError, refetch } =
     adminQuery.useGetClassMembersQuery({
@@ -106,6 +108,12 @@ const ClassMembersTab: React.FC<ClassMembersTabProps> = ({
       align: 'right',
       render: (_: unknown, r) => (
         <View style={styles.rowActions}>
+          <button
+            type="button"
+            style={styles.moveButton as React.CSSProperties}
+            onClick={() => setProfileUserId(r._id)}>
+            Hồ sơ
+          </button>
           <button
             type="button"
             style={styles.moveButton as React.CSSProperties}
@@ -198,6 +206,10 @@ const ClassMembersTab: React.FC<ClassMembersTabProps> = ({
 
   return (
     <View style={styles.wrap}>
+      <StudentProfileDrawer
+        userId={profileUserId}
+        onClose={() => setProfileUserId(null)}
+      />
       <View style={styles.toolbar}>
         <View style={styles.searchWrap}>
           <Input.Search

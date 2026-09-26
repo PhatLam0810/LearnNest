@@ -40,6 +40,7 @@ import {
   SendClassAnnouncementPayload,
   AssignTaskBulkPayload,
   ClassGrades,
+  LearningProfile,
   AssignTaskBulkResult,
   LessonAssignmentItem,
   ClassCodeOption,
@@ -1044,6 +1045,15 @@ export const adminQuery = baseQuery.injectEndpoints({
     }),
     // Bảng điểm trên màn hình - cùng dữ liệu với file CSV bên dưới (BE dùng
     // chung computeClassGrades), tự làm mới khi giao/xóa bài (tag ClassAssignment).
+    // Hồ sơ học tập 1 học viên: tiến độ từng khóa + điểm/nộp muộn gần đây
+    // (thực hành, quiz, thi thử).
+    getStudentLearningProfile: builder.query<LearningProfile, string>({
+      query: userId => ({
+        url: `admin/users/${userId}/learning-profile`,
+        method: 'GET',
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
     getClassGrades: builder.query<ClassGrades, string>({
       query: classId => ({
         url: `admin/practice-classes/${classId}/grades`,

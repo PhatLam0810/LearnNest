@@ -2,7 +2,7 @@
 import { asButton } from '@/utils/asButton';
 import React, { useMemo, useState } from 'react';
 import { View, Text } from 'react-native-web';
-import { Button, Input, Modal, Segmented, Space, Tag } from 'antd';
+import { Button, Input, Modal, Result, Segmented, Space, Tag } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@components/AppIcon';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
@@ -32,7 +32,8 @@ const MockExamManage = () => {
   const [subjectFilter, setSubjectFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const { data, isFetching } = adminQuery.useGetMockExamsAdminQuery();
+  const { data, isFetching, isError, refetch } =
+    adminQuery.useGetMockExamsAdminQuery();
   const [deleteExam, { isLoading: isDeleting }] =
     adminQuery.useDeleteMockExamMutation();
 
@@ -231,6 +232,12 @@ const MockExamManage = () => {
               <FilteredEmptyState
                 query={searchQuery}
                 onClear={() => setSearchQuery('')}
+              />
+            ) : isError && !data ? (
+              <Result
+                status="warning"
+                title="Không tải được danh sách đề thi thử"
+                extra={<Button onClick={() => refetch()}>Thử lại</Button>}
               />
             ) : undefined,
           }}

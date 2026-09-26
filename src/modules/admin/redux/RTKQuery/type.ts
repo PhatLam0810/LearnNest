@@ -832,3 +832,32 @@ export interface AdminOverview {
     pendingFeedback: number;
   };
 }
+
+// ---- Hồ sơ học tập của 1 học viên (admin) ----
+export interface LearningProfileCourse {
+  lessonId: string;
+  title: string;
+  enrolledAt: string | null;
+  isCompleted: boolean;
+  progressPercent: number;
+  completedItems: number;
+  totalItems: number;
+}
+export interface LearningProfileActivity {
+  type: 'practice' | 'quiz' | 'mockExam';
+  title: string;
+  score: number | null;
+  isLate: boolean;
+  at: string;
+}
+export interface LearningProfile {
+  user: {
+    _id: string;
+    fullName: string;
+    email: string;
+    studentId?: string;
+    class?: string;
+  };
+  courses: LearningProfileCourse[];
+  recentActivity: LearningProfileActivity[];
+}
