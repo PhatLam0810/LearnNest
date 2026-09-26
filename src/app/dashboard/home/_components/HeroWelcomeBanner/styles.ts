@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     flexWrap: 'wrap',
+    maxWidth: '100%',
   },
   streakBadge: {
     flexDirection: 'row',
@@ -89,7 +90,7 @@ const styles = StyleSheet.create({
   },
   streakText: {
     ...typography.buttonSmall,
-    color: '#ea580c',
+    color: '#c2410c',
     lineHeight: 20,
     fontWeight: '700',
   },
@@ -102,6 +103,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    maxWidth: '100%',
+    minWidth: 0,
+    flexShrink: 1,
     backgroundColor: 'var(--color-surface-selected)',
     borderTopWidth: 1,
     borderRightWidth: 1,

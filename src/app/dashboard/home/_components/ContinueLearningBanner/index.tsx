@@ -107,7 +107,15 @@ const ContinueLearningBanner: React.FC<ContinueLearningBannerProps> = ({
       </View>
       <View style={styles.rightCol}>
         <Text style={styles.progressPercent}>{progress}%</Text>
-        <View style={styles.progressTrack} aria-label="Tiến độ hoàn thành">
+        <View
+          style={styles.progressTrack}
+          {...({
+            role: 'progressbar',
+            'aria-label': 'Tiến độ hoàn thành',
+            'aria-valuemin': 0,
+            'aria-valuemax': 100,
+            'aria-valuenow': progress,
+          } as object)}>
           <View style={[styles.progressFill, { width: `${progress}%` }]} />
         </View>
         <Text style={styles.progressCaption}>Tiến độ khóa học này</Text>

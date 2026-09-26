@@ -120,7 +120,10 @@ export const HeroWelcomeBanner: React.FC<HeroWelcomeBannerProps> = ({
           {/* Streak Flame Badge with Morphicon */}
           <View
             style={styles.streakBadge}
-            aria-label={`Chuỗi ngày học: ${streakDays} ngày`}>
+            {...({
+              role: 'img',
+              'aria-label': `Chuỗi ngày học: ${streakDays} ngày`,
+            } as object)}>
             <FireOutlined size={20} color="#ea580c" />
             <Text style={styles.streakText}>{streakDays} ngày</Text>
             <Text style={styles.streakSubText}>Streak 🔥</Text>
@@ -129,9 +132,12 @@ export const HeroWelcomeBanner: React.FC<HeroWelcomeBannerProps> = ({
           {/* Level Badge */}
           <View
             style={styles.levelBadge}
-            aria-label={`Cấp độ ${levelInfo.level}: ${levelInfo.title}`}>
+            {...({
+              role: 'img',
+              'aria-label': `Cấp độ ${levelInfo.level}: ${levelInfo.title}`,
+            } as object)}>
             <TrophyOutlined size={18} color="var(--color-vhu-primary)" />
-            <Text style={styles.levelText}>
+            <Text style={[styles.levelText, { flexShrink: 1, minWidth: 0 }]}>
               Lv.{levelInfo.level} · {levelInfo.title}
             </Text>
           </View>
@@ -156,7 +162,13 @@ export const HeroWelcomeBanner: React.FC<HeroWelcomeBannerProps> = ({
 
         <View
           style={styles.progressBarWrapper}
-          aria-label="Thanh tiến độ kinh nghiệm">
+          {...({
+            role: 'progressbar',
+            'aria-label': 'Thanh tiến độ kinh nghiệm',
+            'aria-valuemin': 0,
+            'aria-valuemax': 100,
+            'aria-valuenow': levelInfo.progress,
+          } as object)}>
           <View
             style={[
               styles.progressBarFill,

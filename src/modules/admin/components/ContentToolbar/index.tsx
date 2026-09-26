@@ -40,6 +40,7 @@ const ContentToolbar: React.FC<ContentToolbarProps> = ({
           />
           <Button
             style={styles.searchButton}
+            aria-label="Tìm kiếm"
             onClick={triggerSearch}
             icon={
               <SearchOutlined

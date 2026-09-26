@@ -384,6 +384,7 @@ const HeaderLayout: React.FC = ({}) => {
                     type="text"
                     style={{ display: 'flex' }}
                     icon={<BellOutlined style={{ fontSize: 24 }} />}
+                    aria-label="Thông báo"
                     className="notification-bell-btn"
                   />
                 </Badge>
