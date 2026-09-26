@@ -183,7 +183,8 @@ const styles = StyleSheet.create({
     transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
   },
   collapseToggleBtnCollapsed: {
-    width: 44,
+    width: '100%',
+    maxWidth: 48,
     height: 36,
     paddingLeft: 0,
     paddingRight: 0,
@@ -193,6 +194,7 @@ const styles = StyleSheet.create({
     color: 'var(--color-text-primary)',
     fontWeight: '600',
     lineHeight: 16,
+    whiteSpace: 'nowrap',
   },
 });
 

@@ -41,9 +41,11 @@
   padding-inline: 0 !important;
 }
 .ant-menu-inline-collapsed .ant-menu-item {
-  width: 48px !important;
+  width: 100% !important;
+  max-width: 48px;
   height: 48px !important;
   margin: 0 auto 8px auto !important;
+  overflow: hidden;
   padding: 0 !important;
   justify-content: center !important;
   align-items: center !important;
@@ -51,14 +53,22 @@
 .ant-menu .ant-menu-title-content {
   margin: 0 !important;
   font-family: 'Lexend', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  max-height: 20px;
+  opacity: 1;
   transition:
-    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) 0.1s,
+    max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
+/* Ẩn chữ bằng opacity + max-height (không display:none) để chữ mờ dần thay vì
+   xuống dòng / bật ra đột ngột khi sidebar đổi độ rộng. */
 .ant-menu-inline-collapsed .ant-menu-title-content {
   opacity: 0 !important;
-  transform: scale(0.8) !important;
-  display: none !important;
+  max-height: 0;
+  transition:
+    opacity 0.1s ease,
+    max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 .ant-menu .ant-menu-item-icon {
   font-size: 20px;
