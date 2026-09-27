@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button, Empty, Spin, Upload, UploadProps } from 'antd';
 import {
   CheckCircleFilled,
@@ -15,50 +15,54 @@ import { dashboardQuery } from '~mdDashboard/redux';
 import {
   PracticeSubmitResponse,
   PracticeSubmissionResultItem,
+  PRACTICE_CRITERIA_LABELS,
+  PracticeCriteria,
 } from '~mdDashboard/types/practice';
 import CommentSection from '@components/CommentSection';
 import BookmarkButton from '@components/BookmarkButton';
-import './styles.scss';
+import { useResponsive } from '@/styles/responsive';
+import { asButton } from '@/utils/asButton';
+import {
+  buildCellWindow,
+  readWorkbook,
+  type CellWindowResult,
+} from '@/utils/practiceCellPreview';
+import type { WorkBook } from 'xlsx';
+import styles from './styles';
 
 type Props = {
   taskId: string;
-  // Gọi đúng 1 lần khi 1 lần nộp bài ĐẠT (>= 80% số điểm) — nơi gọi (VD
-  // ModuleDetailPage) dùng để mở khóa + có thể tự chuyển sang nội dung tiếp
-  // theo trong khóa học, y hệt cách video/trắc nghiệm hoạt động.
   onPassed?: () => void;
-  // Có giá trị khi bài này đang được làm TRONG 1 phiên thi thử đang diễn ra
-  // (xem MockExamAttemptPage) — gắn kèm vào request nộp bài để BE biết tính
-  // vào kết quả thi thử nào, và validate còn hợp lệ (đúng đề, chưa hết giờ).
   mockExamAttemptId?: string;
-  // Gọi sau MỖI lần nộp bài thành công (đạt hay không) — khác onPassed (chỉ
-  // gọi khi đạt) — trang thi thử dùng để cập nhật ngay badge "đã nộp" ở
-  // sidebar mà không cần đợi học viên tự refresh.
   onSubmitted?: () => void;
 };
 
-// Quy đổi điểm thô (total/max, max tùy số tiêu chí từng đề) về thang 10
-// chung cho MỌI bài kiểm tra (trắc nghiệm lẫn thực hành) - chỉ đổi lúc HIỂN
-// THỊ, dữ liệu gốc total/max vẫn giữ nguyên ở DB/response để nơi khác (vd
-// liệt kê từng tiêu chí) vẫn biết đúng điểm thô thật.
 const toScore10 = (total: number, max: number) =>
   max ? Number(((total / max) * 10).toFixed(1)) : 0;
 
-// Toàn bộ nội dung "làm 1 bài tập thực hành": mô tả yêu cầu, tải đề gốc,
-// nộp bài + chấm điểm, kết quả, lịch sử nộp. Tách riêng khỏi trang để dùng
-// lại được ở cả 2 chỗ: trang chi tiết đứng riêng (/dashboard/practice/[id])
-// và bên phải trang khóa thực hành dạng sidebar Phần > Bài tập.
 const PracticeTaskContent: React.FC<Props> = ({
   taskId,
   onPassed,
   mockExamAttemptId,
   onSubmitted,
 }) => {
+  const { isMobile } = useResponsive();
   const accessToken = useAppSelector(
     state => state.authReducer.tokenInfo?.accessToken,
   );
   const [latestResult, setLatestResult] =
     useState<PracticeSubmitResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState<'task' | 'fix'>('task');
+  const [expandedCriteriaId, setExpandedCriteriaId] = useState<string | null>(
+    null,
+  );
+  const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
+    {},
+  );
+  const [workbook, setWorkbook] = useState<WorkBook | null>(null);
+  const [workbookLoading, setWorkbookLoading] = useState(false);
+  const [workbookError, setWorkbookError] = useState<string | null>(null);
 
   const {
     data: detail,
@@ -70,67 +74,80 @@ const PracticeTaskContent: React.FC<Props> = ({
   );
   const { data: submissions, refetch: refetchSubmissions } =
     dashboardQuery.useGetMyPracticeSubmissionsQuery(taskId, {
-      skip: !taskId || !!mockExamAttemptId, // không cần lịch sử khi đang thi
+      skip: !taskId || !!mockExamAttemptId,
     });
-  // Hướng dẫn "Bước 1,2,3..." của TỪNG yêu cầu — hiện ngay từ đầu (không đợi
-  // nộp sai mới thấy) để học viên biết chính xác cần làm gì cho mỗi tiêu chí
-  // chấm điểm, giống cách đề thi MOS thật liệt kê rõ từng yêu cầu.
   const { data: instructions } =
     dashboardQuery.useGetPracticeTaskInstructionsQuery(taskId, {
       skip: !taskId,
     });
-  // Bug thật đã gặp: nút "Lưu" bài thực hành chỉ có ở thẻ trong danh sách
-  // (PracticeListPage) - lúc ĐANG LÀM bài (component này, dùng chung cho cả
-  // trang đứng riêng /dashboard/practice/[id], khóa thực hành, và bài thực
-  // hành trong 1 khóa video) lại không có, nên mở bài từ khóa học/làm bài
-  // xong không có chỗ bấm lưu. Thêm ở đây 1 lần, tự động có mặt ở MỌI nơi
-  // dùng lại component này.
   const { data: bookmarkedTaskIds } =
     dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
 
-  // Đổi bài tập (taskId khác) thì phải xoá kết quả lần nộp trước đi, không
-  // thì kết quả bài cũ sẽ hiện nhầm lên bài mới vừa chọn.
   const [lastTaskId, setLastTaskId] = useState(taskId);
   if (taskId !== lastTaskId) {
     setLastTaskId(taskId);
     setLatestResult(null);
+    setActiveTab('task');
+    setExpandedCriteriaId(null);
   }
 
-  if (isFetching) {
-    return (
-      <div className="practice-content practice-content-loading">
-        <Spin />
-      </div>
-    );
-  }
+  // Lấy kết quả chấm từ lần nộp mới nhất trong session hoặc lịch sử nộp bài gần nhất
+  const currentResult = useMemo(() => {
+    if (latestResult) return latestResult;
+    if (submissions && submissions.length > 0 && !mockExamAttemptId) {
+      const last = submissions[0];
+      return {
+        submissionId: last._id,
+        totalScore: last.totalScore,
+        maxScore: last.maxScore,
+        isPass: last.totalScore / (last.maxScore || 1) >= 0.8,
+        items: last.results || [],
+      } as PracticeSubmitResponse;
+    }
+    return null;
+  }, [latestResult, submissions, mockExamAttemptId]);
 
-  if (!detail?.task) {
-    // Backend chặn bài chưa tới lượt bằng 403 kèm lý do cụ thể ("Bạn cần xem
-    // hết video trước đó..."). Hiện đúng câu đó thay vì "Không tìm thấy đề
-    // thực hành": bài CÓ tồn tại, chỉ là chưa mở khóa — báo sai sẽ khiến học
-    // viên tưởng đề bị xóa và đi hỏi admin.
-    const rawMessage =
-      (detailError as any)?.data?.message ?? (detailError as any)?.message;
-    const lockedMessage = typeof rawMessage === 'string' ? rawMessage : '';
-    return (
-      <div className="practice-content">
-        <Empty description={lockedMessage || 'Không tìm thấy đề thực hành'} />
-      </div>
-    );
-  }
-
-  const { task, criteria } = detail;
-  const accept = task.subject === 'Excel' ? '.xlsx' : '.docx';
-  // Đang làm bài TRONG 1 phiên thi thử: giấu kết quả/điểm ngay sau khi nộp
-  // từng bài (mô phỏng đúng áp lực thi thật - không biết đúng/sai giữa
-  // chừng), ẩn cả lịch sử nộp bài và khung thảo luận (tránh "hỏi bài" giữa
-  // giờ thi). Kết quả chỉ lộ ra ở trang kết quả sau khi bấm "Nộp bài thi"
-  // (MockExamResultView) - xem yêu cầu người dùng, không áp dụng khi làm bài
-  // thực hành bình thường (ngoài thi thử vẫn xem kết quả/lịch sử/thảo luận
-  // như cũ).
+  const isGraded = Boolean(currentResult);
   const isMockExam = !!mockExamAttemptId;
 
+  // Đọc THẬT file vừa nộp để khung xem vùng ô hiện đúng giá trị/công thức -
+  // đọc 1 lần cho cả bài (không phải mỗi tiêu chí đọc lại), tải qua endpoint
+  // riêng vì fileUrl (GCS) không cho fetch thẳng từ trình duyệt (không CORS).
+  useEffect(() => {
+    const submissionId = currentResult?.submissionId;
+    if (!submissionId || detail?.task?.subject !== 'Excel') {
+      setWorkbook(null);
+      setWorkbookError(null);
+      return;
+    }
+    let cancelled = false;
+    setWorkbookLoading(true);
+    setWorkbookError(null);
+    api
+      .get(`/practice/submissions/${submissionId}/file`, {
+        responseType: 'blob',
+      })
+      .then(res => readWorkbook(res.data))
+      .then(wb => {
+        if (!cancelled) setWorkbook(wb);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setWorkbook(null);
+          setWorkbookError('Không đọc được file bài nộp để xem trước vùng ô.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setWorkbookLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentResult?.submissionId, detail?.task?.subject]);
+
   const handleDownloadStarter = async () => {
+    if (!detail?.task) return;
+    const acceptExt = detail.task.subject === 'Excel' ? '.xlsx' : '.docx';
     try {
       const res = await api.get(`/practice/tasks/${taskId}/starter-file`, {
         responseType: 'blob',
@@ -138,11 +155,7 @@ const PracticeTaskContent: React.FC<Props> = ({
       const blobUrl = URL.createObjectURL(res.data);
       const a = document.createElement('a');
       a.href = blobUrl;
-      // Tên file dễ hiểu theo tiêu đề đề bài, thay vì tên hash dài của
-      // Firebase Storage — proxy qua backend nên tải blob rồi tự đặt tên,
-      // không dùng thẳng link Firebase (cross-origin nên thuộc tính
-      // `download` của thẻ <a> sẽ bị trình duyệt bỏ qua).
-      a.download = `${task.title}${accept}`;
+      a.download = `${detail.task.title}${acceptExt}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -153,7 +166,7 @@ const PracticeTaskContent: React.FC<Props> = ({
   };
 
   const uploadProps: UploadProps = {
-    accept,
+    accept: detail?.task?.subject === 'Excel' ? '.xlsx' : '.docx',
     maxCount: 1,
     showUploadList: false,
     action: `${api.defaults.baseURL}/practice/tasks/${taskId}/submit`,
@@ -173,8 +186,6 @@ const PracticeTaskContent: React.FC<Props> = ({
         if (result) {
           setLatestResult(result);
           if (isMockExam) {
-            // Không hé lộ điểm/đạt-hay-chưa giữa giờ thi thử - chỉ báo đã
-            // nhận bài, kết quả thật chờ ở trang kết quả sau khi nộp bài thi.
             messageApi.success('Đã nộp bài làm cho bài này.');
           } else if (result.isPass) {
             messageApi.success(
@@ -198,163 +209,89 @@ const PracticeTaskContent: React.FC<Props> = ({
     },
   };
 
-  // Layout đặc biệt khi làm bài TRONG 1 phiên thi thử (Excel lẫn Word): 2
-  // cột trái yêu cầu | phải upload. Bên trái: Excel mô phỏng thanh công thức
-  // + bảng tính (đủ toàn bộ yêu cầu, không rút gọn); Word dùng danh sách yêu
-  // cầu dạng văn bản như trang thực hành thường. Bên phải dùng chung 1 thiết
-  // kế "nộp bài" cho cả 2 môn, chỉ đổi icon/nhãn theo subject.
-  if (isMockExam) {
-    const isExcel = task.subject === 'Excel';
-    const subjectColor = isExcel ? '#217346' : '#2b579a';
-    const subjectLetter = isExcel ? 'X' : 'W';
-
+  if (isFetching) {
     return (
-      <div className="practice-content practice-mock-exam">
-        {/* Panel trái: đề bài + (Excel: formula bar + bảng) hoặc danh sách yêu cầu */}
-        <div className="practice-mock-exam-left">
-          <h2 className="practice-mock-exam-title">{task.title}</h2>
-
-          {isExcel && (
-            <div className="practice-excel-formula-bar">
-              <span className="practice-excel-formula-cell">fx</span>
-              <span className="practice-excel-formula-text">
-                {task.description?.match(/=\w+\(/)?.[0]
-                  ? (task.description
-                      .split(/\r?\n/)
-                      .find(l => l.trim().startsWith('=')) ??
-                    'Nhập công thức vào ô được yêu cầu')
-                  : 'Thực hiện yêu cầu theo đề bài'}
-              </span>
-            </div>
-          )}
-
-          {isExcel ? (
-            <div className="practice-excel-table-wrap">
-              <table className="practice-excel-table">
-                <thead>
-                  <tr>
-                    <th className="practice-excel-table-idx"></th>
-                    {['A', 'B', 'C', 'D', 'E'].map(col => (
-                      <th key={col}>{col}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {instructions?.map((it, i) => (
-                    <tr key={it.criteriaId}>
-                      <td className="practice-excel-table-idx">{i + 1}</td>
-                      <td colSpan={5} className="practice-excel-table-req">
-                        <span className="practice-excel-req-num">
-                          Yêu cầu {i + 1}:
-                        </span>{' '}
-                        {it.summary}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="practice-content-requirements">
-              <h3>Yêu cầu đề bài</h3>
-              {instructions && instructions.length > 0 && (
-                <ol className="practice-content-instruction-list">
-                  {instructions.map((it, idx) => (
-                    <li key={it.criteriaId}>
-                      <span className="practice-content-instruction-label">
-                        Yêu cầu {idx + 1}:
-                      </span>{' '}
-                      <span className="practice-content-instruction-text">
-                        {it.summary}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-          )}
-
-          {task.description && (
-            <p className="practice-content-desc" style={{ marginTop: 16 }}>
-              {task.description}
-            </p>
-          )}
-        </div>
-
-        {/* Panel phải: upload + trạng thái — dùng chung cho Excel/Word */}
-        <div className="practice-mock-exam-right">
-          <div className="practice-mock-exam-upload-card">
-            <div className="practice-mock-exam-upload-icon">
-              <svg
-                width="40"
-                height="40"
-                viewBox="0 0 40 40"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true">
-                <rect width="40" height="40" rx="10" fill={subjectColor} />
-                <text
-                  x="50%"
-                  y="56%"
-                  dominantBaseline="middle"
-                  textAnchor="middle"
-                  fill="white"
-                  fontSize="18"
-                  fontWeight="bold"
-                  fontFamily="Arial">
-                  {subjectLetter}
-                </text>
-              </svg>
-            </div>
-            <div className="practice-mock-exam-upload-title">
-              Nộp bài làm {task.subject}
-            </div>
-            <div className="practice-mock-exam-upload-hint">
-              File {accept}, tối đa 50MB
-            </div>
-            <div className="practice-mock-exam-upload-actions">
-              <Button
-                icon={<DownloadOutlined />}
-                onClick={handleDownloadStarter}
-                style={{ width: '100%' }}>
-                Tải file đề gốc
-              </Button>
-              <Upload {...uploadProps}>
-                <Button
-                  type="primary"
-                  icon={<UploadOutlined />}
-                  loading={isSubmitting}
-                  style={{ width: '100%' }}>
-                  Nộp bài ({accept})
-                </Button>
-              </Upload>
-            </div>
-            {latestResult && (
-              <div className="practice-mock-exam-submitted-badge">
-                <CheckCircleFilled style={{ color: '#52c41a' }} />
-                <span>Đã nộp bài — kết quả hiện sau khi nộp bài thi</span>
-              </div>
-            )}
-          </div>
-
-          {/* Tóm tắt số tiêu chí */}
-          <div className="practice-mock-exam-criteria-summary">
-            <span className="practice-mock-exam-criteria-count">
-              {criteria.length}
-            </span>
-            <span className="practice-mock-exam-criteria-label">
-              tiêu chí chấm điểm
-            </span>
-          </div>
-        </div>
+      <div style={styles.loadingContainer}>
+        <Spin size="large" />
       </div>
     );
   }
 
+  if (!detail?.task) {
+    const rawMessage =
+      (detailError as any)?.data?.message ?? (detailError as any)?.message;
+    const lockedMessage = typeof rawMessage === 'string' ? rawMessage : '';
+    return (
+      <div style={styles.container}>
+        <Empty description={lockedMessage || 'Không tìm thấy đề thực hành'} />
+      </div>
+    );
+  }
+
+  const { task, criteria = [] } = detail;
+  const accept = task.subject === 'Excel' ? '.xlsx' : '.docx';
+  const isExcel = task.subject === 'Excel';
+  const subjectColor = isExcel
+    ? 'var(--color-subject-excel)'
+    : 'var(--color-subject-word)';
+  const subjectLetter = isExcel ? 'X' : 'W';
+
+  // Kết quả từng tiêu chí
+  const resultMap = new Map<string, PracticeSubmissionResultItem>();
+  currentResult?.items?.forEach(item => {
+    resultMap.set(item.criteriaId, item);
+  });
+
+  const passedCriteriaCount = criteria.filter(c => {
+    const r = resultMap.get(c._id || '');
+    return r?.passed;
+  }).length;
+
+  const failedCriteriaList = criteria
+    .map((c, idx) => {
+      const res = resultMap.get(c._id || '');
+      const inst = instructions?.find(i => i.criteriaId === c._id);
+      return {
+        criterion: c,
+        index: idx,
+        result: res,
+        instruction: inst,
+      };
+    })
+    .filter(item => item.result && !item.result.passed);
+
+  const hasFixes = isGraded && failedCriteriaList.length > 0;
+  const fixCount = failedCriteriaList.length;
+
+  // Vùng ô + thanh công thức quanh 1 tiêu chí Excel — đọc THẬT từ workbook
+  // (bài đã nộp), không còn bịa số. 3 kết quả có thể có:
+  // - workbookLoading -> 'reading' (đang tải/đọc file, hiện skeleton)
+  // - đọc xong nhưng thiếu sheet/không có workbook -> null (hiện lỗi)
+  // - đọc xong và có sheet -> CellWindowResult (hiện lưới ô thật)
+  type GridResult = CellWindowResult | 'reading' | null;
+  const getCriterionGridData = (c: PracticeCriteria): GridResult => {
+    if (workbookLoading) return 'reading';
+    if (!workbook) return null;
+    const sheetName = (c.params?.sheet as string | undefined) || '';
+    const cellTarget = c.params?.cell as string | undefined;
+    const ySplit = c.params?.ySplit as number | undefined;
+    const selectedAddr = selectedCells[c._id || ''];
+    return buildCellWindow(
+      workbook,
+      sheetName,
+      cellTarget,
+      ySplit,
+      selectedAddr,
+    );
+  };
+
   return (
-    <div className="practice-content">
-      <div className="practice-content-header">
-        <h1>{task.title}</h1>
+    <div style={styles.container}>
+      {/* Header đề bài */}
+      <div style={styles.header}>
+        <h1 style={isMobile ? styles.titleMobile : styles.title}>
+          {task.title}
+        </h1>
         {!isMockExam && (
           <BookmarkButton
             itemType="practiceTask"
@@ -365,91 +302,737 @@ const PracticeTaskContent: React.FC<Props> = ({
         )}
       </div>
 
-      <div className="practice-content-requirements">
-        <h3>Yêu cầu đề bài</h3>
-        {task.description && (
-          <p className="practice-content-desc">{task.description}</p>
-        )}
-        {instructions && instructions.length > 0 && (
-          <ol className="practice-content-instruction-list">
-            {instructions.map((it, idx) => (
-              <li key={it.criteriaId}>
-                <span className="practice-content-instruction-label">
-                  Yêu cầu {idx + 1}:
-                </span>{' '}
-                <span className="practice-content-instruction-text">
-                  {it.summary}
+      {/* Thanh tab khi có lỗi cần sửa */}
+      {hasFixes && (
+        <div role="tablist" aria-label="Nội dung bài" style={styles.tabList}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'task'}
+            onClick={() => setActiveTab('task')}
+            style={{
+              ...styles.tabButton,
+              ...(activeTab === 'task' ? styles.tabButtonActive : {}),
+            }}>
+            <span
+              style={{
+                ...styles.tabText,
+                ...(activeTab === 'task' ? styles.tabTextActive : {}),
+              }}>
+              Đề bài &amp; Nhiệm vụ
+            </span>
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'fix'}
+            onClick={() => setActiveTab('fix')}
+            style={{
+              ...styles.tabButton,
+              ...(activeTab === 'fix' ? styles.tabButtonActive : {}),
+            }}>
+            <span
+              style={{
+                ...styles.tabText,
+                ...(activeTab === 'fix' ? styles.tabTextActive : {}),
+              }}>
+              Hướng dẫn sửa lỗi
+            </span>
+            <span style={styles.badgeCount}>
+              <span style={styles.badgeCountText}>{fixCount}</span>
+            </span>
+          </button>
+        </div>
+      )}
+
+      {/* Layout 2 cột: Trái là nội dung đề / sửa lỗi, Phải là nộp bài & lịch sử */}
+      <div
+        style={{
+          ...styles.mainLayout,
+          ...(isMobile ? styles.mainLayoutMobile : {}),
+        }}>
+        {/* CỘT CHÍNH */}
+        <div style={styles.mainColumn}>
+          {activeTab === 'task' && (
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <div style={styles.cardHeaderTop}>
+                  <span style={styles.cardTitle}>Yêu cầu đề bài</span>
+                  <span style={styles.cardCounter}>
+                    {isGraded
+                      ? `${passedCriteriaCount}/${criteria.length} yêu cầu đạt`
+                      : `${criteria.length} yêu cầu`}
+                  </span>
+                </div>
+                <p style={styles.cardDesc}>
+                  {task.description ||
+                    `Mở file đề gốc, hoàn thành các yêu cầu bên dưới, lưu lại rồi nộp file ${accept}.`}
+                </p>
+              </div>
+
+              {/* Danh sách các yêu cầu chấm điểm */}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {criteria.map((c, idx) => {
+                  const inst = instructions?.find(i => i.criteriaId === c._id);
+                  const res = resultMap.get(c._id || '');
+                  const isPassed = res?.passed;
+                  const isFailed = res && !res.passed;
+                  const isOpen = expandedCriteriaId === c._id;
+                  const isChart = c.type.includes('chart');
+
+                  const whereStr = [
+                    c.params?.sheet ? `Sheet ${c.params.sheet}` : null,
+                    c.params?.cell ? `ô ${c.params.cell}` : null,
+                    c.params?.range ? `vùng ${c.params.range}` : null,
+                    c.params?.ySplit ? `cố định ${c.params.ySplit} hàng` : null,
+                    isChart ? 'biểu đồ' : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ');
+
+                  const gridData = isExcel ? getCriterionGridData(c) : null;
+
+                  return (
+                    <div key={c._id || idx} style={styles.criteriaItem}>
+                      <div style={styles.criteriaItemRow}>
+                        {/* Huy hiệu số hoặc kết quả */}
+                        <div
+                          style={{
+                            ...styles.criteriaNum,
+                            backgroundColor: isGraded
+                              ? isPassed
+                                ? 'var(--color-success-bg)'
+                                : 'var(--color-error-bg)'
+                              : 'var(--color-info-bg)',
+                          }}>
+                          <span
+                            style={{
+                              ...styles.criteriaNumText,
+                              color: isGraded
+                                ? isPassed
+                                  ? 'var(--color-success)'
+                                  : 'var(--color-error)'
+                                : 'var(--color-vhu-primary)',
+                            }}>
+                            {isGraded ? (isPassed ? '✓' : '✕') : idx + 1}
+                          </span>
+                        </div>
+
+                        {/* Nội dung tiêu chí */}
+                        <div style={styles.criteriaBody}>
+                          <span style={styles.criteriaText}>
+                            <strong style={{ fontWeight: '600' }}>
+                              Yêu cầu {idx + 1}:
+                            </strong>{' '}
+                            {inst?.summary ||
+                              `Thực hiện kiểm tra ${PRACTICE_CRITERIA_LABELS[c.type] || c.type}`}
+                          </span>
+
+                          <div style={styles.criteriaMetaRow}>
+                            <div style={styles.typeTag}>
+                              <span style={styles.typeTagText}>
+                                {PRACTICE_CRITERIA_LABELS[c.type] || c.type}
+                              </span>
+                            </div>
+                            {whereStr && (
+                              <span style={styles.whereText}>{whereStr}</span>
+                            )}
+                          </div>
+
+                          {/* Hành động xem trước và xem hướng dẫn sửa */}
+                          {isGraded && (
+                            <div style={styles.criteriaActionsRow}>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedCriteriaId(
+                                    isOpen ? null : c._id || null,
+                                  )
+                                }
+                                style={{
+                                  ...styles.actionTextButton,
+                                  ...styles.actionTextButtonBlue,
+                                }}>
+                                <span>{isOpen ? '▾' : '▸'}</span>
+                                <span>
+                                  {isChart
+                                    ? isOpen
+                                      ? 'Ẩn thông tin biểu đồ'
+                                      : 'Xem thông tin biểu đồ'
+                                    : isOpen
+                                      ? 'Ẩn vùng ô'
+                                      : 'Xem vùng ô trong bài làm'}
+                                </span>
+                              </button>
+
+                              {isFailed && (
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTab('fix')}
+                                  style={{
+                                    ...styles.actionTextButton,
+                                    ...styles.actionTextButtonRed,
+                                  }}>
+                                  <span>Xem hướng dẫn sửa →</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Chip trạng thái */}
+                        {isGraded && (
+                          <div
+                            style={{
+                              ...styles.statusChip,
+                              backgroundColor: isPassed
+                                ? 'var(--color-success-bg)'
+                                : 'var(--color-error-bg)',
+                            }}>
+                            <span
+                              style={{
+                                ...styles.statusChipText,
+                                color: isPassed
+                                  ? 'var(--color-success)'
+                                  : 'var(--color-error)',
+                              }}>
+                              <span aria-hidden="true">
+                                {isPassed ? '✓ ' : '✕ '}
+                              </span>
+                              {isPassed ? 'Đạt' : 'Chưa đạt'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Khung xem trước vùng ô (4 trạng thái: vGrid, vChart, vError, vReading) */}
+                      {isOpen && (
+                        <div
+                          style={
+                            isMobile
+                              ? styles.previewWrapperMobile
+                              : styles.previewWrapper
+                          }>
+                          <div style={styles.previewBox}>
+                            {isChart ? (
+                              /* 1. vChart: Tiêu chí biểu đồ */
+                              <div style={styles.chartContainer}>
+                                <div
+                                  aria-hidden="true"
+                                  style={styles.chartIconBadge}>
+                                  <div style={styles.chartBar1} />
+                                  <div style={styles.chartBar2} />
+                                  <div style={styles.chartBar3} />
+                                </div>
+                                <div style={styles.chartTextCol}>
+                                  <div style={styles.chartTitle}>
+                                    Có biểu đồ: <strong>{inst?.summary}</strong>{' '}
+                                    trên sheet {c.params?.sheet || 'Sheet1'}
+                                  </div>
+                                  <div style={styles.chartNote}>
+                                    Đọc từ file bạn nộp. Khung xem không vẽ lại
+                                    biểu đồ, chỉ hiện loại và tiêu đề.
+                                  </div>
+                                </div>
+                              </div>
+                            ) : gridData === 'reading' ? (
+                              /* 2. vReading: đang tải/đọc file bài nộp */
+                              <div style={styles.readingContainer}>
+                                <div style={styles.readingStatusRow}>
+                                  <Spin size="small" />
+                                  <span style={styles.readingStatusText}>
+                                    Đang đọc file bài nộp…
+                                  </span>
+                                </div>
+                                <div style={styles.readingSkeletonGrid}>
+                                  {[0, 1, 2, 3].map(r => (
+                                    <div
+                                      key={r}
+                                      style={styles.readingSkeletonRow}>
+                                      {[0, 1, 2, 3].map(col => (
+                                        <div
+                                          key={col}
+                                          style={styles.readingSkeletonCell}
+                                        />
+                                      ))}
+                                    </div>
+                                  ))}
+                                </div>
+                                <span style={styles.readingNote}>
+                                  File càng lớn càng lâu — kết quả chấm điểm ở
+                                  trên đã có sẵn, không cần chờ khung này.
+                                </span>
+                              </div>
+                            ) : gridData ? (
+                              /* 3. vGrid: Đọc thành công hiện lưới ô và thanh công thức */
+                              <div>
+                                <div style={styles.gridTopBar}>
+                                  <span style={styles.gridTopBarLeft}>
+                                    Sheet{' '}
+                                    <strong>
+                                      {c.params?.sheet || 'Sheet1'}
+                                    </strong>{' '}
+                                    · vùng {gridData.rangeWin}
+                                  </span>
+                                  <span
+                                    style={{
+                                      ...styles.gridTopBarRight,
+                                      color: isPassed
+                                        ? 'var(--color-success)'
+                                        : 'var(--color-error)',
+                                    }}>
+                                    <span aria-hidden="true">
+                                      {isPassed ? '✓ ' : '✕ '}
+                                    </span>
+                                    Ô được chấm: {gridData.targetCell || 'Khóa'}{' '}
+                                    · {isPassed ? 'Đạt' : 'Chưa đạt'}
+                                  </span>
+                                </div>
+
+                                {/* Thanh công thức */}
+                                <div style={styles.formulaBar}>
+                                  <div style={styles.formulaCellAddr}>
+                                    {gridData.activeCellAddr}
+                                  </div>
+                                  <div
+                                    aria-hidden="true"
+                                    style={styles.formulaFxLabel}>
+                                    fx
+                                  </div>
+                                  <div style={styles.formulaInputDisplay}>
+                                    {gridData.activeCellFormula}
+                                  </div>
+                                </div>
+
+                                {/* Lưới bảng tính Excel */}
+                                <div style={styles.tableScrollContainer}>
+                                  <table style={styles.gridTable}>
+                                    <thead>
+                                      <tr>
+                                        <th style={styles.gridThCorner} />
+                                        {gridData.visibleCols.map(col => {
+                                          const isColActive =
+                                            gridData.activeCellAddr.startsWith(
+                                              col,
+                                            );
+                                          return (
+                                            <th
+                                              key={col}
+                                              style={{
+                                                ...styles.gridThCol,
+                                                ...(isColActive
+                                                  ? styles.gridThColSelected
+                                                  : {}),
+                                              }}>
+                                              {col}
+                                            </th>
+                                          );
+                                        })}
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {gridData.visibleRows.map(r => {
+                                        const isRowActive =
+                                          gridData.activeCellAddr.includes(
+                                            String(r),
+                                          );
+                                        const isFreezeLine =
+                                          gridData.ySplit === r;
+                                        return (
+                                          <tr key={r}>
+                                            <th
+                                              style={{
+                                                ...styles.gridThRow,
+                                                ...(isRowActive
+                                                  ? styles.gridThRowSelected
+                                                  : {}),
+                                                borderBottomWidth: isFreezeLine
+                                                  ? 2
+                                                  : 1,
+                                                borderBottomColor: isFreezeLine
+                                                  ? 'var(--color-text-primary)'
+                                                  : 'var(--color-border)',
+                                              }}>
+                                              {r}
+                                            </th>
+                                            {gridData.visibleCols.map(col => {
+                                              const addr = `${col}${r}`;
+                                              const cell =
+                                                gridData.cellMap[addr];
+                                              const isCellSelected =
+                                                addr ===
+                                                gridData.activeCellAddr;
+                                              const isTarget =
+                                                addr === gridData.targetCell;
+
+                                              return (
+                                                <td
+                                                  key={addr}
+                                                  onClick={() =>
+                                                    setSelectedCells(prev => ({
+                                                      ...prev,
+                                                      [c._id || '']: addr,
+                                                    }))
+                                                  }
+                                                  style={{
+                                                    ...styles.gridCell,
+                                                    textAlign:
+                                                      cell?.align || 'left',
+                                                    backgroundColor: isTarget
+                                                      ? isPassed
+                                                        ? 'var(--color-success-bg)'
+                                                        : 'var(--color-error-bg)'
+                                                      : isCellSelected
+                                                        ? 'var(--color-surface-selected)'
+                                                        : 'var(--color-surface)',
+                                                    outline: isCellSelected
+                                                      ? '2px solid var(--color-vhu-primary)'
+                                                      : 'none',
+                                                    outlineOffset: -2,
+                                                  }}>
+                                                  {cell?.value || ''}
+                                                </td>
+                                              );
+                                            })}
+                                          </tr>
+                                        );
+                                      })}
+                                    </tbody>
+                                  </table>
+                                </div>
+
+                                <div style={styles.gridFooter}>
+                                  {gridData.ySplit
+                                    ? `Đường đậm dưới hàng ${gridData.ySplit} = vùng cố định đọc từ file (ySplit = ${gridData.ySplit}). Màu/viền ô là mô phỏng.`
+                                    : 'Giá trị, công thức và định dạng số đọc từ file bạn nộp. Màu nền, viền, font ô là mô phỏng theo giao diện LearnNest.'}
+                                </div>
+                              </div>
+                            ) : (
+                              /* 4. vError: lỗi đọc file, hoặc sheet trong tiêu chí không có trong file đã nộp */
+                              <div style={styles.errorContainer}>
+                                <div
+                                  aria-hidden="true"
+                                  style={styles.errorIconBadge}>
+                                  <span style={styles.errorIconText}>!</span>
+                                </div>
+                                <div style={styles.errorTextCol}>
+                                  <span style={styles.errorTitle}>
+                                    Không thể hiển thị vùng ô
+                                  </span>
+                                  <span style={styles.errorBody}>
+                                    {workbookError ||
+                                      `Không tìm thấy sheet "${c.params?.sheet || ''}" trong file bạn đã nộp — kết quả chấm ở trên vẫn đúng, chỉ khung xem trước này không đọc được.`}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: Hướng dẫn sửa lỗi */}
+          {activeTab === 'fix' && (
+            <div style={styles.fixContainer}>
+              <p style={styles.fixIntro}>
+                {fixCount} yêu cầu chưa đạt ở lần nộp gần nhất. Làm theo từng
+                bước bên dưới rồi nộp lại file.
+              </p>
+              {failedCriteriaList.map(item => {
+                const c = item.criterion;
+                const inst = item.instruction;
+                const isChart = c.type.includes('chart');
+
+                // Tách các bước hướng dẫn
+                const rawSteps =
+                  item.result?.instruction || inst?.instruction || '';
+                const stepLines = rawSteps
+                  .split(/\r?\n/)
+                  .map(s => s.trim())
+                  .filter(Boolean);
+
+                const steps =
+                  stepLines.length > 0
+                    ? stepLines
+                    : [
+                        `Mở file đề gốc và chọn đúng vị trí trên sheet ${c.params?.sheet || 'Sheet1'}.`,
+                        `Thực hiện đúng yêu cầu: ${inst?.summary || PRACTICE_CRITERIA_LABELS[c.type]}.`,
+                      ];
+
+                return (
+                  <article key={c._id || item.index} style={styles.fixArticle}>
+                    <div style={styles.fixArticleHeader}>
+                      <span style={styles.fixTitle}>
+                        Yêu cầu {item.index + 1} ·{' '}
+                        {PRACTICE_CRITERIA_LABELS[c.type] || c.type}
+                      </span>
+                      <div
+                        style={{
+                          ...styles.statusChip,
+                          backgroundColor: 'var(--color-error-bg)',
+                        }}>
+                        <span
+                          style={{
+                            ...styles.statusChipText,
+                            color: 'var(--color-error)',
+                          }}>
+                          ✕ Chưa đạt
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={styles.fixSummary}>
+                      {inst?.summary ||
+                        `Yêu cầu kiểm tra ${PRACTICE_CRITERIA_LABELS[c.type]}`}
+                    </div>
+
+                    <ol style={styles.fixStepList}>
+                      {steps.map((st, sIdx) => (
+                        <li key={sIdx} style={styles.fixStepItem}>
+                          {st.startsWith('Bước')
+                            ? st
+                            : `Bước ${sIdx + 1}: ${st}`}
+                        </li>
+                      ))}
+                    </ol>
+
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('task');
+                          setExpandedCriteriaId(c._id || null);
+                        }}
+                        style={{
+                          ...styles.actionTextButton,
+                          ...styles.actionTextButtonBlue,
+                        }}>
+                        <span>
+                          {isChart
+                            ? 'Xem thông tin biểu đồ trong bài làm →'
+                            : 'Xem vùng ô trong bài làm →'}
+                        </span>
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+
+              <div style={styles.fixNoteFooter}>
+                Hướng dẫn soạn sẵn theo từng loại tiêu chí. Yêu cầu đã đạt không
+                hiện ở đây.
+              </div>
+            </div>
+          )}
+
+          {/* Khung thảo luận */}
+          {!isMockExam && (
+            <div style={styles.discussionSection}>
+              <h3 style={styles.discussionTitle}>Thảo luận</h3>
+              <CommentSection postId={taskId} type="PracticeTask" inline />
+            </div>
+          )}
+        </div>
+
+        {/* CỘT PHẢI (Aside): Nộp bài, Kết quả & Lịch sử */}
+        <div
+          style={{
+            ...styles.sideColumn,
+            ...(isMobile ? styles.sideColumnMobile : {}),
+          }}>
+          <div style={styles.asideCard}>
+            {/* Hiển thị điểm số khi đã chấm (chỉ ngoài phiên thi thử) */}
+            {isGraded && currentResult && (
+              <div style={styles.scoreSection}>
+                <span style={styles.scoreLabel}>Kết quả lần nộp gần nhất</span>
+                <div style={styles.scoreRow}>
+                  <span style={styles.scoreBig}>
+                    {toScore10(
+                      currentResult.totalScore,
+                      currentResult.maxScore,
+                    )}
+                  </span>
+                  <span style={styles.scoreTotal}>/10</span>
+                  <div
+                    style={{
+                      ...styles.statusChip,
+                      backgroundColor: currentResult.isPass
+                        ? 'var(--color-success-bg)'
+                        : 'var(--color-error-bg)',
+                    }}>
+                    <span
+                      style={{
+                        ...styles.statusChipText,
+                        color: currentResult.isPass
+                          ? 'var(--color-success)'
+                          : 'var(--color-error)',
+                      }}>
+                      {currentResult.isPass ? '✓ Đạt' : '✕ Chưa đạt (cần ≥ 8)'}
+                    </span>
+                  </div>
+                </div>
+                <span style={styles.scoreNote}>
+                  {currentResult.isPass
+                    ? `${passedCriteriaCount}/${criteria.length} yêu cầu đạt. Đã mở khóa nội dung tiếp theo trong khóa học.`
+                    : `${passedCriteriaCount}/${criteria.length} yêu cầu đạt. Cần tối thiểu 8 điểm để qua bài — xem tab Hướng dẫn sửa lỗi rồi nộp lại.`}
                 </span>
-              </li>
-            ))}
-          </ol>
-        )}
-      </div>
-
-      <p className="practice-content-meta">
-        Đề bài có {criteria.length} yêu cầu chấm điểm — nộp bài đúng .
-        {accept.replace('.', '')} để hệ thống tự động chấm.
-      </p>
-
-      <div className="practice-content-actions">
-        <Button icon={<DownloadOutlined />} onClick={handleDownloadStarter}>
-          Tải file đề gốc
-        </Button>
-        <Upload {...uploadProps}>
-          <Button
-            type="primary"
-            icon={<UploadOutlined />}
-            loading={isSubmitting}>
-            Nộp bài làm ({accept})
-          </Button>
-        </Upload>
-      </div>
-
-      {isMockExam && latestResult && (
-        <div className="practice-result-panel practice-result-panel--hidden">
-          <p>Đã nộp bài làm. Kết quả sẽ hiển thị sau khi bạn nộp bài thi.</p>
-        </div>
-      )}
-
-      {!isMockExam && latestResult && (
-        <div className="practice-result-panel">
-          <h3>
-            Kết quả: {toScore10(latestResult.totalScore, latestResult.maxScore)}
-            /10 điểm
-            {latestResult.isPass ? (
-              <span className="practice-result-status practice-result-status--pass">
-                Đạt
-              </span>
-            ) : (
-              <span className="practice-result-status practice-result-status--fail">
-                Chưa đạt (cần ≥ 8 điểm)
-              </span>
+              </div>
             )}
-          </h3>
-          {latestResult.items.map((item, idx) => (
-            <ResultItemRow key={item.criteriaId} item={item} index={idx} />
-          ))}
-        </div>
-      )}
 
-      {!isMockExam && submissions && submissions.length > 0 && (
-        <div className="practice-history">
-          <h3>Lịch sử nộp bài ({submissions.length} lần)</h3>
-          {submissions.map(s => (
-            <div key={s._id} className="practice-history-row">
-              <span>{toScore10(s.totalScore, s.maxScore)}/10 điểm</span>
-              <span className="practice-history-time">
-                {dayjs(s.submittedAt).format('HH:mm DD/MM/YYYY')}
+            {/* Thông tin nộp bài */}
+            <div style={styles.uploadSubjectRow}>
+              <div
+                aria-hidden="true"
+                style={{
+                  ...styles.subjectIcon,
+                  backgroundColor: subjectColor,
+                }}>
+                <span style={styles.subjectIconText}>{subjectLetter}</span>
+              </div>
+              <div style={styles.uploadTitleCol}>
+                <span style={styles.uploadTitle}>
+                  Nộp bài làm {task.subject}
+                </span>
+                <span style={styles.uploadHint}>
+                  File {accept}, tối đa 20MB
+                </span>
+              </div>
+            </div>
+
+            {/* Nút hành động Tải file / Nộp bài trên Desktop */}
+            {!isMobile && (
+              <div style={styles.uploadBtnCol}>
+                <Button
+                  icon={<DownloadOutlined />}
+                  onClick={handleDownloadStarter}
+                  style={{ width: '100%', height: 40, borderRadius: 8 }}>
+                  Tải file đề gốc
+                </Button>
+                <Upload {...uploadProps}>
+                  <Button
+                    type="primary"
+                    icon={<UploadOutlined />}
+                    loading={isSubmitting}
+                    style={{
+                      width: '100%',
+                      height: 40,
+                      borderRadius: 8,
+                      backgroundColor: 'var(--color-vhu-primary)',
+                    }}>
+                    {isSubmitting
+                      ? 'Đang chấm bài…'
+                      : isGraded
+                        ? `Nộp lại (${accept})`
+                        : `Nộp bài làm (${accept})`}
+                  </Button>
+                </Upload>
+              </div>
+            )}
+
+            {/* Ghi chú trạng thái */}
+            <div
+              style={{
+                ...styles.statusNoteBox,
+                backgroundColor: isSubmitting
+                  ? 'var(--color-info-bg)'
+                  : 'var(--color-surface-subtle)',
+              }}>
+              <span aria-hidden="true">
+                {isSubmitting ? '◌' : isMockExam ? '○' : 'ℹ'}
+              </span>
+              <span
+                style={{
+                  ...styles.statusNoteText,
+                  color: isSubmitting
+                    ? 'var(--color-info)'
+                    : 'var(--color-text-body)',
+                }}>
+                {isSubmitting
+                  ? 'Đã tải lên. Hệ thống đang chấm điểm, thường mất vài giây.'
+                  : isMockExam
+                    ? 'Chưa nộp bài này. Kết quả của từng bài chỉ hiện sau khi nộp bài thi.'
+                    : isGraded
+                      ? 'Nộp lại bất kỳ lúc nào — mỗi lần nộp được chấm và lưu vào lịch sử.'
+                      : `${criteria.length} yêu cầu chấm điểm · cần đạt tối thiểu 8/10 để qua bài.`}
               </span>
             </div>
-          ))}
-        </div>
-      )}
+          </div>
 
-      {!isMockExam && (
-        <div className="practice-discussion">
-          <h3>Thảo luận</h3>
-          <CommentSection postId={taskId} type="PracticeTask" inline />
+          {/* Lịch sử nộp bài (chỉ hiển thị khi làm bài thực hành thường) */}
+          {!isMockExam && submissions && submissions.length > 0 && (
+            <div style={styles.historyCard}>
+              <div style={styles.historyHeader}>
+                Lịch sử nộp bài ({submissions.length} lần)
+              </div>
+              {submissions.map((s, idx) => {
+                const sScore = toScore10(s.totalScore, s.maxScore);
+                const sPass = sScore >= 8;
+                return (
+                  <div key={s._id} style={styles.historyRow}>
+                    <span style={styles.historyTime}>
+                      Lần {submissions.length - idx}
+                    </span>
+                    <span style={styles.historyScore}>{sScore}/10</span>
+                    <div
+                      style={{
+                        ...styles.statusChip,
+                        backgroundColor: sPass
+                          ? 'var(--color-success-bg)'
+                          : 'var(--color-error-bg)',
+                      }}>
+                      <span
+                        style={{
+                          ...styles.statusChipText,
+                          color: sPass
+                            ? 'var(--color-success)'
+                            : 'var(--color-error)',
+                        }}>
+                        {sPass ? '✓ Đạt' : '✕ Chưa đạt'}
+                      </span>
+                    </div>
+                    <span style={styles.historyTime}>
+                      {dayjs(s.submittedAt).format('HH:mm DD/MM')}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Thanh cố định dưới chân trang khi xem trên mobile */}
+      {isMobile && (
+        <div style={styles.bottomBarSticky}>
+          <div style={{ flex: 1 }}>
+            <Button
+              icon={<DownloadOutlined />}
+              onClick={handleDownloadStarter}
+              style={{ width: '100%', height: 44, borderRadius: 8 }}>
+              Tải đề gốc
+            </Button>
+          </div>
+          <div style={{ flex: 1.4 }}>
+            <Upload {...uploadProps}>
+              <Button
+                type="primary"
+                icon={<UploadOutlined />}
+                loading={isSubmitting}
+                style={{
+                  width: '100%',
+                  height: 44,
+                  borderRadius: 8,
+                  backgroundColor: 'var(--color-vhu-primary)',
+                }}>
+                {isSubmitting ? 'Đang chấm…' : `Nộp bài (${accept})`}
+              </Button>
+            </Upload>
+          </div>
         </div>
       )}
     </div>
@@ -462,16 +1045,16 @@ export const ResultItemRow: React.FC<{
   item: PracticeSubmissionResultItem;
   index: number;
 }> = ({ item, index }) => (
-  <div className="practice-result-item">
+  <div style={styles.resultItemRow}>
     {item.passed ? (
-      <CheckCircleFilled style={{ color: '#52c41a' }} />
+      <CheckCircleFilled style={{ color: 'var(--color-success)' }} />
     ) : (
-      <CloseCircleFilled style={{ color: '#ff4d4f' }} />
+      <CloseCircleFilled style={{ color: 'var(--color-error)' }} />
     )}
-    <div>
-      <div>Yêu cầu {index + 1}</div>
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div style={styles.resultItemTitle}>Yêu cầu {index + 1}</div>
       {!item.passed && item.instruction && (
-        <div className="practice-result-instruction">{item.instruction}</div>
+        <div style={styles.resultItemInstruction}>{item.instruction}</div>
       )}
     </div>
   </div>

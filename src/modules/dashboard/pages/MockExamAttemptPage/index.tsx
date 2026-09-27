@@ -9,7 +9,8 @@ import PracticeTaskContent, {
   ResultItemRow,
 } from '~mdDashboard/components/PracticeTaskContent';
 import CommentSection from '@components/CommentSection';
-import './styles.scss';
+import { useResponsive } from '@/styles/responsive';
+import styles from './styles';
 
 const { Countdown } = Statistic;
 
@@ -23,6 +24,7 @@ const subjectLabel = (s: string) => (s === 'Mixed' ? 'Word + Excel' : s);
 // để hết giờ/nộp bài xong không cần điều hướng, chỉ cần refetch.
 const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   const router = useRouter();
+  const { isMobile } = useResponsive();
   const [showExitWarning, setShowExitWarning] = useState(false);
   const allowExitRef = React.useRef(false);
   const pendingNavUrl = React.useRef<string | null>(null);
@@ -34,6 +36,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   const [submitAttempt, { isLoading: isSubmitting }] =
     dashboardQuery.useSubmitMockExamAttemptMutation();
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [isTimeWarning, setIsTimeWarning] = useState(false);
 
   const isInProgress = data?.status === 'in_progress';
 
@@ -164,11 +167,25 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
     }
   }, [data, activeTaskId]);
 
+  // Cảnh báo thời gian còn dưới 5 phút
+  useEffect(() => {
+    if (!data?.deadline || !isInProgress) return;
+    const checkTime = () => {
+      const remaining = new Date(data.deadline).getTime() - Date.now();
+      if (remaining <= 5 * 60 * 1000 && remaining > 0) {
+        setIsTimeWarning(true);
+      } else {
+        setIsTimeWarning(false);
+      }
+    };
+    checkTime();
+    const interval = setInterval(checkTime, 10000);
+    return () => clearInterval(interval);
+  }, [data?.deadline, isInProgress]);
+
   const handleSubmit = async (auto: boolean) => {
     allowExitRef.current = true;
     try {
-      // submitMockExamAttempt đã invalidatesTags MockExamAttempt - không
-      // cần tự refetch(), useGetMockExamAttemptQuery tự tải lại.
       await submitAttempt(attemptId).unwrap();
       if (auto) {
         messageApi.warning('Hết giờ! Bài thi thử đã được nộp tự động.');
@@ -196,8 +213,8 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
   if (isFetching && !data) {
     return (
-      <div className="mock-exam-loading">
-        <Spin />
+      <div style={styles.loadingContainer}>
+        <Spin size="large" />
       </div>
     );
   }
@@ -209,8 +226,23 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
     return <MockExamResultView attemptId={attemptId} />;
   }
 
+  const subjectBg =
+    data.subject === 'Excel'
+      ? '#217346'
+      : data.subject === 'Word'
+        ? '#2b579a'
+        : 'var(--color-vhu-primary)';
+  const subjectLetter =
+    data.subject === 'Excel' ? 'X' : data.subject === 'Word' ? 'W' : 'M';
+
+  const submittedTasksCount = data.tasks.filter(t => t.submitted).length;
+  const totalTasksCount = data.tasks.length;
+  const progressPercent = Math.round(
+    (submittedTasksCount / (totalTasksCount || 1)) * 100,
+  );
+
   return (
-    <div className="mock-exam-page">
+    <div style={isMobile ? styles.pageMobile : styles.page}>
       {/* Modal cảnh báo thoát */}
       <Modal
         title="Thoát bài thi?"
@@ -226,83 +258,197 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
           gian vẫn tiếp tục chạy.
         </p>
       </Modal>
-      <div className="mock-exam-header">
-        <div className="mock-exam-header-left">
-          {/* Nút Back: hiện modal cảnh báo thay vì chuyển hướng ngay */}
+
+      {/* Header trang thi thử */}
+      <header style={isMobile ? styles.headerMobile : styles.header}>
+        <div style={styles.headerLeft}>
           <button
             type="button"
-            className="mock-exam-back-btn"
+            style={styles.backButton}
             onClick={() => setShowExitWarning(true)}
             aria-label="Thoát bài thi">
             <ArrowLeftOutlined />
-            <span>Thoát</span>
+            <span style={styles.backButtonText}>Thoát</span>
           </button>
-          <div className="mock-exam-title-row">
-            <h1 className="mock-exam-title">{data.title}</h1>
-            <Tag
-              color={
-                data.subject === 'Excel'
-                  ? 'green'
-                  : data.subject === 'Word'
-                    ? 'blue'
-                    : 'purple'
-              }>
-              {subjectLabel(data.subject)}
-            </Tag>
+
+          <div
+            aria-hidden="true"
+            style={{
+              ...styles.subjectIconBadge,
+              backgroundColor: subjectBg,
+            }}>
+            <span style={styles.subjectIconText}>{subjectLetter}</span>
           </div>
-          <p className="mock-exam-subtitle">
-            Hoàn thành và nộp bài trước khi thời gian kết thúc
-          </p>
+
+          <div style={styles.titleCol}>
+            <h1 style={isMobile ? styles.titleMobile : styles.title}>
+              {data.title}
+            </h1>
+            <span style={styles.subtitle}>
+              {subjectLabel(data.subject)} · {totalTasksCount} bài ·{' '}
+              {data.durationMinutes} phút
+            </span>
+          </div>
         </div>
-        <div className="mock-exam-header-right">
-          <div className="mock-exam-timer-wrap">
+
+        <div
+          style={{
+            ...styles.headerRight,
+            ...(isMobile ? styles.headerRightMobile : {}),
+          }}>
+          {/* Thanh tiến độ nộp bài */}
+          <div style={styles.progressBox}>
+            <span style={styles.progressText}>
+              <strong>
+                {submittedTasksCount}/{totalTasksCount}
+              </strong>{' '}
+              đã nộp
+            </span>
+            <div
+              role="progressbar"
+              aria-valuenow={submittedTasksCount}
+              aria-valuemin={0}
+              aria-valuemax={totalTasksCount}
+              style={styles.progressBarTrack}>
+              <div
+                style={{
+                  ...styles.progressBarFill,
+                  width: `${progressPercent}%`,
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Đồng hồ đếm ngược */}
+          <div
+            role="timer"
+            aria-label="Thời gian thi còn lại"
+            style={{
+              ...styles.timerBox,
+              ...(isTimeWarning ? styles.timerBoxWarning : {}),
+            }}>
             <Countdown
-              title="Thời gian còn lại"
               value={new Date(data.deadline).getTime()}
               onFinish={() => handleSubmit(true)}
+              valueStyle={{
+                fontFamily: 'Lexend, sans-serif',
+                fontSize: 16.4,
+                fontWeight: 600,
+                color: isTimeWarning
+                  ? 'var(--color-warning)'
+                  : 'var(--color-text-primary)',
+              }}
             />
+            <span style={styles.timerLabel}>
+              {isTimeWarning ? 'Sắp hết giờ' : 'còn lại'}
+            </span>
           </div>
+
           <Popconfirm
             title="Nộp bài thi thử?"
             description="Sau khi nộp sẽ không làm thêm được bài nào trong đề này nữa."
             okText="Nộp bài"
             cancelText="Huỷ"
             onConfirm={() => handleSubmit(false)}>
-            <Button type="primary" danger size="large" loading={isSubmitting}>
+            <Button
+              type="primary"
+              danger
+              style={{ height: 40, borderRadius: 8, fontWeight: 500 }}
+              loading={isSubmitting}>
               Nộp bài thi
             </Button>
           </Popconfirm>
         </div>
-      </div>
+      </header>
 
-      <div className="mock-exam-body">
-        <div className="mock-exam-sidebar">
-          <div className="mock-exam-sidebar-header">
-            <span>Danh sách câu hỏi</span>
-            <span className="mock-exam-sidebar-count">
-              {data.tasks.filter(t => t.submitted).length}/{data.tasks.length}{' '}
-              đã nộp
-            </span>
-          </div>
-          {data.tasks.map((t, idx) => (
-            <div
-              key={t.taskId}
-              className={
-                'mock-exam-task-item' +
-                (activeTaskId === t.taskId
-                  ? ' mock-exam-task-item--active'
-                  : '')
-              }
-              onClick={() => setActiveTaskId(t.taskId)}>
-              <span className="mock-exam-task-number">{idx + 1}</span>
-              <span className="mock-exam-task-item-title">{t.title}</span>
-              {t.submitted && (
-                <CheckCircleFilled style={{ color: '#52c41a', fontSize: 16 }} />
-              )}
+      {/* Điều hướng danh sách câu hỏi dạng Chips trên Mobile */}
+      {isMobile && (
+        <nav aria-label="Danh sách bài trong đề" style={styles.chipsScrollRow}>
+          {data.tasks.map((t, idx) => {
+            const isActive = activeTaskId === t.taskId;
+            return (
+              <button
+                key={t.taskId}
+                type="button"
+                onClick={() => setActiveTaskId(t.taskId)}
+                style={{
+                  ...styles.chipItem,
+                  ...(isActive ? styles.chipItemActive : {}),
+                }}>
+                <span style={styles.chipNumber}>{idx + 1}</span>
+                {t.submitted ? (
+                  <CheckCircleFilled
+                    style={{ color: 'var(--color-success)', fontSize: 13 }}
+                  />
+                ) : (
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      fontSize: 12,
+                      color: isActive
+                        ? 'var(--color-vhu-primary)'
+                        : 'var(--color-text-muted)',
+                    }}>
+                    {isActive ? '●' : '○'}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      )}
+
+      {/* Thân trang: Sidebar danh sách bài (Desktop) & Nội dung bài tập */}
+      <div
+        style={{
+          ...styles.body,
+          ...(isMobile ? styles.bodyMobile : {}),
+        }}>
+        {!isMobile && (
+          <nav aria-label="Danh sách bài trong đề" style={styles.sidebar}>
+            <div style={styles.sidebarHeader}>
+              <span style={styles.sidebarTitle}>Bài trong đề</span>
+              <span style={styles.sidebarCount}>
+                {submittedTasksCount}/{totalTasksCount} đã nộp
+              </span>
             </div>
-          ))}
-        </div>
-        <div className="mock-exam-content">
+            <div style={styles.taskList}>
+              {data.tasks.map((t, idx) => {
+                const isActive = activeTaskId === t.taskId;
+                return (
+                  <button
+                    key={t.taskId}
+                    type="button"
+                    onClick={() => setActiveTaskId(t.taskId)}
+                    style={{
+                      ...styles.taskItem,
+                      ...(isActive ? styles.taskItemActive : {}),
+                    }}>
+                    <span
+                      style={{
+                        ...styles.taskNumber,
+                        ...(isActive ? styles.taskNumberActive : {}),
+                      }}>
+                      {idx + 1}
+                    </span>
+                    <span style={styles.taskTitle}>{t.title}</span>
+                    {t.submitted && (
+                      <CheckCircleFilled
+                        style={{
+                          color: 'var(--color-success)',
+                          fontSize: 16,
+                          flexShrink: 0,
+                        }}
+                      />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+        )}
+
+        <main style={styles.contentArea}>
           {activeTaskId && (
             <PracticeTaskContent
               key={activeTaskId}
@@ -311,7 +457,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
               onSubmitted={refetch}
             />
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
@@ -319,68 +465,95 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
 // Kết quả tổng hợp sau khi nộp/hết giờ - tổng điểm/10, đạt/chưa đạt từng
 // bài, và với bài chưa đạt liệt kê từng tiêu chí sai kèm hướng dẫn sửa
-// (tái dùng đúng cách hiển thị đã có ở PracticeTaskContent.ResultItemRow).
 const MockExamResultView: React.FC<{ attemptId: string }> = ({ attemptId }) => {
   const router = useRouter();
+  const { isMobile } = useResponsive();
   const { data, isFetching } =
     dashboardQuery.useGetMockExamResultQuery(attemptId);
 
   if (isFetching && !data) {
     return (
-      <div className="mock-exam-loading">
-        <Spin />
+      <div style={styles.loadingContainer}>
+        <Spin size="large" />
       </div>
     );
   }
   if (!data) return <Empty description="Không tìm thấy kết quả" />;
 
   return (
-    <div className="mock-exam-page mock-exam-result">
+    <div style={isMobile ? styles.pageMobile : styles.page}>
       <Button
         type="text"
         onClick={() => router.push('/dashboard/practice')}
-        style={{ marginBottom: 12 }}>
+        style={{
+          alignSelf: 'flex-start',
+          paddingLeft: 0,
+          color: 'var(--color-vhu-primary)',
+          fontWeight: 500,
+        }}>
         ← Quay lại Luyện Tập
       </Button>
-      <h1 className="mock-exam-title">{data.title} — Kết quả</h1>
-      <p className="mock-exam-result-summary">
-        Đã làm {data.attemptedTasks}/{data.totalTasks} bài
-        {data.status === 'expired' ? ' (hết giờ)' : ''}
-      </p>
 
-      <div className="mock-exam-result-score-card">
-        <div className="mock-exam-result-score">
-          {data.overallScore.toFixed(1)}
-          <span className="mock-exam-result-score-max">/10</span>
+      {/* Card tổng điểm */}
+      <div style={styles.resultHeaderCard}>
+        <div style={styles.resultHeaderLeft}>
+          <h1 style={isMobile ? styles.titleMobile : styles.title}>
+            {data.title} — Kết quả
+          </h1>
+          <span style={styles.subtitle}>
+            Đã làm {data.attemptedTasks}/{data.totalTasks} bài
+            {data.status === 'expired' ? ' (hết giờ nộp tự động)' : ''}
+          </span>
         </div>
-        <Tag
-          color={data.overallIsPass ? 'success' : 'error'}
-          style={{ fontSize: 14 }}>
-          {data.overallIsPass ? 'Đạt' : 'Chưa đạt'}
-        </Tag>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={styles.resultScoreBadge}>
+            <span style={styles.resultScoreNum}>
+              {data.overallScore.toFixed(1)}
+            </span>
+            <span style={styles.resultScoreTotal}>/10</span>
+          </div>
+          <Tag
+            color={data.overallIsPass ? 'success' : 'error'}
+            style={{
+              fontSize: 14,
+              paddingTop: 4,
+              paddingBottom: 4,
+              paddingLeft: 12,
+              paddingRight: 12,
+              borderRadius: 16,
+              fontWeight: 600,
+            }}>
+            {data.overallIsPass ? '✓ Đạt' : '✕ Chưa đạt'}
+          </Tag>
+        </div>
       </div>
 
+      {/* Danh sách từng bài thi trong đề */}
       {data.tasks.map((t, idx) => (
-        <div key={t.taskId} className="mock-exam-result-task">
-          <div className="mock-exam-result-task-header">
-            <span>
+        <div key={t.taskId} style={styles.resultTaskCard}>
+          <div style={styles.resultTaskHeader}>
+            <span style={styles.resultTaskTitle}>
               Bài {idx + 1}: {t.title}
             </span>
             {!t.attempted ? (
-              <Tag>Chưa làm</Tag>
+              <Tag style={{ borderRadius: 10 }}>Chưa làm</Tag>
             ) : (
-              <>
-                <span className="mock-exam-result-task-score">
-                  {t.score?.toFixed(1)}/10
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={styles.resultTaskScore}>
+                  {t.score?.toFixed(1)}/10 điểm
                 </span>
-                <Tag color={t.isPass ? 'success' : 'error'}>
-                  {t.isPass ? 'Đạt' : 'Chưa đạt'}
+                <Tag
+                  color={t.isPass ? 'success' : 'error'}
+                  style={{ borderRadius: 10 }}>
+                  {t.isPass ? '✓ Đạt' : '✕ Chưa đạt'}
                 </Tag>
-              </>
+              </div>
             )}
           </div>
+
           {t.attempted && t.results.length > 0 && (
-            <div className="mock-exam-result-criteria-list">
+            <div style={styles.resultCriteriaList}>
               {t.results.map((item, i) => (
                 <ResultItemRow key={item.criteriaId} item={item} index={i} />
               ))}
@@ -389,11 +562,9 @@ const MockExamResultView: React.FC<{ attemptId: string }> = ({ attemptId }) => {
         </div>
       ))}
 
-      {/* Thảo luận CHUNG cho cả đề thi thử (khoá theo examId, mọi học viên
-          cùng làm đề này chia sẻ 1 luồng) - không còn tách theo từng bài tập
-          trong đề như trước. */}
-      <div className="mock-exam-result-discussion">
-        <h3>Thảo luận</h3>
+      {/* Thảo luận chung cho cả đề thi thử */}
+      <div style={styles.discussionBox}>
+        <h3 style={styles.discussionTitle}>Thảo luận về đề thi này</h3>
         <CommentSection postId={data.examId} type="MockExam" inline />
       </div>
     </div>

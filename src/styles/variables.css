@@ -47,4 +47,8 @@
   /* Overlay / scrim */
   --color-text-scrim: rgba(33, 33, 33, 0.6);
   --color-overlay-subtle: rgba(0, 0, 0, 0.06);
+
+  /* Môn học (màu thương hiệu thật của Excel/Word) */
+  --color-subject-excel: #217346;
+  --color-subject-word: #2b579a;
 }

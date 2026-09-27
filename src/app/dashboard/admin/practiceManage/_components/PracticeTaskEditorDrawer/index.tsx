@@ -34,6 +34,7 @@ import {
   PracticeSubmissionResultItem,
 } from '~mdDashboard/types/practice';
 import CriteriaListItem from './CriteriaListItem';
+import { readWorkbook, getSheetNames } from '@/utils/practiceCellPreview';
 
 const DIFFICULTY_OPTIONS: PracticeDifficulty[] = [
   'Dễ',
@@ -80,6 +81,41 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
     items: PracticeSubmissionResultItem[];
   } | null>(null);
   const [isTestGrading, setIsTestGrading] = useState(false);
+  // Danh sách sheet thật đọc từ file đề gốc (SheetJS, ngay trên trình
+  // duyệt) - cho ô "Tên sheet" ở mỗi tiêu chí Excel chọn thay vì gõ tay,
+  // tránh gõ sai tên sheet mà phải đợi học viên nộp bài mới phát hiện ra.
+  const [sheetOptions, setSheetOptions] = useState<string[]>([]);
+  const [sheetLoadError, setSheetLoadError] = useState<string | undefined>();
+
+  const readSheetsFromBlob = async (blob: Blob) => {
+    setSheetLoadError(undefined);
+    try {
+      const wb = await readWorkbook(blob);
+      setSheetOptions(getSheetNames(wb));
+    } catch {
+      setSheetOptions([]);
+      setSheetLoadError('Không đọc được danh sách sheet từ file đề gốc.');
+    }
+  };
+
+  const readSheetsFromExistingTask = (id: string) => {
+    api
+      .get(`/practice/tasks/${id}/starter-file`, { responseType: 'blob' })
+      .then(res => readSheetsFromBlob(res.data))
+      .catch(() => {
+        setSheetOptions([]);
+        setSheetLoadError('Không tải được file đề gốc để lấy danh sách sheet.');
+      });
+  };
+
+  const retryReadSheets = () => {
+    const localFile = starterFileList[0]?.originFileObj;
+    if (localFile) {
+      readSheetsFromBlob(localFile);
+    } else if (currentTaskId) {
+      readSheetsFromExistingTask(currentTaskId);
+    }
+  };
   // Tăng lên mỗi lần drawer MỞ (kể cả mở lại đúng task cũ) — dùng làm 1 phần
   // "khoá populate" bên dưới. Bug thật đã gặp: chỉ reset lastPopulatedTaskIdRef
   // trong effect mở drawer thì không đủ, vì effect đổ dữ liệu form lại chỉ
@@ -157,6 +193,8 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
       criteriaForm.resetFields();
       setStarterFileList([]);
       setSubject('Excel');
+      setSheetOptions([]);
+      setSheetLoadError(undefined);
     }
   }, [open, taskId]);
 
@@ -203,6 +241,9 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
         params: c.params,
       })),
     });
+    if (detail.task.subject === 'Excel' && detail.task.starterFileUrl) {
+      readSheetsFromExistingTask(detail.task._id);
+    }
   }, [detail, openSession]);
 
   const handleSaveTask = async (values: any) => {
@@ -444,6 +485,12 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
               onRemove={() => {
                 setStarterFileList([]);
                 taskForm.setFieldsValue({ starterFileUrl: undefined });
+                setSheetOptions([]);
+                setSheetLoadError(undefined);
+              }}
+              beforeUpload={file => {
+                if (subject === 'Excel') readSheetsFromBlob(file);
+                return true;
               }}
               onChange={info => {
                 setStarterFileList(info.fileList.slice(-1));
@@ -526,6 +573,9 @@ const PracticeTaskEditorDrawer: React.FC<Props> = ({
                               restField={restField}
                               remove={remove}
                               subject={subject}
+                              sheetOptions={sheetOptions}
+                              sheetLoadError={sheetLoadError}
+                              onRetryReadSheets={retryReadSheets}
                             />
                           );
                         }}

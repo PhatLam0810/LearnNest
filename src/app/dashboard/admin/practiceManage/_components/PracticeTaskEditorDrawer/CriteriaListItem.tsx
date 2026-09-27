@@ -9,6 +9,7 @@ import {
   Switch,
 } from 'antd';
 import { MinusCircleOutlined } from '@components/AppIcon';
+import { typography } from '@styles';
 import {
   PracticeCriteriaType,
   PRACTICE_CRITERIA_LABELS,
@@ -148,6 +149,9 @@ type Props = {
   restField: any;
   remove: (index: number) => void;
   subject: PracticeSubject;
+  sheetOptions?: string[];
+  sheetLoadError?: string;
+  onRetryReadSheets?: () => void;
 };
 
 // Mỗi tiêu chí có 1 bộ tham số (params) khác nhau tuỳ loại — render đúng bộ
@@ -159,10 +163,23 @@ const CriteriaListItem: React.FC<Props> = ({
   restField,
   remove,
   subject,
+  sheetOptions = [],
+  sheetLoadError,
+  onRetryReadSheets,
 }) => {
   const typeValue: PracticeCriteriaType = Form.useWatch(
     ['criteria', name, 'type'],
     form,
+  );
+  const currentSheetValue: string | undefined = Form.useWatch(
+    ['criteria', name, 'params', 'sheet'],
+    form,
+  );
+
+  const isSheetMismatch = Boolean(
+    currentSheetValue &&
+    sheetOptions.length > 0 &&
+    !sheetOptions.includes(currentSheetValue),
   );
 
   const typeOptions = (subject === 'Excel' ? EXCEL_TYPES : WORD_TYPES).map(
@@ -181,13 +198,71 @@ const CriteriaListItem: React.FC<Props> = ({
     if (!typeValue) return null;
 
     // Mọi tiêu chí Excel đều cần biết chấm ở sheet nào.
+    // Dạng chọn từ danh sách sheet đọc được từ file gốc theo thiết kế SheetPickerDrawer.
+    const sheetSelectOptions = [
+      ...sheetOptions.map(s => ({ value: s, label: s })),
+      ...(isSheetMismatch && currentSheetValue
+        ? [
+            {
+              value: currentSheetValue,
+              label: `${currentSheetValue} (Không có trong file gốc)`,
+            },
+          ]
+        : []),
+    ];
+
+    const sheetHelpContent = isSheetMismatch ? (
+      <span style={{ color: 'var(--color-error)' }}>
+        “{currentSheetValue}” không có trong file gốc. Chọn lại:{' '}
+        {sheetOptions.join(', ')}
+      </span>
+    ) : sheetLoadError ? (
+      <span
+        style={{
+          color: 'var(--color-error)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+        }}>
+        <span>{sheetLoadError}</span>
+        {onRetryReadSheets && (
+          <Button
+            type="link"
+            size="small"
+            onClick={onRetryReadSheets}
+            style={{ padding: 0, height: 'auto', ...typography.caption }}>
+            Thử đọc lại
+          </Button>
+        )}
+      </span>
+    ) : sheetOptions.length === 0 ? (
+      <span style={{ color: 'var(--color-text-muted)', ...typography.caption }}>
+        Danh sách sheet lấy từ file đề gốc. Tải file đề gốc để chọn sheet tự
+        động.
+      </span>
+    ) : null;
+
     const sheetField = subject === 'Excel' && (
       <Form.Item
         {...restField}
         label="Tên sheet"
         name={[name, 'params', 'sheet']}
-        rules={[{ required: true, message: 'Nhập tên sheet' }]}>
-        <Input placeholder="VD: Doanh thu" />
+        rules={[{ required: true, message: 'Chọn tên sheet' }]}
+        validateStatus={isSheetMismatch || sheetLoadError ? 'error' : undefined}
+        help={sheetHelpContent}>
+        <Select
+          placeholder={
+            sheetLoadError
+              ? 'Không đọc được file gốc'
+              : sheetOptions.length > 0
+                ? 'Chọn sheet trong file gốc'
+                : 'Tải file đề gốc trước'
+          }
+          options={sheetSelectOptions}
+          showSearch
+          allowClear
+          disabled={sheetOptions.length === 0 && !currentSheetValue}
+        />
       </Form.Item>
     );
 

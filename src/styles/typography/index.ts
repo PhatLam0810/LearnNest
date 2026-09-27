@@ -78,6 +78,13 @@ export const typography = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 1 / 100,
   },
+  // Chữ đẳng độ rộng cho địa chỉ ô/công thức (thanh công thức Excel) — dùng
+  // font hệ điều hành có sẵn, không tải thêm webfont mới.
+  formulaMono: {
+    fontFamily: 'ui-monospace, SFMono-Regular, Consolas, monospace',
+    fontWeight: '400',
+    fontSize: 12,
+  },
   button: {
     fontFamily: lexend.style.fontFamily,
     fontWeight: '500',
