@@ -24,12 +24,6 @@ import CommentSection from '@components/CommentSection';
 import BookmarkButton from '@components/BookmarkButton';
 import { useResponsive } from '@/styles/responsive';
 import { asButton } from '@/utils/asButton';
-import {
-  buildCellWindow,
-  readWorkbook,
-  type CellWindowResult,
-} from '@/utils/practiceCellPreview';
-import type { WorkBook } from 'xlsx';
 import { typography } from '@styles';
 import styles from './styles';
 
@@ -42,8 +36,6 @@ type Props = {
 
 const toScore10 = (total: number, max: number) =>
   max ? Number(((total / max) * 10).toFixed(1)) : 0;
-
-const COLS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
 const PracticeTaskContent: React.FC<Props> = ({
   taskId,
@@ -60,17 +52,6 @@ const PracticeTaskContent: React.FC<Props> = ({
     useState<PracticeSubmitResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState<'task' | 'fix'>('task');
-  const [expandedCriteriaId, setExpandedCriteriaId] = useState<string | null>(
-    null,
-  );
-  const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
-    {},
-  );
-
-  // Trạng thái đọc file .xlsx bài làm của học viên bằng SheetJS
-  const [workbook, setWorkbook] = useState<WorkBook | null>(null);
-  const [isReadingFile, setIsReadingFile] = useState(false);
-  const [fileReadError, setFileReadError] = useState<string | null>(null);
 
   const {
     data: detail,
@@ -96,9 +77,6 @@ const PracticeTaskContent: React.FC<Props> = ({
     setLastTaskId(taskId);
     setLatestResult(null);
     setActiveTab('task');
-    setExpandedCriteriaId(null);
-    setWorkbook(null);
-    setFileReadError(null);
   }
 
   // Kết quả chấm từ lần nộp mới nhất trong phiên hoặc lịch sử nộp bài gần nhất
@@ -119,95 +97,6 @@ const PracticeTaskContent: React.FC<Props> = ({
 
   const isGraded = Boolean(currentResult && !mockExamAttemptId);
   const isMockExam = !!mockExamAttemptId;
-
-  // Tự động đọc file .xlsx bài làm khi có submissionId và là môn Excel
-  useEffect(() => {
-    const subId = currentResult?.submissionId;
-    if (!subId || detail?.task?.subject !== 'Excel') {
-      setIsReadingFile(false);
-      return;
-    }
-
-    let isMounted = true;
-    setIsReadingFile(true);
-    setFileReadError(null);
-
-    const controller = new AbortController();
-    const safetyTimer = setTimeout(() => {
-      if (isMounted) {
-        controller.abort();
-        setIsReadingFile(false);
-        setWorkbook(null);
-        setFileReadError(
-          'Không thể đọc file bài làm (quá thời gian xử lý hoặc file không đúng định dạng .xlsx).',
-        );
-      }
-    }, 4000);
-
-    api
-      .get(`/practice/submissions/${subId}/file`, {
-        responseType: 'blob',
-        signal: controller.signal,
-        timeout: 4000,
-      })
-      .then(async res => {
-        if (
-          res.data &&
-          res.data.type &&
-          res.data.type.includes('application/json')
-        ) {
-          throw new Error('Dữ liệu trả về không phải file Excel');
-        }
-        return readWorkbook(res.data);
-      })
-      .then(wb => {
-        if (isMounted) {
-          setWorkbook(wb);
-        }
-      })
-      .catch((err: any) => {
-        if (isMounted) {
-          setWorkbook(null);
-          const msg =
-            err?.message || 'Không mở được file bài làm để xem trước vùng ô.';
-          setFileReadError(
-            typeof msg === 'string' && msg.includes('trang tính')
-              ? msg
-              : 'Không mở được file bài làm (file bị lỗi hoặc không đúng định dạng .xlsx).',
-          );
-        }
-      })
-      .finally(() => {
-        clearTimeout(safetyTimer);
-        if (isMounted) {
-          setIsReadingFile(false);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-      clearTimeout(safetyTimer);
-      controller.abort();
-    };
-  }, [currentResult?.submissionId, detail?.task?.subject]);
-
-  // Tự động mở tiêu chí chưa đạt đầu tiên khi đã chấm điểm (theo đặc tả ExamRoom v2)
-  useEffect(() => {
-    if (!isGraded || !detail?.criteria || expandedCriteriaId !== null) return;
-    const itemsMap = new Map<string, PracticeSubmissionResultItem>();
-    currentResult?.items?.forEach(it => itemsMap.set(it.criteriaId, it));
-
-    const firstFailed = detail.criteria.find(c => {
-      const r = itemsMap.get(c._id || '');
-      return r && !r.passed;
-    });
-
-    if (firstFailed?._id) {
-      setExpandedCriteriaId(firstFailed._id);
-    } else if (detail.criteria[0]?._id) {
-      setExpandedCriteriaId(detail.criteria[0]._id);
-    }
-  }, [isGraded, detail?.criteria, currentResult, expandedCriteriaId]);
 
   const handleDownloadStarter = async () => {
     if (!detail?.task) return;
@@ -329,103 +218,6 @@ const PracticeTaskContent: React.FC<Props> = ({
   const score10 = currentResult
     ? toScore10(currentResult.totalScore, currentResult.maxScore)
     : 0;
-
-  // Tính toán dữ liệu xem trước vùng ô (Live từ file thật nếu có, hoặc mô phỏng chuẩn)
-  const getCriterionGridData = (
-    c: PracticeCriteria,
-  ):
-    | (CellWindowResult & {
-        isSheetNotFound?: boolean;
-        missingSheetName?: string;
-        availableSheets?: string[];
-      })
-    | null => {
-    const cellTarget = c.params?.cell as string | undefined;
-    const ySplit = c.params?.ySplit as number | undefined;
-    const reqSheet = (c.params?.sheet as string | undefined) || 'Sheet1';
-
-    // 1. Nếu đã đọc được workbook thật từ file nộp:
-    if (workbook) {
-      const windowRes = buildCellWindow(
-        workbook,
-        reqSheet,
-        cellTarget,
-        ySplit,
-        selectedCells[c._id || ''],
-      );
-      if (!windowRes) {
-        return {
-          visibleCols: [],
-          visibleRows: [],
-          cellMap: {},
-          activeCellAddr: '',
-          activeCellFormula: '',
-          rangeWin: '',
-          isSheetNotFound: true,
-          missingSheetName: reqSheet,
-          availableSheets: workbook.SheetNames,
-        };
-      }
-      return windowRes;
-    }
-
-    // 2. Chế độ dự phòng chuẩn khi chưa tải xong file
-    let targetCol = 'F';
-    let targetRow = 5;
-
-    if (cellTarget) {
-      const colMatch = cellTarget.match(/[A-Z]+/i);
-      const rowMatch = cellTarget.match(/\d+/);
-      if (colMatch) targetCol = colMatch[0].toUpperCase();
-      if (rowMatch) targetRow = parseInt(rowMatch[0], 10);
-    }
-
-    const colIdx = Math.max(0, COLS.indexOf(targetCol));
-    const startColIdx = Math.max(0, Math.min(colIdx - 2, COLS.length - 4));
-    const visibleCols = COLS.slice(startColIdx, startColIdx + 4);
-
-    const startRow = Math.max(1, targetRow - 2);
-    const visibleRows = [startRow, startRow + 1, startRow + 2, startRow + 3];
-
-    const formulaText = c.params?.mustContain
-      ? `=${c.params.mustContain}(...)`
-      : '=SUM(...)';
-
-    const cellMap: Record<string, any> = {};
-    visibleRows.forEach(r => {
-      visibleCols.forEach(col => {
-        const addr = `${col}${r}`;
-        const isTarget = cellTarget ? addr === cellTarget : false;
-        cellMap[addr] = {
-          address: addr,
-          value: isTarget ? '420,000' : '150,000',
-          formula: isTarget ? formulaText : undefined,
-          align: 'right',
-        };
-      });
-    });
-
-    const activeCellAddr =
-      selectedCells[c._id || ''] ||
-      cellTarget ||
-      `${visibleCols[0]}${visibleRows[0]}`;
-    const activeCellData = cellMap[activeCellAddr] || {
-      address: activeCellAddr,
-      value: '',
-      formula: '',
-    };
-
-    return {
-      visibleCols,
-      visibleRows,
-      cellMap,
-      targetCell: cellTarget,
-      ySplit,
-      activeCellAddr,
-      activeCellFormula: activeCellData.formula || activeCellData.value || '',
-      rangeWin: `${visibleCols[0]}${visibleRows[0]}:${visibleCols[visibleCols.length - 1]}${visibleRows[visibleRows.length - 1]}`,
-    };
-  };
 
   return (
     <View style={styles.pageContainer}>
@@ -584,28 +376,18 @@ const PracticeTaskContent: React.FC<Props> = ({
                   const res = resultMap.get(c._id || '');
                   const isPassed = res?.passed;
                   const isFailed = res && !res.passed;
-                  const isOpen = expandedCriteriaId === c._id;
-                  const isChart = c.type.includes('chart');
-
                   const whereStr = [
                     c.params?.sheet ? `Sheet ${c.params.sheet}` : null,
                     c.params?.cell ? `ô ${c.params.cell}` : null,
                     c.params?.range ? `vùng ${c.params.range}` : null,
                     c.params?.ySplit ? `cố định ${c.params.ySplit} hàng` : null,
-                    isChart ? 'biểu đồ' : null,
+                    c.type.includes('chart') ? 'biểu đồ' : null,
                   ]
                     .filter(Boolean)
                     .join(' · ');
 
-                  const gridData = isExcel ? getCriterionGridData(c) : null;
-
                   return (
-                    <View
-                      key={c._id || idx}
-                      style={{
-                        ...styles.criterionRow,
-                        ...(isOpen ? styles.criterionRowExpanded : {}),
-                      }}>
+                    <View key={c._id || idx} style={styles.criterionRow}>
                       <View style={styles.criterionHeader}>
                         {/* Huy hiệu số hoặc kết quả */}
                         <View
@@ -649,50 +431,20 @@ const PracticeTaskContent: React.FC<Props> = ({
                             ) : null}
                           </View>
 
-                          {/* Hành động xem trước và chuyển tab sửa lỗi */}
-                          {isGraded && (
+                          {/* Chuyển tab sửa lỗi khi yêu cầu chưa đạt */}
+                          {isGraded && isFailed && (
                             <View style={styles.actionsRow}>
                               <View
-                                style={styles.toggleBtn}
-                                onClick={() =>
-                                  setExpandedCriteriaId(
-                                    isOpen ? null : c._id || null,
-                                  )
-                                }
+                                style={styles.goFixBtn}
+                                onClick={() => setActiveTab('fix')}
                                 {...asButton(
-                                  () =>
-                                    setExpandedCriteriaId(
-                                      isOpen ? null : c._id || null,
-                                    ),
-                                  isOpen
-                                    ? 'Ẩn vùng ô'
-                                    : 'Xem vùng ô trong bài làm',
+                                  () => setActiveTab('fix'),
+                                  'Xem hướng dẫn sửa lỗi cho yêu cầu này',
                                 )}>
-                                <Text style={styles.toggleBtnText}>
-                                  {isOpen ? '▾ ' : '▸ '}
-                                  {isChart
-                                    ? isOpen
-                                      ? 'Ẩn thông tin biểu đồ'
-                                      : 'Xem thông tin biểu đồ'
-                                    : isOpen
-                                      ? 'Ẩn vùng ô'
-                                      : 'Xem vùng ô trong bài làm'}
+                                <Text style={styles.goFixBtnText}>
+                                  Xem hướng dẫn sửa →
                                 </Text>
                               </View>
-
-                              {isFailed && (
-                                <View
-                                  style={styles.goFixBtn}
-                                  onClick={() => setActiveTab('fix')}
-                                  {...asButton(
-                                    () => setActiveTab('fix'),
-                                    'Xem hướng dẫn sửa lỗi cho yêu cầu này',
-                                  )}>
-                                  <Text style={styles.goFixBtnText}>
-                                    Xem hướng dẫn sửa →
-                                  </Text>
-                                </View>
-                              )}
                             </View>
                           )}
                         </View>
@@ -718,298 +470,6 @@ const PracticeTaskContent: React.FC<Props> = ({
                           </View>
                         )}
                       </View>
-
-                      {/* Khung xem trước vùng ô (4 trạng thái: vReading, vError, vChart, vGrid) */}
-                      {isOpen && (
-                        <View
-                          style={
-                            isMobile
-                              ? styles.previewWrapMobile
-                              : styles.previewWrap
-                          }>
-                          <View style={styles.previewBox}>
-                            {isReadingFile ? (
-                              /* 1. vReading: Đang đọc file */
-                              <View style={styles.readingContainer}>
-                                <View style={styles.readingHeaderRow}>
-                                  <Spin size="small" />
-                                  <Text style={styles.readingHeaderText}>
-                                    Đang đọc file bài làm trên máy bạn…
-                                  </Text>
-                                </View>
-                                <View style={styles.readingSkeletonGrid}>
-                                  {[1, 2, 3, 4].map(sRow => (
-                                    <View
-                                      key={sRow}
-                                      style={styles.readingSkeletonRow}>
-                                      {[1, 2, 3, 4].map(sCol => (
-                                        <View
-                                          key={sCol}
-                                          style={styles.readingSkeletonCell}
-                                        />
-                                      ))}
-                                    </View>
-                                  ))}
-                                </View>
-                                <Text style={styles.readingFooterNote}>
-                                  Điểm số ở trên đã có sẵn, không cần đợi bước
-                                  này.
-                                </Text>
-                              </View>
-                            ) : isChart ? (
-                              /* 2. vChart: Tiêu chí biểu đồ */
-                              <View style={styles.chartContainer}>
-                                <View
-                                  aria-hidden="true"
-                                  style={styles.chartIconBadge}>
-                                  <View style={styles.chartBar1} />
-                                  <View style={styles.chartBar2} />
-                                  <View style={styles.chartBar3} />
-                                </View>
-                                <View style={styles.chartCol}>
-                                  <Text style={styles.chartTitleText}>
-                                    Có biểu đồ: Chart Title trên sheet{' '}
-                                    {c.params?.sheet || 'bài làm'}
-                                  </Text>
-                                  <Text style={styles.chartNoteText}>
-                                    Đọc từ file bạn nộp. Khung xem không vẽ lại
-                                    biểu đồ, chỉ hiện loại và tiêu đề.
-                                  </Text>
-                                </View>
-                              </View>
-                            ) : gridData?.isSheetNotFound ? (
-                              /* 3. vError: Tên sheet không khớp trong file thật */
-                              <View style={styles.errorContainer}>
-                                <View
-                                  aria-hidden="true"
-                                  style={styles.errorIconBadge}>
-                                  <Text style={styles.errorIconBadgeText}>
-                                    !
-                                  </Text>
-                                </View>
-                                <View style={styles.errorCol}>
-                                  <Text style={styles.errorTitle}>
-                                    Không tìm thấy sheet “
-                                    {gridData.missingSheetName}” trong file đã
-                                    nộp
-                                  </Text>
-                                  <Text style={styles.errorBody}>
-                                    Sheet có trong file:{' '}
-                                    {gridData.availableSheets?.join(', ') ||
-                                      'Không xác định'}
-                                    . Điểm và trạng thái ở trên vẫn đúng theo
-                                    kết quả chấm — chỉ khung xem trước không
-                                    hiển thị được.
-                                  </Text>
-                                </View>
-                              </View>
-                            ) : fileReadError ? (
-                              /* 3. vError: Lỗi đọc file chung */
-                              <View style={styles.errorContainer}>
-                                <View
-                                  aria-hidden="true"
-                                  style={styles.errorIconBadge}>
-                                  <Text style={styles.errorIconBadgeText}>
-                                    !
-                                  </Text>
-                                </View>
-                                <View style={styles.errorCol}>
-                                  <Text style={styles.errorTitle}>
-                                    Không mở được file bài làm
-                                  </Text>
-                                  <Text style={styles.errorBody}>
-                                    {fileReadError}
-                                  </Text>
-                                </View>
-                              </View>
-                            ) : gridData && gridData.visibleCols.length > 0 ? (
-                              /* 4. vGrid: Lưới ô tính và thanh công thức fx */
-                              <View style={{ flexDirection: 'column' }}>
-                                <View style={styles.gridTopBar}>
-                                  <Text style={styles.gridTopBarSheetText}>
-                                    Sheet {c.params?.sheet || 'Sheet1'} · vùng{' '}
-                                    {gridData.rangeWin}
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      ...styles.gridTopBarTargetText,
-                                      color: isPassed
-                                        ? 'var(--color-success)'
-                                        : 'var(--color-error)',
-                                    }}>
-                                    {isPassed ? '✓ ' : '✕ '}Ô được chấm:{' '}
-                                    {gridData.targetCell || 'Khóa'} ·{' '}
-                                    {isPassed ? 'Đạt' : 'Chưa đạt'}
-                                  </Text>
-                                </View>
-
-                                {/* Thanh công thức */}
-                                <View style={styles.formulaBar}>
-                                  <View style={styles.formulaAddrBox}>
-                                    <Text
-                                      style={{
-                                        ...typography.caption,
-                                        fontWeight: '500',
-                                      }}>
-                                      {gridData.activeCellAddr}
-                                    </Text>
-                                  </View>
-                                  <View
-                                    aria-hidden="true"
-                                    style={styles.formulaFxBox}>
-                                    <Text
-                                      style={{
-                                        ...typography.caption,
-                                        fontStyle: 'italic',
-                                        color: 'var(--color-text-muted)',
-                                      }}>
-                                      fx
-                                    </Text>
-                                  </View>
-                                  <View style={styles.formulaValBox}>
-                                    <Text
-                                      style={{
-                                        fontFamily:
-                                          'ui-monospace, Consolas, monospace',
-                                        ...typography.caption,
-                                      }}>
-                                      {gridData.activeCellFormula}
-                                    </Text>
-                                  </View>
-                                </View>
-
-                                {/* Lưới ô Flexbox chuẩn React Native Web */}
-                                <View style={styles.tableScrollWrap}>
-                                  <View style={styles.gridTable}>
-                                    {/* Hàng tiêu đề cột */}
-                                    <View style={styles.gridRow}>
-                                      <View style={styles.gridThCorner} />
-                                      {gridData.visibleCols.map(col => {
-                                        const isActiveCol =
-                                          gridData.activeCellAddr.startsWith(
-                                            col,
-                                          );
-                                        return (
-                                          <View
-                                            key={col}
-                                            style={[
-                                              styles.gridThCol,
-                                              isActiveCol &&
-                                                styles.gridThColActive,
-                                            ]}>
-                                            <Text style={styles.gridThColText}>
-                                              {col}
-                                            </Text>
-                                          </View>
-                                        );
-                                      })}
-                                    </View>
-
-                                    {/* Các hàng dữ liệu */}
-                                    {gridData.visibleRows.map(r => {
-                                      const isActiveRow =
-                                        gridData.activeCellAddr.includes(
-                                          String(r),
-                                        );
-                                      const isFreeze = gridData.ySplit === r;
-                                      return (
-                                        <View key={r} style={styles.gridRow}>
-                                          <View
-                                            style={[
-                                              styles.gridThRow,
-                                              isActiveRow &&
-                                                styles.gridThRowActive,
-                                              isFreeze &&
-                                                styles.gridThRowFreeze,
-                                            ]}>
-                                            <Text style={styles.gridThRowText}>
-                                              {r}
-                                            </Text>
-                                          </View>
-                                          {gridData.visibleCols.map(col => {
-                                            const addr = `${col}${r}`;
-                                            const cell = gridData.cellMap[addr];
-                                            const isCellSel =
-                                              addr === gridData.activeCellAddr;
-                                            const isTarget =
-                                              addr === gridData.targetCell;
-
-                                            return (
-                                              <View
-                                                key={addr}
-                                                {...asButton(
-                                                  () =>
-                                                    setSelectedCells(prev => ({
-                                                      ...prev,
-                                                      [c._id || '']: addr,
-                                                    })),
-                                                  `Ô ${addr}`,
-                                                )}
-                                                style={[
-                                                  styles.gridTdCell,
-                                                  isTarget &&
-                                                    (isPassed
-                                                      ? styles.gridTdCellTargetPass
-                                                      : styles.gridTdCellTargetFail),
-                                                  isCellSel &&
-                                                    styles.gridTdCellSelected,
-                                                ]}>
-                                                <Text
-                                                  style={[
-                                                    styles.gridTdCellText,
-                                                    {
-                                                      textAlign:
-                                                        cell?.align || 'left',
-                                                    },
-                                                  ]}>
-                                                  {cell?.value || ''}
-                                                </Text>
-                                              </View>
-                                            );
-                                          })}
-                                        </View>
-                                      );
-                                    })}
-                                  </View>
-                                </View>
-
-                                <View style={styles.gridFooterNote}>
-                                  <Text
-                                    style={{
-                                      ...typography.caption,
-                                      color: 'var(--color-text-muted)',
-                                      lineHeight: 18,
-                                    }}>
-                                    {gridData.ySplit
-                                      ? `Đường đậm dưới hàng ${gridData.ySplit} = vùng cố định đọc từ file (ySplit = ${gridData.ySplit}). Màu/viền ô là mô phỏng.`
-                                      : 'Giá trị, công thức và định dạng số đọc từ file bạn nộp. Màu nền, viền, font ô là mô phỏng theo giao diện LearnNest.'}
-                                  </Text>
-                                </View>
-                              </View>
-                            ) : (
-                              /* Fallback thông báo */
-                              <View style={styles.errorContainer}>
-                                <View
-                                  aria-hidden="true"
-                                  style={styles.errorIconBadge}>
-                                  <Text style={styles.errorIconBadgeText}>
-                                    !
-                                  </Text>
-                                </View>
-                                <View style={styles.errorCol}>
-                                  <Text style={styles.errorTitle}>
-                                    Không thể hiển thị vùng ô
-                                  </Text>
-                                  <Text style={styles.errorBody}>
-                                    File bài làm không chứa định dạng bảng tính
-                                    phù hợp để vẽ lại khung xem trước.
-                                  </Text>
-                                </View>
-                              </View>
-                            )}
-                          </View>
-                        </View>
-                      )}
                     </View>
                   );
                 })}
@@ -1077,21 +537,16 @@ const PracticeTaskContent: React.FC<Props> = ({
                       ))}
                     </View>
 
-                    <View>
+                    <View style={{ marginTop: 8 }}>
                       <View
-                        style={styles.toggleBtn}
-                        onClick={() => {
-                          setActiveTab('task');
-                          setExpandedCriteriaId(c._id || null);
-                        }}
-                        {...asButton(() => {
-                          setActiveTab('task');
-                          setExpandedCriteriaId(c._id || null);
-                        }, 'Xem vùng ô trong bài làm cho yêu cầu này')}>
-                        <Text style={styles.toggleBtnText}>
-                          {isChart
-                            ? 'Xem thông tin biểu đồ trong bài làm →'
-                            : 'Xem vùng ô trong bài làm →'}
+                        style={styles.goFixBtn}
+                        onClick={() => setActiveTab('task')}
+                        {...asButton(
+                          () => setActiveTab('task'),
+                          'Xem lại đề bài & nhiệm vụ',
+                        )}>
+                        <Text style={styles.goFixBtnText}>
+                          ← Xem lại đề bài &amp; nhiệm vụ
                         </Text>
                       </View>
                     </View>
