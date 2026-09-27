@@ -100,19 +100,31 @@ const HomeOverview: React.FC = () => {
             style={[styles.mainRow, isMobile ? styles.mainRowMobile : null]}>
             <View style={styles.continuingCol}>
               <View style={styles.titleContainer}>
-                <Text style={styles.title}>Đang học</Text>
+                <Text style={styles.title}>
+                  {myCourses?.length ? 'Đang học' : 'Khóa học gợi ý cho bạn'}
+                </Text>
                 <AppButton
                   type="text"
                   style={styles.seeAllBtn}
-                  onClick={() => router.push('/dashboard/my-courses')}>
+                  onClick={() =>
+                    router.push(
+                      myCourses?.length
+                        ? '/dashboard/my-courses'
+                        : '/dashboard/lesson',
+                    )
+                  }>
                   Xem tất cả →
                 </AppButton>
               </View>
-              <ContinuingCourses
-                courses={myCourses}
-                loading={loadingCourses}
-                formatRelativeTime={formatRelativeTime}
-              />
+              {myCourses?.length ? (
+                <ContinuingCourses
+                  courses={myCourses}
+                  loading={loadingCourses}
+                  formatRelativeTime={formatRelativeTime}
+                />
+              ) : (
+                <AllCoursesGrid enrolledIds={enrolledIds} limit={4} />
+              )}
             </View>
 
             <View style={styles.roadmapCol}>
@@ -121,19 +133,21 @@ const HomeOverview: React.FC = () => {
             </View>
           </View>
 
-          {/* 5. ALL COURSES CATALOG PREVIEW */}
-          <View style={[styles.section, styles.sectionSpacing]}>
-            <View style={styles.titleContainer}>
-              <Text style={styles.title}>Khám phá khóa học khác</Text>
-              <AppButton
-                type="text"
-                style={styles.seeAllBtn}
-                onClick={() => router.push('/dashboard/lesson')}>
-                Xem tất cả →
-              </AppButton>
+          {/* 5. ALL COURSES CATALOG PREVIEW (chỉ hiện khi đã có bài đang học) */}
+          {Boolean(myCourses?.length) && (
+            <View style={[styles.section, styles.sectionSpacing]}>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>Khám phá khóa học khác</Text>
+                <AppButton
+                  type="text"
+                  style={styles.seeAllBtn}
+                  onClick={() => router.push('/dashboard/lesson')}>
+                  Xem tất cả →
+                </AppButton>
+              </View>
+              <AllCoursesGrid enrolledIds={enrolledIds} />
             </View>
-            <AllCoursesGrid enrolledIds={enrolledIds} />
-          </View>
+          )}
         </View>
       )}
     </View>

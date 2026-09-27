@@ -285,7 +285,7 @@ export default async function HomePage() {
 
           <div className="landing__features">
             {/* Bento Card 1: Large - Luyện thi thực hành */}
-            <Reveal>
+            <Reveal className="bento-span-2">
               <div className="landing__feature-card landing__feature-card--large">
                 <div className="landing__feature-card-content">
                   <div className="landing__feature-icon landing__feature-icon--primary">

@@ -6,9 +6,13 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 const Reveal = ({
   children,
   delay = 0,
+  className,
+  style,
 }: {
   children: ReactNode;
   delay?: number;
+  className?: string;
+  style?: React.CSSProperties;
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
@@ -32,10 +36,12 @@ const Reveal = ({
   return (
     <div
       ref={ref}
+      className={className}
       style={{
         opacity: shown ? 1 : 0,
         transform: shown ? 'none' : 'translateY(24px)',
         transition: `opacity 0.5s ease-out ${delay}s, transform 0.5s ease-out ${delay}s`,
+        ...style,
       }}>
       {children}
     </div>

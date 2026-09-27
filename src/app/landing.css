@@ -1010,7 +1010,13 @@
   gap: 24px;
 }
 
+.bento-span-2 {
+  grid-column: span 2;
+}
+
 .landing__feature-card {
+  height: 100%;
+  box-sizing: border-box;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 18px;
@@ -1029,11 +1035,11 @@
 }
 
 .landing__feature-card--large {
-  grid-column: span 2;
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 24px;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 32px;
   align-items: center;
+  padding: 32px;
 }
 
 .landing__feature-icon {
@@ -1463,9 +1469,15 @@
     grid-template-columns: 1fr;
   }
 
+  .bento-span-2 {
+    grid-column: span 1;
+  }
+
   .landing__feature-card--large {
     grid-column: span 1;
     grid-template-columns: 1fr;
+    padding: 24px;
+    gap: 20px;
   }
 
   .testimonials-grid {
