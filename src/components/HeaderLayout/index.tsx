@@ -319,6 +319,7 @@ const HeaderLayout: React.FC = ({}) => {
               <Button
                 type="text"
                 icon={<MenuOutlined />}
+                aria-label="Mở menu điều hướng"
                 onClick={() => setOpen(true)}
               />
             )}

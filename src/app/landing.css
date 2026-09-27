@@ -1478,6 +1478,10 @@
     padding: 12px 16px;
   }
 
+  .landing__header-actions {
+    display: none;
+  }
+
   .landing__hero-text h1 {
     font-size: 32px;
   }
