@@ -123,12 +123,25 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
       if (allowExitRef.current) return;
       const target = (e.target as HTMLElement).closest('a');
       if (target && target.href) {
-        const url = new URL(target.href);
-        if (!url.pathname.includes(attemptId)) {
-          e.preventDefault();
-          e.stopPropagation();
-          pendingNavUrl.current = url.pathname + url.search;
-          setShowExitWarning(true);
+        // Không chặn nút download file gốc, link blob, hoặc tab mới
+        if (
+          target.hasAttribute('download') ||
+          target.getAttribute('target') === '_blank' ||
+          target.href.startsWith('blob:') ||
+          target.protocol === 'blob:'
+        ) {
+          return;
+        }
+        try {
+          const url = new URL(target.href);
+          if (!url.pathname.includes(attemptId)) {
+            e.preventDefault();
+            e.stopPropagation();
+            pendingNavUrl.current = url.pathname + url.search;
+            setShowExitWarning(true);
+          }
+        } catch {
+          // ignore invalid URLs
         }
       }
     };
@@ -240,6 +253,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
         <View style={styles.headerLeft}>
           <View
             style={styles.backButton}
+            onClick={() => setShowExitWarning(true)}
             {...asButton(() => setShowExitWarning(true), 'Thoát bài thi')}>
             <Text style={styles.backButtonText}>← Thoát</Text>
           </View>
@@ -344,6 +358,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
               <View
                 key={t.taskId}
                 style={[styles.chipItem, isActive && styles.chipItemActive]}
+                onClick={() => setActiveTaskId(t.taskId)}
                 {...asButton(
                   () => setActiveTaskId(t.taskId),
                   `Chuyển đến bài ${idx + 1}: ${t.title}`,
@@ -382,6 +397,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
                   <View
                     key={t.taskId}
                     style={[styles.taskItem, isActive && styles.taskItemActive]}
+                    onClick={() => setActiveTaskId(t.taskId)}
                     {...asButton(
                       () => setActiveTaskId(t.taskId),
                       `Bài ${idx + 1}: ${t.title}`,
@@ -466,11 +482,9 @@ const MockExamResultView: React.FC<{ attemptId: string }> = ({ attemptId }) => {
     <View style={isMobile ? styles.pageMobile : styles.page}>
       <View
         style={styles.backButton}
-        {...asButton(
-          () => router.push('/dashboard/practice'),
-          'Quay lại Luyện Tập',
-        )}>
-        <Text style={styles.backButtonText}>← Quay lại Luyện Tập</Text>
+        onClick={() => router.push('/dashboard/practice')}
+        {...asButton(() => router.push('/dashboard/practice'), 'Quay lại')}>
+        <Text style={styles.backButtonText}>← Quay lại</Text>
       </View>
 
       {/* Card tổng điểm */}

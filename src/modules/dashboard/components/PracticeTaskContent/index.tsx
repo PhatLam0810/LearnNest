@@ -123,29 +123,62 @@ const PracticeTaskContent: React.FC<Props> = ({
   // Tự động đọc file .xlsx bài làm khi có submissionId và là môn Excel
   useEffect(() => {
     const subId = currentResult?.submissionId;
-    if (!subId || detail?.task?.subject !== 'Excel') return;
+    if (!subId || detail?.task?.subject !== 'Excel') {
+      setIsReadingFile(false);
+      return;
+    }
 
     let isMounted = true;
     setIsReadingFile(true);
     setFileReadError(null);
 
+    const controller = new AbortController();
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) {
+        controller.abort();
+        setIsReadingFile(false);
+        setWorkbook(null);
+        setFileReadError(
+          'Không thể đọc file bài làm (quá thời gian xử lý hoặc file không đúng định dạng .xlsx).',
+        );
+      }
+    }, 4000);
+
     api
       .get(`/practice/submissions/${subId}/file`, {
         responseType: 'blob',
+        signal: controller.signal,
+        timeout: 4000,
       })
-      .then(res => readWorkbook(res.data))
+      .then(async res => {
+        if (
+          res.data &&
+          res.data.type &&
+          res.data.type.includes('application/json')
+        ) {
+          throw new Error('Dữ liệu trả về không phải file Excel');
+        }
+        return readWorkbook(res.data);
+      })
       .then(wb => {
         if (isMounted) {
           setWorkbook(wb);
         }
       })
-      .catch(() => {
+      .catch((err: any) => {
         if (isMounted) {
           setWorkbook(null);
-          setFileReadError('Không mở được file bài làm để xem trước vùng ô.');
+          const msg =
+            err?.message || 'Không mở được file bài làm để xem trước vùng ô.';
+          setFileReadError(
+            typeof msg === 'string' && msg.includes('trang tính')
+              ? msg
+              : 'Không mở được file bài làm (file bị lỗi hoặc không đúng định dạng .xlsx).',
+          );
         }
       })
       .finally(() => {
+        clearTimeout(safetyTimer);
         if (isMounted) {
           setIsReadingFile(false);
         }
@@ -153,6 +186,8 @@ const PracticeTaskContent: React.FC<Props> = ({
 
     return () => {
       isMounted = false;
+      clearTimeout(safetyTimer);
+      controller.abort();
     };
   }, [currentResult?.submissionId, detail?.task?.subject]);
 
@@ -400,13 +435,12 @@ const PracticeTaskContent: React.FC<Props> = ({
           <View style={styles.headerLeft}>
             <View
               style={styles.backButton}
+              onClick={() => router.push('/dashboard/practice')}
               {...asButton(
                 () => router.push('/dashboard/practice'),
-                'Quay lại trang Luyện tập',
+                'Quay lại',
               )}>
-              <Text style={styles.backButtonText}>
-                ← {isMobile ? 'Quay lại' : 'Luyện tập'}
-              </Text>
+              <Text style={styles.backButtonText}>← Quay lại</Text>
             </View>
 
             <View
@@ -488,6 +522,7 @@ const PracticeTaskContent: React.FC<Props> = ({
                   styles.tabItem,
                   activeTab === 'task' && styles.tabItemActive,
                 ]}
+                onClick={() => setActiveTab('task')}
                 {...asButton(
                   () => setActiveTab('task'),
                   'Xem tab Đề bài & Nhiệm vụ',
@@ -505,6 +540,7 @@ const PracticeTaskContent: React.FC<Props> = ({
                   styles.tabItem,
                   activeTab === 'fix' && styles.tabItemActive,
                 ]}
+                onClick={() => setActiveTab('fix')}
                 {...asButton(
                   () => setActiveTab('fix'),
                   'Xem tab Hướng dẫn sửa lỗi',
@@ -618,6 +654,11 @@ const PracticeTaskContent: React.FC<Props> = ({
                             <View style={styles.actionsRow}>
                               <View
                                 style={styles.toggleBtn}
+                                onClick={() =>
+                                  setExpandedCriteriaId(
+                                    isOpen ? null : c._id || null,
+                                  )
+                                }
                                 {...asButton(
                                   () =>
                                     setExpandedCriteriaId(
@@ -642,6 +683,7 @@ const PracticeTaskContent: React.FC<Props> = ({
                               {isFailed && (
                                 <View
                                   style={styles.goFixBtn}
+                                  onClick={() => setActiveTab('fix')}
                                   {...asButton(
                                     () => setActiveTab('fix'),
                                     'Xem hướng dẫn sửa lỗi cho yêu cầu này',
@@ -1038,6 +1080,10 @@ const PracticeTaskContent: React.FC<Props> = ({
                     <View>
                       <View
                         style={styles.toggleBtn}
+                        onClick={() => {
+                          setActiveTab('task');
+                          setExpandedCriteriaId(c._id || null);
+                        }}
                         {...asButton(() => {
                           setActiveTab('task');
                           setExpandedCriteriaId(c._id || null);

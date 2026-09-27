@@ -12,17 +12,8 @@ type Props = { taskId: string };
 // lessonId) — bài đã gắn vào khóa thì học viên làm ngay trong trang khóa
 // thực hành (sidebar Phần > Bài tập), không cần trang này.
 const PracticeTaskDetailPage: React.FC<Props> = ({ taskId }) => {
-  const router = useRouter();
-
   return (
-    <div className="practice-detail-page">
-      <Button
-        type="text"
-        icon={<LeftOutlined />}
-        style={{ padding: 0 }}
-        onClick={() => router.push('/dashboard/practice')}>
-        Quay lại
-      </Button>
+    <div className="practice-detail-page" style={{ padding: 0 }}>
       <PracticeTaskContent taskId={taskId} />
     </div>
   );

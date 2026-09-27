@@ -24,8 +24,19 @@ export interface CellWindowResult {
 }
 
 export const readWorkbook = async (blob: Blob): Promise<XLSX.WorkBook> => {
-  const buf = await blob.arrayBuffer();
-  return XLSX.read(buf, { type: 'array', cellFormula: true });
+  if (!blob || blob.size < 50) {
+    throw new Error('File không hợp lệ hoặc rỗng');
+  }
+  try {
+    const buf = await blob.arrayBuffer();
+    const wb = XLSX.read(buf, { type: 'array', cellFormula: true });
+    if (!wb || !wb.SheetNames || wb.SheetNames.length === 0) {
+      throw new Error('File không chứa trang tính (sheet) nào hợp lệ');
+    }
+    return wb;
+  } catch (err: any) {
+    throw new Error(err?.message || 'Không thể đọc cấu trúc file Excel');
+  }
 };
 
 export const getSheetNames = (workbook: XLSX.WorkBook): string[] =>

@@ -71,29 +71,36 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({
           alignItems: 'center',
           justifyContent: 'center',
           gap: 6,
-          minWidth: hitArea,
-          minHeight: hitArea,
-          paddingTop: 0,
-          paddingRight: 0,
-          paddingBottom: 0,
-          paddingLeft: 0,
+          minWidth: hitArea || (saved ? size + 12 : undefined),
+          minHeight: hitArea || (saved ? size + 12 : undefined),
+          paddingTop: 6,
+          paddingRight: withLabel || saved ? 8 : 6,
+          paddingBottom: 6,
+          paddingLeft: withLabel || saved ? 8 : 6,
+          borderRadius: 8,
           borderWidth: 0,
-          background: 'none',
+          backgroundColor: saved ? 'var(--color-vhu-primary)' : 'transparent',
           fontFamily: 'inherit',
           cursor: isLoading ? 'wait' : 'pointer',
-          color: saved ? '#1d418a' : '#6b7280',
+          color: saved ? '#ffffff' : 'var(--color-text-muted)',
           fontSize: size,
           lineHeight: 1,
+          transition: 'all 0.2s ease',
         }}>
         <AppIcon
           icon={saved ? BookmarkCheck : Bookmark}
           size={size}
-          color={saved ? 'var(--color-vhu-primary)' : '#6b7280'}
+          color={saved ? '#ffffff' : 'var(--color-text-muted)'}
           active={saved}
-          activeColor="var(--color-vhu-primary)"
+          activeColor="#ffffff"
         />
         {withLabel && (
-          <span style={{ fontSize: 13, fontWeight: 500 }}>
+          <span
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: saved ? '#ffffff' : 'var(--color-text-body)',
+            }}>
             {saved ? 'Đã lưu' : 'Lưu'}
           </span>
         )}
