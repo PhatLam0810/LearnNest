@@ -1,38 +1,157 @@
 import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
-  container: {
+  pageContainer: {
     width: '100%',
-    display: 'flex',
+    minHeight: '100%',
+    backgroundColor: 'var(--color-surface-page)',
     flexDirection: 'column',
-    gap: 20,
   },
   loadingContainer: {
-    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 64,
-    paddingBottom: 64,
+    paddingTop: 80,
+    paddingBottom: 80,
   },
+  // Sticky header top of ExamRoom
   header: {
-    display: 'flex',
+    backgroundColor: 'var(--color-surface)',
+    borderBottomWidth: 1,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'var(--color-border)',
+    paddingLeft: 32,
+    paddingRight: 32,
+    paddingTop: 16,
+    paddingBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 16,
+    flexWrap: 'wrap',
+    position: 'sticky',
+    top: 0,
+    zIndex: 5,
+  },
+  headerMobile: {
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingTop: 12,
+    paddingBottom: 12,
     gap: 12,
   },
-  title: {
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+    minWidth: 0,
+  },
+  backButton: {
+    height: 40,
+    paddingLeft: 12,
+    paddingRight: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-border)',
+    backgroundColor: 'var(--color-surface)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    cursor: 'pointer',
+    flexShrink: 0,
+  },
+  backButtonText: {
+    ...typography.subTitle2,
+    color: 'var(--color-text-body)',
+  },
+  subjectIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  subjectIconBadgeText: {
+    color: 'var(--color-text-on-primary)',
+    fontWeight: '700',
+    ...typography.subTitle1,
+  },
+  headerTitleCol: {
+    flexDirection: 'column',
+    gap: 2,
+    minWidth: 0,
+    flex: 1,
+  },
+  headerTitle: {
     ...typography.titleM,
     color: 'var(--color-text-primary)',
     lineHeight: 28,
   },
-  titleMobile: {
+  headerTitleMobile: {
     ...typography.titleMMobile,
     color: 'var(--color-text-primary)',
     lineHeight: 24,
   },
+  headerMeta: {
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+    lineHeight: 16,
+  },
+  statusChip: {
+    height: 32,
+    paddingLeft: 12,
+    paddingRight: 12,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 0,
+  },
+  statusChipText: {
+    ...typography.subTitle2,
+    fontWeight: '500',
+    lineHeight: 20,
+  },
+  // Body: flex-wrap main + aside
+  bodyRow: {
+    paddingLeft: 32,
+    paddingRight: 32,
+    paddingTop: 20,
+    paddingBottom: 40,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 24,
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  bodyRowMobile: {
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingTop: 16,
+    paddingBottom: 80,
+    flexDirection: 'column',
+    gap: 16,
+  },
+  mainCol: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'column',
+    gap: 16,
+  },
+  asideCol: {
+    width: 340,
+    maxWidth: '100%',
+    flexShrink: 0,
+    flexDirection: 'column',
+    gap: 16,
+  },
+  asideColMobile: {
+    width: '100%',
+  },
+  // Tab Bar
   tabList: {
-    display: 'flex',
     flexDirection: 'row',
     gap: 4,
     borderBottomWidth: 1,
@@ -40,81 +159,49 @@ const styles = StyleSheet.create({
     borderBottomColor: 'var(--color-border)',
     overflowX: 'auto',
   },
-  tabButton: {
+  tabItem: {
     height: 44,
-    paddingLeft: 16,
-    paddingRight: 16,
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    borderBottomWidth: 2,
-    borderBottomStyle: 'solid',
-    borderBottomColor: 'transparent',
-    display: 'flex',
+    paddingLeft: 14,
+    paddingRight: 14,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    cursor: 'pointer',
+    borderBottomWidth: 2,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'transparent',
     marginBottom: -1,
+    cursor: 'pointer',
+    backgroundColor: 'transparent',
   },
-  tabButtonActive: {
+  tabItemActive: {
     borderBottomColor: 'var(--color-vhu-primary)',
   },
-  tabText: {
+  tabItemText: {
     ...typography.subTitle2,
     color: 'var(--color-text-body)',
     lineHeight: 20,
   },
-  tabTextActive: {
+  tabItemTextActive: {
     color: 'var(--color-vhu-primary)',
     fontWeight: '600',
   },
-  badgeCount: {
+  fixBadge: {
     minWidth: 20,
     height: 20,
     paddingLeft: 6,
     paddingRight: 6,
     borderRadius: 10,
     backgroundColor: 'var(--color-error-bg)',
-    display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  badgeCountText: {
+  fixBadgeText: {
     ...typography.caption,
     fontWeight: '600',
     color: 'var(--color-error)',
     lineHeight: 14,
   },
-  // Main layout: 2 columns on desktop, stacked on mobile
-  mainLayout: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 24,
-    width: '100%',
-  },
-  mainLayoutMobile: {
-    flexDirection: 'column',
-    gap: 16,
-  },
-  mainColumn: {
-    flex: 1,
-    minWidth: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 16,
-  },
-  sideColumn: {
-    width: 320,
-    maxWidth: '100%',
-    flexShrink: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 16,
-  },
-  sideColumnMobile: {
-    width: '100%',
-  },
+  // Card Yêu cầu đề bài
   card: {
     backgroundColor: 'var(--color-surface)',
     borderWidth: 1,
@@ -122,6 +209,7 @@ const styles = StyleSheet.create({
     borderColor: 'var(--color-border)',
     borderRadius: 12,
     overflow: 'hidden',
+    flexDirection: 'column',
   },
   cardHeader: {
     paddingLeft: 20,
@@ -131,82 +219,82 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomStyle: 'solid',
     borderBottomColor: 'var(--color-border-subtle)',
-    display: 'flex',
     flexDirection: 'column',
     gap: 6,
   },
-  cardHeaderTop: {
-    display: 'flex',
+  cardHeaderTitleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 8,
     flexWrap: 'wrap',
   },
-  cardTitle: {
+  cardHeaderTitle: {
     ...typography.subTitle1,
     color: 'var(--color-text-primary)',
     lineHeight: 24,
   },
-  cardCounter: {
+  cardHeaderCounter: {
     ...typography.caption,
     color: 'var(--color-text-muted)',
     lineHeight: 16,
   },
-  cardDesc: {
+  cardHeaderDesc: {
     ...typography.body2,
     color: 'var(--color-text-body)',
     lineHeight: 21,
   },
-  criteriaItem: {
+  // Criterion list items
+  criterionRow: {
     borderBottomWidth: 1,
     borderBottomStyle: 'solid',
     borderBottomColor: 'var(--color-border-subtle)',
+    backgroundColor: 'var(--color-surface)',
+    flexDirection: 'column',
   },
-  criteriaItemRow: {
+  criterionRowExpanded: {
+    backgroundColor: 'var(--color-surface-selected)',
+  },
+  criterionHeader: {
     paddingLeft: 20,
     paddingRight: 20,
     paddingTop: 14,
     paddingBottom: 14,
-    display: 'flex',
     flexDirection: 'row',
     gap: 12,
     alignItems: 'flex-start',
   },
-  criteriaNum: {
+  criterionNum: {
     width: 28,
     height: 28,
     borderRadius: 14,
-    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
   },
-  criteriaNumText: {
+  criterionNumText: {
     ...typography.caption,
     fontWeight: '600',
     lineHeight: 16,
   },
-  criteriaBody: {
-    display: 'flex',
+  criterionBody: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'column',
     gap: 8,
-    minWidth: 0,
-    flex: 1,
   },
-  criteriaText: {
+  criterionSummary: {
     ...typography.body2,
     color: 'var(--color-text-primary)',
     lineHeight: 21,
   },
-  criteriaMetaRow: {
-    display: 'flex',
+  criterionMetaRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
     alignItems: 'center',
   },
-  typeTag: {
+  typeBadge: {
     paddingLeft: 8,
     paddingRight: 8,
     paddingTop: 2,
@@ -217,7 +305,7 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderColor: 'var(--color-border)',
   },
-  typeTagText: {
+  typeBadgeText: {
     ...typography.caption,
     color: 'var(--color-text-body)',
     lineHeight: 16,
@@ -227,56 +315,69 @@ const styles = StyleSheet.create({
     color: 'var(--color-text-body)',
     lineHeight: 16,
   },
-  criteriaActionsRow: {
-    display: 'flex',
+  actionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 16,
     alignItems: 'center',
   },
-  actionTextButton: {
+  toggleBtn: {
     height: 32,
-    paddingLeft: 10,
-    paddingRight: 10,
-    borderWidth: 0,
-    borderRadius: 6,
-    backgroundColor: 'transparent',
-    display: 'flex',
+    paddingLeft: 8,
+    paddingRight: 8,
+    marginLeft: -8,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     cursor: 'pointer',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    borderRadius: 6,
   },
-  actionTextButtonBlue: {
+  toggleBtnText: {
+    ...typography.subTitle2,
     color: 'var(--color-vhu-primary)',
+    fontWeight: '500',
   },
-  actionTextButtonRed: {
+  goFixBtn: {
+    height: 32,
+    paddingLeft: 8,
+    paddingRight: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    cursor: 'pointer',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    borderRadius: 6,
+  },
+  goFixBtnText: {
+    ...typography.subTitle2,
     color: 'var(--color-error)',
+    fontWeight: '500',
   },
-  statusChip: {
+  criterionStatusBadge: {
     paddingLeft: 10,
     paddingRight: 10,
     paddingTop: 2,
     paddingBottom: 2,
     borderRadius: 12,
-    display: 'flex',
+    flexShrink: 0,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
   },
-  statusChipText: {
+  criterionStatusBadgeText: {
     ...typography.caption,
     fontWeight: '500',
     lineHeight: 16,
   },
-  previewWrapper: {
+  // Preview panels
+  previewWrap: {
     paddingLeft: 60,
     paddingRight: 20,
     paddingBottom: 16,
   },
-  previewWrapperMobile: {
+  previewWrapMobile: {
     paddingLeft: 12,
     paddingRight: 12,
     paddingBottom: 14,
@@ -288,34 +389,32 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: 'var(--color-surface)',
+    flexDirection: 'column',
   },
-  // 4 preview states
+  // 4 states
+  // 1) vReading
   readingContainer: {
     paddingLeft: 16,
     paddingRight: 16,
     paddingTop: 16,
     paddingBottom: 16,
-    display: 'flex',
     flexDirection: 'column',
-    gap: 12,
+    gap: 10,
   },
-  readingStatusRow: {
-    display: 'flex',
+  readingHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  readingStatusText: {
+  readingHeaderText: {
     ...typography.body2,
     color: 'var(--color-text-body)',
   },
   readingSkeletonGrid: {
-    display: 'flex',
     flexDirection: 'column',
     gap: 4,
   },
   readingSkeletonRow: {
-    display: 'flex',
     flexDirection: 'row',
     gap: 4,
   },
@@ -325,17 +424,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'var(--color-border-subtle)',
     borderRadius: 2,
   },
-  readingNote: {
+  readingFooterNote: {
     ...typography.caption,
     color: 'var(--color-text-muted)',
   },
+  // 2) vError
   errorContainer: {
     paddingLeft: 16,
     paddingRight: 16,
     paddingTop: 14,
     paddingBottom: 14,
     backgroundColor: 'var(--color-warning-bg)',
-    display: 'flex',
     flexDirection: 'row',
     gap: 10,
     alignItems: 'flex-start',
@@ -345,39 +444,37 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 10,
     backgroundColor: 'var(--color-warning)',
-    display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
   },
-  errorIconText: {
+  errorIconBadgeText: {
     ...typography.caption,
     color: 'var(--color-text-on-primary)',
     fontWeight: '700',
   },
-  errorTextCol: {
-    display: 'flex',
+  errorCol: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'column',
     gap: 4,
-    minWidth: 0,
-    flex: 1,
   },
   errorTitle: {
     ...typography.subTitle2,
+    fontWeight: '500',
     color: 'var(--color-text-primary)',
-    lineHeight: 20,
   },
   errorBody: {
     ...typography.body2,
     color: 'var(--color-text-body)',
     lineHeight: 21,
   },
+  // 3) vChart
   chartContainer: {
     paddingLeft: 16,
     paddingRight: 16,
     paddingTop: 14,
     paddingBottom: 14,
-    display: 'flex',
     flexDirection: 'row',
     gap: 12,
     alignItems: 'flex-start',
@@ -387,7 +484,7 @@ const styles = StyleSheet.create({
     height: 32,
     borderRadius: 8,
     backgroundColor: 'var(--color-info-bg)',
-    display: 'flex',
+    flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'center',
     gap: 3,
@@ -409,30 +506,23 @@ const styles = StyleSheet.create({
     height: 11,
     backgroundColor: 'var(--color-vhu-primary)',
   },
-  chartTextCol: {
-    display: 'flex',
+  chartCol: {
+    flex: 1,
+    minWidth: 0,
     flexDirection: 'column',
     gap: 4,
-    minWidth: 0,
-    flex: 1,
   },
-  chartTitle: {
+  chartTitleText: {
     ...typography.body2,
     color: 'var(--color-text-primary)',
-    lineHeight: 20,
   },
-  chartNote: {
+  chartNoteText: {
     ...typography.caption,
     color: 'var(--color-text-muted)',
     lineHeight: 18,
   },
+  // 4) vGrid
   gridTopBar: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-    flexWrap: 'wrap',
     paddingLeft: 12,
     paddingRight: 12,
     paddingTop: 8,
@@ -441,17 +531,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomStyle: 'solid',
     borderBottomColor: 'var(--color-border)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
   },
-  gridTopBarLeft: {
+  gridTopBarSheetText: {
     ...typography.caption,
     color: 'var(--color-text-body)',
   },
-  gridTopBarRight: {
+  gridTopBarTargetText: {
     ...typography.caption,
     fontWeight: '500',
   },
   formulaBar: {
-    display: 'flex',
     flexDirection: 'row',
     alignItems: 'stretch',
     borderBottomWidth: 1,
@@ -460,8 +554,8 @@ const styles = StyleSheet.create({
     minWidth: 0,
     backgroundColor: 'var(--color-surface)',
   },
-  formulaCellAddr: {
-    width: 60,
+  formulaAddrBox: {
+    width: 56,
     flexShrink: 0,
     paddingLeft: 10,
     paddingRight: 10,
@@ -473,10 +567,9 @@ const styles = StyleSheet.create({
     ...typography.caption,
     fontWeight: '500',
     color: 'var(--color-text-primary)',
-    display: 'flex',
-    alignItems: 'center',
+    justifyContent: 'center',
   },
-  formulaFxLabel: {
+  formulaFxBox: {
     paddingLeft: 10,
     paddingRight: 10,
     paddingTop: 8,
@@ -487,50 +580,65 @@ const styles = StyleSheet.create({
     ...typography.caption,
     fontStyle: 'italic',
     color: 'var(--color-text-muted)',
-    display: 'flex',
-    alignItems: 'center',
+    justifyContent: 'center',
   },
-  formulaInputDisplay: {
+  formulaValBox: {
     flex: 1,
     minWidth: 0,
     paddingLeft: 10,
     paddingRight: 10,
     paddingTop: 8,
     paddingBottom: 8,
-    ...typography.formulaMono,
+    fontFamily: 'ui-monospace, Consolas, monospace',
+    ...typography.caption,
     color: 'var(--color-text-primary)',
     overflowX: 'auto',
     whiteSpace: 'nowrap',
+    justifyContent: 'center',
   },
-  tableScrollContainer: {
-    overflowX: 'auto',
+  tableScrollWrap: {
     width: '100%',
+    overflowX: 'auto',
   },
   gridTable: {
+    flexDirection: 'column',
     width: '100%',
-    borderCollapse: 'collapse',
+    minWidth: 320,
+  },
+  gridRow: {
+    flexDirection: 'row',
+    width: '100%',
   },
   gridThCorner: {
     width: 36,
+    height: 24,
     backgroundColor: 'var(--color-surface-subtle)',
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--color-border)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
   },
   gridThCol: {
     minWidth: 72,
-    height: 26,
+    flex: 1,
+    height: 24,
     backgroundColor: 'var(--color-surface-subtle)',
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--color-border)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gridThColActive: {
+    backgroundColor: 'var(--color-info-bg)',
+  },
+  gridThColText: {
     ...typography.caption,
     color: 'var(--color-text-body)',
     fontWeight: '500',
-    textAlign: 'center',
-  },
-  gridThColSelected: {
-    backgroundColor: 'var(--color-info-bg)',
+    lineHeight: 16,
   },
   gridThRow: {
     width: 36,
@@ -539,50 +647,83 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--color-border)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  gridThRowActive: {
+    backgroundColor: 'var(--color-info-bg)',
+  },
+  gridThRowFreeze: {
+    borderBottomWidth: 2,
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'var(--color-text-body)',
+  },
+  gridThRowText: {
     ...typography.caption,
     color: 'var(--color-text-body)',
     fontWeight: '500',
-    textAlign: 'center',
+    lineHeight: 16,
   },
-  gridThRowSelected: {
-    backgroundColor: 'var(--color-info-bg)',
-  },
-  gridCell: {
+  gridTdCell: {
+    minWidth: 72,
+    flex: 1,
+    height: 28,
     paddingLeft: 8,
     paddingRight: 8,
-    height: 28,
     borderWidth: 1,
     borderStyle: 'solid',
     borderColor: 'var(--color-border)',
+    backgroundColor: 'var(--color-surface)',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  gridTdCellTargetPass: {
+    backgroundColor: 'var(--color-success-bg)',
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-success)',
+  },
+  gridTdCellTargetFail: {
+    backgroundColor: 'var(--color-error-bg)',
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-error)',
+  },
+  gridTdCellSelected: {
+    backgroundColor: 'var(--color-surface-selected)',
+    borderWidth: 2,
+    borderStyle: 'solid',
+    borderColor: 'var(--color-vhu-primary)',
+  },
+  gridTdCellText: {
     ...typography.caption,
     color: 'var(--color-text-primary)',
-    whiteSpace: 'nowrap',
-    cursor: 'cell',
+    lineHeight: 16,
   },
-  gridFooter: {
+  gridFooterNote: {
     paddingLeft: 12,
     paddingRight: 12,
     paddingTop: 8,
     paddingBottom: 8,
-    ...typography.caption,
-    color: 'var(--color-text-muted)',
     borderTopWidth: 1,
     borderTopStyle: 'solid',
     borderTopColor: 'var(--color-border)',
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
     lineHeight: 18,
   },
   // Tab 2: Hướng dẫn sửa lỗi
   fixContainer: {
-    display: 'flex',
     flexDirection: 'column',
     gap: 12,
   },
-  fixIntro: {
+  fixIntroText: {
     ...typography.body2,
     color: 'var(--color-text-body)',
     lineHeight: 21,
   },
-  fixArticle: {
+  fixCard: {
     backgroundColor: 'var(--color-surface)',
     borderWidth: 1,
     borderStyle: 'solid',
@@ -592,24 +733,22 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     paddingTop: 16,
     paddingBottom: 16,
-    display: 'flex',
     flexDirection: 'column',
     gap: 10,
   },
-  fixArticleHeader: {
-    display: 'flex',
+  fixCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     gap: 8,
     flexWrap: 'wrap',
   },
-  fixTitle: {
+  fixCardTitle: {
     ...typography.subTitle2,
     color: 'var(--color-text-primary)',
-    lineHeight: 20,
+    fontWeight: '500',
   },
-  fixSummary: {
+  fixSummaryText: {
     ...typography.body2,
     color: 'var(--color-text-body)',
     lineHeight: 21,
@@ -622,22 +761,21 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     backgroundColor: 'var(--color-surface-subtle)',
     borderRadius: 8,
-    display: 'flex',
     flexDirection: 'column',
     gap: 6,
   },
-  fixStepItem: {
+  fixStepText: {
     ...typography.body2,
     color: 'var(--color-text-primary)',
     lineHeight: 21,
   },
-  fixNoteFooter: {
+  fixFooterNote: {
     ...typography.caption,
     color: 'var(--color-text-muted)',
     lineHeight: 18,
   },
-  // Aside Column: Card upload & score
-  asideCard: {
+  // Aside Column
+  asideSection: {
     backgroundColor: 'var(--color-surface)',
     borderWidth: 1,
     borderStyle: 'solid',
@@ -647,12 +785,10 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     paddingTop: 20,
     paddingBottom: 20,
-    display: 'flex',
     flexDirection: 'column',
-    gap: 16,
+    gap: 14,
   },
   scoreSection: {
-    display: 'flex',
     flexDirection: 'column',
     gap: 8,
     paddingBottom: 14,
@@ -666,66 +802,47 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   scoreRow: {
-    display: 'flex',
     flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 4,
+    alignItems: 'center',
+    gap: 10,
     flexWrap: 'wrap',
   },
-  scoreBig: {
+  scoreBigText: {
     ...typography.displayL,
     fontWeight: '700',
     color: 'var(--color-vhu-primary)',
     lineHeight: 36,
   },
-  scoreTotal: {
+  scoreTotalText: {
     ...typography.body1,
     color: 'var(--color-text-muted)',
-    lineHeight: 24,
   },
-  scoreNote: {
+  scoreNoteText: {
     ...typography.body2,
     color: 'var(--color-text-body)',
     lineHeight: 21,
   },
-  uploadSubjectRow: {
-    display: 'flex',
+  uploadHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
-  subjectIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  subjectIconText: {
-    color: 'var(--color-text-on-primary)',
-    fontWeight: '700',
-    ...typography.body1,
-  },
   uploadTitleCol: {
-    display: 'flex',
     flexDirection: 'column',
     gap: 2,
     minWidth: 0,
+    flex: 1,
   },
-  uploadTitle: {
+  uploadTitleText: {
     ...typography.subTitle2,
     color: 'var(--color-text-primary)',
-    lineHeight: 20,
+    fontWeight: '500',
   },
-  uploadHint: {
+  uploadHintText: {
     ...typography.caption,
     color: 'var(--color-text-muted)',
-    lineHeight: 16,
   },
   uploadBtnCol: {
-    display: 'flex',
     flexDirection: 'column',
     gap: 8,
     width: '100%',
@@ -736,7 +853,6 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
     borderRadius: 8,
-    display: 'flex',
     flexDirection: 'row',
     gap: 8,
     alignItems: 'flex-start',
@@ -753,6 +869,7 @@ const styles = StyleSheet.create({
     borderColor: 'var(--color-border)',
     borderRadius: 12,
     overflow: 'hidden',
+    flexDirection: 'column',
   },
   historyHeader: {
     paddingLeft: 20,
@@ -764,14 +881,13 @@ const styles = StyleSheet.create({
     borderBottomColor: 'var(--color-border-subtle)',
     ...typography.subTitle2,
     color: 'var(--color-text-primary)',
-    lineHeight: 20,
+    fontWeight: '500',
   },
   historyRow: {
     paddingLeft: 20,
     paddingRight: 20,
     paddingTop: 12,
     paddingBottom: 12,
-    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
@@ -779,16 +895,20 @@ const styles = StyleSheet.create({
     borderBottomStyle: 'solid',
     borderBottomColor: 'var(--color-border-subtle)',
   },
-  historyTime: {
+  historyAttemptLabel: {
     ...typography.caption,
     color: 'var(--color-text-muted)',
-    lineHeight: 16,
+    width: 44,
   },
-  historyScore: {
+  historyScoreText: {
     ...typography.subTitle2,
+    fontWeight: '500',
     color: 'var(--color-text-primary)',
-    lineHeight: 20,
     flex: 1,
+  },
+  historyTimeText: {
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
   },
   bottomBarSticky: {
     position: 'sticky',
@@ -802,26 +922,24 @@ const styles = StyleSheet.create({
     paddingRight: 16,
     paddingTop: 12,
     paddingBottom: 12,
-    display: 'flex',
     flexDirection: 'row',
     gap: 8,
+    boxShadow: '0 -4px 12px rgba(17,24,39,0.06)',
   },
-  discussionSection: {
+  discussionBox: {
     marginTop: 20,
     borderTopWidth: 1,
     borderTopStyle: 'solid',
     borderTopColor: 'var(--color-border-subtle)',
     paddingTop: 20,
+    flexDirection: 'column',
   },
   discussionTitle: {
     ...typography.subTitle1,
     color: 'var(--color-text-primary)',
-    lineHeight: 24,
     marginBottom: 16,
   },
-  // Result item row for export
   resultItemRow: {
-    display: 'flex',
     flexDirection: 'row',
     gap: 12,
     alignItems: 'flex-start',

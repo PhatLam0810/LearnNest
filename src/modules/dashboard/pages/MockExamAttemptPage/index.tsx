@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { View, Text } from 'react-native-web';
 import { Button, Empty, Modal, Popconfirm, Spin, Statistic, Tag } from 'antd';
-import { ArrowLeftOutlined, CheckCircleFilled } from '@components/AppIcon';
 import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import PracticeTaskContent, {
@@ -10,6 +10,7 @@ import PracticeTaskContent, {
 } from '~mdDashboard/components/PracticeTaskContent';
 import CommentSection from '@components/CommentSection';
 import { useResponsive } from '@/styles/responsive';
+import { asButton } from '@/utils/asButton';
 import styles from './styles';
 
 const { Countdown } = Statistic;
@@ -100,102 +101,77 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
       if (url) {
         const dest = typeof url === 'string' ? url : url.toString();
-        const currentPath = window.location.pathname;
-        let destPath = dest;
-        try {
-          const parsed = new URL(dest, window.location.origin);
-          destPath = parsed.pathname;
-        } catch {
-          destPath = dest.split('?')[0];
-        }
-
-        if (destPath !== currentPath) {
+        if (dest && !dest.includes(attemptId)) {
           pendingNavUrl.current = dest;
           setShowExitWarning(true);
           return;
         }
       }
-
       return originalFn(data, unused, url);
     };
 
-    window.history.pushState = function (data, unused, url) {
-      return checkAndIntercept(originalPushState, data, unused, url);
+    window.history.pushState = (data, unused, url) => {
+      checkAndIntercept(originalPushState, data, unused, url);
     };
 
-    window.history.replaceState = function (data, unused, url) {
-      return checkAndIntercept(originalReplaceState, data, unused, url);
+    window.history.replaceState = (data, unused, url) => {
+      checkAndIntercept(originalReplaceState, data, unused, url);
     };
 
-    const onDocumentClick = (e: MouseEvent) => {
+    // Bắt thêm click vào tất cả thẻ <a> (như các link trong sidebar dashboard)
+    const handleAnchorClick = (e: MouseEvent) => {
       if (allowExitRef.current) return;
-      const anchor = (e.target as HTMLElement)?.closest('a');
-      if (!anchor) return;
-      const href = anchor.getAttribute('href');
-      if (!href || href.startsWith('#') || href.startsWith('javascript:'))
-        return;
-
-      let destPath = href;
-      try {
-        const parsed = new URL(href, window.location.origin);
-        destPath = parsed.pathname;
-      } catch {
-        destPath = href.split('?')[0];
-      }
-
-      if (destPath !== window.location.pathname) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        pendingNavUrl.current = href;
-        setShowExitWarning(true);
+      const target = (e.target as HTMLElement).closest('a');
+      if (target && target.href) {
+        const url = new URL(target.href);
+        if (!url.pathname.includes(attemptId)) {
+          e.preventDefault();
+          e.stopPropagation();
+          pendingNavUrl.current = url.pathname + url.search;
+          setShowExitWarning(true);
+        }
       }
     };
-
-    document.addEventListener('click', onDocumentClick, true);
+    document.addEventListener('click', handleAnchorClick, true);
 
     return () => {
       window.history.pushState = originalPushState;
       window.history.replaceState = originalReplaceState;
-      document.removeEventListener('click', onDocumentClick, true);
+      document.removeEventListener('click', handleAnchorClick, true);
     };
-  }, [isInProgress]);
+  }, [isInProgress, attemptId]);
 
+  // Tự chọn bài đầu tiên khi load xong đề
   useEffect(() => {
-    if (data?.tasks?.length && !activeTaskId) {
+    if (data?.tasks && data.tasks.length > 0 && !activeTaskId) {
       setActiveTaskId(data.tasks[0].taskId);
     }
-  }, [data, activeTaskId]);
+  }, [data?.tasks, activeTaskId]);
 
-  // Cảnh báo thời gian còn dưới 5 phút
+  // Kiểm tra cảnh báo thời gian (< 5 phút)
   useEffect(() => {
     if (!data?.deadline || !isInProgress) return;
-    const checkTime = () => {
-      const remaining = new Date(data.deadline).getTime() - Date.now();
-      if (remaining <= 5 * 60 * 1000 && remaining > 0) {
-        setIsTimeWarning(true);
-      } else {
-        setIsTimeWarning(false);
-      }
+    const checkTimer = () => {
+      const remainingMs = new Date(data.deadline).getTime() - Date.now();
+      setIsTimeWarning(remainingMs > 0 && remainingMs <= 5 * 60 * 1000);
     };
-    checkTime();
-    const interval = setInterval(checkTime, 10000);
+    checkTimer();
+    const interval = setInterval(checkTimer, 1000);
     return () => clearInterval(interval);
   }, [data?.deadline, isInProgress]);
 
-  const handleSubmit = async (auto: boolean) => {
-    allowExitRef.current = true;
+  const handleSubmit = async (isAutoExpire = false) => {
     try {
       await submitAttempt(attemptId).unwrap();
-      if (auto) {
-        messageApi.warning('Hết giờ! Bài thi thử đã được nộp tự động.');
+      allowExitRef.current = true;
+      if (isAutoExpire) {
+        messageApi.warning('Đã hết giờ làm bài! Hệ thống đã tự động nộp bài.');
+      } else {
+        messageApi.success('Đã nộp bài thi thử thành công!');
       }
-    } catch (e: any) {
-      if (!auto) {
-        messageApi.error(
-          e?.data?.message || 'Nộp bài thi thất bại, vui lòng thử lại',
-        );
-      }
+      refetch();
+    } catch {
+      messageApi.error('Nộp bài thi thất bại, vui lòng thử lại');
     }
   };
 
@@ -213,9 +189,9 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
   if (isFetching && !data) {
     return (
-      <div style={styles.loadingContainer}>
+      <View style={styles.loadingContainer}>
         <Spin size="large" />
-      </div>
+      </View>
     );
   }
   if (!data) {
@@ -242,7 +218,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   );
 
   return (
-    <div style={isMobile ? styles.pageMobile : styles.page}>
+    <View style={isMobile ? styles.pageMobile : styles.page}>
       {/* Modal cảnh báo thoát */}
       <Modal
         title="Thoát bài thi?"
@@ -260,67 +236,64 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
       </Modal>
 
       {/* Header trang thi thử */}
-      <header style={isMobile ? styles.headerMobile : styles.header}>
-        <div style={styles.headerLeft}>
-          <button
-            type="button"
+      <View style={isMobile ? styles.headerMobile : styles.header}>
+        <View style={styles.headerLeft}>
+          <View
             style={styles.backButton}
-            onClick={() => setShowExitWarning(true)}
-            aria-label="Thoát bài thi">
-            <ArrowLeftOutlined />
-            <span style={styles.backButtonText}>Thoát</span>
-          </button>
+            {...asButton(() => setShowExitWarning(true), 'Thoát bài thi')}>
+            <Text style={styles.backButtonText}>← Thoát</Text>
+          </View>
 
-          <div
+          <View
             aria-hidden="true"
             style={{
               ...styles.subjectIconBadge,
               backgroundColor: subjectBg,
             }}>
-            <span style={styles.subjectIconText}>{subjectLetter}</span>
-          </div>
+            <Text style={styles.subjectIconText}>{subjectLetter}</Text>
+          </View>
 
-          <div style={styles.titleCol}>
-            <h1 style={isMobile ? styles.titleMobile : styles.title}>
+          <View style={styles.titleCol}>
+            <Text style={isMobile ? styles.titleMobile : styles.title}>
               {data.title}
-            </h1>
-            <span style={styles.subtitle}>
+            </Text>
+            <Text style={styles.subtitle}>
               {subjectLabel(data.subject)} · {totalTasksCount} bài ·{' '}
               {data.durationMinutes} phút
-            </span>
-          </div>
-        </div>
+            </Text>
+          </View>
+        </View>
 
-        <div
+        <View
           style={{
             ...styles.headerRight,
             ...(isMobile ? styles.headerRightMobile : {}),
           }}>
           {/* Thanh tiến độ nộp bài */}
-          <div style={styles.progressBox}>
-            <span style={styles.progressText}>
-              <strong>
+          <View style={styles.progressBox}>
+            <Text style={styles.progressText}>
+              <strong style={{ fontWeight: '600' }}>
                 {submittedTasksCount}/{totalTasksCount}
               </strong>{' '}
               đã nộp
-            </span>
-            <div
+            </Text>
+            <View
               role="progressbar"
               aria-valuenow={submittedTasksCount}
               aria-valuemin={0}
               aria-valuemax={totalTasksCount}
               style={styles.progressBarTrack}>
-              <div
+              <View
                 style={{
                   ...styles.progressBarFill,
                   width: `${progressPercent}%`,
                 }}
               />
-            </div>
-          </div>
+            </View>
+          </View>
 
           {/* Đồng hồ đếm ngược */}
-          <div
+          <View
             role="timer"
             aria-label="Thời gian thi còn lại"
             style={{
@@ -339,116 +312,125 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
                   : 'var(--color-text-primary)',
               }}
             />
-            <span style={styles.timerLabel}>
+            <Text style={styles.timerLabel}>
               {isTimeWarning ? 'Sắp hết giờ' : 'còn lại'}
-            </span>
-          </div>
+            </Text>
+          </View>
 
           <Popconfirm
             title="Nộp bài thi thử?"
             description="Sau khi nộp sẽ không làm thêm được bài nào trong đề này nữa."
             okText="Nộp bài"
-            cancelText="Huỷ"
+            cancelText="Làm tiếp"
+            okButtonProps={{ danger: true, loading: isSubmitting }}
             onConfirm={() => handleSubmit(false)}>
             <Button
               type="primary"
               danger
-              style={{ height: 40, borderRadius: 8, fontWeight: 500 }}
-              loading={isSubmitting}>
+              loading={isSubmitting}
+              style={{ height: 40, borderRadius: 8, fontWeight: 500 }}>
               Nộp bài thi
             </Button>
           </Popconfirm>
-        </div>
-      </header>
+        </View>
+      </View>
 
-      {/* Điều hướng danh sách câu hỏi dạng Chips trên Mobile */}
+      {/* Mobile Chips Navigation Bar */}
       {isMobile && (
-        <nav aria-label="Danh sách bài trong đề" style={styles.chipsScrollRow}>
+        <View style={styles.chipsScrollRow}>
           {data.tasks.map((t, idx) => {
-            const isActive = activeTaskId === t.taskId;
+            const isActive = t.taskId === activeTaskId;
             return (
-              <button
+              <View
                 key={t.taskId}
-                type="button"
-                onClick={() => setActiveTaskId(t.taskId)}
-                style={{
-                  ...styles.chipItem,
-                  ...(isActive ? styles.chipItemActive : {}),
-                }}>
-                <span style={styles.chipNumber}>{idx + 1}</span>
+                style={[styles.chipItem, isActive && styles.chipItemActive]}
+                {...asButton(
+                  () => setActiveTaskId(t.taskId),
+                  `Chuyển đến bài ${idx + 1}: ${t.title}`,
+                )}>
+                <Text style={styles.chipNumber}>Bài {idx + 1}</Text>
                 {t.submitted ? (
-                  <CheckCircleFilled
-                    style={{ color: 'var(--color-success)', fontSize: 13 }}
-                  />
+                  <Text style={{ color: 'var(--color-success)', fontSize: 12 }}>
+                    ✓
+                  </Text>
                 ) : (
-                  <span
-                    aria-hidden="true"
-                    style={{
-                      fontSize: 12,
-                      color: isActive
-                        ? 'var(--color-vhu-primary)'
-                        : 'var(--color-text-muted)',
-                    }}>
-                    {isActive ? '●' : '○'}
-                  </span>
+                  <Text
+                    style={{ color: 'var(--color-text-muted)', fontSize: 12 }}>
+                    ○
+                  </Text>
                 )}
-              </button>
+              </View>
             );
           })}
-        </nav>
+        </View>
       )}
 
-      {/* Thân trang: Sidebar danh sách bài (Desktop) & Nội dung bài tập */}
-      <div
-        style={{
-          ...styles.body,
-          ...(isMobile ? styles.bodyMobile : {}),
-        }}>
+      {/* Thân trang: Sidebar bên trái (Desktop), Nội dung bài ở giữa */}
+      <View style={isMobile ? styles.bodyMobile : styles.body}>
         {!isMobile && (
-          <nav aria-label="Danh sách bài trong đề" style={styles.sidebar}>
-            <div style={styles.sidebarHeader}>
-              <span style={styles.sidebarTitle}>Bài trong đề</span>
-              <span style={styles.sidebarCount}>
+          <View style={styles.sidebar}>
+            <View style={styles.sidebarHeader}>
+              <Text style={styles.sidebarTitle}>Bài trong đề</Text>
+              <Text style={styles.sidebarCount}>
                 {submittedTasksCount}/{totalTasksCount} đã nộp
-              </span>
-            </div>
-            <div style={styles.taskList}>
+              </Text>
+            </View>
+            <View style={styles.taskList}>
               {data.tasks.map((t, idx) => {
-                const isActive = activeTaskId === t.taskId;
+                const isActive = t.taskId === activeTaskId;
                 return (
-                  <button
+                  <View
                     key={t.taskId}
-                    type="button"
-                    onClick={() => setActiveTaskId(t.taskId)}
-                    style={{
-                      ...styles.taskItem,
-                      ...(isActive ? styles.taskItemActive : {}),
-                    }}>
-                    <span
-                      style={{
-                        ...styles.taskNumber,
-                        ...(isActive ? styles.taskNumberActive : {}),
-                      }}>
-                      {idx + 1}
-                    </span>
-                    <span style={styles.taskTitle}>{t.title}</span>
-                    {t.submitted && (
-                      <CheckCircleFilled
+                    style={[styles.taskItem, isActive && styles.taskItemActive]}
+                    {...asButton(
+                      () => setActiveTaskId(t.taskId),
+                      `Bài ${idx + 1}: ${t.title}`,
+                    )}>
+                    <View
+                      style={[
+                        styles.taskNumber,
+                        isActive && styles.taskNumberActive,
+                      ]}>
+                      <Text
                         style={{
-                          color: 'var(--color-success)',
-                          fontSize: 16,
+                          color: isActive
+                            ? 'var(--color-text-on-primary)'
+                            : 'var(--color-text-body)',
+                          fontSize: 12,
+                          fontWeight: '600',
+                        }}>
+                        {idx + 1}
+                      </Text>
+                    </View>
+                    <Text style={styles.taskTitle}>{t.title}</Text>
+                    {t.submitted ? (
+                      <Tag
+                        color="success"
+                        style={{
+                          margin: 0,
+                          borderRadius: 10,
                           flexShrink: 0,
-                        }}
-                      />
+                        }}>
+                        ✓ Đã nộp
+                      </Tag>
+                    ) : (
+                      <Tag
+                        style={{
+                          margin: 0,
+                          borderRadius: 10,
+                          flexShrink: 0,
+                        }}>
+                        ○ Chưa làm
+                      </Tag>
                     )}
-                  </button>
+                  </View>
                 );
               })}
-            </div>
-          </nav>
+            </View>
+          </View>
         )}
 
-        <main style={styles.contentArea}>
+        <View style={styles.contentArea}>
           {activeTaskId && (
             <PracticeTaskContent
               key={activeTaskId}
@@ -457,9 +439,9 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
               onSubmitted={refetch}
             />
           )}
-        </main>
-      </div>
-    </div>
+        </View>
+      </View>
+    </View>
   );
 };
 
@@ -473,46 +455,43 @@ const MockExamResultView: React.FC<{ attemptId: string }> = ({ attemptId }) => {
 
   if (isFetching && !data) {
     return (
-      <div style={styles.loadingContainer}>
+      <View style={styles.loadingContainer}>
         <Spin size="large" />
-      </div>
+      </View>
     );
   }
   if (!data) return <Empty description="Không tìm thấy kết quả" />;
 
   return (
-    <div style={isMobile ? styles.pageMobile : styles.page}>
-      <Button
-        type="text"
-        onClick={() => router.push('/dashboard/practice')}
-        style={{
-          alignSelf: 'flex-start',
-          paddingLeft: 0,
-          color: 'var(--color-vhu-primary)',
-          fontWeight: 500,
-        }}>
-        ← Quay lại Luyện Tập
-      </Button>
+    <View style={isMobile ? styles.pageMobile : styles.page}>
+      <View
+        style={styles.backButton}
+        {...asButton(
+          () => router.push('/dashboard/practice'),
+          'Quay lại Luyện Tập',
+        )}>
+        <Text style={styles.backButtonText}>← Quay lại Luyện Tập</Text>
+      </View>
 
       {/* Card tổng điểm */}
-      <div style={styles.resultHeaderCard}>
-        <div style={styles.resultHeaderLeft}>
-          <h1 style={isMobile ? styles.titleMobile : styles.title}>
+      <View style={styles.resultHeaderCard}>
+        <View style={styles.resultHeaderLeft}>
+          <Text style={isMobile ? styles.titleMobile : styles.title}>
             {data.title} — Kết quả
-          </h1>
-          <span style={styles.subtitle}>
+          </Text>
+          <Text style={styles.subtitle}>
             Đã làm {data.attemptedTasks}/{data.totalTasks} bài
             {data.status === 'expired' ? ' (hết giờ nộp tự động)' : ''}
-          </span>
-        </div>
+          </Text>
+        </View>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={styles.resultScoreBadge}>
-            <span style={styles.resultScoreNum}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          <View style={styles.resultScoreBadge}>
+            <Text style={styles.resultScoreNum}>
               {data.overallScore.toFixed(1)}
-            </span>
-            <span style={styles.resultScoreTotal}>/10</span>
-          </div>
+            </Text>
+            <Text style={styles.resultScoreTotal}>/10</Text>
+          </View>
           <Tag
             color={data.overallIsPass ? 'success' : 'error'}
             style={{
@@ -526,48 +505,49 @@ const MockExamResultView: React.FC<{ attemptId: string }> = ({ attemptId }) => {
             }}>
             {data.overallIsPass ? '✓ Đạt' : '✕ Chưa đạt'}
           </Tag>
-        </div>
-      </div>
+        </View>
+      </View>
 
       {/* Danh sách từng bài thi trong đề */}
       {data.tasks.map((t, idx) => (
-        <div key={t.taskId} style={styles.resultTaskCard}>
-          <div style={styles.resultTaskHeader}>
-            <span style={styles.resultTaskTitle}>
+        <View key={t.taskId} style={styles.resultTaskCard}>
+          <View style={styles.resultTaskHeader}>
+            <Text style={styles.resultTaskTitle}>
               Bài {idx + 1}: {t.title}
-            </span>
+            </Text>
             {!t.attempted ? (
               <Tag style={{ borderRadius: 10 }}>Chưa làm</Tag>
             ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={styles.resultTaskScore}>
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Text style={styles.resultTaskScore}>
                   {t.score?.toFixed(1)}/10 điểm
-                </span>
+                </Text>
                 <Tag
                   color={t.isPass ? 'success' : 'error'}
                   style={{ borderRadius: 10 }}>
                   {t.isPass ? '✓ Đạt' : '✕ Chưa đạt'}
                 </Tag>
-              </div>
+              </View>
             )}
-          </div>
+          </View>
 
           {t.attempted && t.results.length > 0 && (
-            <div style={styles.resultCriteriaList}>
+            <View style={styles.resultCriteriaList}>
               {t.results.map((item, i) => (
                 <ResultItemRow key={item.criteriaId} item={item} index={i} />
               ))}
-            </div>
+            </View>
           )}
-        </div>
+        </View>
       ))}
 
       {/* Thảo luận chung cho cả đề thi thử */}
-      <div style={styles.discussionBox}>
-        <h3 style={styles.discussionTitle}>Thảo luận về đề thi này</h3>
+      <View style={styles.discussionBox}>
+        <Text style={styles.discussionTitle}>Thảo luận về đề thi này</Text>
         <CommentSection postId={data.examId} type="MockExam" inline />
-      </div>
-    </div>
+      </View>
+    </View>
   );
 };
 

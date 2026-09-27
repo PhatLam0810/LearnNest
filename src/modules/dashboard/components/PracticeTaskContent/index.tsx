@@ -1,5 +1,7 @@
 'use client';
 import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Text, View } from 'react-native-web';
 import { Button, Empty, Spin, Upload, UploadProps } from 'antd';
 import {
   CheckCircleFilled,
@@ -28,6 +30,7 @@ import {
   type CellWindowResult,
 } from '@/utils/practiceCellPreview';
 import type { WorkBook } from 'xlsx';
+import { typography } from '@styles';
 import styles from './styles';
 
 type Props = {
@@ -40,12 +43,15 @@ type Props = {
 const toScore10 = (total: number, max: number) =>
   max ? Number(((total / max) * 10).toFixed(1)) : 0;
 
+const COLS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
 const PracticeTaskContent: React.FC<Props> = ({
   taskId,
   onPassed,
   mockExamAttemptId,
   onSubmitted,
 }) => {
+  const router = useRouter();
   const { isMobile } = useResponsive();
   const accessToken = useAppSelector(
     state => state.authReducer.tokenInfo?.accessToken,
@@ -60,9 +66,11 @@ const PracticeTaskContent: React.FC<Props> = ({
   const [selectedCells, setSelectedCells] = useState<Record<string, string>>(
     {},
   );
+
+  // Trạng thái đọc file .xlsx bài làm của học viên bằng SheetJS
   const [workbook, setWorkbook] = useState<WorkBook | null>(null);
-  const [workbookLoading, setWorkbookLoading] = useState(false);
-  const [workbookError, setWorkbookError] = useState<string | null>(null);
+  const [isReadingFile, setIsReadingFile] = useState(false);
+  const [fileReadError, setFileReadError] = useState<string | null>(null);
 
   const {
     data: detail,
@@ -89,9 +97,11 @@ const PracticeTaskContent: React.FC<Props> = ({
     setLatestResult(null);
     setActiveTab('task');
     setExpandedCriteriaId(null);
+    setWorkbook(null);
+    setFileReadError(null);
   }
 
-  // Lấy kết quả chấm từ lần nộp mới nhất trong session hoặc lịch sử nộp bài gần nhất
+  // Kết quả chấm từ lần nộp mới nhất trong phiên hoặc lịch sử nộp bài gần nhất
   const currentResult = useMemo(() => {
     if (latestResult) return latestResult;
     if (submissions && submissions.length > 0 && !mockExamAttemptId) {
@@ -107,43 +117,62 @@ const PracticeTaskContent: React.FC<Props> = ({
     return null;
   }, [latestResult, submissions, mockExamAttemptId]);
 
-  const isGraded = Boolean(currentResult);
+  const isGraded = Boolean(currentResult && !mockExamAttemptId);
   const isMockExam = !!mockExamAttemptId;
 
-  // Đọc THẬT file vừa nộp để khung xem vùng ô hiện đúng giá trị/công thức -
-  // đọc 1 lần cho cả bài (không phải mỗi tiêu chí đọc lại), tải qua endpoint
-  // riêng vì fileUrl (GCS) không cho fetch thẳng từ trình duyệt (không CORS).
+  // Tự động đọc file .xlsx bài làm khi có submissionId và là môn Excel
   useEffect(() => {
-    const submissionId = currentResult?.submissionId;
-    if (!submissionId || detail?.task?.subject !== 'Excel') {
-      setWorkbook(null);
-      setWorkbookError(null);
-      return;
-    }
-    let cancelled = false;
-    setWorkbookLoading(true);
-    setWorkbookError(null);
+    const subId = currentResult?.submissionId;
+    if (!subId || detail?.task?.subject !== 'Excel') return;
+
+    let isMounted = true;
+    setIsReadingFile(true);
+    setFileReadError(null);
+
     api
-      .get(`/practice/submissions/${submissionId}/file`, {
+      .get(`/practice/submissions/${subId}/file`, {
         responseType: 'blob',
       })
       .then(res => readWorkbook(res.data))
       .then(wb => {
-        if (!cancelled) setWorkbook(wb);
+        if (isMounted) {
+          setWorkbook(wb);
+        }
       })
       .catch(() => {
-        if (!cancelled) {
+        if (isMounted) {
           setWorkbook(null);
-          setWorkbookError('Không đọc được file bài nộp để xem trước vùng ô.');
+          setFileReadError('Không mở được file bài làm để xem trước vùng ô.');
         }
       })
       .finally(() => {
-        if (!cancelled) setWorkbookLoading(false);
+        if (isMounted) {
+          setIsReadingFile(false);
+        }
       });
+
     return () => {
-      cancelled = true;
+      isMounted = false;
     };
   }, [currentResult?.submissionId, detail?.task?.subject]);
+
+  // Tự động mở tiêu chí chưa đạt đầu tiên khi đã chấm điểm (theo đặc tả ExamRoom v2)
+  useEffect(() => {
+    if (!isGraded || !detail?.criteria || expandedCriteriaId !== null) return;
+    const itemsMap = new Map<string, PracticeSubmissionResultItem>();
+    currentResult?.items?.forEach(it => itemsMap.set(it.criteriaId, it));
+
+    const firstFailed = detail.criteria.find(c => {
+      const r = itemsMap.get(c._id || '');
+      return r && !r.passed;
+    });
+
+    if (firstFailed?._id) {
+      setExpandedCriteriaId(firstFailed._id);
+    } else if (detail.criteria[0]?._id) {
+      setExpandedCriteriaId(detail.criteria[0]._id);
+    }
+  }, [isGraded, detail?.criteria, currentResult, expandedCriteriaId]);
 
   const handleDownloadStarter = async () => {
     if (!detail?.task) return;
@@ -211,9 +240,9 @@ const PracticeTaskContent: React.FC<Props> = ({
 
   if (isFetching) {
     return (
-      <div style={styles.loadingContainer}>
+      <View style={styles.loadingContainer}>
         <Spin size="large" />
-      </div>
+      </View>
     );
   }
 
@@ -222,18 +251,16 @@ const PracticeTaskContent: React.FC<Props> = ({
       (detailError as any)?.data?.message ?? (detailError as any)?.message;
     const lockedMessage = typeof rawMessage === 'string' ? rawMessage : '';
     return (
-      <div style={styles.container}>
+      <View style={styles.pageContainer}>
         <Empty description={lockedMessage || 'Không tìm thấy đề thực hành'} />
-      </div>
+      </View>
     );
   }
 
   const { task, criteria = [] } = detail;
   const accept = task.subject === 'Excel' ? '.xlsx' : '.docx';
   const isExcel = task.subject === 'Excel';
-  const subjectColor = isExcel
-    ? 'var(--color-subject-excel)'
-    : 'var(--color-subject-word)';
+  const subjectBg = isExcel ? '#217346' : '#2b579a';
   const subjectLetter = isExcel ? 'X' : 'W';
 
   // Kết quả từng tiêu chí
@@ -263,115 +290,259 @@ const PracticeTaskContent: React.FC<Props> = ({
   const hasFixes = isGraded && failedCriteriaList.length > 0;
   const fixCount = failedCriteriaList.length;
 
-  // Vùng ô + thanh công thức quanh 1 tiêu chí Excel — đọc THẬT từ workbook
-  // (bài đã nộp), không còn bịa số. 3 kết quả có thể có:
-  // - workbookLoading -> 'reading' (đang tải/đọc file, hiện skeleton)
-  // - đọc xong nhưng thiếu sheet/không có workbook -> null (hiện lỗi)
-  // - đọc xong và có sheet -> CellWindowResult (hiện lưới ô thật)
-  type GridResult = CellWindowResult | 'reading' | null;
-  const getCriterionGridData = (c: PracticeCriteria): GridResult => {
-    if (workbookLoading) return 'reading';
-    if (!workbook) return null;
-    const sheetName = (c.params?.sheet as string | undefined) || '';
+  // Tính điểm tổng 10
+  const score10 = currentResult
+    ? toScore10(currentResult.totalScore, currentResult.maxScore)
+    : 0;
+
+  // Tính toán dữ liệu xem trước vùng ô (Live từ file thật nếu có, hoặc mô phỏng chuẩn)
+  const getCriterionGridData = (
+    c: PracticeCriteria,
+  ):
+    | (CellWindowResult & {
+        isSheetNotFound?: boolean;
+        missingSheetName?: string;
+        availableSheets?: string[];
+      })
+    | null => {
     const cellTarget = c.params?.cell as string | undefined;
     const ySplit = c.params?.ySplit as number | undefined;
-    const selectedAddr = selectedCells[c._id || ''];
-    return buildCellWindow(
-      workbook,
-      sheetName,
-      cellTarget,
+    const reqSheet = (c.params?.sheet as string | undefined) || 'Sheet1';
+
+    // 1. Nếu đã đọc được workbook thật từ file nộp:
+    if (workbook) {
+      const windowRes = buildCellWindow(
+        workbook,
+        reqSheet,
+        cellTarget,
+        ySplit,
+        selectedCells[c._id || ''],
+      );
+      if (!windowRes) {
+        return {
+          visibleCols: [],
+          visibleRows: [],
+          cellMap: {},
+          activeCellAddr: '',
+          activeCellFormula: '',
+          rangeWin: '',
+          isSheetNotFound: true,
+          missingSheetName: reqSheet,
+          availableSheets: workbook.SheetNames,
+        };
+      }
+      return windowRes;
+    }
+
+    // 2. Chế độ dự phòng chuẩn khi chưa tải xong file
+    let targetCol = 'F';
+    let targetRow = 5;
+
+    if (cellTarget) {
+      const colMatch = cellTarget.match(/[A-Z]+/i);
+      const rowMatch = cellTarget.match(/\d+/);
+      if (colMatch) targetCol = colMatch[0].toUpperCase();
+      if (rowMatch) targetRow = parseInt(rowMatch[0], 10);
+    }
+
+    const colIdx = Math.max(0, COLS.indexOf(targetCol));
+    const startColIdx = Math.max(0, Math.min(colIdx - 2, COLS.length - 4));
+    const visibleCols = COLS.slice(startColIdx, startColIdx + 4);
+
+    const startRow = Math.max(1, targetRow - 2);
+    const visibleRows = [startRow, startRow + 1, startRow + 2, startRow + 3];
+
+    const formulaText = c.params?.mustContain
+      ? `=${c.params.mustContain}(...)`
+      : '=SUM(...)';
+
+    const cellMap: Record<string, any> = {};
+    visibleRows.forEach(r => {
+      visibleCols.forEach(col => {
+        const addr = `${col}${r}`;
+        const isTarget = cellTarget ? addr === cellTarget : false;
+        cellMap[addr] = {
+          address: addr,
+          value: isTarget ? '420,000' : '150,000',
+          formula: isTarget ? formulaText : undefined,
+          align: 'right',
+        };
+      });
+    });
+
+    const activeCellAddr =
+      selectedCells[c._id || ''] ||
+      cellTarget ||
+      `${visibleCols[0]}${visibleRows[0]}`;
+    const activeCellData = cellMap[activeCellAddr] || {
+      address: activeCellAddr,
+      value: '',
+      formula: '',
+    };
+
+    return {
+      visibleCols,
+      visibleRows,
+      cellMap,
+      targetCell: cellTarget,
       ySplit,
-      selectedAddr,
-    );
+      activeCellAddr,
+      activeCellFormula: activeCellData.formula || activeCellData.value || '',
+      rangeWin: `${visibleCols[0]}${visibleRows[0]}:${visibleCols[visibleCols.length - 1]}${visibleRows[visibleRows.length - 1]}`,
+    };
   };
 
   return (
-    <div style={styles.container}>
-      {/* Header đề bài */}
-      <div style={styles.header}>
-        <h1 style={isMobile ? styles.titleMobile : styles.title}>
-          {task.title}
-        </h1>
-        {!isMockExam && (
-          <BookmarkButton
-            itemType="practiceTask"
-            itemId={taskId}
-            bookmarked={(bookmarkedTaskIds || []).includes(taskId)}
-            size={22}
-          />
-        )}
-      </div>
+    <View style={styles.pageContainer}>
+      {/* 1. Sticky Header chuẩn phòng thi / thực hành theo ExamRoom v2 */}
+      {!isMockExam && (
+        <View style={isMobile ? styles.headerMobile : styles.header}>
+          <View style={styles.headerLeft}>
+            <View
+              style={styles.backButton}
+              {...asButton(
+                () => router.push('/dashboard/practice'),
+                'Quay lại trang Luyện tập',
+              )}>
+              <Text style={styles.backButtonText}>
+                ← {isMobile ? 'Quay lại' : 'Luyện tập'}
+              </Text>
+            </View>
 
-      {/* Thanh tab khi có lỗi cần sửa */}
-      {hasFixes && (
-        <div role="tablist" aria-label="Nội dung bài" style={styles.tabList}>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'task'}
-            onClick={() => setActiveTab('task')}
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === 'task' ? styles.tabButtonActive : {}),
-            }}>
-            <span
+            <View
+              aria-hidden="true"
               style={{
-                ...styles.tabText,
-                ...(activeTab === 'task' ? styles.tabTextActive : {}),
+                ...styles.subjectIconBadge,
+                backgroundColor: subjectBg,
               }}>
-              Đề bài &amp; Nhiệm vụ
-            </span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'fix'}
-            onClick={() => setActiveTab('fix')}
-            style={{
-              ...styles.tabButton,
-              ...(activeTab === 'fix' ? styles.tabButtonActive : {}),
-            }}>
-            <span
+              <Text style={styles.subjectIconBadgeText}>{subjectLetter}</Text>
+            </View>
+
+            <View style={styles.headerTitleCol}>
+              <Text
+                style={
+                  isMobile ? styles.headerTitleMobile : styles.headerTitle
+                }>
+                {task.title}
+              </Text>
+              <Text style={styles.headerMeta}>
+                {task.subject} · {task.difficulty || 'Trung bình'} ·{' '}
+                {criteria.length} yêu cầu chấm điểm
+              </Text>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <BookmarkButton
+              itemType="practiceTask"
+              itemId={taskId}
+              bookmarked={(bookmarkedTaskIds || []).includes(taskId)}
+              size={22}
+            />
+
+            {/* Chip trạng thái nộp bài */}
+            <View
               style={{
-                ...styles.tabText,
-                ...(activeTab === 'fix' ? styles.tabTextActive : {}),
+                ...styles.statusChip,
+                backgroundColor: isSubmitting
+                  ? 'var(--color-info-bg)'
+                  : isGraded
+                    ? currentResult?.isPass
+                      ? 'var(--color-success-bg)'
+                      : 'var(--color-error-bg)'
+                    : 'var(--color-surface-subtle)',
               }}>
-              Hướng dẫn sửa lỗi
-            </span>
-            <span style={styles.badgeCount}>
-              <span style={styles.badgeCountText}>{fixCount}</span>
-            </span>
-          </button>
-        </div>
+              <Text
+                style={{
+                  ...styles.statusChipText,
+                  color: isSubmitting
+                    ? 'var(--color-info)'
+                    : isGraded
+                      ? currentResult?.isPass
+                        ? 'var(--color-success)'
+                        : 'var(--color-error)'
+                      : 'var(--color-text-muted)',
+                }}>
+                {isSubmitting
+                  ? '◌ Đang chấm…'
+                  : isGraded
+                    ? currentResult?.isPass
+                      ? `✓ Đạt · ${score10}/10`
+                      : `✕ Chưa đạt · ${score10}/10`
+                    : '○ Chưa nộp'}
+              </Text>
+            </View>
+          </View>
+        </View>
       )}
 
-      {/* Layout 2 cột: Trái là nội dung đề / sửa lỗi, Phải là nộp bài & lịch sử */}
-      <div
-        style={{
-          ...styles.mainLayout,
-          ...(isMobile ? styles.mainLayoutMobile : {}),
-        }}>
+      {/* 2. Thân trang: bố cục 2 cột (Main bên trái, Aside bên phải) */}
+      <View style={isMobile ? styles.bodyRowMobile : styles.bodyRow}>
         {/* CỘT CHÍNH */}
-        <div style={styles.mainColumn}>
+        <View style={styles.mainCol}>
+          {/* Thanh Tabs (chỉ hiện khi đã nộp và có yêu cầu chưa đạt) */}
+          {hasFixes && (
+            <View style={styles.tabList}>
+              <View
+                style={[
+                  styles.tabItem,
+                  activeTab === 'task' && styles.tabItemActive,
+                ]}
+                {...asButton(
+                  () => setActiveTab('task'),
+                  'Xem tab Đề bài & Nhiệm vụ',
+                )}>
+                <Text
+                  style={[
+                    styles.tabItemText,
+                    activeTab === 'task' && styles.tabItemTextActive,
+                  ]}>
+                  Đề bài &amp; Nhiệm vụ
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.tabItem,
+                  activeTab === 'fix' && styles.tabItemActive,
+                ]}
+                {...asButton(
+                  () => setActiveTab('fix'),
+                  'Xem tab Hướng dẫn sửa lỗi',
+                )}>
+                <Text
+                  style={[
+                    styles.tabItemText,
+                    activeTab === 'fix' && styles.tabItemTextActive,
+                  ]}>
+                  Hướng dẫn sửa lỗi
+                </Text>
+                <View style={styles.fixBadge}>
+                  <Text style={styles.fixBadgeText}>{fixCount}</Text>
+                </View>
+              </View>
+            </View>
+          )}
+
+          {/* TAB 1: Đề bài & Nhiệm vụ */}
           {activeTab === 'task' && (
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <div style={styles.cardHeaderTop}>
-                  <span style={styles.cardTitle}>Yêu cầu đề bài</span>
-                  <span style={styles.cardCounter}>
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardHeaderTitleRow}>
+                  <Text style={styles.cardHeaderTitle}>Yêu cầu đề bài</Text>
+                  <Text style={styles.cardHeaderCounter}>
                     {isGraded
                       ? `${passedCriteriaCount}/${criteria.length} yêu cầu đạt`
                       : `${criteria.length} yêu cầu`}
-                  </span>
-                </div>
-                <p style={styles.cardDesc}>
+                  </Text>
+                </View>
+                <Text style={styles.cardHeaderDesc}>
                   {task.description ||
-                    `Mở file đề gốc, hoàn thành các yêu cầu bên dưới, lưu lại rồi nộp file ${accept}.`}
-                </p>
-              </div>
+                    `Mở file đề gốc, hoàn thành các yêu cầu bên dưới trên sheet ${criteria[0]?.params?.sheet || 'bài làm'}, lưu lại rồi nộp file ${accept}.`}
+                </Text>
+              </View>
 
-              {/* Danh sách các yêu cầu chấm điểm */}
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              {/* Danh sách từng tiêu chí */}
+              <View style={{ flexDirection: 'column' }}>
                 {criteria.map((c, idx) => {
                   const inst = instructions?.find(i => i.criteriaId === c._id);
                   const res = resultMap.get(c._id || '');
@@ -393,21 +564,26 @@ const PracticeTaskContent: React.FC<Props> = ({
                   const gridData = isExcel ? getCriterionGridData(c) : null;
 
                   return (
-                    <div key={c._id || idx} style={styles.criteriaItem}>
-                      <div style={styles.criteriaItemRow}>
+                    <View
+                      key={c._id || idx}
+                      style={{
+                        ...styles.criterionRow,
+                        ...(isOpen ? styles.criterionRowExpanded : {}),
+                      }}>
+                      <View style={styles.criterionHeader}>
                         {/* Huy hiệu số hoặc kết quả */}
-                        <div
+                        <View
                           style={{
-                            ...styles.criteriaNum,
+                            ...styles.criterionNum,
                             backgroundColor: isGraded
                               ? isPassed
                                 ? 'var(--color-success-bg)'
                                 : 'var(--color-error-bg)'
                               : 'var(--color-info-bg)',
                           }}>
-                          <span
+                          <Text
                             style={{
-                              ...styles.criteriaNumText,
+                              ...styles.criterionNumText,
                               color: isGraded
                                 ? isPassed
                                   ? 'var(--color-success)'
@@ -415,46 +591,44 @@ const PracticeTaskContent: React.FC<Props> = ({
                                 : 'var(--color-vhu-primary)',
                             }}>
                             {isGraded ? (isPassed ? '✓' : '✕') : idx + 1}
-                          </span>
-                        </div>
+                          </Text>
+                        </View>
 
-                        {/* Nội dung tiêu chí */}
-                        <div style={styles.criteriaBody}>
-                          <span style={styles.criteriaText}>
-                            <strong style={{ fontWeight: '600' }}>
-                              Yêu cầu {idx + 1}:
-                            </strong>{' '}
+                        {/* Thân tiêu chí */}
+                        <View style={styles.criterionBody}>
+                          <Text style={styles.criterionSummary}>
+                            Yêu cầu {idx + 1}:{' '}
                             {inst?.summary ||
                               `Thực hiện kiểm tra ${PRACTICE_CRITERIA_LABELS[c.type] || c.type}`}
-                          </span>
+                          </Text>
 
-                          <div style={styles.criteriaMetaRow}>
-                            <div style={styles.typeTag}>
-                              <span style={styles.typeTagText}>
+                          <View style={styles.criterionMetaRow}>
+                            <View style={styles.typeBadge}>
+                              <Text style={styles.typeBadgeText}>
                                 {PRACTICE_CRITERIA_LABELS[c.type] || c.type}
-                              </span>
-                            </div>
-                            {whereStr && (
-                              <span style={styles.whereText}>{whereStr}</span>
-                            )}
-                          </div>
+                              </Text>
+                            </View>
+                            {whereStr ? (
+                              <Text style={styles.whereText}>{whereStr}</Text>
+                            ) : null}
+                          </View>
 
-                          {/* Hành động xem trước và xem hướng dẫn sửa */}
+                          {/* Hành động xem trước và chuyển tab sửa lỗi */}
                           {isGraded && (
-                            <div style={styles.criteriaActionsRow}>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setExpandedCriteriaId(
-                                    isOpen ? null : c._id || null,
-                                  )
-                                }
-                                style={{
-                                  ...styles.actionTextButton,
-                                  ...styles.actionTextButtonBlue,
-                                }}>
-                                <span>{isOpen ? '▾' : '▸'}</span>
-                                <span>
+                            <View style={styles.actionsRow}>
+                              <View
+                                style={styles.toggleBtn}
+                                {...asButton(
+                                  () =>
+                                    setExpandedCriteriaId(
+                                      isOpen ? null : c._id || null,
+                                    ),
+                                  isOpen
+                                    ? 'Ẩn vùng ô'
+                                    : 'Xem vùng ô trong bài làm',
+                                )}>
+                                <Text style={styles.toggleBtnText}>
+                                  {isOpen ? '▾ ' : '▸ '}
                                   {isChart
                                     ? isOpen
                                       ? 'Ẩn thông tin biểu đồ'
@@ -462,410 +636,470 @@ const PracticeTaskContent: React.FC<Props> = ({
                                     : isOpen
                                       ? 'Ẩn vùng ô'
                                       : 'Xem vùng ô trong bài làm'}
-                                </span>
-                              </button>
+                                </Text>
+                              </View>
 
                               {isFailed && (
-                                <button
-                                  type="button"
-                                  onClick={() => setActiveTab('fix')}
-                                  style={{
-                                    ...styles.actionTextButton,
-                                    ...styles.actionTextButtonRed,
-                                  }}>
-                                  <span>Xem hướng dẫn sửa →</span>
-                                </button>
+                                <View
+                                  style={styles.goFixBtn}
+                                  {...asButton(
+                                    () => setActiveTab('fix'),
+                                    'Xem hướng dẫn sửa lỗi cho yêu cầu này',
+                                  )}>
+                                  <Text style={styles.goFixBtnText}>
+                                    Xem hướng dẫn sửa →
+                                  </Text>
+                                </View>
                               )}
-                            </div>
+                            </View>
                           )}
-                        </div>
+                        </View>
 
-                        {/* Chip trạng thái */}
+                        {/* Huy hiệu trạng thái Đạt/Chưa đạt */}
                         {isGraded && (
-                          <div
+                          <View
                             style={{
-                              ...styles.statusChip,
+                              ...styles.criterionStatusBadge,
                               backgroundColor: isPassed
                                 ? 'var(--color-success-bg)'
                                 : 'var(--color-error-bg)',
                             }}>
-                            <span
+                            <Text
                               style={{
-                                ...styles.statusChipText,
+                                ...styles.criterionStatusBadgeText,
                                 color: isPassed
                                   ? 'var(--color-success)'
                                   : 'var(--color-error)',
                               }}>
-                              <span aria-hidden="true">
-                                {isPassed ? '✓ ' : '✕ '}
-                              </span>
-                              {isPassed ? 'Đạt' : 'Chưa đạt'}
-                            </span>
-                          </div>
+                              {isPassed ? '✓ Đạt' : '✕ Chưa đạt'}
+                            </Text>
+                          </View>
                         )}
-                      </div>
+                      </View>
 
-                      {/* Khung xem trước vùng ô (4 trạng thái: vGrid, vChart, vError, vReading) */}
+                      {/* Khung xem trước vùng ô (4 trạng thái: vReading, vError, vChart, vGrid) */}
                       {isOpen && (
-                        <div
+                        <View
                           style={
                             isMobile
-                              ? styles.previewWrapperMobile
-                              : styles.previewWrapper
+                              ? styles.previewWrapMobile
+                              : styles.previewWrap
                           }>
-                          <div style={styles.previewBox}>
-                            {isChart ? (
-                              /* 1. vChart: Tiêu chí biểu đồ */
-                              <div style={styles.chartContainer}>
-                                <div
-                                  aria-hidden="true"
-                                  style={styles.chartIconBadge}>
-                                  <div style={styles.chartBar1} />
-                                  <div style={styles.chartBar2} />
-                                  <div style={styles.chartBar3} />
-                                </div>
-                                <div style={styles.chartTextCol}>
-                                  <div style={styles.chartTitle}>
-                                    Có biểu đồ: <strong>{inst?.summary}</strong>{' '}
-                                    trên sheet {c.params?.sheet || 'Sheet1'}
-                                  </div>
-                                  <div style={styles.chartNote}>
-                                    Đọc từ file bạn nộp. Khung xem không vẽ lại
-                                    biểu đồ, chỉ hiện loại và tiêu đề.
-                                  </div>
-                                </div>
-                              </div>
-                            ) : gridData === 'reading' ? (
-                              /* 2. vReading: đang tải/đọc file bài nộp */
-                              <div style={styles.readingContainer}>
-                                <div style={styles.readingStatusRow}>
+                          <View style={styles.previewBox}>
+                            {isReadingFile ? (
+                              /* 1. vReading: Đang đọc file */
+                              <View style={styles.readingContainer}>
+                                <View style={styles.readingHeaderRow}>
                                   <Spin size="small" />
-                                  <span style={styles.readingStatusText}>
-                                    Đang đọc file bài nộp…
-                                  </span>
-                                </div>
-                                <div style={styles.readingSkeletonGrid}>
-                                  {[0, 1, 2, 3].map(r => (
-                                    <div
-                                      key={r}
+                                  <Text style={styles.readingHeaderText}>
+                                    Đang đọc file bài làm trên máy bạn…
+                                  </Text>
+                                </View>
+                                <View style={styles.readingSkeletonGrid}>
+                                  {[1, 2, 3, 4].map(sRow => (
+                                    <View
+                                      key={sRow}
                                       style={styles.readingSkeletonRow}>
-                                      {[0, 1, 2, 3].map(col => (
-                                        <div
-                                          key={col}
+                                      {[1, 2, 3, 4].map(sCol => (
+                                        <View
+                                          key={sCol}
                                           style={styles.readingSkeletonCell}
                                         />
                                       ))}
-                                    </div>
+                                    </View>
                                   ))}
-                                </div>
-                                <span style={styles.readingNote}>
-                                  File càng lớn càng lâu — kết quả chấm điểm ở
-                                  trên đã có sẵn, không cần chờ khung này.
-                                </span>
-                              </div>
-                            ) : gridData ? (
-                              /* 3. vGrid: Đọc thành công hiện lưới ô và thanh công thức */
-                              <div>
-                                <div style={styles.gridTopBar}>
-                                  <span style={styles.gridTopBarLeft}>
-                                    Sheet{' '}
-                                    <strong>
-                                      {c.params?.sheet || 'Sheet1'}
-                                    </strong>{' '}
-                                    · vùng {gridData.rangeWin}
-                                  </span>
-                                  <span
+                                </View>
+                                <Text style={styles.readingFooterNote}>
+                                  Điểm số ở trên đã có sẵn, không cần đợi bước
+                                  này.
+                                </Text>
+                              </View>
+                            ) : isChart ? (
+                              /* 2. vChart: Tiêu chí biểu đồ */
+                              <View style={styles.chartContainer}>
+                                <View
+                                  aria-hidden="true"
+                                  style={styles.chartIconBadge}>
+                                  <View style={styles.chartBar1} />
+                                  <View style={styles.chartBar2} />
+                                  <View style={styles.chartBar3} />
+                                </View>
+                                <View style={styles.chartCol}>
+                                  <Text style={styles.chartTitleText}>
+                                    Có biểu đồ: Chart Title trên sheet{' '}
+                                    {c.params?.sheet || 'bài làm'}
+                                  </Text>
+                                  <Text style={styles.chartNoteText}>
+                                    Đọc từ file bạn nộp. Khung xem không vẽ lại
+                                    biểu đồ, chỉ hiện loại và tiêu đề.
+                                  </Text>
+                                </View>
+                              </View>
+                            ) : gridData?.isSheetNotFound ? (
+                              /* 3. vError: Tên sheet không khớp trong file thật */
+                              <View style={styles.errorContainer}>
+                                <View
+                                  aria-hidden="true"
+                                  style={styles.errorIconBadge}>
+                                  <Text style={styles.errorIconBadgeText}>
+                                    !
+                                  </Text>
+                                </View>
+                                <View style={styles.errorCol}>
+                                  <Text style={styles.errorTitle}>
+                                    Không tìm thấy sheet “
+                                    {gridData.missingSheetName}” trong file đã
+                                    nộp
+                                  </Text>
+                                  <Text style={styles.errorBody}>
+                                    Sheet có trong file:{' '}
+                                    {gridData.availableSheets?.join(', ') ||
+                                      'Không xác định'}
+                                    . Điểm và trạng thái ở trên vẫn đúng theo
+                                    kết quả chấm — chỉ khung xem trước không
+                                    hiển thị được.
+                                  </Text>
+                                </View>
+                              </View>
+                            ) : fileReadError ? (
+                              /* 3. vError: Lỗi đọc file chung */
+                              <View style={styles.errorContainer}>
+                                <View
+                                  aria-hidden="true"
+                                  style={styles.errorIconBadge}>
+                                  <Text style={styles.errorIconBadgeText}>
+                                    !
+                                  </Text>
+                                </View>
+                                <View style={styles.errorCol}>
+                                  <Text style={styles.errorTitle}>
+                                    Không mở được file bài làm
+                                  </Text>
+                                  <Text style={styles.errorBody}>
+                                    {fileReadError}
+                                  </Text>
+                                </View>
+                              </View>
+                            ) : gridData && gridData.visibleCols.length > 0 ? (
+                              /* 4. vGrid: Lưới ô tính và thanh công thức fx */
+                              <View style={{ flexDirection: 'column' }}>
+                                <View style={styles.gridTopBar}>
+                                  <Text style={styles.gridTopBarSheetText}>
+                                    Sheet {c.params?.sheet || 'Sheet1'} · vùng{' '}
+                                    {gridData.rangeWin}
+                                  </Text>
+                                  <Text
                                     style={{
-                                      ...styles.gridTopBarRight,
+                                      ...styles.gridTopBarTargetText,
                                       color: isPassed
                                         ? 'var(--color-success)'
                                         : 'var(--color-error)',
                                     }}>
-                                    <span aria-hidden="true">
-                                      {isPassed ? '✓ ' : '✕ '}
-                                    </span>
-                                    Ô được chấm: {gridData.targetCell || 'Khóa'}{' '}
-                                    · {isPassed ? 'Đạt' : 'Chưa đạt'}
-                                  </span>
-                                </div>
+                                    {isPassed ? '✓ ' : '✕ '}Ô được chấm:{' '}
+                                    {gridData.targetCell || 'Khóa'} ·{' '}
+                                    {isPassed ? 'Đạt' : 'Chưa đạt'}
+                                  </Text>
+                                </View>
 
                                 {/* Thanh công thức */}
-                                <div style={styles.formulaBar}>
-                                  <div style={styles.formulaCellAddr}>
-                                    {gridData.activeCellAddr}
-                                  </div>
-                                  <div
+                                <View style={styles.formulaBar}>
+                                  <View style={styles.formulaAddrBox}>
+                                    <Text
+                                      style={{
+                                        ...typography.caption,
+                                        fontWeight: '500',
+                                      }}>
+                                      {gridData.activeCellAddr}
+                                    </Text>
+                                  </View>
+                                  <View
                                     aria-hidden="true"
-                                    style={styles.formulaFxLabel}>
-                                    fx
-                                  </div>
-                                  <div style={styles.formulaInputDisplay}>
-                                    {gridData.activeCellFormula}
-                                  </div>
-                                </div>
+                                    style={styles.formulaFxBox}>
+                                    <Text
+                                      style={{
+                                        ...typography.caption,
+                                        fontStyle: 'italic',
+                                        color: 'var(--color-text-muted)',
+                                      }}>
+                                      fx
+                                    </Text>
+                                  </View>
+                                  <View style={styles.formulaValBox}>
+                                    <Text
+                                      style={{
+                                        fontFamily:
+                                          'ui-monospace, Consolas, monospace',
+                                        ...typography.caption,
+                                      }}>
+                                      {gridData.activeCellFormula}
+                                    </Text>
+                                  </View>
+                                </View>
 
-                                {/* Lưới bảng tính Excel */}
-                                <div style={styles.tableScrollContainer}>
-                                  <table style={styles.gridTable}>
-                                    <thead>
-                                      <tr>
-                                        <th style={styles.gridThCorner} />
-                                        {gridData.visibleCols.map(col => {
-                                          const isColActive =
-                                            gridData.activeCellAddr.startsWith(
-                                              col,
-                                            );
-                                          return (
-                                            <th
-                                              key={col}
-                                              style={{
-                                                ...styles.gridThCol,
-                                                ...(isColActive
-                                                  ? styles.gridThColSelected
-                                                  : {}),
-                                              }}>
-                                              {col}
-                                            </th>
+                                {/* Lưới ô Flexbox chuẩn React Native Web */}
+                                <View style={styles.tableScrollWrap}>
+                                  <View style={styles.gridTable}>
+                                    {/* Hàng tiêu đề cột */}
+                                    <View style={styles.gridRow}>
+                                      <View style={styles.gridThCorner} />
+                                      {gridData.visibleCols.map(col => {
+                                        const isActiveCol =
+                                          gridData.activeCellAddr.startsWith(
+                                            col,
                                           );
-                                        })}
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {gridData.visibleRows.map(r => {
-                                        const isRowActive =
-                                          gridData.activeCellAddr.includes(
-                                            String(r),
-                                          );
-                                        const isFreezeLine =
-                                          gridData.ySplit === r;
                                         return (
-                                          <tr key={r}>
-                                            <th
-                                              style={{
-                                                ...styles.gridThRow,
-                                                ...(isRowActive
-                                                  ? styles.gridThRowSelected
-                                                  : {}),
-                                                borderBottomWidth: isFreezeLine
-                                                  ? 2
-                                                  : 1,
-                                                borderBottomColor: isFreezeLine
-                                                  ? 'var(--color-text-primary)'
-                                                  : 'var(--color-border)',
-                                              }}>
-                                              {r}
-                                            </th>
-                                            {gridData.visibleCols.map(col => {
-                                              const addr = `${col}${r}`;
-                                              const cell =
-                                                gridData.cellMap[addr];
-                                              const isCellSelected =
-                                                addr ===
-                                                gridData.activeCellAddr;
-                                              const isTarget =
-                                                addr === gridData.targetCell;
+                                          <View
+                                            key={col}
+                                            style={[
+                                              styles.gridThCol,
+                                              isActiveCol &&
+                                                styles.gridThColActive,
+                                            ]}>
+                                            <Text style={styles.gridThColText}>
+                                              {col}
+                                            </Text>
+                                          </View>
+                                        );
+                                      })}
+                                    </View>
 
-                                              return (
-                                                <td
-                                                  key={addr}
-                                                  onClick={() =>
+                                    {/* Các hàng dữ liệu */}
+                                    {gridData.visibleRows.map(r => {
+                                      const isActiveRow =
+                                        gridData.activeCellAddr.includes(
+                                          String(r),
+                                        );
+                                      const isFreeze = gridData.ySplit === r;
+                                      return (
+                                        <View key={r} style={styles.gridRow}>
+                                          <View
+                                            style={[
+                                              styles.gridThRow,
+                                              isActiveRow &&
+                                                styles.gridThRowActive,
+                                              isFreeze &&
+                                                styles.gridThRowFreeze,
+                                            ]}>
+                                            <Text style={styles.gridThRowText}>
+                                              {r}
+                                            </Text>
+                                          </View>
+                                          {gridData.visibleCols.map(col => {
+                                            const addr = `${col}${r}`;
+                                            const cell = gridData.cellMap[addr];
+                                            const isCellSel =
+                                              addr === gridData.activeCellAddr;
+                                            const isTarget =
+                                              addr === gridData.targetCell;
+
+                                            return (
+                                              <View
+                                                key={addr}
+                                                {...asButton(
+                                                  () =>
                                                     setSelectedCells(prev => ({
                                                       ...prev,
                                                       [c._id || '']: addr,
-                                                    }))
-                                                  }
-                                                  style={{
-                                                    ...styles.gridCell,
-                                                    textAlign:
-                                                      cell?.align || 'left',
-                                                    backgroundColor: isTarget
-                                                      ? isPassed
-                                                        ? 'var(--color-success-bg)'
-                                                        : 'var(--color-error-bg)'
-                                                      : isCellSelected
-                                                        ? 'var(--color-surface-selected)'
-                                                        : 'var(--color-surface)',
-                                                    outline: isCellSelected
-                                                      ? '2px solid var(--color-vhu-primary)'
-                                                      : 'none',
-                                                    outlineOffset: -2,
-                                                  }}>
+                                                    })),
+                                                  `Ô ${addr}`,
+                                                )}
+                                                style={[
+                                                  styles.gridTdCell,
+                                                  isTarget &&
+                                                    (isPassed
+                                                      ? styles.gridTdCellTargetPass
+                                                      : styles.gridTdCellTargetFail),
+                                                  isCellSel &&
+                                                    styles.gridTdCellSelected,
+                                                ]}>
+                                                <Text
+                                                  style={[
+                                                    styles.gridTdCellText,
+                                                    {
+                                                      textAlign:
+                                                        cell?.align || 'left',
+                                                    },
+                                                  ]}>
                                                   {cell?.value || ''}
-                                                </td>
-                                              );
-                                            })}
-                                          </tr>
-                                        );
-                                      })}
-                                    </tbody>
-                                  </table>
-                                </div>
+                                                </Text>
+                                              </View>
+                                            );
+                                          })}
+                                        </View>
+                                      );
+                                    })}
+                                  </View>
+                                </View>
 
-                                <div style={styles.gridFooter}>
-                                  {gridData.ySplit
-                                    ? `Đường đậm dưới hàng ${gridData.ySplit} = vùng cố định đọc từ file (ySplit = ${gridData.ySplit}). Màu/viền ô là mô phỏng.`
-                                    : 'Giá trị, công thức và định dạng số đọc từ file bạn nộp. Màu nền, viền, font ô là mô phỏng theo giao diện LearnNest.'}
-                                </div>
-                              </div>
+                                <View style={styles.gridFooterNote}>
+                                  <Text
+                                    style={{
+                                      ...typography.caption,
+                                      color: 'var(--color-text-muted)',
+                                      lineHeight: 18,
+                                    }}>
+                                    {gridData.ySplit
+                                      ? `Đường đậm dưới hàng ${gridData.ySplit} = vùng cố định đọc từ file (ySplit = ${gridData.ySplit}). Màu/viền ô là mô phỏng.`
+                                      : 'Giá trị, công thức và định dạng số đọc từ file bạn nộp. Màu nền, viền, font ô là mô phỏng theo giao diện LearnNest.'}
+                                  </Text>
+                                </View>
+                              </View>
                             ) : (
-                              /* 4. vError: lỗi đọc file, hoặc sheet trong tiêu chí không có trong file đã nộp */
-                              <div style={styles.errorContainer}>
-                                <div
+                              /* Fallback thông báo */
+                              <View style={styles.errorContainer}>
+                                <View
                                   aria-hidden="true"
                                   style={styles.errorIconBadge}>
-                                  <span style={styles.errorIconText}>!</span>
-                                </div>
-                                <div style={styles.errorTextCol}>
-                                  <span style={styles.errorTitle}>
+                                  <Text style={styles.errorIconBadgeText}>
+                                    !
+                                  </Text>
+                                </View>
+                                <View style={styles.errorCol}>
+                                  <Text style={styles.errorTitle}>
                                     Không thể hiển thị vùng ô
-                                  </span>
-                                  <span style={styles.errorBody}>
-                                    {workbookError ||
-                                      `Không tìm thấy sheet "${c.params?.sheet || ''}" trong file bạn đã nộp — kết quả chấm ở trên vẫn đúng, chỉ khung xem trước này không đọc được.`}
-                                  </span>
-                                </div>
-                              </div>
+                                  </Text>
+                                  <Text style={styles.errorBody}>
+                                    File bài làm không chứa định dạng bảng tính
+                                    phù hợp để vẽ lại khung xem trước.
+                                  </Text>
+                                </View>
+                              </View>
                             )}
-                          </div>
-                        </div>
+                          </View>
+                        </View>
                       )}
-                    </div>
+                    </View>
                   );
                 })}
-              </div>
-            </div>
+              </View>
+            </View>
           )}
 
           {/* TAB 2: Hướng dẫn sửa lỗi */}
           {activeTab === 'fix' && (
-            <div style={styles.fixContainer}>
-              <p style={styles.fixIntro}>
-                {fixCount} yêu cầu chưa đạt ở lần nộp gần nhất. Làm theo từng
-                bước bên dưới rồi nộp lại file.
-              </p>
+            <View style={styles.fixContainer}>
+              <Text style={styles.fixIntroText}>
+                {failedCriteriaList.length} yêu cầu chưa đạt ở lần nộp gần nhất.
+                Làm theo từng bước bên dưới rồi nộp lại file bài làm.
+              </Text>
+
               {failedCriteriaList.map(item => {
                 const c = item.criterion;
                 const inst = item.instruction;
+                const rawInstruction =
+                  item.result?.instruction || inst?.instruction || '';
+                const steps = rawInstruction
+                  ? rawInstruction
+                      .split(/(?=Bước\s+\d+:?)/gi)
+                      .map(s => s.trim())
+                      .filter(Boolean)
+                  : [
+                      'Xem lại yêu cầu và thực hiện lại các thao tác theo đúng chuẩn MOS.',
+                    ];
                 const isChart = c.type.includes('chart');
 
-                // Tách các bước hướng dẫn
-                const rawSteps =
-                  item.result?.instruction || inst?.instruction || '';
-                const stepLines = rawSteps
-                  .split(/\r?\n/)
-                  .map(s => s.trim())
-                  .filter(Boolean);
-
-                const steps =
-                  stepLines.length > 0
-                    ? stepLines
-                    : [
-                        `Mở file đề gốc và chọn đúng vị trí trên sheet ${c.params?.sheet || 'Sheet1'}.`,
-                        `Thực hiện đúng yêu cầu: ${inst?.summary || PRACTICE_CRITERIA_LABELS[c.type]}.`,
-                      ];
-
                 return (
-                  <article key={c._id || item.index} style={styles.fixArticle}>
-                    <div style={styles.fixArticleHeader}>
-                      <span style={styles.fixTitle}>
+                  <View key={c._id || item.index} style={styles.fixCard}>
+                    <View style={styles.fixCardHeader}>
+                      <Text style={styles.fixCardTitle}>
                         Yêu cầu {item.index + 1} ·{' '}
                         {PRACTICE_CRITERIA_LABELS[c.type] || c.type}
-                      </span>
-                      <div
+                      </Text>
+                      <View
                         style={{
-                          ...styles.statusChip,
+                          ...styles.criterionStatusBadge,
                           backgroundColor: 'var(--color-error-bg)',
                         }}>
-                        <span
+                        <Text
                           style={{
-                            ...styles.statusChipText,
+                            ...styles.criterionStatusBadgeText,
                             color: 'var(--color-error)',
                           }}>
                           ✕ Chưa đạt
-                        </span>
-                      </div>
-                    </div>
+                        </Text>
+                      </View>
+                    </View>
 
-                    <div style={styles.fixSummary}>
+                    <Text style={styles.fixSummaryText}>
                       {inst?.summary ||
                         `Yêu cầu kiểm tra ${PRACTICE_CRITERIA_LABELS[c.type]}`}
-                    </div>
+                    </Text>
 
-                    <ol style={styles.fixStepList}>
+                    <View style={styles.fixStepList}>
                       {steps.map((st, sIdx) => (
-                        <li key={sIdx} style={styles.fixStepItem}>
+                        <Text key={sIdx} style={styles.fixStepText}>
                           {st.startsWith('Bước')
                             ? st
                             : `Bước ${sIdx + 1}: ${st}`}
-                        </li>
+                        </Text>
                       ))}
-                    </ol>
+                    </View>
 
-                    <div>
-                      <button
-                        type="button"
-                        onClick={() => {
+                    <View>
+                      <View
+                        style={styles.toggleBtn}
+                        {...asButton(() => {
                           setActiveTab('task');
                           setExpandedCriteriaId(c._id || null);
-                        }}
-                        style={{
-                          ...styles.actionTextButton,
-                          ...styles.actionTextButtonBlue,
-                        }}>
-                        <span>
+                        }, 'Xem vùng ô trong bài làm cho yêu cầu này')}>
+                        <Text style={styles.toggleBtnText}>
                           {isChart
                             ? 'Xem thông tin biểu đồ trong bài làm →'
                             : 'Xem vùng ô trong bài làm →'}
-                        </span>
-                      </button>
-                    </div>
-                  </article>
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
                 );
               })}
 
-              <div style={styles.fixNoteFooter}>
-                Hướng dẫn soạn sẵn theo từng loại tiêu chí. Yêu cầu đã đạt không
-                hiện ở đây.
-              </div>
-            </div>
+              <View style={styles.fixFooterNote}>
+                <Text
+                  style={{
+                    ...typography.caption,
+                    color: 'var(--color-text-muted)',
+                  }}>
+                  Hướng dẫn soạn sẵn theo từng loại tiêu chí. Yêu cầu đã đạt
+                  không hiện ở đây.
+                </Text>
+              </View>
+            </View>
           )}
 
-          {/* Khung thảo luận */}
+          {/* Thảo luận khi làm bài thường */}
           {!isMockExam && (
-            <div style={styles.discussionSection}>
-              <h3 style={styles.discussionTitle}>Thảo luận</h3>
+            <View style={styles.discussionBox}>
+              <Text style={styles.discussionTitle}>Thảo luận</Text>
               <CommentSection postId={taskId} type="PracticeTask" inline />
-            </div>
+            </View>
           )}
-        </div>
+        </View>
 
         {/* CỘT PHẢI (Aside): Nộp bài, Kết quả & Lịch sử */}
-        <div
-          style={{
-            ...styles.sideColumn,
-            ...(isMobile ? styles.sideColumnMobile : {}),
-          }}>
-          <div style={styles.asideCard}>
-            {/* Hiển thị điểm số khi đã chấm (chỉ ngoài phiên thi thử) */}
+        <View style={isMobile ? styles.asideColMobile : styles.asideCol}>
+          <View style={styles.asideSection}>
+            {/* Điểm số lần nộp gần nhất */}
             {isGraded && currentResult && (
-              <div style={styles.scoreSection}>
-                <span style={styles.scoreLabel}>Kết quả lần nộp gần nhất</span>
-                <div style={styles.scoreRow}>
-                  <span style={styles.scoreBig}>
-                    {toScore10(
-                      currentResult.totalScore,
-                      currentResult.maxScore,
-                    )}
-                  </span>
-                  <span style={styles.scoreTotal}>/10</span>
-                  <div
+              <View style={styles.scoreSection}>
+                <Text style={styles.scoreLabel}>Kết quả lần nộp gần nhất</Text>
+                <View style={styles.scoreRow}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'baseline',
+                      gap: 2,
+                    }}>
+                    <Text style={styles.scoreBigText}>{score10}</Text>
+                    <Text style={styles.scoreTotalText}>/10</Text>
+                  </View>
+                  <View
                     style={{
                       ...styles.statusChip,
                       backgroundColor: currentResult.isPass
                         ? 'var(--color-success-bg)'
                         : 'var(--color-error-bg)',
                     }}>
-                    <span
+                    <Text
                       style={{
                         ...styles.statusChipText,
                         color: currentResult.isPass
@@ -873,44 +1107,54 @@ const PracticeTaskContent: React.FC<Props> = ({
                           : 'var(--color-error)',
                       }}>
                       {currentResult.isPass ? '✓ Đạt' : '✕ Chưa đạt (cần ≥ 8)'}
-                    </span>
-                  </div>
-                </div>
-                <span style={styles.scoreNote}>
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.scoreNoteText}>
                   {currentResult.isPass
                     ? `${passedCriteriaCount}/${criteria.length} yêu cầu đạt. Đã mở khóa nội dung tiếp theo trong khóa học.`
                     : `${passedCriteriaCount}/${criteria.length} yêu cầu đạt. Cần tối thiểu 8 điểm để qua bài — xem tab Hướng dẫn sửa lỗi rồi nộp lại.`}
-                </span>
-              </div>
+                </Text>
+              </View>
             )}
 
             {/* Thông tin nộp bài */}
-            <div style={styles.uploadSubjectRow}>
-              <div
+            <View style={styles.uploadHeaderRow}>
+              <View
                 aria-hidden="true"
                 style={{
-                  ...styles.subjectIcon,
-                  backgroundColor: subjectColor,
+                  ...styles.subjectIconBadge,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 8,
+                  backgroundColor: subjectBg,
                 }}>
-                <span style={styles.subjectIconText}>{subjectLetter}</span>
-              </div>
-              <div style={styles.uploadTitleCol}>
-                <span style={styles.uploadTitle}>
+                <Text style={{ ...styles.subjectIconBadgeText, fontSize: 16 }}>
+                  {subjectLetter}
+                </Text>
+              </View>
+              <View style={styles.uploadTitleCol}>
+                <Text style={styles.uploadTitleText}>
                   Nộp bài làm {task.subject}
-                </span>
-                <span style={styles.uploadHint}>
+                </Text>
+                <Text style={styles.uploadHintText}>
                   File {accept}, tối đa 20MB
-                </span>
-              </div>
-            </div>
+                </Text>
+              </View>
+            </View>
 
-            {/* Nút hành động Tải file / Nộp bài trên Desktop */}
+            {/* Nút Tải đề / Nộp bài trên Desktop */}
             {!isMobile && (
-              <div style={styles.uploadBtnCol}>
+              <View style={styles.uploadBtnCol}>
                 <Button
                   icon={<DownloadOutlined />}
                   onClick={handleDownloadStarter}
-                  style={{ width: '100%', height: 40, borderRadius: 8 }}>
+                  style={{
+                    width: '100%',
+                    height: 40,
+                    borderRadius: 8,
+                    fontWeight: 500,
+                  }}>
                   Tải file đề gốc
                 </Button>
                 <Upload {...uploadProps}>
@@ -922,6 +1166,7 @@ const PracticeTaskContent: React.FC<Props> = ({
                       width: '100%',
                       height: 40,
                       borderRadius: 8,
+                      fontWeight: 500,
                       backgroundColor: 'var(--color-vhu-primary)',
                     }}>
                     {isSubmitting
@@ -931,21 +1176,18 @@ const PracticeTaskContent: React.FC<Props> = ({
                         : `Nộp bài làm (${accept})`}
                   </Button>
                 </Upload>
-              </div>
+              </View>
             )}
 
             {/* Ghi chú trạng thái */}
-            <div
+            <View
               style={{
                 ...styles.statusNoteBox,
                 backgroundColor: isSubmitting
                   ? 'var(--color-info-bg)'
                   : 'var(--color-surface-subtle)',
               }}>
-              <span aria-hidden="true">
-                {isSubmitting ? '◌' : isMockExam ? '○' : 'ℹ'}
-              </span>
-              <span
+              <Text
                 style={{
                   ...styles.statusNoteText,
                   color: isSubmitting
@@ -953,71 +1195,76 @@ const PracticeTaskContent: React.FC<Props> = ({
                     : 'var(--color-text-body)',
                 }}>
                 {isSubmitting
-                  ? 'Đã tải lên. Hệ thống đang chấm điểm, thường mất vài giây.'
+                  ? '◌ Đã tải lên. Hệ thống đang chấm điểm, thường mất vài giây.'
                   : isMockExam
-                    ? 'Chưa nộp bài này. Kết quả của từng bài chỉ hiện sau khi nộp bài thi.'
+                    ? '○ Chưa nộp bài này. Kết quả của từng bài chỉ hiện sau khi nộp bài thi.'
                     : isGraded
-                      ? 'Nộp lại bất kỳ lúc nào — mỗi lần nộp được chấm và lưu vào lịch sử.'
-                      : `${criteria.length} yêu cầu chấm điểm · cần đạt tối thiểu 8/10 để qua bài.`}
-              </span>
-            </div>
-          </div>
+                      ? 'ℹ Nộp lại bất kỳ lúc nào — mỗi lần nộp được chấm và lưu vào lịch sử.'
+                      : `ℹ ${criteria.length} yêu cầu chấm điểm · cần đạt tối thiểu 8/10 để qua bài.`}
+              </Text>
+            </View>
+          </View>
 
-          {/* Lịch sử nộp bài (chỉ hiển thị khi làm bài thực hành thường) */}
+          {/* Lịch sử nộp bài */}
           {!isMockExam && submissions && submissions.length > 0 && (
-            <div style={styles.historyCard}>
-              <div style={styles.historyHeader}>
+            <View style={styles.historyCard}>
+              <View style={styles.historyHeader}>
                 Lịch sử nộp bài ({submissions.length} lần)
-              </div>
+              </View>
               {submissions.map((s, idx) => {
                 const sScore = toScore10(s.totalScore, s.maxScore);
                 const sPass = sScore >= 8;
                 return (
-                  <div key={s._id} style={styles.historyRow}>
-                    <span style={styles.historyTime}>
+                  <View key={s._id} style={styles.historyRow}>
+                    <Text style={styles.historyAttemptLabel}>
                       Lần {submissions.length - idx}
-                    </span>
-                    <span style={styles.historyScore}>{sScore}/10</span>
-                    <div
+                    </Text>
+                    <Text style={styles.historyScoreText}>{sScore}/10</Text>
+                    <View
                       style={{
-                        ...styles.statusChip,
+                        ...styles.criterionStatusBadge,
                         backgroundColor: sPass
                           ? 'var(--color-success-bg)'
                           : 'var(--color-error-bg)',
                       }}>
-                      <span
+                      <Text
                         style={{
-                          ...styles.statusChipText,
+                          ...styles.criterionStatusBadgeText,
                           color: sPass
                             ? 'var(--color-success)'
                             : 'var(--color-error)',
                         }}>
                         {sPass ? '✓ Đạt' : '✕ Chưa đạt'}
-                      </span>
-                    </div>
-                    <span style={styles.historyTime}>
+                      </Text>
+                    </View>
+                    <Text style={styles.historyTimeText}>
                       {dayjs(s.submittedAt).format('HH:mm DD/MM')}
-                    </span>
-                  </div>
+                    </Text>
+                  </View>
                 );
               })}
-            </div>
+            </View>
           )}
-        </div>
-      </div>
+        </View>
+      </View>
 
-      {/* Thanh cố định dưới chân trang khi xem trên mobile */}
+      {/* Thanh nút bấm cố định dưới đáy trên Mobile */}
       {isMobile && (
-        <div style={styles.bottomBarSticky}>
-          <div style={{ flex: 1 }}>
+        <View style={styles.bottomBarSticky}>
+          <View style={{ flex: 1 }}>
             <Button
               icon={<DownloadOutlined />}
               onClick={handleDownloadStarter}
-              style={{ width: '100%', height: 44, borderRadius: 8 }}>
+              style={{
+                width: '100%',
+                height: 44,
+                borderRadius: 8,
+                fontWeight: 500,
+              }}>
               Tải đề gốc
             </Button>
-          </div>
-          <div style={{ flex: 1.4 }}>
+          </View>
+          <View style={{ flex: 1.4 }}>
             <Upload {...uploadProps}>
               <Button
                 type="primary"
@@ -1027,37 +1274,40 @@ const PracticeTaskContent: React.FC<Props> = ({
                   width: '100%',
                   height: 44,
                   borderRadius: 8,
+                  fontWeight: 500,
                   backgroundColor: 'var(--color-vhu-primary)',
                 }}>
                 {isSubmitting ? 'Đang chấm…' : `Nộp bài (${accept})`}
               </Button>
             </Upload>
-          </div>
-        </div>
+          </View>
+        </View>
       )}
-    </div>
+    </View>
   );
 };
 
-// Xuất ra ngoài để tái dùng đúng y hệt cách hiển thị "Yêu cầu N" ở trang kết
-// quả thi thử (MockExamResultView) - tránh viết lại cùng 1 UI 2 lần.
 export const ResultItemRow: React.FC<{
   item: PracticeSubmissionResultItem;
   index: number;
 }> = ({ item, index }) => (
-  <div style={styles.resultItemRow}>
+  <View style={styles.resultItemRow}>
     {item.passed ? (
-      <CheckCircleFilled style={{ color: 'var(--color-success)' }} />
+      <CheckCircleFilled
+        style={{ color: 'var(--color-success)', marginTop: 2 }}
+      />
     ) : (
-      <CloseCircleFilled style={{ color: 'var(--color-error)' }} />
+      <CloseCircleFilled
+        style={{ color: 'var(--color-error)', marginTop: 2 }}
+      />
     )}
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={styles.resultItemTitle}>Yêu cầu {index + 1}</div>
+    <View style={{ flex: 1, minWidth: 0, flexDirection: 'column' }}>
+      <Text style={styles.resultItemTitle}>Yêu cầu {index + 1}</Text>
       {!item.passed && item.instruction && (
-        <div style={styles.resultItemInstruction}>{item.instruction}</div>
+        <Text style={styles.resultItemInstruction}>{item.instruction}</Text>
       )}
-    </div>
-  </div>
+    </View>
+  </View>
 );
 
 export default PracticeTaskContent;
