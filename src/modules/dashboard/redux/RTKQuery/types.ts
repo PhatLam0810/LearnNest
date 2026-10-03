@@ -300,7 +300,8 @@ export type NotificationType =
   | 'NEW_COURSE'
   | 'COURSE_COMPLETED'
   | 'STUDY_REMINDER'
-  | 'RETRY_REMINDER';
+  | 'RETRY_REMINDER'
+  | 'FEEDBACK_NEW';
 
 export interface NotificationItem {
   _id: string;

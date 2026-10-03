@@ -55,6 +55,7 @@ type MenuItem = GetProp<MenuProps, 'items'>[number];
 const NOTIF_DOT_COLOR: Record<string, string> = {
   COMMENT_REPLY: 'var(--color-vhu-primary)',
   NEW_QUESTION: 'var(--color-vhu-primary)',
+  FEEDBACK_NEW: 'var(--color-vhu-primary)',
   FEEDBACK_REPLIED: 'var(--color-vhu-primary)',
   NEW_COURSE: 'var(--color-success)',
   COURSE_COMPLETED: 'var(--color-success)',
@@ -153,7 +154,7 @@ const HeaderLayout: React.FC = ({}) => {
   const renderNotificationDropdown = () => (
     <div className="notification-dropdown-panel">
       <div className="dropdown-header">
-        <h3>Thông báo</h3>
+        <h3>Thông báo{unreadCount > 0 ? ` (${unreadCount})` : ''}</h3>
         {unreadCount > 0 && (
           <span className="see-all-btn" onClick={handleMarkAllRead}>
             Đánh dấu tất cả đã đọc
@@ -380,12 +381,19 @@ const HeaderLayout: React.FC = ({}) => {
                 popupRender={renderNotificationDropdown}
                 placement="bottomRight"
                 onOpenChange={setIsNotifOpen}>
-                <Badge dot={unreadCount > 0} offset={[-6, 6]}>
+                <Badge
+                  className="notification-badge"
+                  count={unreadCount}
+                  overflowCount={99}
+                  offset={[-4, 6]}>
                   <Button
                     type="text"
-                    style={{ display: 'flex' }}
-                    icon={<BellOutlined style={{ fontSize: 24 }} />}
-                    aria-label="Thông báo"
+                    icon={<BellOutlined size={22} strokeWidth={1.8} />}
+                    aria-label={
+                      unreadCount > 0
+                        ? `Thông báo (${unreadCount} chưa đọc)`
+                        : 'Thông báo'
+                    }
                     className="notification-bell-btn"
                   />
                 </Badge>

@@ -23,6 +23,7 @@ const USER_NOTIF_TYPES: { type: string; label: string }[] = [
 ];
 const ADMIN_NOTIF_TYPES: { type: string; label: string }[] = [
   { type: 'NEW_QUESTION', label: 'Có câu hỏi mới cần trả lời' },
+  { type: 'FEEDBACK_NEW', label: 'Có phản hồi/hỗ trợ mới' },
   { type: 'VIOLATION_REPORT', label: 'Có báo cáo vi phạm mới' },
 ];
 
