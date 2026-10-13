@@ -15,10 +15,11 @@ const SITE_NAME = 'LearnNest';
 // "LearnNest" ở mọi nơi, không hề có chữ khớp với domain "learnestvhu" nên
 // tìm đúng domain (không kèm .com) không ra kết quả nào.
 const SITE_DESCRIPTION =
-  'LearnNest VHU (learnestvhu.com) - nền tảng học trực tuyến của Trường Đại học Văn Hiến (VHU): học nhanh, luyện tập hiệu quả và theo dõi tiến độ học tập mọi lúc, mọi nơi.';
-// "LearnNest VHU" (có dấu cách) + "học trực tuyến" + "VHU" để khớp các cách gõ
-// tìm kiếm: "learnest vhu", "nền tảng học trực tuyến vhu".
-const DEFAULT_TITLE = `${SITE_NAME} VHU - Nền tảng học trực tuyến Đại học Văn Hiến`;
+  'LearnNest VHU - Learnest AI (learnestvhu.com): nền tảng học trực tuyến của Trường Đại học Văn Hiến (VHU), luyện thi MOS Word & Excel, học nhanh và theo dõi tiến độ học tập mọi lúc, mọi nơi.';
+// "LearnNest VHU" (có dấu cách) + "Learnest AI" (tên trường dùng khi truyền
+// thông) + "học trực tuyến" + "VHU" để khớp các cách gõ tìm kiếm:
+// "learnest vhu", "learnest ai vhu", "nền tảng học trực tuyến vhu".
+const DEFAULT_TITLE = `${SITE_NAME} VHU - Learnest AI, nền tảng học trực tuyến Đại học Văn Hiến`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
