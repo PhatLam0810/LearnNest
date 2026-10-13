@@ -15,12 +15,15 @@ const SITE_NAME = 'LearnNest';
 // "LearnNest" ở mọi nơi, không hề có chữ khớp với domain "learnestvhu" nên
 // tìm đúng domain (không kèm .com) không ra kết quả nào.
 const SITE_DESCRIPTION =
-  'LearnNest (learnestvhu.com) - nền tảng học tập trực tuyến của Trường Đại học Văn Hiến (VHU), giúp bạn học nhanh, luyện tập hiệu quả và theo dõi tiến độ học tập mọi lúc, mọi nơi.';
+  'LearnNest VHU (learnestvhu.com) - nền tảng học trực tuyến của Trường Đại học Văn Hiến (VHU): học nhanh, luyện tập hiệu quả và theo dõi tiến độ học tập mọi lúc, mọi nơi.';
+// "LearnNest VHU" (có dấu cách) + "học trực tuyến" + "VHU" để khớp các cách gõ
+// tìm kiếm: "learnest vhu", "nền tảng học trực tuyến vhu".
+const DEFAULT_TITLE = `${SITE_NAME} VHU - Nền tảng học trực tuyến Đại học Văn Hiến`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} - Nền tảng học tập trực tuyến`,
+    default: DEFAULT_TITLE,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -28,7 +31,7 @@ export const metadata: Metadata = {
     canonical: '/',
   },
   openGraph: {
-    title: `${SITE_NAME} - Nền tảng học tập trực tuyến`,
+    title: DEFAULT_TITLE,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     siteName: SITE_NAME,
