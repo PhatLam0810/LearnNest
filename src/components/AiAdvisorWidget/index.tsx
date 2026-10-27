@@ -130,11 +130,17 @@ const AiAdvisorWidget: React.FC = () => {
         { role: 'assistant-text', text: res.reply },
       ]);
     } catch (error) {
+      // Hết lượt miễn phí: BE trả PREMIUM_REQUIRED (modal nâng cấp đã mở ở baseQuery).
+      const data = (error as { data?: { code?: string; message?: string } })
+        ?.data;
       setMessages(prev => [
         ...prev.filter(m => m.role !== 'assistant-typing'),
         {
           role: 'assistant-text',
-          text: 'Xin lỗi, có lỗi xảy ra. Bạn thử hỏi lại giúp mình nhé.',
+          text:
+            data?.code === 'PREMIUM_REQUIRED'
+              ? data.message
+              : 'Xin lỗi, có lỗi xảy ra. Bạn thử hỏi lại giúp mình nhé.',
         },
       ]);
     }

@@ -5,7 +5,9 @@ export interface UserItem {
   lastName: string;
   email: string;
   role: Role;
-  subscription: any;
+  // Premium: BE trả premiumExpiresAt; isPremium chỉ để hiển thị (còn hạn hay không).
+  isPremium?: boolean;
+  premiumExpiresAt?: string;
   createdAt: string;
   updatedAt: string;
   __v: number;

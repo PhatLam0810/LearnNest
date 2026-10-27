@@ -31,17 +31,8 @@ export const authSlice = createSlice({
     setVerifyInfo: (s, a: PayloadAction<boolean>) => {
       s.verifyInfo = a.payload;
     },
-    // lessonPurchase (trigger) không còn dùng - luồng mua bằng ETH/MetaMask
-    // đã bị comment hết ở AppModalPayPal, chỉ giữ setter lessonPurchaseData
-    // vì AppModalSuccess vẫn đọc/ghi field này khi hiện chi tiết giao dịch.
-    lessonPurchaseData: (s, a: PayloadAction<any>) => {
-      s.lessonPurchaseData = a.payload;
-    },
     setIsShowLoading: (s, a: PayloadAction<boolean>) => {
       s.isLoading = a.payload;
-    },
-    walletAddress: (s, a: PayloadAction<string>) => {
-      s.walletAddress = a.payload;
     },
   },
 });

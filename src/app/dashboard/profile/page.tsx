@@ -8,9 +8,13 @@ import {
   EditProfile,
   ProfileSidebar,
   StudyPreferences,
+  TransactionHistory,
 } from './components';
+import PremiumStatusCard from '@components/PremiumStatusCard';
+import { useRouter } from 'next/navigation';
 
 const ProfilePage: React.FC = () => {
+  const router = useRouter();
   const mustChangePassword = useAppSelector(
     state => !!state.authReducer.tokenInfo?.userProfile?.mustChangePassword,
   );
@@ -37,6 +41,10 @@ const ProfilePage: React.FC = () => {
           <EditProfile />
           <ChangePassword />
           <StudyPreferences />
+          <PremiumStatusCard
+            onAction={() => router.push('/dashboard/premium')}
+          />
+          <TransactionHistory />
         </View>
       </View>
     </View>

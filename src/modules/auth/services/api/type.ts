@@ -49,29 +49,3 @@ export interface UserProfile {
     name: string;
   };
 }
-
-export interface LessonPurchase {
-  _id: string;
-  email: string;
-  userId: string;
-  paymentId: string;
-  title: string;
-  amount: number;
-  currency: string;
-  status: string;
-}
-
-export interface LessonPurchaseResponse {
-  lessonId: string;
-  userId: string;
-  paymentId: string;
-  title: string;
-  amount: number;
-  currency: string;
-  startDate: string;
-  status: string;
-  _id: string;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-}

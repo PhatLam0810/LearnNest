@@ -243,6 +243,8 @@ export interface MockExamSummary {
   subject: MockExamSubject;
   durationMinutes: number;
   taskCount: number;
+  // BE đánh dấu đề cần Premium với tài khoản này (chỉ để hiển thị khóa).
+  locked?: boolean;
 }
 
 export type MockExamAttemptStatus = 'in_progress' | 'submitted' | 'expired';

@@ -22,6 +22,7 @@ import QuizManagePage from './quizManage/page';
 import SubmissionsManage from './submissionsManage/page';
 import PracticeClassManage from './practiceClassManage/page';
 import OverviewManage from './overviewManage/page';
+import PremiumManage from './premiumManage/page';
 import { ADMIN_PRIMARY } from './adminTheme';
 import motion from '@/styles/motion';
 
@@ -48,6 +49,7 @@ const buildItems = (qnaPendingCount: number): TabItem[] => [
   { key: '12', label: 'Ngân Hàng Câu Hỏi', children: <QuizManagePage /> },
   { key: '13', label: 'Bài Nộp Học Viên', children: <SubmissionsManage /> },
   { key: '10', label: 'Đề Thi Thử', children: <MockExamManage /> },
+  { key: '15', label: 'Premium', children: <PremiumManage /> },
   { key: '9', label: 'Báo Cáo Ngưỡng Đạt', children: <PassRateReport /> },
   {
     key: '8',

@@ -25,9 +25,10 @@ const STUDENT_PAGES = [
   '/dashboard/my-notes',
   '/dashboard/saved',
   '/dashboard/profile',
+  '/dashboard/premium',
 ];
 
-const ADMIN_TABS = Array.from({ length: 15 }, (_, i) => i);
+const ADMIN_TABS = Array.from({ length: 16 }, (_, i) => i);
 
 const login = async (page: Page, email: string, password: string) => {
   await page.goto('/login');

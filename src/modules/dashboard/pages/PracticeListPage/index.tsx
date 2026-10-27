@@ -16,6 +16,8 @@ import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PracticeSubject } from '~mdDashboard/types/practice';
 import BookmarkButton from '@components/BookmarkButton';
+import PremiumGate from '@components/PremiumGate';
+import { usePremium } from '@/modules/premium/usePremium';
 import './styles.scss';
 
 // Màu thanh tiến độ theo tỉ lệ đạt — khớp quy ước đỏ/vàng/xanh đã dùng ở
@@ -83,6 +85,7 @@ const PracticeListPage = () => {
   const { data: allTasks, isFetching: isLoadingTasks } =
     dashboardQuery.useGetPracticeTasksStudentQuery();
   const { data: weakSkills } = dashboardQuery.useGetMyWeakSkillsQuery();
+  const { isPremium, openUpgrade } = usePremium();
   const { data: retryQueue } = dashboardQuery.useGetMyRetryQueueQuery();
   const { data: bookmarkedTaskIds } =
     dashboardQuery.useGetBookmarkIdsQuery('practiceTask');
@@ -99,9 +102,12 @@ const PracticeListPage = () => {
       const attempt = await startMockExam(examId).unwrap();
       router.push(`/dashboard/mock-exam/${attempt._id}`);
     } catch (e: any) {
-      messageApi.error(
-        e?.data?.message || 'Không bắt đầu được đề thi thử, thử lại sau',
-      );
+      // PREMIUM_REQUIRED đã mở modal nâng cấp ở baseQuery, khỏi báo lỗi thêm.
+      if (e?.data?.code !== 'PREMIUM_REQUIRED') {
+        messageApi.error(
+          e?.data?.message || 'Không bắt đầu được đề thi thử, thử lại sau',
+        );
+      }
       setStartingExamId(null);
     }
   };
@@ -197,6 +203,19 @@ const PracticeListPage = () => {
               </span>
             </div>
           ))}
+          {!isPremium && weakSkills.length >= 3 && (
+            <p className="practice-weak-skills-desc">
+              Gói miễn phí chỉ hiện 3 kỹ năng yếu nhất.{' '}
+              <button
+                type="button"
+                className="practice-link-btn"
+                onClick={() =>
+                  openUpgrade('Nâng cấp Premium để xem đầy đủ kỹ năng yếu.')
+                }>
+                Nâng cấp để xem đầy đủ
+              </button>
+            </p>
+          )}
         </div>
       )}
 
@@ -216,39 +235,44 @@ const PracticeListPage = () => {
           </p>
           <div className="practice-task-grid" style={{ marginBottom: 24 }}>
             {mockExams.map(exam => (
-              <div key={exam._id} className="practice-task-card">
-                <Tag
-                  color={
-                    exam.subject === 'Excel'
-                      ? 'green'
-                      : exam.subject === 'Word'
-                        ? 'blue'
-                        : 'purple'
-                  }>
-                  {exam.subject === 'Mixed' ? 'Word + Excel' : exam.subject}
-                </Tag>
-                <h3 className="practice-task-title">{exam.title}</h3>
-                <div className="practice-mock-exam-meta">
-                  <span>
-                    <ClockCircleOutlined /> {exam.durationMinutes} phút
-                  </span>
-                  <span>{exam.taskCount} bài</span>
+              <PremiumGate
+                key={exam._id}
+                locked={!!exam.locked}
+                message="Đề thi thử này dành cho thành viên Premium. Gói miễn phí chỉ mở 1 đề.">
+                <div className="practice-task-card">
+                  <Tag
+                    color={
+                      exam.subject === 'Excel'
+                        ? 'green'
+                        : exam.subject === 'Word'
+                          ? 'blue'
+                          : 'purple'
+                    }>
+                    {exam.subject === 'Mixed' ? 'Word + Excel' : exam.subject}
+                  </Tag>
+                  <h3 className="practice-task-title">{exam.title}</h3>
+                  <div className="practice-mock-exam-meta">
+                    <span>
+                      <ClockCircleOutlined /> {exam.durationMinutes} phút
+                    </span>
+                    <span>{exam.taskCount} bài</span>
+                  </div>
+                  <Popconfirm
+                    title="Bắt đầu đề thi thử?"
+                    description="Sẽ tính giờ ngay từ lúc này, không tạm dừng được. Tiếp tục?"
+                    okText="Bắt đầu"
+                    cancelText="Huỷ"
+                    onConfirm={() => handleStartExam(exam._id)}>
+                    <Button
+                      type="primary"
+                      loading={startingExamId === exam._id}
+                      disabled={!!startingExamId && startingExamId !== exam._id}
+                      style={{ marginTop: 12 }}>
+                      Bắt đầu
+                    </Button>
+                  </Popconfirm>
                 </div>
-                <Popconfirm
-                  title="Bắt đầu đề thi thử?"
-                  description="Sẽ tính giờ ngay từ lúc này, không tạm dừng được. Tiếp tục?"
-                  okText="Bắt đầu"
-                  cancelText="Huỷ"
-                  onConfirm={() => handleStartExam(exam._id)}>
-                  <Button
-                    type="primary"
-                    loading={startingExamId === exam._id}
-                    disabled={!!startingExamId && startingExamId !== exam._id}
-                    style={{ marginTop: 12 }}>
-                    Bắt đầu
-                  </Button>
-                </Popconfirm>
-              </div>
+              </PremiumGate>
             ))}
           </div>
         </>

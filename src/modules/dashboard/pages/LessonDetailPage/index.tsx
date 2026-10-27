@@ -6,7 +6,6 @@ import { Text, View } from 'react-native-web';
 import { Modal, Skeleton } from 'antd';
 import dayjs from 'dayjs';
 import AppButton from '@components/AppButton';
-import AppModalSuccess from '@components/AppModalSuccess';
 import BookmarkButton from '@components/BookmarkButton';
 import CommentCountBadge from '@components/CommentCountBadge';
 import CourseRatingSection from '@components/CourseRatingSection';
@@ -33,7 +32,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
   const dispatch = useAppDispatch();
   const { userProfile } =
     useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const { lessonPurchaseData } = useAppSelector(state => state.authReducer);
   const contextHolder = null;
   const {
     data: lessonDetail,
@@ -41,7 +39,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
     isError,
     refetch,
   } = dashboardQuery.useGetLessonIdQuery({ id });
-  const [isVisibleModalSuccess, setIsVisibleModalSuccess] = useState(false);
   // Dùng chung cache với CourseRatingSection (cùng 1 lessonId) - RTK Query
   // gộp lại thành 1 request, không gọi API 2 lần.
   const { data: ratingSummary } = dashboardQuery.useGetCourseRatingQuery(
@@ -118,12 +115,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
       });
     }
   }, [lessonDetail, setLibraryCanPlay, userProfile?._id]);
-
-  useEffect(() => {
-    if (lessonPurchaseData) {
-      setIsVisibleModalSuccess(true);
-    }
-  }, [lessonPurchaseData]);
 
   const isAdmin = (userProfile?.role?.level ?? 99) <= 2;
 
@@ -582,11 +573,6 @@ const LessonDetailPage = ({ id }: LessonDetailPageProps) => {
           onClose={() => setWatcherModalVisible(false)}
         />
       </Modal>
-
-      <AppModalSuccess
-        isVisibleModalSuccess={isVisibleModalSuccess}
-        setIsVisibleModalSuccess={setIsVisibleModalSuccess}
-      />
     </View>
   );
 };

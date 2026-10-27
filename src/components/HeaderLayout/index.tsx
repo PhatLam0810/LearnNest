@@ -37,6 +37,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { authAction } from '~mdAuth/redux';
 import { useAppSelector } from '@redux';
 import UserAvatar from '@components/UserAvatar';
+import PremiumBadge from '@components/PremiumBadge';
 import { asButton } from '@/utils/asButton';
 import SearchBar from '@components/SearchContext/SearchBar';
 import { formatRelativeTime } from '@/utils/time';
@@ -399,6 +400,7 @@ const HeaderLayout: React.FC = ({}) => {
                 </Badge>
               </Dropdown>
             )}
+            <PremiumBadge />
             <Dropdown
               trigger={['hover', 'click']}
               menu={{ items: menuItemsUser }}>

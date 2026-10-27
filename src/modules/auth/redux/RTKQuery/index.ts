@@ -1,5 +1,5 @@
 import { baseQuery } from '@redux/RTKQuery';
-import { LessonRecommendRes, ResetPassWord, SubscriptionsRes } from './types';
+import { LessonRecommendRes, ResetPassWord } from './types';
 import {
   LoginApiReq,
   loginApiRes,
@@ -68,29 +68,6 @@ export const authQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (response: any) => response,
     }),
-    sendTransactionOtp: builder.mutation({
-      query: (params: { email: string; type: number }) => ({
-        url: '/otp/sendTransaction',
-        method: 'POST',
-        body: params,
-      }),
-      transformResponse: (response: any) => response,
-    }),
-    verifyTransactionOtp: builder.mutation({
-      query: (params: { email: string; otp: number }) => ({
-        url: '/otp/verify',
-        method: 'POST',
-        body: params,
-      }),
-      transformResponse: (response: any) => response,
-    }),
-    getSubscriptions: builder.query({
-      query: () => ({
-        url: '/subscriptions',
-        method: 'GET',
-      }),
-      transformResponse: (res: SubscriptionsRes[]) => res,
-    }),
     deleteAccount: builder.mutation({
       query: (params: { Userid: string }) => ({
         url: `/user/${params.Userid}`,
@@ -103,13 +80,6 @@ export const authQuery = baseQuery.injectEndpoints({
         url: '/user/changePassword',
         method: 'PUT',
         body: params,
-      }),
-      transformResponse: (res: any) => res,
-    }),
-    getTransactionDetail: builder.mutation({
-      query: (params: { id: string }) => ({
-        url: `/transaction/${params.id}`,
-        method: 'GET',
       }),
       transformResponse: (res: any) => res,
     }),

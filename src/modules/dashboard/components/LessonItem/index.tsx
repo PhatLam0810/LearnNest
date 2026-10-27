@@ -1,10 +1,9 @@
 'use client';
 import { asButton } from '@/utils/asButton';
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from 'antd';
 import {
   BookOutlined,
-  DollarOutlined,
   PlayCircleOutlined,
   StarFilled,
   TeamOutlined,
@@ -14,8 +13,7 @@ import styles from './styles';
 import { Text, View } from 'react-native-web';
 import LessonThumbnail from '../LessonThumbnail';
 import BookmarkButton from '@components/BookmarkButton';
-import { authQuery } from '~mdAuth/redux';
-import { useAppSelector } from '@redux';
+import { usePremium } from '@/modules/premium/usePremium';
 
 type LessonItemData = {
   thumbnail: string;
@@ -56,17 +54,15 @@ const LessonItem: React.FC<LessonItemProps> = ({
     title,
     description,
     isPremium,
-    price,
     totalLibraries,
     totalLearners,
     averageRating,
     ratingCount,
     isInProgress,
   } = data || {};
-  const { data: dataSub } = authQuery.useGetSubscriptionsQuery({});
-  const [accessLesson, setAccessLesson] = useState(true);
-  const { userProfile } =
-    useAppSelector(state => state.authReducer.tokenInfo) || {};
+  const { isPremium: userIsPremium } = usePremium();
+  // Khóa Premium mà tài khoản chưa Premium: chỉ hiển thị nhãn, BE mới chặn thật.
+  const premiumLocked = !!isPremium && !userIsPremium;
 
   return (
     <Card
@@ -98,9 +94,9 @@ const LessonItem: React.FC<LessonItemProps> = ({
         style={styles.inner}
         {...asButton(onClick, data.title)}
         onClick={onClick}>
-        {!accessLesson && (
+        {premiumLocked && (
           <View style={styles.premium}>
-            <DollarOutlined style={styles.premiumIcon} />
+            <StarFilled style={styles.premiumIcon} />
           </View>
         )}
 
@@ -120,11 +116,7 @@ const LessonItem: React.FC<LessonItemProps> = ({
           <Text style={styles.desc} numberOfLines={2}>
             {description}
           </Text>
-          {!accessLesson && (
-            <Text style={styles.price} numberOfLines={2}>
-              Cost price: {price} ETH
-            </Text>
-          )}
+          {premiumLocked && <Text style={styles.price}>Premium</Text>}
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>

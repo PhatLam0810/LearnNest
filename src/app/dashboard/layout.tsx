@@ -12,7 +12,9 @@ import {
   LibraryOutlined,
   RightOutlined,
   RocketOutlined,
+  StarFilled,
 } from '@components/AppIcon';
+import UpgradeModal from '@components/UpgradeModal';
 import './styles.css';
 import { useAppSelector } from '@redux';
 import { ScrollView, Text, View } from 'react-native-web';
@@ -62,6 +64,7 @@ export default function DashboardLayout({
   const isMyCoursesSelected = pathname === '/dashboard/my-courses';
   const isMyRoadmapSelected = pathname === '/dashboard/my-roadmap';
   const isAdminSelected = pathname.startsWith('/dashboard/admin');
+  const isPremiumSelected = pathname === '/dashboard/premium';
 
   const menuItems: MenuItem[] = [
     {
@@ -146,6 +149,19 @@ export default function DashboardLayout({
                     color={isMyRoadmapSelected ? '#ffffff' : '#000000'}
                     activeColor={isMyRoadmapSelected ? '#ffffff' : '#000000'}
                     hoverColor={isMyRoadmapSelected ? '#ffffff' : '#000000'}
+                  />
+                ),
+              },
+              {
+                key: '/dashboard/premium',
+                label: 'Premium',
+                icon: (
+                  <StarFilled
+                    size={20}
+                    hoverMorph={false}
+                    color={isPremiumSelected ? '#ffffff' : '#000000'}
+                    activeColor={isPremiumSelected ? '#ffffff' : '#000000'}
+                    hoverColor={isPremiumSelected ? '#ffffff' : '#000000'}
                   />
                 ),
               },
@@ -251,5 +267,10 @@ export default function DashboardLayout({
     </Layout>
   );
 
-  return <SearchProvider>{layout}</SearchProvider>;
+  return (
+    <SearchProvider>
+      {layout}
+      <UpgradeModal />
+    </SearchProvider>
+  );
 }

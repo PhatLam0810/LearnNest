@@ -12,6 +12,7 @@ import {
   Input,
   Card,
   Segmented,
+  InputNumber,
 } from 'antd';
 import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
@@ -26,6 +27,10 @@ import UserBulkActions from '~mdAdmin/components/UserBulkActions';
 import StudentProfileDrawer from '~mdAdmin/components/StudentProfileDrawer';
 import { messageApi } from '@hooks';
 import { downloadBlob } from '~mdAdmin/components/submissionShared';
+import {
+  useGrantPremiumMutation,
+  useRevokePremiumMutation,
+} from '@/modules/premium/redux/RTKQuery';
 
 const TrafficChart = dynamic(() => import('./components/TrafficChart'), {
   ssr: false,
@@ -56,6 +61,10 @@ const UserManage = () => {
   const [infoUser, setInfoUser] = useState<UserItem>(null);
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
   const [deleteAccount] = authQuery.useDeleteAccountMutation();
+  const [grantPremium, { isLoading: isGranting }] = useGrantPremiumMutation();
+  const [revokePremium] = useRevokePremiumMutation();
+  const [grantUser, setGrantUser] = useState<UserItem>(null);
+  const [grantDays, setGrantDays] = useState(30);
   const { Search } = Input;
   const [createUser, { isLoading: isLoadingCreateUser }] =
     adminQuery.useCreateUserMutation();
@@ -122,6 +131,27 @@ const UserManage = () => {
       setListItem(prev => prev.filter(u => u._id !== _id));
     } catch (error) {
       messageApi.error('Xóa tài khoản thất bại');
+    }
+  };
+  const isActivePremium = (u: UserItem) =>
+    !!u.premiumExpiresAt && dayjs(u.premiumExpiresAt).isAfter(dayjs());
+  const handleGrantPremium = async () => {
+    try {
+      await grantPremium({ userId: grantUser._id, days: grantDays }).unwrap();
+      messageApi.success('Đã cấp Premium');
+      setGrantUser(null);
+      refresh();
+    } catch (error) {
+      messageApi.error(error?.data?.message || 'Cấp Premium thất bại');
+    }
+  };
+  const handleRevokePremium = async (userId: string) => {
+    try {
+      await revokePremium({ userId }).unwrap();
+      messageApi.success('Đã thu hồi Premium');
+      refresh();
+    } catch (error) {
+      messageApi.error(error?.data?.message || 'Thu hồi thất bại');
     }
   };
   const handleCreateUser = async (value: any) => {
@@ -194,6 +224,16 @@ const UserManage = () => {
       key: 'phoneNumber',
     },
     {
+      title: 'Premium',
+      key: 'premium',
+      render: (record: UserItem) =>
+        isActivePremium(record) ? (
+          <Text>đến {dayjs(record.premiumExpiresAt).format('DD/MM/YYYY')}</Text>
+        ) : (
+          <Text>Miễn phí</Text>
+        ),
+    },
+    {
       title: 'Ngày tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
@@ -208,6 +248,12 @@ const UserManage = () => {
           <Button onClick={() => setProfileUserId(record._id)}>
             Hồ sơ học tập
           </Button>
+          <Button onClick={() => setGrantUser(record)}>Cấp Premium</Button>
+          {isActivePremium(record) && (
+            <Button onClick={() => handleRevokePremium(record._id)}>
+              Thu hồi Premium
+            </Button>
+          )}
           <Button
             danger
             onClick={() => {
@@ -388,6 +434,29 @@ const UserManage = () => {
             <Input />
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="Cấp Premium"
+        open={!!grantUser}
+        onCancel={() => setGrantUser(null)}
+        okText="Cấp Premium"
+        cancelText="Hủy"
+        confirmLoading={isGranting}
+        onOk={handleGrantPremium}>
+        <p>
+          Cấp cho <b>{grantUser?.fullName || grantUser?.email}</b>. Số ngày sẽ
+          được cộng dồn vào hạn Premium hiện có (nếu còn).
+        </p>
+        <label htmlFor="grant-days">Số ngày (1-3650)</label>
+        <InputNumber
+          id="grant-days"
+          size="large"
+          min={1}
+          max={3650}
+          style={{ width: '100%', marginTop: 8 }}
+          value={grantDays}
+          onChange={v => setGrantDays(v ?? 30)}
+        />
       </Modal>
       <Modal
         title="Xác nhận xóa tài khoản"

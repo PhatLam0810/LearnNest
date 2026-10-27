@@ -1,85 +1,112 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { Text, View } from 'react-native-web';
-import styles from './styles';
-import { Input, Table, TableProps } from 'antd';
-import { useAppPagination } from '@hooks';
-import { TransactionItem } from '~mdDashboard/redux/saga/type';
+import { Table, TableProps } from 'antd';
 import dayjs from 'dayjs';
-import { useAppDispatch, useAppSelector } from '@redux';
-import AppModalSuccess from '@components/AppModalSuccess';
-import { authAction, authQuery } from '~mdAuth/redux';
+import { useRouter } from 'next/navigation';
+import AppButton from '@components/AppButton';
+import { useGetMyPremiumOrdersQuery } from '@/modules/premium/redux/RTKQuery';
+import { PremiumOrder } from '@/modules/premium/redux/types';
+import styles from './styles';
 
+const PLAN_LABEL: Record<string, string> = {
+  month: 'Premium 1 tháng',
+  year: 'Premium 1 năm',
+  admin: 'Premium do quản trị cấp',
+};
+const METHOD_LABEL: Record<PremiumOrder['method'], string> = {
+  bank: 'Chuyển khoản QR',
+  vnpay: 'VNPay (cũ)',
+  code: 'Mã kích hoạt',
+  admin: 'Quản trị cấp',
+};
+const STATUS: Record<
+  PremiumOrder['status'],
+  { label: string; color: string; bg: string }
+> = {
+  paid: {
+    label: 'Thành công',
+    color: 'var(--color-success)',
+    bg: 'var(--color-success-bg)',
+  },
+  pending: {
+    label: 'Chờ thanh toán',
+    color: 'var(--color-warning)',
+    bg: 'var(--color-warning-bg)',
+  },
+  failed: {
+    label: 'Thất bại',
+    color: 'var(--color-error)',
+    bg: 'var(--color-error-bg)',
+  },
+};
+
+// Lịch sử đơn mua gói Premium (thay cho lịch sử mua từng bài bằng ETH cũ).
 const TransactionHistory = () => {
-  const divRef = useRef(null);
-  const dispatch = useAppDispatch();
-  const [height, setHeight] = useState(0);
-  const { userProfile } =
-    useAppSelector(state => state.authReducer.tokenInfo) || {};
-  const [getTransactions, { data, error, isSuccess }] =
-    authQuery.useGetTransactionDetailMutation();
-  const [isVisibleModalOverview, setIsVisibleModalModalOverview] =
-    useState(false);
-  const { listItem, currentData, fetchData, refresh, search } =
-    useAppPagination<TransactionItem>({
-      apiUrl: '/transaction/getAllTransaction',
-      params: {
-        userId: userProfile?._id,
-      },
-    });
-  const columns: TableProps<TransactionItem>['columns'] = [
+  const router = useRouter();
+  const { data, isLoading, isError, refetch } = useGetMyPremiumOrdersQuery();
+
+  const columns: TableProps<PremiumOrder>['columns'] = [
     {
-      title: 'Transaction ID',
-      dataIndex: 'transactionId',
-      key: 'transactionId',
-      render: (_, record) => (
+      title: 'Mã đơn',
+      key: 'txnRef',
+      render: (_, r) => (
         <Text style={styles.subTitle} numberOfLines={1}>
-          {record.paymentId.slice(0, 20)}...
+          {r.txnRef}
         </Text>
       ),
     },
     {
-      title: 'Lesson Name',
-      key: 'title',
-      render: (_, record) => (
-        <Text style={styles.subTitle}> {record.title} </Text>
+      title: 'Gói',
+      key: 'plan',
+      render: (_, r) => (
+        <Text style={styles.subTitle}>{PLAN_LABEL[r.plan] || r.plan}</Text>
       ),
     },
     {
-      title: 'Amount',
-      dataIndex: 'Amount',
-      key: 'Amount',
-      render: (_, record) => {
-        return (
-          <View style={{ display: 'flex', gap: 8 }}>
-            <Text style={[styles.subTitle, { color: '#f95f5b' }]}>
-              - {record?.amount} {record.currency}
-            </Text>
-          </View>
-        );
-      },
-    },
-    {
-      title: 'Date created',
-      key: 'Date created',
-      render: (_, record) => (
+      title: 'Số tiền',
+      key: 'amount',
+      align: 'right',
+      render: (_, r) => (
         <Text style={styles.subTitle}>
-          {dayjs(record.createdAt).format('HH:MM DD/MM/YYYY')}
+          {r.amount ? `${r.amount.toLocaleString('vi-VN')} ₫` : 'Miễn phí'}
         </Text>
       ),
     },
     {
-      title: 'Status',
+      title: 'Hình thức',
+      key: 'method',
+      render: (_, r) => (
+        <Text style={styles.subTitle}>{METHOD_LABEL[r.method]}</Text>
+      ),
+    },
+    {
+      title: 'Ngày tạo',
+      key: 'createdAt',
+      render: (_, r) => (
+        <Text style={styles.subTitle}>
+          {dayjs(r.createdAt).format('HH:mm DD/MM/YYYY')}
+        </Text>
+      ),
+    },
+    {
+      title: 'Hạn đến',
+      key: 'premiumUntil',
+      render: (_, r) => (
+        <Text style={styles.subTitle}>
+          {r.premiumUntil ? dayjs(r.premiumUntil).format('DD/MM/YYYY') : '-'}
+        </Text>
+      ),
+    },
+    {
+      title: 'Trạng thái',
       key: 'status',
-      render: (_, record) => {
-        const isSuccess = record?.status === 'success';
-        const backgroundColor = isSuccess ? '#6BC49729' : '#EB6F7029';
-        const color = isSuccess ? '#47B881' : '#f95f5b';
+      render: (_, r) => {
+        const s = STATUS[r.status];
         return (
-          <View style={[styles.status, { backgroundColor: backgroundColor }]}>
-            <Text
-              style={[styles.subTitle, { color: color, textAlign: 'center' }]}>
-              {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+          <View style={[styles.status, { backgroundColor: s.bg }]}>
+            <Text style={[styles.statusText, { color: s.color }]}>
+              {s.label}
             </Text>
           </View>
         );
@@ -87,62 +114,41 @@ const TransactionHistory = () => {
     },
   ];
 
-  useEffect(() => {
-    if (divRef.current) {
-      setHeight(divRef.current.offsetHeight * 3);
-    }
-  }, []);
+  if (isError) {
+    return (
+      <View style={styles.errorPanel}>
+        <Text style={styles.subTitle}>Không tải được lịch sử đơn Premium.</Text>
+        <AppButton onClick={() => refetch()}>Thử lại</AppButton>
+      </View>
+    );
+  }
 
-  const { Search } = Input;
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <Search
-          placeholder="Tìm kiếm"
-          onSearch={search}
-          style={{ width: '50%' }}
-        />
-      </View>
-      <View ref={divRef} style={{ flex: 1 }}>
-        <Table
-          rowKey="_id"
-          scroll={{ y: height - 100 }}
-          columns={columns}
-          dataSource={listItem}
-          onChange={res => {
-            fetchData({ pageNum: res.current, replace: true });
-          }}
-          pagination={{
-            current: currentData?.pageNum,
-            pageSize: currentData?.pageSize,
-            total: currentData?.totalRecords,
-            showSizeChanger: false,
-          }}
-          style={{ cursor: 'pointer' }}
-          onRow={record => {
-            return {
-              onClick: async () => {
-                dispatch(authAction.setIsShowLoading(true));
-                const res = await getTransactions({ id: record.paymentId });
-                if (res) {
-                  setIsVisibleModalModalOverview(true);
-                  dispatch(authAction.setIsShowLoading(false));
-                  dispatch(authAction.lessonPurchaseData(res.data.data));
-                }
-              },
-            };
-          }}
-        />
-      </View>
-      <AppModalSuccess
-        isVisibleModalSuccess={isVisibleModalOverview}
-        setIsVisibleModalSuccess={setIsVisibleModalModalOverview}
-        isDetail={false}
+      <Text role="heading" aria-level={2} style={styles.title}>
+        Lịch sử đơn Premium
+      </Text>
+      <Table
+        rowKey="_id"
+        loading={isLoading}
+        columns={columns}
+        dataSource={data}
+        scroll={{ x: 'max-content' }}
+        pagination={{ pageSize: 10, showSizeChanger: false }}
+        locale={{
+          emptyText: (
+            <View style={styles.empty}>
+              <Text style={styles.emptyText}>
+                Bạn chưa có đơn mua Premium nào.
+              </Text>
+              <AppButton
+                type="primary"
+                onClick={() => router.push('/dashboard/premium')}>
+                Xem các gói Premium
+              </AppButton>
+            </View>
+          ),
+        }}
       />
     </View>
   );

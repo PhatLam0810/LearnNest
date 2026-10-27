@@ -7,6 +7,11 @@ import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@redux';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { RecentTestResult } from '~mdDashboard/redux/RTKQuery/types';
+import { downloadBlob } from '~mdAdmin/components/submissionShared';
+import { messageApi } from '@hooks';
+import AppButton from '@components/AppButton';
+import { usePremium } from '@/modules/premium/usePremium';
+import { useExportMyProgressMutation } from '@/modules/premium/redux/RTKQuery';
 import styles from './styles';
 
 const scoreStyle = (score: number) => {
@@ -28,6 +33,24 @@ const ResultsPage: React.FC = () => {
     userId || '',
     { skip: !userId },
   );
+
+  const { isPremium, openUpgrade } = usePremium();
+  const [exportProgress, { isLoading: exporting }] =
+    useExportMyProgressMutation();
+  const handleExport = async () => {
+    if (!isPremium) {
+      openUpgrade('Xuất báo cáo tiến độ dành cho thành viên Premium.');
+      return;
+    }
+    try {
+      downloadBlob(
+        await exportProgress({ userId: userId || '' }).unwrap(),
+        'tien-do-hoc-tap.xlsx',
+      );
+    } catch {
+      messageApi.error('Xuất Excel thất bại, thử lại sau');
+    }
+  };
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -109,6 +132,9 @@ const ResultsPage: React.FC = () => {
       <Text style={styles.title}>Toàn Bộ Lịch Sử Kiểm Tra</Text>
 
       <View style={styles.filterRow}>
+        <AppButton loading={exporting} onClick={handleExport}>
+          {isPremium ? 'Xuất Excel' : 'Xuất Excel (Premium)'}
+        </AppButton>
         <Select
           allowClear
           placeholder="Loại bài"

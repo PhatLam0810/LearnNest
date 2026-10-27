@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { premiumAction } from '@/modules/premium/redux/slice';
 
 const baseQueryFetch = fetchBaseQuery({
   baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
@@ -15,6 +16,13 @@ const baseQueryFetch = fetchBaseQuery({
 
 const baseQueryWithReauth = async (args, api, extraOptions) => {
   const result = await baseQueryFetch(args, api, extraOptions);
+  // Một chỗ chung: BE từ chối tính năng Premium (hết lượt AI, đề/bài khóa,
+  // khóa học Premium) -> mở modal nâng cấp. FE không tự quyết quyền.
+  const err = result.error;
+  const body = err?.data as { code?: string; message?: string } | undefined;
+  if (err?.status === 403 && body?.code === 'PREMIUM_REQUIRED') {
+    api.dispatch(premiumAction.openUpgradeModal(body.message));
+  }
   return result;
 };
 
@@ -52,6 +60,10 @@ export const baseQuery = createApi({
     'Class',
     // Hộp thư hỏi đáp: số liệu (chờ trả lời / quá hạn / thời gian trả lời).
     'QuestionStats',
+    // Trạng thái/đơn Premium của người dùng; mã kích hoạt (admin).
+    'Premium',
+    'ActivationCode',
+    'AdminOrders',
   ],
   endpoints: () => ({}),
 });
