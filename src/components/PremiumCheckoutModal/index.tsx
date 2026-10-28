@@ -50,6 +50,9 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
+  // Dùng chung 1 ô lỗi cho cả 2 field dễ hiện nhầm (vd lỗi OTP lại tô đỏ ô
+  // tên) - tách riêng field nào đang lỗi để tô đúng chỗ.
+  const [errorField, setErrorField] = useState<'name' | 'otp' | ''>('');
   const [order, setOrder] = useState<BankOrder | null>(null);
   const [now, setNow] = useState(Date.now());
   const [paid, setPaid] = useState(false);
@@ -60,6 +63,7 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
       setOtp('');
       setOtpSent(false);
       setError('');
+      setErrorField('');
       setOrder(null);
       setPaid(false);
     }
@@ -103,13 +107,16 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
     if (!plan) return;
     if (!name.trim()) {
       setError('Vui lòng nhập họ tên người thanh toán');
+      setErrorField('name');
       return;
     }
     if (!otp.trim()) {
       setError('Vui lòng nhập mã OTP đã gửi về email');
+      setErrorField('otp');
       return;
     }
     setError('');
+    setErrorField('');
     try {
       setOrder(
         await createOrder({
@@ -123,6 +130,7 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
         (e as { data?: { message?: string } })?.data?.message ||
         'Không tạo được đơn, thử lại sau';
       setError(msg);
+      setErrorField('name'); // lỗi chung của cả đơn, hiện ở đầu form
       // Lỗi "đang có đơn pending" dễ bị bỏ sót nếu chỉ hiện chữ nhỏ dưới ô
       // tên - nhắc rõ bằng toast để người dùng biết qua trang Lịch sử hủy.
       if (msg.includes('Lịch sử giao dịch')) {
@@ -176,11 +184,13 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
                 size="large"
                 value={name}
                 maxLength={100}
-                status={error ? 'error' : undefined}
+                status={errorField === 'name' ? 'error' : undefined}
                 onChange={e => setName(e.target.value)}
-                aria-invalid={!!error}
+                aria-invalid={errorField === 'name'}
               />
-              {!!error && <Text style={styles.error}>{error}</Text>}
+              {errorField === 'name' && (
+                <Text style={styles.error}>{error}</Text>
+              )}
             </View>
             <View style={styles.field}>
               <Text nativeID="checkout-otp-label" style={styles.label}>
@@ -194,6 +204,8 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
                   maxLength={6}
                   inputMode="numeric"
                   disabled={!otpSent}
+                  status={errorField === 'otp' ? 'error' : undefined}
+                  aria-invalid={errorField === 'otp'}
                   placeholder={otpSent ? 'Nhập mã 6 số' : 'Bấm Gửi OTP trước'}
                   onChange={e => setOtp(e.target.value)}
                 />
@@ -205,6 +217,9 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
                   {otpSent ? 'Gửi lại OTP' : 'Gửi OTP'}
                 </AppButton>
               </View>
+              {errorField === 'otp' && (
+                <Text style={styles.error}>{error}</Text>
+              )}
             </View>
             <Text style={styles.note}>
               Thanh toán một lần bằng chuyển khoản QR. LearnNest không lưu thẻ

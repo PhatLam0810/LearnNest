@@ -337,7 +337,7 @@ test.describe('Trang /dashboard/premium', () => {
     await expect(page.getByText('399.000 ₫').first()).toBeVisible();
     await expect(page.getByText('Tiết kiệm 32%')).toBeVisible();
     await expect(
-      page.getByRole('button', { name: 'Bắt đầu', exact: true }),
+      page.getByRole('button', { name: 'Mua gói', exact: true }),
     ).toHaveCount(2);
   });
 
@@ -380,7 +380,7 @@ test.describe('Trang /dashboard/premium', () => {
     await expect(used).toHaveCount(2);
     await expect(used.first()).toBeDisabled();
     await expect(
-      page.getByRole('button', { name: 'Bắt đầu', exact: true }),
+      page.getByRole('button', { name: 'Mua gói', exact: true }),
     ).toHaveCount(0);
     await expect(page.getByLabel('Mã kích hoạt')).toBeDisabled();
     await expect(
@@ -464,7 +464,7 @@ test.describe('Trang /dashboard/premium', () => {
     const calls = await open(page, { orderSeq: ['pending'] });
     await page.goto('/dashboard/premium');
     await page
-      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .getByRole('button', { name: 'Mua gói', exact: true })
       .nth(1)
       .click();
     const dialog = page.getByRole('dialog');
@@ -503,7 +503,7 @@ test.describe('Trang /dashboard/premium', () => {
     const calls = await open(page);
     await page.goto('/dashboard/premium');
     await page
-      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .getByRole('button', { name: 'Mua gói', exact: true })
       .first()
       .click();
     const dialog = page.getByRole('dialog');
@@ -526,7 +526,7 @@ test.describe('Trang /dashboard/premium', () => {
     });
     await page.goto('/dashboard/premium');
     await page
-      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .getByRole('button', { name: 'Mua gói', exact: true })
       .first()
       .click();
     const dialog = page.getByRole('dialog');
@@ -542,7 +542,7 @@ test.describe('Trang /dashboard/premium', () => {
     const calls = await open(page);
     await page.goto('/dashboard/premium');
     await page
-      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .getByRole('button', { name: 'Mua gói', exact: true })
       .first()
       .click();
     await page.getByRole('dialog').getByRole('button', { name: 'Hủy' }).click();
@@ -558,7 +558,7 @@ test.describe('Trang /dashboard/premium', () => {
     const calls = await open(page);
     await page.goto('/dashboard/premium');
     await page
-      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .getByRole('button', { name: 'Mua gói', exact: true })
       .first()
       .click();
     const dialog = page.getByRole('dialog');
@@ -580,7 +580,7 @@ test.describe('Trang /dashboard/premium', () => {
     });
     await page.goto('/dashboard/premium');
     await page
-      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .getByRole('button', { name: 'Mua gói', exact: true })
       .first()
       .click();
     const dialog = page.getByRole('dialog');
@@ -600,7 +600,7 @@ test.describe('Trang /dashboard/premium', () => {
     });
     await page.goto('/dashboard/premium');
     await page
-      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .getByRole('button', { name: 'Mua gói', exact: true })
       .first()
       .click();
     await fillOtp(page.getByRole('dialog'));
@@ -644,7 +644,7 @@ test.describe('Trang /dashboard/premium', () => {
     const calls = await open(page, { orderSeq: ['pending'] });
     await page.goto('/dashboard/premium');
     await page
-      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .getByRole('button', { name: 'Mua gói', exact: true })
       .first()
       .click();
     await fillOtp(page.getByRole('dialog'));

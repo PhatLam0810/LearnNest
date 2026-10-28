@@ -123,7 +123,7 @@ const PremiumContent: React.FC = () => {
     ? 'Mua lại'
     : info.active
       ? 'Gia hạn'
-      : 'Bắt đầu';
+      : 'Mua gói';
   const locked = info.active && !info.expiringSoon;
 
   return (

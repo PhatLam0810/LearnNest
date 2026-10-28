@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     color: 'var(--color-text-primary)',
   },
   priceDiscounted: {
-    color: 'var(--color-error)',
+    color: 'var(--color-success)',
   },
   priceUnit: {
     ...typography.body2,
