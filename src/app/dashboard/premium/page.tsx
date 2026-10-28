@@ -239,7 +239,18 @@ const PremiumContent: React.FC = () => {
                 </Text>
                 <View>
                   <View style={styles.priceRow}>
-                    <Text style={styles.price}>{formatVnd(plan.amount)}</Text>
+                    {featured && monthly && (
+                      <Text style={styles.priceOriginal}>
+                        {formatVnd(monthly.amount * 12)}
+                      </Text>
+                    )}
+                    <Text
+                      style={[
+                        styles.price,
+                        featured && styles.priceDiscounted,
+                      ]}>
+                      {formatVnd(plan.amount)}
+                    </Text>
                     <Text style={styles.priceUnit}>
                       /{featured ? 'năm' : 'tháng'}
                     </Text>

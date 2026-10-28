@@ -173,11 +173,21 @@ const styles = StyleSheet.create({
     color: 'var(--color-text-body)',
   },
   priceRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+  priceOriginal: {
+    ...typography.body2,
+    lineHeight: 20,
+    paddingBottom: 6,
+    color: 'var(--color-text-muted)',
+    textDecorationLine: 'line-through',
+  },
   price: {
     ...typography.titleM,
     fontSize: 32,
     lineHeight: 40,
     color: 'var(--color-text-primary)',
+  },
+  priceDiscounted: {
+    color: 'var(--color-error)',
   },
   priceUnit: {
     ...typography.body2,
