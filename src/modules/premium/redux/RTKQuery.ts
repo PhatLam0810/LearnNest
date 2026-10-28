@@ -30,10 +30,22 @@ export const premiumQuery = baseQuery.injectEndpoints({
     }),
     createBankOrder: builder.mutation<
       BankOrder,
-      { plan: PremiumPlanKey; fullName?: string }
+      { plan: PremiumPlanKey; fullName?: string; otp: string }
     >({
       query: body => ({ url: '/premium/orders', method: 'POST', body }),
       transformResponse: unwrap<BankOrder>,
+    }),
+    // Xác nhận mua: gửi OTP về email trước khi tạo đơn (chặn người khác bấm
+    // mua hộ). Dùng chung endpoint /otp/sendTransaction như lúc đăng ký.
+    sendPurchaseOtp: builder.mutation<void, { email: string }>({
+      query: body => ({ url: '/otp/sendTransaction', method: 'POST', body }),
+    }),
+    cancelBankOrder: builder.mutation<void, { txnRef: string }>({
+      query: ({ txnRef }) => ({
+        url: `/premium/orders/${encodeURIComponent(txnRef)}/cancel`,
+        method: 'POST',
+      }),
+      invalidatesTags: ['Premium'],
     }),
     // Trang thanh toán hỏi mỗi 3 giây tới khi đơn không còn 'pending'.
     getPremiumOrder: builder.query<PremiumOrder, string>({
@@ -113,6 +125,8 @@ export const {
   useGetPremiumPlansQuery,
   useGetMyPremiumOrdersQuery,
   useCreateBankOrderMutation,
+  useSendPurchaseOtpMutation,
+  useCancelBankOrderMutation,
   useGetPendingOrdersQuery,
   useConfirmOrderMutation,
   useGetPremiumOrderQuery,

@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Locator, Page } from '@playwright/test';
 
 // Test giao diện Premium với API GIẢ (không cần BE/tài khoản thật), nên chạy
 // được ở mọi máy. Phải chạy trên bản `next start` thật với
@@ -58,6 +58,18 @@ ORDERS.push({
   status: 'paid',
   createdAt: iso(-1),
   premiumUntil: iso(29),
+} as never);
+// Đơn chuyển khoản chưa thanh toán - để test mục "Đơn chờ thanh toán" + Hủy
+// ở trang Lịch sử giao dịch.
+ORDERS.push({
+  _id: 'o5',
+  plan: 'month',
+  days: 30,
+  amount: 49000,
+  method: 'bank',
+  txnRef: 'LNPENDWAIT',
+  status: 'pending',
+  createdAt: iso(0),
 } as never);
 const ADMIN_PENDING = [
   {
@@ -185,6 +197,8 @@ const open = async (
           )
         : json({ skipped: false });
     }
+    if (url.endsWith('/otp/sendTransaction'))
+      return json({ success: true, message: 'ok' });
     if (url.endsWith('/premium/status')) return json(wrap(status));
     if (url.endsWith('/premium/plans')) return json(wrap(PLANS));
     if (url.endsWith('/premium/orders/mine')) return json(wrap(ORDERS));
@@ -237,6 +251,8 @@ const open = async (
         }),
       );
     }
+    if (url.includes('/premium/orders/') && url.endsWith('/cancel'))
+      return json({ status: 200, message: 'ok' });
     if (url.endsWith('/premium/admin/orders/pending'))
       return json(wrap(ADMIN_PENDING));
     if (url.includes('/premium/admin/orders/') && url.endsWith('/confirm'))
@@ -290,6 +306,13 @@ const open = async (
     return json(wrap([]));
   });
   return calls;
+};
+
+// Gửi + điền OTP trước khi bấm "Tạo mã QR thanh toán" (BE giả luôn thành
+// công ở /otp/sendTransaction, giá trị mã không quan trọng).
+const fillOtp = async (dialog: Locator) => {
+  await dialog.getByRole('button', { name: 'Gửi OTP' }).click();
+  await dialog.getByLabel(/Mã OTP xác nhận mua/).fill('123456');
 };
 
 const noOverflow = async (page: Page) => {
@@ -384,6 +407,7 @@ test.describe('Trang /dashboard/premium', () => {
     await renew.nth(1).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog.getByText('Xác nhận đơn Premium')).toBeVisible();
+    await fillOtp(dialog);
     await dialog.getByRole('button', { name: 'Tạo mã QR thanh toán' }).click();
     await expect(dialog.getByText('Quét mã để thanh toán')).toBeVisible();
     const create = calls.find(
@@ -451,6 +475,7 @@ test.describe('Trang /dashboard/premium', () => {
       'Hoc Vien Test',
     );
     await dialog.getByLabel('Họ tên người thanh toán').fill('Nguyễn Văn A');
+    await fillOtp(dialog);
     await dialog.getByRole('button', { name: 'Tạo mã QR thanh toán' }).click();
 
     await expect(dialog.getByText('Quét mã để thanh toán')).toBeVisible();
@@ -460,12 +485,9 @@ test.describe('Trang /dashboard/premium', () => {
     await expect(dialog.getByText('MB Bank')).toBeVisible();
     await expect(dialog.getByText('LAM TAN PHAT')).toBeVisible();
     await expect(dialog.getByText('399.000 ₫')).toBeVisible();
-    await expect(
-      dialog.getByRole('button', { name: /19031234567890/ }),
-    ).toBeVisible();
-    await expect(
-      dialog.getByRole('button', { name: /LNTEST2345/ }),
-    ).toBeVisible();
+    await expect(dialog.getByText('19031234567890')).toBeVisible();
+    await expect(dialog.getByText('LNTEST2345')).toBeVisible();
+    await expect(dialog.getByRole('button', { name: /Chép/ })).toHaveCount(0); // đã bỏ nút Chép, chỉ còn text
     await expect(dialog.getByText(/Đang chờ nhận tiền/)).toBeVisible();
     const create = calls.find(
       c => c.url.endsWith('/premium/orders') && c.method === 'POST',
@@ -473,6 +495,7 @@ test.describe('Trang /dashboard/premium', () => {
     expect(JSON.parse(create!.body)).toEqual({
       plan: 'year',
       fullName: 'Nguyễn Văn A',
+      otp: '123456',
     });
   });
 
@@ -507,9 +530,12 @@ test.describe('Trang /dashboard/premium', () => {
       .first()
       .click();
     const dialog = page.getByRole('dialog');
+    await fillOtp(dialog);
     await dialog.getByRole('button', { name: 'Tạo mã QR thanh toán' }).click();
     await expect(dialog.getByText(/Có thể gia hạn từ/)).toBeVisible();
-    await expect(dialog.getByRole('img')).toHaveCount(0);
+    await expect(
+      dialog.getByRole('img', { name: /Mã QR chuyển khoản/ }),
+    ).toHaveCount(0);
   });
 
   test('7d. bấm Hủy đóng form, không gọi API', async ({ page }) => {
@@ -526,6 +552,46 @@ test.describe('Trang /dashboard/premium', () => {
     ).toBe(false);
   });
 
+  test('7e. chưa nhập OTP: chặn tại chỗ, không gọi API tạo đơn', async ({
+    page,
+  }) => {
+    const calls = await open(page);
+    await page.goto('/dashboard/premium');
+    await page
+      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .first()
+      .click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('button', { name: 'Tạo mã QR thanh toán' }).click();
+    await expect(
+      dialog.getByText('Vui lòng nhập mã OTP đã gửi về email'),
+    ).toBeVisible();
+    expect(
+      calls.some(c => c.url.endsWith('/premium/orders') && c.method === 'POST'),
+    ).toBe(false);
+  });
+
+  test('7f. đang có đơn chưa thanh toán: BE chặn, hiện lỗi hướng dẫn qua Lịch sử giao dịch', async ({
+    page,
+  }) => {
+    await open(page, {
+      createError:
+        'Bạn đang có 1 đơn chuyển khoản chưa thanh toán. Vào trang Lịch sử giao dịch (Hồ sơ) để hủy đơn đó, hoặc đợi hết hạn (5 phút) rồi thử lại.',
+    });
+    await page.goto('/dashboard/premium');
+    await page
+      .getByRole('button', { name: 'Bắt đầu', exact: true })
+      .first()
+      .click();
+    const dialog = page.getByRole('dialog');
+    await fillOtp(dialog);
+    await dialog.getByRole('button', { name: 'Tạo mã QR thanh toán' }).click();
+    await expect(dialog.getByText(/Lịch sử giao dịch/)).toBeVisible();
+    await expect(
+      dialog.getByRole('img', { name: /Mã QR chuyển khoản/ }),
+    ).toHaveCount(0);
+  });
+
   test('8. real time: đang chờ -> tiền về (hỏi 3 giây/lần) -> modal kích hoạt thành công, dừng hỏi', async ({
     page,
   }) => {
@@ -537,6 +603,7 @@ test.describe('Trang /dashboard/premium', () => {
       .getByRole('button', { name: 'Bắt đầu', exact: true })
       .first()
       .click();
+    await fillOtp(page.getByRole('dialog'));
     await page
       .getByRole('dialog')
       .getByRole('button', { name: 'Tạo mã QR thanh toán' })
@@ -580,6 +647,7 @@ test.describe('Trang /dashboard/premium', () => {
       .getByRole('button', { name: 'Bắt đầu', exact: true })
       .first()
       .click();
+    await fillOtp(page.getByRole('dialog'));
     await page
       .getByRole('dialog')
       .getByRole('button', { name: 'Tạo mã QR thanh toán' })
@@ -676,6 +744,23 @@ test.describe('Huy hiệu header, hồ sơ, khóa/modal', () => {
       page.getByText('Miễn phí', { exact: true }).first(),
     ).toBeVisible();
     await expect(page.getByText('Thất bại')).toBeVisible();
+  });
+
+  test('14b. hồ sơ: đơn chuyển khoản chờ thanh toán hiện ở mục riêng, bấm Hủy gọi đúng API', async ({
+    page,
+  }) => {
+    const calls = await open(page);
+    await page.goto('/dashboard/profile');
+    await expect(page.getByText('Đơn chờ thanh toán')).toBeVisible();
+    await expect(page.getByText(/LNPENDWAIT/).first()).toBeVisible();
+    await page.getByRole('button', { name: 'Hủy đơn' }).click();
+    await expect(
+      page.getByText('Đã hủy đơn, bạn có thể mua lại ngay'),
+    ).toBeVisible();
+    const cancel = calls.find(c =>
+      c.url.endsWith('/premium/orders/LNPENDWAIT/cancel'),
+    );
+    expect(cancel).toBeTruthy();
   });
 
   test('15. luyện tập: đề khóa có nhãn Premium; bấm mở modal nâng cấp với đủ quyền lợi', async ({

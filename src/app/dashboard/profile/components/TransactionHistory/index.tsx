@@ -5,9 +5,17 @@ import { Table, TableProps } from 'antd';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import AppButton from '@components/AppButton';
-import { useGetMyPremiumOrdersQuery } from '@/modules/premium/redux/RTKQuery';
+import { messageApi } from '@hooks';
+import {
+  useCancelBankOrderMutation,
+  useGetMyPremiumOrdersQuery,
+} from '@/modules/premium/redux/RTKQuery';
 import { PremiumOrder } from '@/modules/premium/redux/types';
 import styles from './styles';
+
+// Khớp ORDER_PENDING_MINUTES ở BE (premium.constants.ts) - chỉ để hiển thị,
+// BE là nơi quyết định thật.
+const ORDER_PENDING_MINUTES = 5;
 
 const PLAN_LABEL: Record<string, string> = {
   month: 'Premium 1 tháng',
@@ -45,6 +53,23 @@ const STATUS: Record<
 const TransactionHistory = () => {
   const router = useRouter();
   const { data, isLoading, isError, refetch } = useGetMyPremiumOrdersQuery();
+  const [cancelOrder, { isLoading: cancelling }] = useCancelBankOrderMutation();
+
+  const pendingOrders = (data ?? []).filter(
+    o => o.method === 'bank' && o.status === 'pending',
+  );
+
+  const handleCancel = async (txnRef: string) => {
+    try {
+      await cancelOrder({ txnRef }).unwrap();
+      messageApi.success('Đã hủy đơn, bạn có thể mua lại ngay');
+    } catch (e) {
+      messageApi.error(
+        (e as { data?: { message?: string } })?.data?.message ||
+          'Không hủy được đơn, thử lại sau',
+      );
+    }
+  };
 
   const columns: TableProps<PremiumOrder>['columns'] = [
     {
@@ -128,6 +153,40 @@ const TransactionHistory = () => {
       <Text role="heading" aria-level={2} style={styles.title}>
         Lịch sử đơn Premium
       </Text>
+      {pendingOrders.length > 0 && (
+        <View style={styles.pendingSection}>
+          <Text role="heading" aria-level={3} style={styles.pendingTitle}>
+            Đơn chờ thanh toán
+          </Text>
+          {pendingOrders.map(o => {
+            const expired =
+              Date.now() - new Date(o.createdAt).getTime() >
+              ORDER_PENDING_MINUTES * 60 * 1000;
+            return (
+              <View key={o._id} style={styles.pendingRow}>
+                <View style={styles.pendingInfo}>
+                  <Text style={styles.subTitle}>
+                    {PLAN_LABEL[o.plan] || o.plan} ·{' '}
+                    {o.amount.toLocaleString('vi-VN')} ₫ · {o.txnRef}
+                  </Text>
+                  <Text style={styles.emptyText}>
+                    {expired
+                      ? 'Đã quá 5 phút - có thể mua đơn mới, hoặc hủy đơn này.'
+                      : 'Đang chờ chuyển khoản. Muốn mua đơn khác thì hủy đơn này trước.'}
+                  </Text>
+                </View>
+                <AppButton
+                  size="small"
+                  danger
+                  loading={cancelling}
+                  onClick={() => handleCancel(o.txnRef)}>
+                  Hủy đơn
+                </AppButton>
+              </View>
+            );
+          })}
+        </View>
+      )}
       <Table
         rowKey="_id"
         loading={isLoading}

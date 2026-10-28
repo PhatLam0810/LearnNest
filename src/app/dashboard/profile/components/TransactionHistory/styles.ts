@@ -73,6 +73,27 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
   },
+  pendingSection: {
+    gap: 12,
+    padding: 16,
+    backgroundColor: 'var(--color-warning-bg)',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  pendingTitle: {
+    ...typography.subTitle1,
+    color: 'var(--color-text-primary)',
+  },
+  pendingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  pendingInfo: { gap: 2 },
 });
 
 export default styles;

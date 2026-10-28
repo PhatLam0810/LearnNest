@@ -8,6 +8,7 @@ import { useAppSelector } from '@redux';
 import {
   useCreateBankOrderMutation,
   useGetPremiumOrderQuery,
+  useSendPurchaseOtpMutation,
 } from '@/modules/premium/redux/RTKQuery';
 import {
   BankOrder,
@@ -40,8 +41,14 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
   const profileName = useAppSelector(
     state => state.authReducer.tokenInfo?.userProfile?.fullName,
   );
+  const email = useAppSelector(
+    state => state.authReducer.tokenInfo?.userProfile?.email,
+  );
   const [createOrder, { isLoading }] = useCreateBankOrderMutation();
+  const [sendOtp, { isLoading: sendingOtp }] = useSendPurchaseOtpMutation();
   const [name, setName] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState('');
   const [order, setOrder] = useState<BankOrder | null>(null);
   const [now, setNow] = useState(Date.now());
@@ -50,6 +57,8 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
   useEffect(() => {
     if (plan) {
       setName(profileName || '');
+      setOtp('');
+      setOtpSent(false);
       setError('');
       setOrder(null);
       setPaid(false);
@@ -76,31 +85,49 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
     return () => clearInterval(t);
   }, [order]);
 
+  const requestOtp = async () => {
+    if (!email) return;
+    try {
+      await sendOtp({ email }).unwrap();
+      setOtpSent(true);
+      messageApi.success('Đã gửi mã OTP về email của bạn');
+    } catch (e) {
+      messageApi.error(
+        (e as { data?: { message?: string } })?.data?.message ||
+          'Không gửi được OTP, thử lại sau',
+      );
+    }
+  };
+
   const start = async () => {
     if (!plan) return;
     if (!name.trim()) {
       setError('Vui lòng nhập họ tên người thanh toán');
       return;
     }
+    if (!otp.trim()) {
+      setError('Vui lòng nhập mã OTP đã gửi về email');
+      return;
+    }
     setError('');
     try {
       setOrder(
-        await createOrder({ plan: plan.key, fullName: name.trim() }).unwrap(),
+        await createOrder({
+          plan: plan.key,
+          fullName: name.trim(),
+          otp: otp.trim(),
+        }).unwrap(),
       );
     } catch (e) {
-      setError(
+      const msg =
         (e as { data?: { message?: string } })?.data?.message ||
-          'Không tạo được đơn, thử lại sau',
-      );
-    }
-  };
-
-  const copy = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      messageApi.success('Đã sao chép');
-    } catch {
-      messageApi.error('Không sao chép được, hãy chép tay');
+        'Không tạo được đơn, thử lại sau';
+      setError(msg);
+      // Lỗi "đang có đơn pending" dễ bị bỏ sót nếu chỉ hiện chữ nhỏ dưới ô
+      // tên - nhắc rõ bằng toast để người dùng biết qua trang Lịch sử hủy.
+      if (msg.includes('Lịch sử giao dịch')) {
+        messageApi.error(msg, 6);
+      }
     }
   };
 
@@ -155,6 +182,30 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
               />
               {!!error && <Text style={styles.error}>{error}</Text>}
             </View>
+            <View style={styles.field}>
+              <Text nativeID="checkout-otp-label" style={styles.label}>
+                Mã OTP xác nhận mua (gửi về {email || 'email của bạn'})
+              </Text>
+              <View style={styles.row}>
+                <Input
+                  aria-labelledby="checkout-otp-label"
+                  size="large"
+                  value={otp}
+                  maxLength={6}
+                  inputMode="numeric"
+                  disabled={!otpSent}
+                  placeholder={otpSent ? 'Nhập mã 6 số' : 'Bấm Gửi OTP trước'}
+                  onChange={e => setOtp(e.target.value)}
+                />
+                <AppButton
+                  size="small"
+                  style={{ width: 'auto' }}
+                  loading={sendingOtp}
+                  onClick={requestOtp}>
+                  {otpSent ? 'Gửi lại OTP' : 'Gửi OTP'}
+                </AppButton>
+              </View>
+            </View>
             <Text style={styles.note}>
               Thanh toán một lần bằng chuyển khoản QR. LearnNest không lưu thẻ
               của bạn và không tự động gia hạn. Đơn đã thanh toán là chốt, không
@@ -188,12 +239,9 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Số tài khoản</Text>
-                <AppButton
-                  size="small"
-                  style={{ width: 'auto' }}
-                  onClick={() => copy(order.bank.accountNo)}>
-                  {order.bank.accountNo} · Chép
-                </AppButton>
+                <Text selectable style={styles.value}>
+                  {order.bank.accountNo}
+                </Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Chủ tài khoản</Text>
@@ -205,12 +253,9 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
               </View>
               <View style={styles.row}>
                 <Text style={styles.label}>Nội dung (bắt buộc)</Text>
-                <AppButton
-                  size="small"
-                  style={{ width: 'auto' }}
-                  onClick={() => copy(order.transferContent)}>
-                  {order.transferContent} · Chép
-                </AppButton>
+                <Text selectable style={styles.value}>
+                  {order.transferContent}
+                </Text>
               </View>
             </View>
             <View
