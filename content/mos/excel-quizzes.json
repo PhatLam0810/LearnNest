@@ -1,0 +1,299 @@
+[
+  {
+    "title": "Excel 1 - Quản lý sổ làm việc và định dạng ô",
+    "description": "Tạo, lưu, định dạng sổ làm việc, ô, hàng, cột.",
+    "note": "Kịch bản video (8 phút): 1) Giao diện Excel, Workbook/Worksheet. 2) Lưu .xlsx/.csv/PDF. 3) Định dạng ô: Number, Currency, Date. 4) Merge & Center, Wrap Text, Format Painter. 5) Chèn/xóa/ẩn hàng cột, AutoFit. 6) Freeze Panes. Thay link video thật vào trường URL sau khi quay.",
+    "questions": [
+      {
+        "questionText": "Tổ hợp phím nào lưu sổ làm việc dưới tên khác (Save As)?",
+        "answers": [
+          { "text": "F12", "isCorrect": true },
+          { "text": "Ctrl+S", "isCorrect": false },
+          { "text": "Ctrl+P", "isCorrect": false },
+          { "text": "F2", "isCorrect": false }
+        ],
+        "explanation": "F12 mở hộp thoại Save As; Ctrl+S chỉ lưu đè."
+      },
+      {
+        "questionText": "Công cụ nào sao chép định dạng của ô này sang ô khác?",
+        "answers": [
+          { "text": "Format Painter", "isCorrect": true },
+          { "text": "Paste Special - Values", "isCorrect": false },
+          { "text": "Flash Fill", "isCorrect": false },
+          { "text": "Conditional Formatting", "isCorrect": false }
+        ],
+        "explanation": "Format Painter (Home > Clipboard) chỉ chép định dạng, không chép dữ liệu."
+      },
+      {
+        "questionText": "Để cố định hàng tiêu đề khi cuộn xuống, dùng lệnh nào?",
+        "answers": [
+          { "text": "View > Freeze Panes > Freeze Top Row", "isCorrect": true },
+          { "text": "Data > Filter", "isCorrect": false },
+          { "text": "Page Layout > Print Titles", "isCorrect": false },
+          { "text": "Home > Merge & Center", "isCorrect": false }
+        ],
+        "explanation": "Freeze Top Row giữ hàng 1 hiển thị khi cuộn."
+      },
+      {
+        "questionText": "Ô hiển thị ####### nghĩa là gì?",
+        "answers": [
+          { "text": "Cột quá hẹp để hiện giá trị", "isCorrect": true },
+          { "text": "Công thức bị lỗi chia cho 0", "isCorrect": false },
+          { "text": "Ô đang bị khóa", "isCorrect": false },
+          { "text": "Dữ liệu là văn bản", "isCorrect": false }
+        ],
+        "explanation": "Mở rộng cột hoặc AutoFit để hiện đủ số."
+      },
+      {
+        "questionText": "Xuống dòng trong cùng một ô bằng phím nào?",
+        "answers": [
+          { "text": "Alt+Enter", "isCorrect": true },
+          { "text": "Ctrl+Enter", "isCorrect": false },
+          { "text": "Shift+Enter", "isCorrect": false },
+          { "text": "Tab", "isCorrect": false }
+        ],
+        "explanation": "Alt+Enter chèn ngắt dòng trong ô."
+      }
+    ]
+  },
+  {
+    "title": "Excel 2 - Công thức và hàm cơ bản",
+    "description": "SUM, AVERAGE, MIN, MAX, COUNT, tham chiếu ô.",
+    "note": "Kịch bản video (10 phút): 1) Công thức bắt đầu bằng dấu =. 2) SUM, AVERAGE, MIN, MAX. 3) COUNT, COUNTA, COUNTBLANK. 4) Tham chiếu tương đối, tuyệt đối ($A$1), hỗn hợp, phím F4. 5) Lỗi thường gặp: #DIV/0!, #REF!, #NAME?. Thay link video thật sau khi quay.",
+    "questions": [
+      {
+        "questionText": "Hàm nào đếm số ô chứa số trong vùng A1:A10?",
+        "answers": [
+          { "text": "COUNT", "isCorrect": true },
+          { "text": "COUNTA", "isCorrect": false },
+          { "text": "SUM", "isCorrect": false },
+          { "text": "LEN", "isCorrect": false }
+        ],
+        "explanation": "COUNT chỉ đếm ô số; COUNTA đếm mọi ô không trống."
+      },
+      {
+        "questionText": "Phím nào đổi nhanh giữa tham chiếu tương đối và tuyệt đối khi nhập công thức?",
+        "answers": [
+          { "text": "F4", "isCorrect": true },
+          { "text": "F2", "isCorrect": false },
+          { "text": "F5", "isCorrect": false },
+          { "text": "F9", "isCorrect": false }
+        ],
+        "explanation": "F4 xoay vòng A1 > $A$1 > A$1 > $A1."
+      },
+      {
+        "questionText": "Lỗi #DIV/0! xuất hiện khi nào?",
+        "answers": [
+          { "text": "Chia cho 0 hoặc ô trống", "isCorrect": true },
+          { "text": "Tên hàm sai", "isCorrect": false },
+          { "text": "Tham chiếu ô đã bị xóa", "isCorrect": false },
+          { "text": "Cột quá hẹp", "isCorrect": false }
+        ],
+        "explanation": "#NAME? là sai tên hàm; #REF! là tham chiếu bị xóa."
+      },
+      {
+        "questionText": "Công thức =SUM(B2:B6)/COUNT(B2:B6) cho kết quả giống hàm nào?",
+        "answers": [
+          { "text": "AVERAGE(B2:B6)", "isCorrect": true },
+          { "text": "MAX(B2:B6)", "isCorrect": false },
+          { "text": "MEDIAN(B2:B6)", "isCorrect": false },
+          { "text": "SUMIF(B2:B6)", "isCorrect": false }
+        ],
+        "explanation": "Tổng chia số lượng là trung bình cộng."
+      },
+      {
+        "questionText": "Sao chép công thức =A1*$B$1 từ C1 xuống C2 sẽ thành?",
+        "answers": [
+          { "text": "=A2*$B$1", "isCorrect": true },
+          { "text": "=A2*$B$2", "isCorrect": false },
+          { "text": "=A1*$B$1", "isCorrect": false },
+          { "text": "=B2*$B$1", "isCorrect": false }
+        ],
+        "explanation": "A1 là tương đối nên đổi thành A2; $B$1 cố định."
+      }
+    ]
+  },
+  {
+    "title": "Excel 3 - Hàm logic và tra cứu",
+    "description": "IF, AND, OR, COUNTIF, SUMIF, VLOOKUP, XLOOKUP.",
+    "note": "Kịch bản video (12 phút): 1) IF, IF lồng nhau. 2) AND/OR trong IF. 3) COUNTIF/SUMIF/AVERAGEIF. 4) VLOOKUP (range_lookup FALSE), XLOOKUP. 5) Bài tập mẫu: xếp loại học lực. Thay link video thật sau khi quay.",
+    "questions": [
+      {
+        "questionText": "=IF(A1>=5,\"Đạt\",\"Rớt\") trả về gì khi A1 = 4?",
+        "answers": [
+          { "text": "Rớt", "isCorrect": true },
+          { "text": "Đạt", "isCorrect": false },
+          { "text": "FALSE", "isCorrect": false },
+          { "text": "#N/A", "isCorrect": false }
+        ],
+        "explanation": "4 < 5 nên điều kiện sai, trả về giá trị thứ ba."
+      },
+      {
+        "questionText": "Đối số cuối của VLOOKUP để tra cứu khớp chính xác là gì?",
+        "answers": [
+          { "text": "FALSE (hoặc 0)", "isCorrect": true },
+          { "text": "TRUE (hoặc 1)", "isCorrect": false },
+          { "text": "-1", "isCorrect": false },
+          { "text": "Bỏ trống", "isCorrect": false }
+        ],
+        "explanation": "Bỏ trống hoặc TRUE là khớp gần đúng, dễ ra sai kết quả."
+      },
+      {
+        "questionText": "Hàm nào tính tổng chỉ các ô thỏa một điều kiện?",
+        "answers": [
+          { "text": "SUMIF", "isCorrect": true },
+          { "text": "COUNTIF", "isCorrect": false },
+          { "text": "SUBTOTAL", "isCorrect": false },
+          { "text": "IFERROR", "isCorrect": false }
+        ],
+        "explanation": "SUMIF(vùng, điều_kiện, vùng_tính_tổng)."
+      },
+      {
+        "questionText": "Hàm nào bẫy lỗi và thay bằng giá trị khác?",
+        "answers": [
+          { "text": "IFERROR", "isCorrect": true },
+          { "text": "ISBLANK", "isCorrect": false },
+          { "text": "NOT", "isCorrect": false },
+          { "text": "TRIM", "isCorrect": false }
+        ],
+        "explanation": "=IFERROR(VLOOKUP(...),\"Không có\") tránh hiện #N/A."
+      },
+      {
+        "questionText": "=IF(AND(A1>=5,B1>=5),\"Đậu\",\"Rớt\") trả về \"Đậu\" khi nào?",
+        "answers": [
+          { "text": "Cả A1 và B1 đều >= 5", "isCorrect": true },
+          { "text": "Chỉ cần một trong hai >= 5", "isCorrect": false },
+          { "text": "Cả hai đều < 5", "isCorrect": false },
+          { "text": "Luôn luôn", "isCorrect": false }
+        ],
+        "explanation": "AND đòi mọi điều kiện đúng; OR chỉ cần một."
+      }
+    ]
+  },
+  {
+    "title": "Excel 4 - Sắp xếp, lọc và định dạng có điều kiện",
+    "description": "Sort, Filter, Table, Conditional Formatting, Remove Duplicates.",
+    "note": "Kịch bản video (9 phút): 1) Sort 1 và nhiều cấp. 2) AutoFilter, Text/Number Filter. 3) Format as Table, Total Row. 4) Conditional Formatting: Highlight Cells, Top/Bottom, Data Bars. 5) Remove Duplicates. Thay link video thật sau khi quay.",
+    "questions": [
+      {
+        "questionText": "Muốn tô đỏ các ô có giá trị lớn hơn 100 tự động, dùng gì?",
+        "answers": [
+          { "text": "Conditional Formatting", "isCorrect": true },
+          { "text": "Format Painter", "isCorrect": false },
+          { "text": "Data Validation", "isCorrect": false },
+          { "text": "Find & Replace", "isCorrect": false }
+        ],
+        "explanation": "Home > Conditional Formatting > Highlight Cells Rules > Greater Than."
+      },
+      {
+        "questionText": "Lệnh nào xóa các dòng trùng lặp?",
+        "answers": [
+          { "text": "Data > Remove Duplicates", "isCorrect": true },
+          { "text": "Home > Clear All", "isCorrect": false },
+          { "text": "Data > Group", "isCorrect": false },
+          { "text": "Review > Protect Sheet", "isCorrect": false }
+        ],
+        "explanation": "Chọn cột dùng để xác định trùng trong hộp thoại."
+      },
+      {
+        "questionText": "Sắp xếp theo hai cấp (ví dụ Lớp rồi Điểm) dùng lệnh nào?",
+        "answers": [
+          { "text": "Data > Sort rồi Add Level", "isCorrect": true },
+          { "text": "Data > Filter", "isCorrect": false },
+          { "text": "Insert > PivotTable", "isCorrect": false },
+          { "text": "View > Split", "isCorrect": false }
+        ],
+        "explanation": "Add Level thêm tiêu chí sắp xếp thứ hai."
+      },
+      {
+        "questionText": "Total Row của Table hiển thị ở đâu?",
+        "answers": [
+          { "text": "Hàng cuối của bảng", "isCorrect": true },
+          { "text": "Hàng đầu của bảng", "isCorrect": false },
+          { "text": "Cạnh thanh công thức", "isCorrect": false },
+          { "text": "Trên một sheet mới", "isCorrect": false }
+        ],
+        "explanation": "Bật ở Table Design > Total Row."
+      },
+      {
+        "questionText": "Data Bars trong Conditional Formatting dùng để làm gì?",
+        "answers": [
+          {
+            "text": "Hiện thanh ngang tỷ lệ với giá trị trong ô",
+            "isCorrect": true
+          },
+          { "text": "Đổi font chữ", "isCorrect": false },
+          { "text": "Ẩn ô trống", "isCorrect": false },
+          { "text": "Tạo biểu đồ cột riêng", "isCorrect": false }
+        ],
+        "explanation": "Thanh càng dài giá trị càng lớn, ngay trong ô."
+      }
+    ]
+  },
+  {
+    "title": "Excel 5 - Biểu đồ và in ấn",
+    "description": "Tạo biểu đồ, chỉnh sửa, thiết lập trang in.",
+    "note": "Kịch bản video (9 phút): 1) Chọn dữ liệu, Insert Chart. 2) Column/Line/Pie: khi nào dùng. 3) Chart Title, Axis Title, Legend, Data Labels. 4) Page Layout: Orientation, Margins, Print Area, Fit to 1 page. 5) Header/Footer. Thay link video thật sau khi quay.",
+    "questions": [
+      {
+        "questionText": "Loại biểu đồ nào phù hợp nhất để thể hiện tỷ lệ phần trăm của tổng thể?",
+        "answers": [
+          { "text": "Pie", "isCorrect": true },
+          { "text": "Line", "isCorrect": false },
+          { "text": "Scatter", "isCorrect": false },
+          { "text": "Radar", "isCorrect": false }
+        ],
+        "explanation": "Pie biểu diễn các phần cộng lại thành 100%."
+      },
+      {
+        "questionText": "Biểu đồ nào hợp để xem xu hướng theo thời gian?",
+        "answers": [
+          { "text": "Line", "isCorrect": true },
+          { "text": "Pie", "isCorrect": false },
+          { "text": "Doughnut", "isCorrect": false },
+          { "text": "Treemap", "isCorrect": false }
+        ],
+        "explanation": "Line nối các điểm theo trục thời gian."
+      },
+      {
+        "questionText": "Chỉ in một vùng cố định của sheet, dùng lệnh nào?",
+        "answers": [
+          {
+            "text": "Page Layout > Print Area > Set Print Area",
+            "isCorrect": true
+          },
+          { "text": "View > Freeze Panes", "isCorrect": false },
+          { "text": "Home > Wrap Text", "isCorrect": false },
+          { "text": "Data > Subtotal", "isCorrect": false }
+        ],
+        "explanation": "Chọn vùng trước rồi Set Print Area."
+      },
+      {
+        "questionText": "Để mọi nội dung vừa đúng 1 trang khi in, chọn gì?",
+        "answers": [
+          {
+            "text": "Scale to Fit: Width 1 page, Height 1 page",
+            "isCorrect": true
+          },
+          { "text": "Margins: Wide", "isCorrect": false },
+          { "text": "Orientation: Portrait", "isCorrect": false },
+          { "text": "Size: A3", "isCorrect": false }
+        ],
+        "explanation": "Fit Sheet on One Page thu nhỏ tự động."
+      },
+      {
+        "questionText": "Thêm số trang vào chân trang bằng cách nào?",
+        "answers": [
+          {
+            "text": "Insert > Header & Footer rồi chèn Page Number",
+            "isCorrect": true
+          },
+          { "text": "Home > Number Format", "isCorrect": false },
+          { "text": "Review > New Comment", "isCorrect": false },
+          { "text": "Data > Validation", "isCorrect": false }
+        ],
+        "explanation": "Chân trang nằm trong chế độ Page Layout."
+      }
+    ]
+  }
+]
