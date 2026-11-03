@@ -85,6 +85,26 @@
   text-align: right;
 }
 
+.app-footer__legal {
+  max-width: 1280px;
+  margin: 24px auto 0;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.app-footer__legal-link {
+  font-size: 13px;
+  color: #8fa3d6;
+  text-decoration: none;
+
+  &:hover {
+    color: #ffffff;
+  }
+}
+
 @media (max-width: 768px) {
   .app-footer {
     padding: 24px 20px;

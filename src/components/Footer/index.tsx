@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import Link from 'next/link';
 import FeedbackFormModal from '@components/FeedbackWidget/FeedbackFormModal';
 import { CommentOutlined } from '@components/AppIcon';
 import './styles.scss';
@@ -61,6 +62,18 @@ const Footer: React.FC = () => {
             <CommentOutlined /> Gửi phản hồi
           </button>
         </div>
+      </div>
+
+      <div className="app-footer__legal">
+        <Link className="app-footer__legal-link" href="/chinh-sach-bao-mat">
+          Chính sách bảo vệ dữ liệu cá nhân
+        </Link>
+        <Link className="app-footer__legal-link" href="/dieu-khoan-su-dung">
+          Điều khoản sử dụng
+        </Link>
+        <Link className="app-footer__legal-link" href="/chinh-sach-doi-tra">
+          Chính sách đổi trả / hoàn tiền
+        </Link>
       </div>
 
       <FeedbackFormModal
