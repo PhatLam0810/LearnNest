@@ -20,7 +20,7 @@ export interface PremiumOrder {
   // 'vnpay' chỉ còn ở đơn cũ (đã gỡ VNPay).
   method: 'bank' | 'vnpay' | 'code' | 'admin';
   txnRef: string;
-  status: 'pending' | 'paid' | 'failed';
+  status: 'pending' | 'paid' | 'failed' | 'cancelled';
   createdAt: string;
   paidAt?: string;
   premiumUntil?: string;

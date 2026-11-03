@@ -47,6 +47,11 @@ const STATUS: Record<
     color: 'var(--color-error)',
     bg: 'var(--color-error-bg)',
   },
+  cancelled: {
+    label: 'Đã hủy',
+    color: 'var(--color-text-muted)',
+    bg: 'var(--color-surface-subtle)',
+  },
 };
 
 // Lịch sử đơn mua gói Premium (thay cho lịch sử mua từng bài bằng ETH cũ).
