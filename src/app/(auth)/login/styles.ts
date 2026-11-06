@@ -1,6 +1,17 @@
 import { StyleSheet, typography } from '@styles';
 
 const styles = StyleSheet.create({
+  consentRow: {
+    marginBottom: 12,
+  },
+  consentText: {
+    ...typography.body2,
+    color: '#374151',
+  },
+  consentLink: {
+    color: 'var(--color-vhu-primary)',
+    textDecoration: 'none',
+  },
   container: {
     flex: 1,
     width: '35%',

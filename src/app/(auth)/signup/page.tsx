@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Card, Form } from 'antd';
+import { Card, Checkbox, Form } from 'antd';
 import { MailOutlined, ArrowLeftOutlined } from '@components/AppIcon';
 import { Text, View } from 'react-native-web';
 import Image from 'next/image';
@@ -29,6 +29,7 @@ const SignUpPage = () => {
     authQuery.useSendOtpMutation();
   const contextHolder = null;
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
 
   // Trang signup trước đây không theo dõi accessToken - đăng nhập Google ở
@@ -42,7 +43,7 @@ const SignUpPage = () => {
 
   const [loginOauth] = authQuery.useLoginOauthMutation();
   const handleLoginOauth = async () => {
-    if (isGoogleLoading) return;
+    if (isGoogleLoading || !agreedToTerms) return;
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -148,10 +149,43 @@ const SignUpPage = () => {
                 />
               </Form.Item>
 
+              <View style={styles.consentRow}>
+                <Checkbox
+                  checked={agreedToTerms}
+                  onChange={e => setAgreedToTerms(e.target.checked)}>
+                  <Text style={styles.consentText}>
+                    Tôi đã đọc và đồng ý với{' '}
+                    <a
+                      href="/dieu-khoan-su-dung"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.consentLink}>
+                      Điều khoản sử dụng
+                    </a>
+                    ,{' '}
+                    <a
+                      href="/chinh-sach-bao-mat"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.consentLink}>
+                      Chính sách bảo vệ dữ liệu cá nhân
+                    </a>{' '}
+                    và{' '}
+                    <a
+                      href="/chinh-sach-doi-tra"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={styles.consentLink}>
+                      Chính sách đổi trả / hoàn tiền
+                    </a>
+                  </Text>
+                </Checkbox>
+              </View>
+
               <Form.Item<FieldType> shouldUpdate>
                 {({ getFieldsValue }) => {
                   const { email } = getFieldsValue();
-                  const isFormIncomplete = !email;
+                  const isFormIncomplete = !email || !agreedToTerms;
                   return (
                     <AppButton
                       type="primary"
@@ -179,7 +213,9 @@ const SignUpPage = () => {
               <View style={styles.btnContainer}>
                 <AppButton
                   onClick={handleLoginOauth}
-                  disabled={isGoogleLoading || isSendOtpLoading}
+                  disabled={
+                    isGoogleLoading || isSendOtpLoading || !agreedToTerms
+                  }
                   loading={isGoogleLoading}
                   style={styles.googleButton}>
                   <Icon name="google" />

@@ -12,6 +12,17 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 16,
   },
+  consentRow: {
+    marginBottom: 16,
+  },
+  consentText: {
+    ...typography.body2,
+    color: '#374151',
+  },
+  consentLink: {
+    color: 'var(--color-vhu-primary)',
+    textDecoration: 'none',
+  },
   labelText: {
     margin: 0,
     ...typography.button,

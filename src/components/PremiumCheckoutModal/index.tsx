@@ -49,6 +49,7 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
   const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [error, setError] = useState('');
   // Dùng chung 1 ô lỗi cho cả 2 field dễ hiện nhầm (vd lỗi OTP lại tô đỏ ô
   // tên) - tách riêng field nào đang lỗi để tô đúng chỗ.
@@ -62,6 +63,7 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
       setName(profileName || '');
       setOtp('');
       setOtpSent(false);
+      setResendCooldown(0);
       setError('');
       setErrorField('');
       setOrder(null);
@@ -89,11 +91,23 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
     return () => clearInterval(t);
   }, [order]);
 
+  // Đếm ngược 60 giây trước khi cho bấm gửi lại - tránh spam bấm, trùng với
+  // giới hạn 5 lần/phút/IP ở BE.
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setInterval(
+      () => setResendCooldown(s => Math.max(0, s - 1)),
+      1000,
+    );
+    return () => clearInterval(t);
+  }, [resendCooldown]);
+
   const requestOtp = async () => {
-    if (!email) return;
+    if (!email || resendCooldown > 0) return;
     try {
       await sendOtp({ email }).unwrap();
       setOtpSent(true);
+      setResendCooldown(60);
       messageApi.success('Đã gửi mã OTP về email của bạn');
     } catch (e) {
       messageApi.error(
@@ -213,8 +227,13 @@ const PremiumCheckoutModal: React.FC<PremiumCheckoutModalProps> = ({
                   size="small"
                   style={{ width: 'auto' }}
                   loading={sendingOtp}
+                  disabled={resendCooldown > 0}
                   onClick={requestOtp}>
-                  {otpSent ? 'Gửi lại OTP' : 'Gửi OTP'}
+                  {resendCooldown > 0
+                    ? `Gửi lại sau ${resendCooldown}s`
+                    : otpSent
+                      ? 'Gửi lại OTP'
+                      : 'Gửi OTP'}
                 </AppButton>
               </View>
               {errorField === 'otp' && (

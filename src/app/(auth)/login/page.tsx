@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Card, Form } from 'antd';
+import { Card, Checkbox, Form } from 'antd';
 import {
   MailOutlined,
   LockOutlined,
@@ -33,10 +33,14 @@ const LoginPage = () => {
   const { signUpInfo } = useAppSelector(state => state.authReducer);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  // Google ở trang đăng nhập cũng có thể tạo tài khoản mới nếu email chưa
+  // tồn tại (xem authService.loginOAuth) - cùng một nghĩa vụ xin đồng ý
+  // điều khoản như trang đăng ký, không chỉ riêng trang /signup.
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [login, { isLoading: isLoginLoading }] = authQuery.useLoginMutation();
   const [loginOauth] = authQuery.useLoginOauthMutation();
   const handleLoginOauth = async () => {
-    if (isGoogleLoading) return;
+    if (isGoogleLoading || !agreedToTerms) return;
     setIsGoogleLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -209,10 +213,44 @@ const LoginPage = () => {
                   }}
                 </Form.Item>
 
+                <View style={styles.consentRow}>
+                  <Checkbox
+                    checked={agreedToTerms}
+                    onChange={e => setAgreedToTerms(e.target.checked)}>
+                    <Text style={styles.consentText}>
+                      Đăng nhập Google lần đầu sẽ tạo tài khoản mới - tôi đồng ý
+                      với{' '}
+                      <a
+                        href="/dieu-khoan-su-dung"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={styles.consentLink}>
+                        Điều khoản sử dụng
+                      </a>
+                      ,{' '}
+                      <a
+                        href="/chinh-sach-bao-mat"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={styles.consentLink}>
+                        Chính sách bảo vệ dữ liệu cá nhân
+                      </a>{' '}
+                      và{' '}
+                      <a
+                        href="/chinh-sach-doi-tra"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={styles.consentLink}>
+                        Chính sách đổi trả / hoàn tiền
+                      </a>
+                    </Text>
+                  </Checkbox>
+                </View>
+
                 <AppButton
                   aria-label="Đăng nhập bằng Google"
                   onClick={handleLoginOauth}
-                  disabled={isGoogleLoading || isLoginLoading}
+                  disabled={isGoogleLoading || isLoginLoading || !agreedToTerms}
                   loading={isGoogleLoading}
                   style={styles.googleButton}>
                   <Icon name="google" />

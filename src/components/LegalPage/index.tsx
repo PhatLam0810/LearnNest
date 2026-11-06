@@ -2,6 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Text, View } from 'react-native-web';
+import { useAppSelector } from '@redux';
 import styles from './styles';
 
 type LegalPageProps = {
@@ -14,35 +15,43 @@ const LegalPage: React.FC<LegalPageProps> = ({
   title,
   updatedAt,
   children,
-}) => (
-  <View style={styles.page}>
-    <View style={styles.header}>
-      <Link href="/" style={styles.logoLink}>
-        <Text style={styles.logoText}>LearnNest</Text>
-      </Link>
-      <Link href="/" style={styles.homeLink}>
-        <Text style={styles.homeLinkText}>Về trang chủ</Text>
-      </Link>
-    </View>
+}) => {
+  // Trang này mở ở tab mới (target="_blank") từ trang đã đăng nhập - "về
+  // trang chủ" phải về dashboard, không phải trang "/" công khai (sẽ bắt
+  // đăng nhập lại).
+  const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
+  const homeHref = accessToken ? '/dashboard/home' : '/';
 
-    <View style={styles.body}>
-      <View style={styles.container}>
-        <Text role="heading" aria-level={1} style={styles.h1}>
-          {title}
+  return (
+    <View style={styles.page}>
+      <View style={styles.header}>
+        <Link href={homeHref} style={styles.logoLink}>
+          <Text style={styles.logoText}>LearnNest</Text>
+        </Link>
+        <Link href={homeHref} style={styles.homeLink}>
+          <Text style={styles.homeLinkText}>Về trang chủ</Text>
+        </Link>
+      </View>
+
+      <View style={styles.body}>
+        <View style={styles.container}>
+          <Text role="heading" aria-level={1} style={styles.h1}>
+            {title}
+          </Text>
+          <Text style={styles.updatedAt}>Cập nhật lần cuối: {updatedAt}</Text>
+          <View style={styles.content}>{children}</View>
+        </View>
+      </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>
+          Trung Tâm Tin Học - Đại Học Văn Hiến · info@vhu.edu.vn · Hotline
+          18001568
         </Text>
-        <Text style={styles.updatedAt}>Cập nhật lần cuối: {updatedAt}</Text>
-        <View style={styles.content}>{children}</View>
       </View>
     </View>
-
-    <View style={styles.footer}>
-      <Text style={styles.footerText}>
-        Trung Tâm Tin Học - Đại Học Văn Hiến · info@vhu.edu.vn · Hotline
-        18001568
-      </Text>
-    </View>
-  </View>
-);
+  );
+};
 
 export default LegalPage;
 
