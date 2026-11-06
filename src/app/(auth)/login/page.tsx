@@ -33,9 +33,8 @@ const LoginPage = () => {
   const { signUpInfo } = useAppSelector(state => state.authReducer);
   const accessToken = useAppSelector(state => state.authReducer.tokenInfo);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  // Google ở trang đăng nhập cũng có thể tạo tài khoản mới nếu email chưa
-  // tồn tại (xem authService.loginOAuth) - cùng một nghĩa vụ xin đồng ý
-  // điều khoản như trang đăng ký, không chỉ riêng trang /signup.
+  // Bắt tick điều khoản cho cả đăng nhập mật khẩu lẫn Google (Google có thể
+  // tạo tài khoản mới - xem authService.loginOAuth).
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [login, { isLoading: isLoginLoading }] = authQuery.useLoginMutation();
   const [loginOauth] = authQuery.useLoginOauthMutation();
@@ -190,36 +189,12 @@ const LoginPage = () => {
                     Quên mật khẩu?
                   </Text>
                 </View>
-                <Form.Item<FieldType> shouldUpdate style={{ marginBottom: 12 }}>
-                  {({ getFieldsValue }) => {
-                    const { email, password } = getFieldsValue();
-                    const isFormIncomplete = !email || !password;
-                    return (
-                      <AppButton
-                        type="primary"
-                        aria-label="Đăng nhập vào tài khoản của bạn"
-                        style={{
-                          ...styles.primaryButton,
-                          ...(isFormIncomplete || isLoginLoading
-                            ? styles.primaryButtonDisabled
-                            : {}),
-                        }}
-                        disabled={isFormIncomplete || isLoginLoading}
-                        loading={isLoginLoading}
-                        htmlType="submit">
-                        Đăng nhập
-                      </AppButton>
-                    );
-                  }}
-                </Form.Item>
-
                 <View style={styles.consentRow}>
                   <Checkbox
                     checked={agreedToTerms}
                     onChange={e => setAgreedToTerms(e.target.checked)}>
                     <Text style={styles.consentText}>
-                      Đăng nhập Google lần đầu sẽ tạo tài khoản mới - tôi đồng ý
-                      với{' '}
+                      Tôi đã đọc và đồng ý với{' '}
                       <a
                         href="/dieu-khoan-su-dung"
                         target="_blank"
@@ -246,6 +221,30 @@ const LoginPage = () => {
                     </Text>
                   </Checkbox>
                 </View>
+
+                <Form.Item<FieldType> shouldUpdate style={{ marginBottom: 12 }}>
+                  {({ getFieldsValue }) => {
+                    const { email, password } = getFieldsValue();
+                    const isFormIncomplete =
+                      !email || !password || !agreedToTerms;
+                    return (
+                      <AppButton
+                        type="primary"
+                        aria-label="Đăng nhập vào tài khoản của bạn"
+                        style={{
+                          ...styles.primaryButton,
+                          ...(isFormIncomplete || isLoginLoading
+                            ? styles.primaryButtonDisabled
+                            : {}),
+                        }}
+                        disabled={isFormIncomplete || isLoginLoading}
+                        loading={isLoginLoading}
+                        htmlType="submit">
+                        Đăng nhập
+                      </AppButton>
+                    );
+                  }}
+                </Form.Item>
 
                 <AppButton
                   aria-label="Đăng nhập bằng Google"
