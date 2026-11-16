@@ -1234,79 +1234,30 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
-
-.testimonial-card {
-  background: var(--color-surface-subtle);
-  border: 1px solid var(--color-border);
-  border-radius: 18px;
-  padding: 28px;
+.interview-video {
+  max-width: 880px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  gap: 16px;
 }
 
-.testimonial-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+.interview-video__player {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  background: #000;
+  border-radius: 18px;
+  border: 2px solid var(--color-vhu-primary);
+  box-shadow: 0 10px 26px rgba(29, 65, 138, 0.18);
 }
 
-.testimonial-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.testimonial-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 999px;
-  object-fit: cover;
-  border: 2px solid var(--color-vhu-accent);
-}
-
-.testimonial-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  margin: 0 0 2px;
-}
-
-.testimonial-major {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-.testimonial-badge {
-  display: inline-block;
-  align-self: flex-start;
-  background: #eef9f2;
-  color: #15803d;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: 1px solid #bbf7d0;
-}
-
-.testimonial-rating {
-  display: flex;
-  gap: 2px;
-}
-
-.testimonial-content {
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: var(--color-text-body);
-  font-style: italic;
+.interview-video__caption {
   margin: 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--color-text-body);
 }
 
 /* 8. Call to Action Banner */

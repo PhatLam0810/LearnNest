@@ -21,6 +21,7 @@ import {
   ImportUsersResponse,
   CreateMockExamPayload,
   CreateQuizPayload,
+  GenerateDraftResult,
   Quiz,
   QuestionBankItem,
   CreatePracticeClassPayload,
@@ -1201,6 +1202,15 @@ export const adminQuery = baseQuery.injectEndpoints({
       query: id => ({ url: `quiz/${id}`, method: 'GET' }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
       providesTags: (_result, _error, id) => [{ type: 'Quiz', id }],
+    }),
+    // Sinh bản nháp câu hỏi từ ảnh/PDF/zip bằng Gemini (không lưu gì).
+    generateQuizDraft: builder.mutation<GenerateDraftResult, FormData>({
+      query: formData => ({
+        url: 'quiz/generate-draft',
+        method: 'POST',
+        body: formData,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
     createQuiz: builder.mutation<Quiz, CreateQuizPayload>({
       query: body => ({ url: 'quiz', method: 'POST', body }),

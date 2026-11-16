@@ -10,6 +10,7 @@ import {
   QuizBuilderModal,
   ThemedTable,
 } from '~mdAdmin/components';
+import { QUESTION_TYPE_LABEL } from '~mdAdmin/utils/questionTypes';
 import pageStyles from '../../styles';
 
 const buttonStyle = { width: 'auto', height: 40 } as const;
@@ -36,6 +37,17 @@ const QuestionBankTab: React.FC = () => {
 
   const columns = [
     { title: 'Câu hỏi', dataIndex: 'questionText', key: 'questionText' },
+    {
+      title: 'Dạng',
+      key: 'type',
+      render: (_: unknown, r: QuestionBankItem) =>
+        QUESTION_TYPE_LABEL[
+          r.type ??
+            (r.answers.filter(a => a.isCorrect).length > 1
+              ? 'multiple'
+              : 'single')
+        ],
+    },
     {
       title: 'Số đáp án đúng',
       key: 'correctCount',
@@ -141,6 +153,7 @@ const QuestionBankTab: React.FC = () => {
 function toDraft(item: QuestionBankItem) {
   return {
     key: `bank-${item._id}`,
+    type: item.type,
     questionText: item.questionText,
     answers: item.answers,
     explanation: item.explanation || '',

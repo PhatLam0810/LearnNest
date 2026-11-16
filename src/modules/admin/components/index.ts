@@ -8,3 +8,4 @@ export { default as FilteredEmptyState } from './FilteredEmptyState';
 export { default as CreateSectionModal } from './CreateSectionModal';
 export { default as CreateCourseModal } from './CreateCourseModal';
 export { default as QuizBuilderModal } from './QuizBuilderModal';
+export { default as QuizAiDraftModal } from './QuizAiDraftModal';

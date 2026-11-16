@@ -404,12 +404,18 @@ export interface AssignTaskBulkResult {
 }
 
 // ---- Tạo Bài Tập (quiz trắc nghiệm nhiều đáp án đúng, TASK 4) ----
+export type QuestionType = 'single' | 'multiple' | 'dragdrop';
+
 export interface QuizAnswer {
   text: string;
   isCorrect: boolean;
+  // Dạng kéo thả: đáp án đúng của ô trống {{blankIndex}} trong đề.
+  blankIndex?: number;
 }
 
 export interface QuizQuestion {
+  // Câu tạo trước khi có dạng câu hỏi thì không có trường này.
+  type?: QuestionType;
   questionText: string;
   answers: QuizAnswer[];
   explanation?: string;
@@ -442,8 +448,22 @@ export interface CreateQuizPayload {
   shuffleQuestions: boolean;
 }
 
+// Bản nháp AI sinh từ ảnh/PDF/zip - chưa lưu, admin xem lại rồi mới dùng.
+export interface DraftQuestion extends QuizQuestion {
+  type: QuestionType;
+  needsReview: boolean;
+}
+
+export interface GenerateDraftResult {
+  questions: DraftQuestion[];
+  skipped: number;
+  failedBatches: number;
+  sourceCount: number;
+}
+
 export interface QuestionBankItem {
   _id: string;
+  type?: QuestionType;
   questionText: string;
   answers: QuizAnswer[];
   explanation?: string;

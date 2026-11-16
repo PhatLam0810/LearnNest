@@ -186,6 +186,22 @@ const styles = StyleSheet.create({
     padding: 0,
     flexShrink: 0,
   },
+  typeSelect: {
+    width: 190,
+    flexShrink: 0,
+  },
+  blankSelect: {
+    width: 96,
+    flexShrink: 0,
+  },
+  hintText: {
+    ...typography.caption,
+    color: 'var(--color-text-muted)',
+  },
+  warnText: {
+    ...typography.caption,
+    color: 'var(--color-warning)',
+  },
   errorText: {
     ...typography.caption,
     color: 'var(--color-error)',

@@ -42,39 +42,6 @@ async function getPublicStats(): Promise<PublicStats | null> {
   }
 }
 
-const TESTIMONIALS = [
-  {
-    name: 'Nguyễn Minh Thư',
-    major: 'Khoa Công Nghệ Thông Tin - Khóa 28',
-    avatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
-    badge: 'MOS Excel 2019: 980/1000',
-    content:
-      'Nhờ hệ thống chấm bài tự động của LearnNest chỉ ra ngay lỗi sai công thức mảng và hàm dò tìm, mình đã tự tin vượt qua kỳ thi MOS Excel ngay lần thi đầu tiên tại trường!',
-    rating: 5,
-  },
-  {
-    name: 'Trần Hoàng Phúc',
-    major: 'Khoa Quản Trị Kinh Doanh - Khóa 27',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80',
-    badge: 'MOS Word 2019: 1,000/1,000',
-    content:
-      'Giao diện thi thử giống y hệt phần mềm Certiport lúc thi thật! Mình luyện hết 5 bộ đề trên web, lúc đi thi không hề bị bỡ ngỡ về thời gian và đạt điểm tuyệt đối 1,000.',
-    rating: 5,
-  },
-  {
-    name: 'Lê Thảo My',
-    major: 'Khoa Tài Chính - Ngân Hàng - Khóa 29',
-    avatar:
-      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80',
-    badge: 'MOS PowerPoint: 950/1000',
-    content:
-      'Trợ lý AI Coach giải đáp siêu nhanh lúc mình làm bài tập đêm. Lộ trình học theo từng mô đun rất rõ ràng, không bị ngộp kiến thức.',
-    rating: 5,
-  },
-];
-
 export default async function HomePage() {
   const stats = await getPublicStats();
 
@@ -420,38 +387,33 @@ export default async function HomePage() {
               <span className="section-pill">CẢM NHẬN SINH VIÊN</span>
               <h2>Sinh Viên Đại Học Văn Hiến Nói Gì Về LearnNest?</h2>
               <p>
-                Những câu chuyện thành công thực tế từ các bạn sinh viên đã xuất
-                sắc vượt qua kỳ thi MOS.
+                Câu chuyện thật từ các bạn sinh viên đã trải nghiệm kỳ thi MOS
+                tại Đại học Văn Hiến.
               </p>
             </div>
           </Reveal>
 
-          <div className="testimonials-grid">
-            {TESTIMONIALS.map((t, idx) => (
-              <Reveal key={t.name} delay={idx * 0.15}>
-                <div className="testimonial-card">
-                  <div className="testimonial-header">
-                    <img
-                      src={t.avatar}
-                      alt={t.name}
-                      className="testimonial-avatar"
-                    />
-                    <div>
-                      <h4 className="testimonial-name">{t.name}</h4>
-                      <div className="testimonial-major">{t.major}</div>
-                    </div>
-                  </div>
-                  <div className="testimonial-badge">{t.badge}</div>
-                  <div className="testimonial-rating">
-                    {[...Array(t.rating)].map((_, i) => (
-                      <Star key={i} size={16} fill="#f0c356" color="#f0c356" />
-                    ))}
-                  </div>
-                  <p className="testimonial-content">"{t.content}"</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+          <Reveal>
+            <div className="interview-video">
+              {/* preload="none": file ~13MB chỉ tải khi người xem bấm phát. */}
+              <video
+                controls
+                playsInline
+                preload="none"
+                poster="/videos/phong-van-sinh-vien.jpg"
+                aria-label="Sinh viên Đại học Văn Hiến chia sẻ kinh nghiệm thi MOS"
+                className="interview-video__player">
+                <source
+                  src="/videos/phong-van-sinh-vien.mp4"
+                  type="video/mp4"
+                />
+              </video>
+              <p className="interview-video__caption">
+                Chia sẻ từ các bạn sinh viên đã trải nghiệm kỳ thi MOS tại VHU:
+                cách ôn tập, giữ tâm lý và những lưu ý khi làm bài.
+              </p>
+            </div>
+          </Reveal>
         </div>
       </section>
 

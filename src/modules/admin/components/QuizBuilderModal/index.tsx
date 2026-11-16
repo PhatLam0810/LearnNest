@@ -12,22 +12,39 @@ import {
   Switch,
 } from 'antd';
 import { DeleteOutlined, PlusOutlined } from '@components/AppIcon';
+import QuizAiDraftModal from '../QuizAiDraftModal';
+import {
+  blankNumbers,
+  convertAnswers,
+  maxAnswers,
+  QUESTION_TYPE_LABEL,
+  validateQuestionDraft,
+} from '~mdAdmin/utils/questionTypes';
 import AppButton from '@components/AppButton';
 import { useAppPagination } from '@hooks';
 import { useResponsive } from '@/styles/responsive';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
-import { CreateQuizPayload, Quiz } from '~mdAdmin/redux/RTKQuery/type';
+import {
+  CreateQuizPayload,
+  DraftQuestion,
+  QuestionType,
+  Quiz,
+} from '~mdAdmin/redux/RTKQuery/type';
 import { Library } from '~mdDashboard/types';
 import styles from './styles';
 
 interface AnswerDraft {
   text: string;
   isCorrect: boolean;
+  blankIndex?: number;
 }
 
 interface QuestionDraft {
   key: string;
+  type: QuestionType;
+  // AI không thấy đáp án đúng trong tài liệu -> nhắc admin kiểm tra.
+  needsReview?: boolean;
   questionText: string;
   answers: AnswerDraft[];
   explanation: string;
@@ -47,8 +64,15 @@ interface QuizBuilderModalProps {
 const buttonStyle = { width: 'auto', height: 44 } as const;
 
 const emptyAnswer = (): AnswerDraft => ({ text: '', isCorrect: false });
+const draftKey = () =>
+  `new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+// Câu cũ chưa có dạng: nhiều đáp án đúng thì coi là "chọn nhiều".
+const inferType = (q: { type?: QuestionType; answers: AnswerDraft[] }) =>
+  q.type ??
+  (q.answers.filter(a => a.isCorrect).length > 1 ? 'multiple' : 'single');
 const newQuestion = (): QuestionDraft => ({
-  key: `new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+  key: draftKey(),
+  type: 'single',
   questionText: '',
   answers: [emptyAnswer(), emptyAnswer()],
   explanation: '',
@@ -66,6 +90,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [attemptedSave, setAttemptedSave] = useState(false);
+  const [isAiOpen, setIsAiOpen] = useState(false);
   const timeLimitMinutes = Form.useWatch('timeLimitMinutes', form);
 
   const { listItem: libraries, search: searchLibraries } =
@@ -93,6 +118,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
       setQuestions(
         editing.questions.map((q, i) => ({
           key: `edit-${i}`,
+          type: inferType(q),
           questionText: q.questionText,
           answers: q.answers,
           explanation: q.explanation || '',
@@ -100,7 +126,9 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
       );
     } else {
       form.resetFields();
-      setQuestions(initialQuestions?.length ? initialQuestions : []);
+      setQuestions(
+        (initialQuestions ?? []).map(q => ({ ...q, type: inferType(q) })),
+      );
     }
     setErrors({});
     setAttemptedSave(false);
@@ -117,7 +145,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
   const addAnswer = (key: string) =>
     setQuestions(prev =>
       prev.map(q =>
-        q.key === key && q.answers.length < 6
+        q.key === key && q.answers.length < maxAnswers(q.type)
           ? { ...q, answers: [...q.answers, emptyAnswer()] }
           : q,
       ),
@@ -144,16 +172,63 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
       ),
     );
 
+  // "Chọn 1 đáp án": tick đáp án nào thì bỏ tick các đáp án còn lại.
+  const markSingleCorrect = (key: string, idx: number) =>
+    setQuestions(prev =>
+      prev.map(q =>
+        q.key === key
+          ? {
+              ...q,
+              answers: q.answers.map((a, i) => ({
+                ...a,
+                isCorrect: i === idx,
+              })),
+            }
+          : q,
+      ),
+    );
+
+  // Kéo thả: đáp án có số ô thì là đáp án đúng của ô đó, để trống là đáp án nhiễu.
+  const setBlank = (key: string, idx: number, blank: number | null) =>
+    patchAnswer(key, idx, {
+      blankIndex: blank ?? undefined,
+      isCorrect: blank !== null,
+    });
+
+  const changeType = (key: string, type: QuestionType) =>
+    setQuestions(prev =>
+      prev.map(q =>
+        q.key === key
+          ? {
+              ...q,
+              type,
+              answers: convertAnswers(q.answers, type).slice(
+                0,
+                maxAnswers(type),
+              ),
+            }
+          : q,
+      ),
+    );
+
+  const addAiQuestions = (drafts: DraftQuestion[]) =>
+    setQuestions(prev => [
+      ...prev,
+      ...drafts.map(d => ({
+        key: draftKey(),
+        type: d.type,
+        needsReview: d.needsReview,
+        questionText: d.questionText,
+        answers: d.answers,
+        explanation: d.explanation || '',
+      })),
+    ]);
+
   const validateQuestions = (list: QuestionDraft[]) => {
     const errs: Record<string, string> = {};
     list.forEach(q => {
-      if (!q.questionText.trim()) {
-        errs[q.key] = 'Vui lòng nhập nội dung câu hỏi';
-      } else if (q.answers.some(a => !a.text.trim())) {
-        errs[q.key] = 'Vui lòng nhập đầy đủ nội dung đáp án';
-      } else if (!q.answers.some(a => a.isCorrect)) {
-        errs[q.key] = 'Cần chọn ít nhất 1 đáp án đúng';
-      }
+      const error = validateQuestionDraft(q);
+      if (error) errs[q.key] = error;
     });
     return errs;
   };
@@ -186,6 +261,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
       title: values.title,
       libraryId: values.libraryId,
       questions: questions.map(q => ({
+        type: q.type,
         questionText: q.questionText,
         answers: q.answers,
         explanation: q.explanation || undefined,
@@ -265,9 +341,25 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                       <View style={styles.indexBadge}>
                         <Text style={styles.indexBadgeText}>{qIndex + 1}</Text>
                       </View>
+                      <Select<QuestionType>
+                        value={q.type}
+                        style={styles.typeSelect}
+                        aria-label="Dạng câu hỏi"
+                        options={(
+                          Object.keys(QUESTION_TYPE_LABEL) as QuestionType[]
+                        ).map(t => ({
+                          value: t,
+                          label: QUESTION_TYPE_LABEL[t],
+                        }))}
+                        onChange={t => changeType(q.key, t)}
+                      />
                       <Input
                         value={q.questionText}
-                        placeholder="Nhập nội dung câu hỏi"
+                        placeholder={
+                          q.type === 'dragdrop'
+                            ? 'Nội dung câu hỏi, dùng {{1}}, {{2}}... cho ô trống'
+                            : 'Nhập nội dung câu hỏi'
+                        }
                         style={styles.questionInput}
                         onChange={e =>
                           patchQuestion(q.key, { questionText: e.target.value })
@@ -290,14 +382,36 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                       <View style={styles.answersList}>
                         {q.answers.map((a, aIndex) => (
                           <View key={aIndex} style={styles.answerRow}>
-                            <Checkbox
-                              checked={a.isCorrect}
-                              onChange={e =>
-                                patchAnswer(q.key, aIndex, {
-                                  isCorrect: e.target.checked,
-                                })
-                              }
-                            />
+                            {q.type === 'dragdrop' ? (
+                              <Select<number>
+                                allowClear
+                                value={a.blankIndex}
+                                placeholder="Nhiễu"
+                                aria-label="Ô trống của đáp án này"
+                                style={styles.blankSelect}
+                                options={[
+                                  ...new Set(blankNumbers(q.questionText)),
+                                ]
+                                  .sort((x, y) => x - y)
+                                  .map(n => ({ value: n, label: `Ô ${n}` }))}
+                                onChange={v =>
+                                  setBlank(q.key, aIndex, v ?? null)
+                                }
+                                onClear={() => setBlank(q.key, aIndex, null)}
+                              />
+                            ) : (
+                              <Checkbox
+                                checked={a.isCorrect}
+                                aria-label={`Đáp án ${aIndex + 1} đúng`}
+                                onChange={e =>
+                                  q.type === 'single'
+                                    ? markSingleCorrect(q.key, aIndex)
+                                    : patchAnswer(q.key, aIndex, {
+                                        isCorrect: e.target.checked,
+                                      })
+                                }
+                              />
+                            )}
                             <Input
                               value={a.text}
                               placeholder={`Đáp án ${aIndex + 1}`}
@@ -320,7 +434,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                             </Button>
                           </View>
                         ))}
-                        {q.answers.length < 6 && (
+                        {q.answers.length < maxAnswers(q.type) && (
                           <Button
                             type="dashed"
                             block
@@ -331,6 +445,19 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                         )}
                       </View>
 
+                      {q.type === 'dragdrop' && (
+                        <Text style={styles.hintText}>
+                          Ô trống viết {'{{1}}'}, {'{{2}}'}... trong nội dung
+                          câu hỏi. Chọn số ô cho đáp án đúng; để trống là đáp án
+                          gây nhiễu.
+                        </Text>
+                      )}
+                      {q.needsReview && (
+                        <Text style={styles.warnText}>
+                          AI không thấy đáp án đúng trong tài liệu - hãy kiểm
+                          tra lại đáp án.
+                        </Text>
+                      )}
                       {errors[q.key] && (
                         <Text style={styles.errorText}>{errors[q.key]}</Text>
                       )}
@@ -353,6 +480,12 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                   style={styles.addQuestionButton}
                   onClick={addQuestion}>
                   Thêm câu hỏi
+                </Button>
+                <Button
+                  block
+                  style={styles.addQuestionButton}
+                  onClick={() => setIsAiOpen(true)}>
+                  Tạo câu hỏi từ ảnh / PDF / zip bằng AI
                 </Button>
               </View>
 
@@ -458,6 +591,11 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
           </Form>
         </View>
       </View>
+      <QuizAiDraftModal
+        isVisible={isAiOpen}
+        onClose={() => setIsAiOpen(false)}
+        onUse={addAiQuestions}
+      />
     </Modal>
   );
 };
