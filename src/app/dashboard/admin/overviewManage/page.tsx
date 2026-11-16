@@ -4,6 +4,13 @@ import { Text, View } from 'react-native-web';
 import { Modal, Skeleton } from 'antd';
 import type { TableProps } from 'antd';
 import dayjs from 'dayjs';
+import { useRouter } from 'next/navigation';
+import {
+  CarryOutOutlined,
+  FireOutlined,
+  TeamOutlined,
+  TrophyOutlined,
+} from '@components/AppIcon';
 import AppButton from '@components/AppButton';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
@@ -20,37 +27,67 @@ const buttonStyle = { width: 'auto', height: 40 } as const;
 const smallButton = { width: 'auto', height: 32 } as const;
 const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
+type Tone = 'primary' | 'danger' | 'success';
+const ICON_COLOR: Record<Tone, string> = {
+  primary: 'var(--color-vhu-primary)',
+  danger: 'var(--color-error)',
+  success: 'var(--color-success)',
+};
+
 const StatBox = ({
   label,
   value,
   caption,
+  Icon,
   tone = 'primary',
+  trend,
 }: {
   label: string;
   value: string;
   caption: string;
-  tone?: 'primary' | 'danger' | 'success';
+  Icon: typeof TeamOutlined;
+  tone?: Tone;
+  // Huy hiệu xu hướng cạnh con số (vd "+2,5%"); up=false tô đỏ.
+  trend?: { text: string; up: boolean };
 }) => (
   <View style={styles.statCard}>
-    <Text style={styles.statLabel}>{label}</Text>
-    <Text
+    <View style={styles.statBody}>
+      <Text style={styles.statLabel}>{label}</Text>
+      <View style={styles.statValueRow}>
+        <Text
+          style={{
+            ...styles.statValue,
+            ...(tone === 'danger' ? styles.toneDanger : null),
+          }}>
+          {value}
+        </Text>
+        {trend && (
+          <Text
+            style={{
+              ...styles.trendBadge,
+              ...(trend.up ? null : styles.trendBadgeDown),
+            }}>
+            {trend.text}
+          </Text>
+        )}
+      </View>
+      <Text style={styles.statCaption}>{caption}</Text>
+    </View>
+    <View
       style={{
-        ...styles.statValue,
-        ...(tone === 'danger' ? styles.toneDanger : null),
+        ...styles.statIcon,
+        ...(tone === 'danger' ? styles.statIconDanger : null),
+        ...(tone === 'success' ? styles.statIconSuccess : null),
       }}>
-      {value}
-    </Text>
-    <Text
-      style={{
-        ...styles.statCaption,
-        ...(tone === 'success' ? styles.toneSuccess : null),
-      }}>
-      {caption}
-    </Text>
+      <Icon size={22} hoverMorph={false} color={ICON_COLOR[tone]} />
+    </View>
   </View>
 );
 
 const OverviewManage: React.FC = () => {
+  const router = useRouter();
+  const { data: qnaStats } = adminQuery.useGetQuestionStatsQuery();
+  const qnaPending = qnaStats?.openCount ?? 0;
   const { data, isFetching, isError, refetch } =
     adminQuery.useGetAdminOverviewQuery();
   const [remindLearner] = adminQuery.useRemindLearnerMutation();
@@ -252,145 +289,181 @@ const OverviewManage: React.FC = () => {
           label="Đăng ký mới (7 ngày)"
           value={String(signups.total)}
           caption={`${signups.student} sinh viên VHU · ${signups.guest} khách`}
+          Icon={TeamOutlined}
         />
         <StatBox
           label="Tỉ lệ hoàn thành khóa TB"
           value={`${String(completion.rate).replace('.', ',')}%`}
           caption={
-            delta === null
-              ? 'Chưa đủ dữ liệu so sánh'
-              : `${delta >= 0 ? '+' : ''}${String(delta).replace('.', ',')}% so với tháng trước`
+            delta === null ? 'Chưa đủ dữ liệu so sánh' : 'so với tháng trước'
           }
-          tone={delta !== null && delta >= 0 ? 'success' : 'primary'}
+          Icon={TrophyOutlined}
+          tone="success"
+          trend={
+            delta === null
+              ? undefined
+              : {
+                  text: `${delta >= 0 ? '+' : ''}${String(delta).replace('.', ',')}%`,
+                  up: delta >= 0,
+                }
+          }
         />
         <StatBox
           label="Có nguy cơ bỏ học"
           value={String(data.atRiskCount)}
           caption="chưa học >10 ngày"
+          Icon={FireOutlined}
           tone="danger"
         />
         <StatBox
           label="Hạn nộp trong 7 ngày"
           value={String(data.dueSoon)}
           caption="bài thực hành + quiz"
+          Icon={CarryOutOutlined}
         />
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Đăng ký mới theo ngày</Text>
-        <View style={styles.chart}>
-          {signups.days.map(d => {
-            const total = d.student + d.guest;
-            return (
-              <View key={d.date} style={styles.chartCol}>
-                <View style={styles.chartBarWrap}>
-                  <View
-                    style={{
-                      ...styles.chartBar,
-                      height: `${(total / maxDay) * 100}%`,
-                    }}
-                    {...({ role: 'img' } as Record<string, string>)}
-                    accessibilityLabel={`${dayjs(d.date).format('DD/MM')}: ${d.student} sinh viên, ${d.guest} khách`}>
-                    <View style={{ ...styles.barGuest, flexGrow: d.guest }} />
-                    <View
-                      style={{ ...styles.barStudent, flexGrow: d.student }}
-                    />
-                  </View>
-                </View>
-                <Text style={styles.chartValue}>{total}</Text>
-                <Text style={styles.chartLabel}>
-                  {WEEKDAYS[dayjs(d.date).day()]}
+      {/* Chia 70/30: bảng cần thao tác bên trái, số liệu xem nhanh bên phải.
+          Màn hẹp thì cột phải tự rớt xuống dưới (flexWrap). */}
+      <View style={styles.twoCol}>
+        <View style={styles.colWide}>
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardTitle}>Học viên có nguy cơ bỏ học</Text>
+              <AppButton
+                style={smallButton}
+                loading={isExporting}
+                onClick={handleExport}>
+                Xuất Excel
+              </AppButton>
+            </View>
+            {data.atRisk.length ? (
+              <ThemedTable
+                rowKey="userId"
+                columns={atRiskColumns}
+                dataSource={data.atRisk}
+                pagination={{ pageSize: 5, showSizeChanger: false }}
+              />
+            ) : (
+              <Text style={styles.emptyText}>
+                Không có học viên nào chưa học quá 10 ngày.
+              </Text>
+            )}
+          </View>
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View style={{ flex: 1, minWidth: 220 }}>
+                <Text style={styles.cardTitle}>Lịch hạn nộp</Text>
+                <Text style={styles.caption}>
+                  Bài thực hành sắp đến hạn theo lớp (14 ngày tới)
                 </Text>
               </View>
-            );
-          })}
-        </View>
-        <View style={styles.legend}>
-          <View style={styles.legendItem}>
-            <View style={{ ...styles.dot, ...styles.barStudent }} />
-            <Text style={styles.caption}>Sinh viên VHU</Text>
+              <AppButton
+                style={buttonStyle}
+                disabled={!data.deadlines.some(d => d.submitted < d.total)}
+                onClick={handleRemindAll}>
+                Gửi email nhắc tất cả
+              </AppButton>
+            </View>
+            {data.deadlines.length ? (
+              <ThemedTable
+                rowKey="assignmentId"
+                columns={deadlineColumns}
+                dataSource={data.deadlines}
+                pagination={false}
+              />
+            ) : (
+              <Text style={styles.emptyText}>
+                Không có bài giao nào đến hạn trong 14 ngày tới.
+              </Text>
+            )}
           </View>
-          <View style={styles.legendItem}>
-            <View style={{ ...styles.dot, ...styles.barGuest }} />
-            <Text style={styles.caption}>Khách</Text>
-          </View>
         </View>
-      </View>
-
-      <View style={styles.twoCol}>
-        <View style={{ ...styles.card, ...styles.colWide }}>
-          <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Học viên có nguy cơ bỏ học</Text>
+        <View style={styles.colNarrow}>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Đăng ký mới theo ngày</Text>
+            <View style={styles.chart}>
+              {signups.days.map(d => {
+                const total = d.student + d.guest;
+                return (
+                  <View key={d.date} style={styles.chartCol}>
+                    <View style={styles.chartBarWrap}>
+                      <View
+                        style={{
+                          ...styles.chartBar,
+                          height: `${(total / maxDay) * 100}%`,
+                        }}
+                        {...({ role: 'img' } as Record<string, string>)}
+                        accessibilityLabel={`${dayjs(d.date).format('DD/MM')}: ${d.student} sinh viên, ${d.guest} khách`}>
+                        <View
+                          style={{ ...styles.barGuest, flexGrow: d.guest }}
+                        />
+                        <View
+                          style={{ ...styles.barStudent, flexGrow: d.student }}
+                        />
+                      </View>
+                    </View>
+                    <Text style={styles.chartValue}>{total}</Text>
+                    <Text style={styles.chartLabel}>
+                      {WEEKDAYS[dayjs(d.date).day()]}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+            <View style={styles.legend}>
+              <View style={styles.legendItem}>
+                <View style={{ ...styles.dot, ...styles.barStudent }} />
+                <Text style={styles.caption}>Sinh viên VHU</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={{ ...styles.dot, ...styles.barGuest }} />
+                <Text style={styles.caption}>Khách</Text>
+              </View>
+            </View>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Tóm tắt tuần này</Text>
+            {[
+              ['Học viên hoạt động', weekly.activeLearners],
+              ['Bài nộp mới', weekly.newSubmissions],
+              ['Lớp học mới', weekly.newClasses],
+              ['Phản hồi cần xử lý', weekly.pendingFeedback],
+            ].map(([label, value]) => (
+              <View key={label as string} style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>{label}</Text>
+                <Text style={styles.strong}>{value}</Text>
+              </View>
+            ))}
             <AppButton
-              style={smallButton}
-              loading={isExporting}
-              onClick={handleExport}>
-              Xuất Excel
+              type="primary"
+              style={{ ...buttonStyle, width: '100%' }}
+              loading={isEmailing}
+              onClick={handleEmailWeekly}>
+              Gửi tóm tắt qua email
             </AppButton>
           </View>
-          {data.atRisk.length ? (
-            <ThemedTable
-              rowKey="userId"
-              columns={atRiskColumns}
-              dataSource={data.atRisk}
-              pagination={{ pageSize: 5, showSizeChanger: false }}
-            />
-          ) : (
-            <Text style={styles.emptyText}>
-              Không có học viên nào chưa học quá 10 ngày.
-            </Text>
-          )}
-        </View>
-        <View style={{ ...styles.card, ...styles.colNarrow }}>
-          <Text style={styles.cardTitle}>Tóm tắt tuần này</Text>
-          {[
-            ['Học viên hoạt động', weekly.activeLearners],
-            ['Bài nộp mới', weekly.newSubmissions],
-            ['Lớp học mới', weekly.newClasses],
-            ['Phản hồi cần xử lý', weekly.pendingFeedback],
-          ].map(([label, value]) => (
-            <View key={label as string} style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{label}</Text>
-              <Text style={styles.strong}>{value}</Text>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Hộp thư hỏi đáp</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Câu hỏi chờ trả lời</Text>
+              <Text
+                style={{
+                  ...styles.strong,
+                  ...(qnaPending > 0 ? styles.toneDanger : null),
+                }}>
+                {qnaPending}
+              </Text>
             </View>
-          ))}
-          <AppButton
-            type="primary"
-            style={{ ...buttonStyle, width: '100%' }}
-            loading={isEmailing}
-            onClick={handleEmailWeekly}>
-            Gửi tóm tắt qua email
-          </AppButton>
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <View style={{ flex: 1, minWidth: 220 }}>
-            <Text style={styles.cardTitle}>Lịch hạn nộp</Text>
-            <Text style={styles.caption}>
-              Bài thực hành sắp đến hạn theo lớp (14 ngày tới)
-            </Text>
+            <AppButton
+              style={{ ...buttonStyle, width: '100%' }}
+              onClick={() =>
+                router.replace('/dashboard/admin?tab=8', { scroll: false })
+              }>
+              Mở hộp thư
+            </AppButton>
           </View>
-          <AppButton
-            style={buttonStyle}
-            disabled={!data.deadlines.some(d => d.submitted < d.total)}
-            onClick={handleRemindAll}>
-            Gửi email nhắc tất cả
-          </AppButton>
         </View>
-        {data.deadlines.length ? (
-          <ThemedTable
-            rowKey="assignmentId"
-            columns={deadlineColumns}
-            dataSource={data.deadlines}
-            pagination={false}
-          />
-        ) : (
-          <Text style={styles.emptyText}>
-            Không có bài giao nào đến hạn trong 14 ngày tới.
-          </Text>
-        )}
       </View>
     </View>
   );

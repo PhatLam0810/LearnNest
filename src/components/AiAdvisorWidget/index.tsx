@@ -74,7 +74,9 @@ const AiAdvisorWidget: React.FC = () => {
   const isExcludedPage = EXCLUDED_PREFIXES.some(prefix =>
     pathname?.startsWith(prefix),
   );
-  if (!userProfile || !isInsideApp || isExcludedPage) return null;
+  // Admin không dùng trợ lý tư vấn khóa học của học viên.
+  const isAdmin = userProfile?.role?.level <= 2;
+  if (!userProfile || !isInsideApp || isExcludedPage || isAdmin) return null;
 
   const isBusy =
     isAdvising ||

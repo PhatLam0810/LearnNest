@@ -1,10 +1,9 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { GetProp, Grid, Layout, Menu, MenuProps } from 'antd';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   BookOpenOutlined,
-  ControlOutlined,
   FileTextOutlined,
   HomeOutlined,
   IdcardOutlined,
@@ -22,6 +21,27 @@ import styles from './styles';
 import HeaderLayout from '@components/HeaderLayout';
 import { SearchProvider } from '@components/SearchContext';
 import { asButton } from '@/utils/asButton';
+import AdminNav from './admin/AdminNav';
+
+// Trang chỉ dành cho học viên: admin mở (kể cả gõ thẳng URL) sẽ bị đưa về khu
+// Quản trị. So khớp CHÍNH XÁC nên trang con (xem thử bài học, bài thực hành)
+// admin vẫn mở được từ các link trong khu Quản trị.
+const STUDENT_ONLY_ROUTES = [
+  '/dashboard/home',
+  '/dashboard/lesson',
+  '/dashboard/library',
+  '/dashboard/practice',
+  '/dashboard/my-courses',
+  '/dashboard/my-roadmap',
+  '/dashboard/premium',
+  '/dashboard/my-notes',
+  '/dashboard/saved',
+  '/dashboard/my-qa',
+  '/dashboard/my-assignments',
+  '/dashboard/achievements',
+  '/dashboard/leaderboard',
+  '/dashboard/mock-exam/history',
+];
 
 const { Sider, Content } = Layout;
 type MenuItem = GetProp<MenuProps, 'items'>[number];
@@ -51,11 +71,16 @@ export default function DashboardLayout({
   const isBlockedAdminRoute =
     pathname.startsWith('/dashboard/admin') && !!userProfile && !isAdmin;
 
+  const isBlockedStudentRoute =
+    isAdmin && STUDENT_ONLY_ROUTES.includes(pathname);
+
   useEffect(() => {
     if (isBlockedAdminRoute) {
       router.replace('/dashboard/home');
+    } else if (isBlockedStudentRoute) {
+      router.replace('/dashboard/admin');
     }
-  }, [isBlockedAdminRoute, router]);
+  }, [isBlockedAdminRoute, isBlockedStudentRoute, router]);
 
   const isHomeSelected = pathname === '/dashboard/home';
   const isLessonSelected = pathname === '/dashboard/lesson';
@@ -63,7 +88,6 @@ export default function DashboardLayout({
   const isPracticeSelected = pathname.startsWith('/dashboard/practice');
   const isMyCoursesSelected = pathname === '/dashboard/my-courses';
   const isMyRoadmapSelected = pathname === '/dashboard/my-roadmap';
-  const isAdminSelected = pathname.startsWith('/dashboard/admin');
   const isPremiumSelected = pathname === '/dashboard/premium';
 
   const menuItems: MenuItem[] = [
@@ -124,63 +148,45 @@ export default function DashboardLayout({
             />
           ),
         },
-        ...(!isAdmin
-          ? [
-              {
-                key: '/dashboard/my-courses',
-                label: 'Tổng Quan',
-                icon: (
-                  <IdcardOutlined
-                    size={20}
-                    hoverMorph={false}
-                    color={isMyCoursesSelected ? '#ffffff' : '#000000'}
-                    activeColor={isMyCoursesSelected ? '#ffffff' : '#000000'}
-                    hoverColor={isMyCoursesSelected ? '#ffffff' : '#000000'}
-                  />
-                ),
-              },
-              {
-                key: '/dashboard/my-roadmap',
-                label: 'Lộ Trình AI',
-                icon: (
-                  <RocketOutlined
-                    size={20}
-                    hoverMorph={false}
-                    color={isMyRoadmapSelected ? '#ffffff' : '#000000'}
-                    activeColor={isMyRoadmapSelected ? '#ffffff' : '#000000'}
-                    hoverColor={isMyRoadmapSelected ? '#ffffff' : '#000000'}
-                  />
-                ),
-              },
-              {
-                key: '/dashboard/premium',
-                label: 'Premium',
-                icon: (
-                  <StarFilled
-                    size={20}
-                    hoverMorph={false}
-                    color={isPremiumSelected ? '#ffffff' : '#000000'}
-                    activeColor={isPremiumSelected ? '#ffffff' : '#000000'}
-                    hoverColor={isPremiumSelected ? '#ffffff' : '#000000'}
-                  />
-                ),
-              },
-            ]
-          : [
-              {
-                key: '/dashboard/admin',
-                label: 'Quản Trị',
-                icon: (
-                  <ControlOutlined
-                    size={20}
-                    hoverMorph={false}
-                    color={isAdminSelected ? '#ffffff' : '#000000'}
-                    activeColor={isAdminSelected ? '#ffffff' : '#000000'}
-                    hoverColor={isAdminSelected ? '#ffffff' : '#000000'}
-                  />
-                ),
-              },
-            ]),
+        {
+          key: '/dashboard/my-courses',
+          label: 'Tổng Quan',
+          icon: (
+            <IdcardOutlined
+              size={20}
+              hoverMorph={false}
+              color={isMyCoursesSelected ? '#ffffff' : '#000000'}
+              activeColor={isMyCoursesSelected ? '#ffffff' : '#000000'}
+              hoverColor={isMyCoursesSelected ? '#ffffff' : '#000000'}
+            />
+          ),
+        },
+        {
+          key: '/dashboard/my-roadmap',
+          label: 'Lộ Trình AI',
+          icon: (
+            <RocketOutlined
+              size={20}
+              hoverMorph={false}
+              color={isMyRoadmapSelected ? '#ffffff' : '#000000'}
+              activeColor={isMyRoadmapSelected ? '#ffffff' : '#000000'}
+              hoverColor={isMyRoadmapSelected ? '#ffffff' : '#000000'}
+            />
+          ),
+        },
+        {
+          key: '/dashboard/premium',
+          label: 'Premium',
+          icon: (
+            <StarFilled
+              size={20}
+              hoverMorph={false}
+              color={isPremiumSelected ? '#ffffff' : '#000000'}
+              activeColor={isPremiumSelected ? '#ffffff' : '#000000'}
+              hoverColor={isPremiumSelected ? '#ffffff' : '#000000'}
+            />
+          ),
+        },
       ],
     },
   ];
@@ -228,16 +234,23 @@ export default function DashboardLayout({
           width: '100%',
           scrollbarWidth: 'none',
         }}>
-        <Menu
-          mode="inline"
-          inlineCollapsed={collapsed}
-          style={styles.menu}
-          selectedKeys={[pathname]}
-          items={menuItems}
-          onClick={item => {
-            onClickItem(item.key);
-          }}
-        />
+        {isAdmin ? (
+          // useSearchParams trong AdminNav cần Suspense khi prerender.
+          <Suspense fallback={null}>
+            <AdminNav collapsed={collapsed} />
+          </Suspense>
+        ) : (
+          <Menu
+            mode="inline"
+            inlineCollapsed={collapsed}
+            style={styles.menu}
+            selectedKeys={[pathname]}
+            items={menuItems}
+            onClick={item => {
+              onClickItem(item.key);
+            }}
+          />
+        )}
       </ScrollView>
     </View>
   );
@@ -250,7 +263,7 @@ export default function DashboardLayout({
         {screens.md && (
           <Sider
             theme="light"
-            width={130}
+            width={isAdmin ? 264 : 130}
             collapsedWidth={68}
             collapsible
             trigger={null}
@@ -261,7 +274,7 @@ export default function DashboardLayout({
           </Sider>
         )}
         <Content style={styles.content}>
-          {isBlockedAdminRoute ? null : children}
+          {isBlockedAdminRoute || isBlockedStudentRoute ? null : children}
         </Content>
       </Layout>
     </Layout>

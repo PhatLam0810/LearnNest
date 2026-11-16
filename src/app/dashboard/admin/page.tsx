@@ -1,12 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Badge, ConfigProvider } from 'antd';
+import { ConfigProvider } from 'antd';
 import { View } from 'react-native-web';
 import { typography } from '@styles';
 import styles from './styles';
 import './styles.scss';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { adminQuery } from '~mdAdmin/redux';
+import { useSearchParams } from 'next/navigation';
+import { ADMIN_DEFAULT_TAB, adminTabLabel } from './AdminNav';
 import UserManage from './userManage/page';
 import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
@@ -26,61 +26,35 @@ import PremiumManage from './premiumManage/page';
 import { ADMIN_PRIMARY } from './adminTheme';
 import motion from '@/styles/motion';
 
-type TabItem = {
-  key: string;
-  label: React.ReactNode;
-  children: React.ReactNode;
+// Nhãn + nhóm của từng mục nằm ở AdminNav (thanh bên); ở đây chỉ map key ->
+// màn hình. Key giữ nguyên số cũ để các link ?tab=13... đã có vẫn chạy.
+const PANES: Record<string, React.ReactNode> = {
+  '0': <OverviewManage />,
+  '1': <UserManage />,
+  '2': <ImportUserManage />,
+  '14': <PracticeClassManage />,
+  '3': <LessonAdmin />,
+  '4': <LessonLearnersOverview />,
+  '11': <GiaoBaiPage />,
+  '12': <QuizManagePage />,
+  '13': <SubmissionsManage />,
+  '10': <MockExamManage />,
+  '15': <PremiumManage />,
+  '9': <PassRateReport />,
+  '8': <QaInbox />,
+  '5': <FeedbackManage />,
+  '6': <AuditLogManage />,
+  '7': <CommentReportsManage />,
 };
 
-// Thứ tự tab theo luồng làm việc của admin (đọc từ trên xuống): tổng quan ->
-// người dùng -> lớp -> khóa học -> giao/làm bài -> hỗ trợ -> nhật ký.
-const buildItems = (qnaPendingCount: number): TabItem[] => [
-  { key: '0', label: 'Tổng Quan', children: <OverviewManage /> },
-  { key: '1', label: 'Quản Trị Người Dùng', children: <UserManage /> },
-  { key: '2', label: 'Tạo Người Dùng', children: <ImportUserManage /> },
-  { key: '14', label: 'Lớp Học', children: <PracticeClassManage /> },
-  { key: '3', label: 'Tạo Khóa Học', children: <LessonAdmin /> },
-  {
-    key: '4',
-    label: 'Tổng Quan Người Học',
-    children: <LessonLearnersOverview />,
-  },
-  { key: '11', label: 'Giao Bài', children: <GiaoBaiPage /> },
-  { key: '12', label: 'Ngân Hàng Câu Hỏi', children: <QuizManagePage /> },
-  { key: '13', label: 'Bài Nộp Học Viên', children: <SubmissionsManage /> },
-  { key: '10', label: 'Đề Thi Thử', children: <MockExamManage /> },
-  { key: '15', label: 'Premium', children: <PremiumManage /> },
-  { key: '9', label: 'Báo Cáo Ngưỡng Đạt', children: <PassRateReport /> },
-  {
-    key: '8',
-    label: (
-      <Badge count={qnaPendingCount} size="default" offset={[8, -2]}>
-        <View style={styles.subTitle}>Hộp Thư Hỏi Đáp</View>
-      </Badge>
-    ),
-    children: <QaInbox />,
-  },
-  { key: '5', label: 'Phản Hồi Người Dùng', children: <FeedbackManage /> },
-  { key: '6', label: 'Nhật Ký Thao Tác', children: <AuditLogManage /> },
-  { key: '7', label: 'Báo Cáo Vi Phạm', children: <CommentReportsManage /> },
-];
-
 const AdminPage: React.FC = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const tab = searchParams.get('tab') || '1'; // Tab đang mở lấy từ URL, mặc định '1'
-  // Tab đã mở giữ nguyên mounted (ẩn/hiện) như antd Tabs cũ để không mất state.
+  const param = useSearchParams().get('tab') || ADMIN_DEFAULT_TAB;
+  const tab = param in PANES ? param : ADMIN_DEFAULT_TAB;
+  // Mục đã mở giữ nguyên mounted (ẩn/hiện) để không mất state khi đổi mục.
   const [visited, setVisited] = useState<string[]>([tab]);
   useEffect(() => {
     setVisited(prev => (prev.includes(tab) ? prev : [...prev, tab]));
   }, [tab]);
-  const selectTab = (key: string) =>
-    router.replace(`/dashboard/admin?tab=${key}`, { scroll: false });
-  // Dùng chung cache với tab Hộp thư: trả lời/bỏ qua xong là huy hiệu tự cập nhật.
-  const { data: qnaStats } = adminQuery.useGetQuestionStatsQuery();
-  const qnaPendingCount = qnaStats?.openCount ?? 0;
-
-  const items = buildItems(qnaPendingCount);
 
   return (
     <ConfigProvider
@@ -108,46 +82,21 @@ const AdminPage: React.FC = () => {
       <div className="admin-page">
         <View style={styles.container}>
           <View style={styles.headerWrapper}>
-            <h1 style={styles.pageTitle}>Quản Trị Hệ Thống</h1>
+            <h1 style={styles.pageTitle}>{adminTabLabel(tab)}</h1>
           </View>
-          {/* Thanh tab xuống dòng thay vì gom vào menu "...": mọi tab luôn
-              hiện, không cuộn ngang. */}
-          <div role="tablist" style={styles.tabStrip as React.CSSProperties}>
-            {items.map(item => (
-              <button
-                key={item.key}
-                type="button"
-                role="tab"
-                id={`admin-tab-${item.key}`}
-                aria-selected={tab === item.key}
-                aria-controls={`admin-pane-${item.key}`}
-                onClick={() => selectTab(item.key)}
-                style={
-                  (tab === item.key
-                    ? { ...styles.tab, ...styles.tabActive }
-                    : styles.tab) as React.CSSProperties
-                }>
-                {item.label}
-              </button>
-            ))}
-          </div>
-          {items
-            .filter(item => visited.includes(item.key))
-            .map(item => (
-              <div
-                key={item.key}
-                role="tabpanel"
-                id={`admin-pane-${item.key}`}
-                aria-labelledby={`admin-tab-${item.key}`}
-                hidden={tab !== item.key}
-                style={
-                  tab === item.key
-                    ? (motion.routeEnter as React.CSSProperties)
-                    : undefined
-                }>
-                {item.children}
-              </div>
-            ))}
+          {visited.map(key => (
+            <section
+              key={key}
+              aria-label={adminTabLabel(key)}
+              hidden={tab !== key}
+              style={
+                tab === key
+                  ? (motion.routeEnter as React.CSSProperties)
+                  : undefined
+              }>
+              {PANES[key]}
+            </section>
+          ))}
         </View>
       </div>
     </ConfigProvider>

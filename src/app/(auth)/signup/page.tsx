@@ -37,7 +37,11 @@ const SignUpPage = () => {
   // yên tại chỗ. Thêm effect giống hệt trang login.
   useEffect(() => {
     if (accessToken) {
-      router.push('/dashboard/home');
+      router.push(
+        accessToken.userProfile?.role?.level <= 2
+          ? '/dashboard/admin'
+          : '/dashboard/home',
+      );
     }
   }, [accessToken]);
 

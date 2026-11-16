@@ -1,0 +1,100 @@
+/* Thanh điều hướng khu Quản trị: nền trắng chữ xanh VHU, dùng ở Sider (desktop) và Drawer (mobile). */
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding-bottom: 12px;
+  font-family: 'Lexend', sans-serif;
+}
+.admin-nav__group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 12px 6px;
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.admin-nav__group:hover {
+  color: var(--color-vhu-primary);
+}
+.admin-nav__chevron {
+  transition: transform 0.2s ease;
+}
+.admin-nav__group[aria-expanded='true'] .admin-nav__chevron {
+  transform: rotate(90deg);
+}
+.admin-nav__divider {
+  width: 28px;
+  margin: 10px auto;
+  border: 0;
+  border-top: 1px solid var(--color-border);
+}
+.admin-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.admin-nav__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: var(--color-vhu-primary);
+  font-size: 14px;
+  line-height: 20px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+.admin-nav__item:hover:not([aria-current='page']) {
+  background: var(--color-surface-subtle);
+}
+.admin-nav__item[aria-current='page'] {
+  background: var(--color-vhu-primary);
+  color: #fff;
+  font-weight: 600;
+}
+.admin-nav__group:focus-visible,
+.admin-nav__item:focus-visible {
+  outline: 2px solid var(--color-vhu-primary);
+  outline-offset: -2px;
+}
+.admin-nav__label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.admin-nav__badge .ant-badge-count {
+  box-shadow: none;
+}
+.admin-nav--collapsed .admin-nav__item {
+  justify-content: center;
+  width: 44px;
+  margin: 0 auto;
+  padding: 0;
+  position: relative;
+}
+.admin-nav--collapsed .admin-nav__badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}

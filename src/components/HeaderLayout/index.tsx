@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { Suspense, useState, useCallback, useEffect } from 'react';
 import {
   Layout,
   Button,
@@ -39,6 +39,7 @@ import { useAppSelector } from '@redux';
 import UserAvatar from '@components/UserAvatar';
 import PremiumBadge from '@components/PremiumBadge';
 import { asButton } from '@/utils/asButton';
+import AdminNav from '@/app/dashboard/admin/AdminNav';
 import SearchBar from '@components/SearchContext/SearchBar';
 import { formatRelativeTime } from '@/utils/time';
 import CourseItem from '@/components/CourseItem';
@@ -247,12 +248,14 @@ const HeaderLayout: React.FC = ({}) => {
     </div>
   );
 
+  const homeHref = isAdmin ? '/dashboard/admin' : '/dashboard/home';
+
   const menuItemsUser = [
     ...(isAdmin
       ? [
           {
             key: 'admin',
-            label: 'Admin',
+            label: 'Quản trị',
             icon: <ControlOutlined />,
             onClick: () => router.push('/dashboard/admin/'),
           },
@@ -329,11 +332,8 @@ const HeaderLayout: React.FC = ({}) => {
             {/* LOGO */}
             <div
               className="header-logo"
-              {...asButton(
-                () => router.push('/dashboard/home'),
-                'Về trang chủ',
-              )}
-              onClick={() => router.push('/dashboard/home')}>
+              {...asButton(() => router.push(homeHref), 'Về trang chủ')}
+              onClick={() => router.push(homeHref)}>
               <div className="header-logo-image-wrap">
                 <Image
                   src="/images/LogoVhu.png"
@@ -400,7 +400,7 @@ const HeaderLayout: React.FC = ({}) => {
                 </Badge>
               </Dropdown>
             )}
-            <PremiumBadge />
+            {!isAdmin && <PremiumBadge />}
             <Dropdown
               trigger={['hover', 'click']}
               menu={{ items: menuItemsUser }}>
@@ -453,41 +453,50 @@ const HeaderLayout: React.FC = ({}) => {
         </div>
 
         <div className="drawer-content">
-          <Button block onClick={() => router.push('/dashboard/home')}>
-            Trang Chủ
-          </Button>
-          <Button
-            block
-            onClick={() => {
-              setOpen(false);
-              router.push('/dashboard/lesson');
-            }}>
-            Khóa Học
-          </Button>
-          <Button
-            block
-            onClick={() => {
-              setOpen(false);
-              router.push('/dashboard/library');
-            }}>
-            Thư Viện
-          </Button>
-          <Button
-            block
-            onClick={() => {
-              setOpen(false);
-              router.push('/dashboard/my-roadmap');
-            }}>
-            Lộ Trình AI
-          </Button>
-          <Button
-            block
-            onClick={() => {
-              setOpen(false);
-              router.push('/dashboard/practice');
-            }}>
-            Thực Hành MOS
-          </Button>
+          {isAdmin && (
+            <Suspense fallback={null}>
+              <AdminNav onNavigate={() => setOpen(false)} />
+            </Suspense>
+          )}
+          {!isAdmin && (
+            <>
+              <Button block onClick={() => router.push('/dashboard/home')}>
+                Trang Chủ
+              </Button>
+              <Button
+                block
+                onClick={() => {
+                  setOpen(false);
+                  router.push('/dashboard/lesson');
+                }}>
+                Khóa Học
+              </Button>
+              <Button
+                block
+                onClick={() => {
+                  setOpen(false);
+                  router.push('/dashboard/library');
+                }}>
+                Thư Viện
+              </Button>
+              <Button
+                block
+                onClick={() => {
+                  setOpen(false);
+                  router.push('/dashboard/my-roadmap');
+                }}>
+                Lộ Trình AI
+              </Button>
+              <Button
+                block
+                onClick={() => {
+                  setOpen(false);
+                  router.push('/dashboard/practice');
+                }}>
+                Thực Hành MOS
+              </Button>
+            </>
+          )}
           {!isAdmin && (
             <Button
               block
@@ -576,28 +585,6 @@ const HeaderLayout: React.FC = ({}) => {
             }}>
             Cài Đặt
           </Button>
-
-          {isAdmin && (
-            <>
-              <Button
-                block
-                onClick={() => router.push('/dashboard/admin/userManage')}>
-                Quản lí người học
-              </Button>
-
-              <Button
-                block
-                onClick={() => router.push('/dashboard/admin/lessonManage')}>
-                Quản lí khóa học
-              </Button>
-
-              <Button
-                block
-                onClick={() => router.push('/dashboard/admin/feedbackManage')}>
-                Phản hồi người dùng
-              </Button>
-            </>
-          )}
 
           <Button danger block onClick={() => dispatch(authAction.logout())}>
             Đăng xuất
