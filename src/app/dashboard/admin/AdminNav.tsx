@@ -67,9 +67,10 @@ export const ADMIN_NAV = [
   },
 ];
 
+export const DEFAULT_TITLE = 'Quản Trị Hệ Thống';
 export const adminTabLabel = (tab: string) =>
   ADMIN_NAV.flatMap(g => g.items).find(i => i.tab === tab)?.label ??
-  'Quản Trị Hệ Thống';
+  DEFAULT_TITLE;
 
 type Props = { collapsed?: boolean; onNavigate?: () => void };
 

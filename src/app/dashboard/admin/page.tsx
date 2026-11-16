@@ -6,7 +6,7 @@ import { typography } from '@styles';
 import styles from './styles';
 import './styles.scss';
 import { useSearchParams } from 'next/navigation';
-import { ADMIN_DEFAULT_TAB, adminTabLabel } from './AdminNav';
+import { ADMIN_DEFAULT_TAB, adminTabLabel, DEFAULT_TITLE } from './AdminNav';
 import UserManage from './userManage/page';
 import ImportUserManage from './userManage/components/ImportUserManage';
 import LessonAdmin from './lessonManage/page';
@@ -49,7 +49,11 @@ const PANES: Record<string, React.ReactNode> = {
 
 const AdminPage: React.FC = () => {
   const param = useSearchParams().get('tab') || ADMIN_DEFAULT_TAB;
-  const tab = param in PANES ? param : ADMIN_DEFAULT_TAB;
+  // Mục có trong thanh bên nhưng đã bị tắt khỏi PANES (vd Giao Bài, Ngân Hàng
+  // Câu Hỏi): báo "tạm tắt" thay vì lặng lẽ nhảy sang Tổng Quan.
+  const isDisabled =
+    !(param in PANES) && adminTabLabel(param) !== DEFAULT_TITLE;
+  const tab = param in PANES || isDisabled ? param : ADMIN_DEFAULT_TAB;
   // Mục đã mở giữ nguyên mounted (ẩn/hiện) để không mất state khi đổi mục.
   const [visited, setVisited] = useState<string[]>([tab]);
   useEffect(() => {
@@ -84,19 +88,26 @@ const AdminPage: React.FC = () => {
           <View style={styles.headerWrapper}>
             <h1 style={styles.pageTitle}>{adminTabLabel(tab)}</h1>
           </View>
-          {visited.map(key => (
-            <section
-              key={key}
-              aria-label={adminTabLabel(key)}
-              hidden={tab !== key}
-              style={
-                tab === key
-                  ? (motion.routeEnter as React.CSSProperties)
-                  : undefined
-              }>
-              {PANES[key]}
-            </section>
-          ))}
+          {isDisabled && (
+            <p role="status" style={styles.disabledNote}>
+              Chức năng này đang tạm tắt.
+            </p>
+          )}
+          {visited
+            .filter(key => key in PANES)
+            .map(key => (
+              <section
+                key={key}
+                aria-label={adminTabLabel(key)}
+                hidden={tab !== key}
+                style={
+                  tab === key
+                    ? (motion.routeEnter as React.CSSProperties)
+                    : undefined
+                }>
+                {PANES[key]}
+              </section>
+            ))}
         </View>
       </div>
     </ConfigProvider>

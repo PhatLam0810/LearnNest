@@ -41,6 +41,11 @@ const styles = StyleSheet.create({
   subTitle: {
     ...typography.body1,
   },
+  disabledNote: {
+    ...typography.body2,
+    color: 'var(--color-text-muted)',
+    margin: 0,
+  },
 });
 
 export default styles;
