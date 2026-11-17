@@ -10,6 +10,7 @@ import { adminQuery } from '~mdAdmin/redux';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { LessonAssignmentItem } from '~mdAdmin/redux/RTKQuery/type';
 import { ThemedTable } from '~mdAdmin/components';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import styles from './styles';
 
 const buttonStyle = { width: 'auto', height: 44 } as const;
@@ -18,6 +19,8 @@ const buttonStyle = { width: 'auto', height: 44 } as const;
 // Học" (chọn lớp -> mở modal -> cuộn xuống mới thấy) vì quá khó tìm. Luồng:
 // chọn khóa học -> chọn 1 hoặc nhiều lớp thuộc khóa đó -> chọn đề -> hạn nộp.
 const GiaoBaiPage: React.FC = () => {
+  // modal.confirm() tĩnh không hiện ở trang này: dùng hook (cần {modalHolder}).
+  const [modal, modalHolder] = Modal.useModal();
   const [lessonId, setLessonId] = useState<string | undefined>();
   const [classIds, setClassIds] = useState<string[]>([]);
   const [taskId, setTaskId] = useState<string | undefined>();
@@ -88,7 +91,7 @@ const GiaoBaiPage: React.FC = () => {
   };
 
   const handleRemove = (item: LessonAssignmentItem) => {
-    Modal.confirm({
+    modal.confirm({
       title: 'Xóa bài đã giao?',
       content: `Bài "${item.taskTitle}" sẽ không còn được giao cho lớp ${item.className}. Bài nộp của học viên vẫn được giữ lại. Không thể hoàn tác.`,
       okText: 'Xóa bài giao',
@@ -199,6 +202,17 @@ const GiaoBaiPage: React.FC = () => {
 
   return (
     <View style={styles.page}>
+      {modalHolder}
+      <AdminGuide
+        title="giao đề thực hành cho lớp"
+        steps={[
+          'Chọn Khóa học.',
+          'Chọn một hoặc nhiều Lớp thực hành thuộc khóa đó (chưa có lớp thì tạo ở tab Lớp Học Thực Hành).',
+          'Chọn Đề thực hành và Hạn nộp, rồi bấm "Giao bài".',
+          'Danh sách bên dưới là các bài đã giao. Bấm Xóa để thu hồi một bài giao (bài nộp của học viên vẫn được giữ).',
+        ]}
+        note="Học viên thấy bài ở mục Bài được giao. Muốn đổi hạn nộp: xóa bài giao rồi giao lại."
+      />
       <View style={styles.headerBlock}>
         <Text style={styles.title}>Giao bài</Text>
         <Text style={styles.subtitle}>

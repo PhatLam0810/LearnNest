@@ -17,6 +17,7 @@ import {
   fromPracticeSubmission,
   fromQuizResult,
 } from '~mdAdmin/components/submissionShared';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import styles from './styles';
 
 const KIND_OPTIONS = [
@@ -27,6 +28,8 @@ const KIND_OPTIONS = [
 const buttonStyle = { width: 'auto', height: 40 } as const;
 
 const SubmissionsManage: React.FC = () => {
+  // modal.confirm() tĩnh không hiện ở trang này: dùng hook (cần {modalHolder}).
+  const [modal, modalHolder] = Modal.useModal();
   const router = useRouter();
   const params = useSearchParams();
   const { isMobile, isTablet } = useResponsive();
@@ -116,7 +119,7 @@ const SubmissionsManage: React.FC = () => {
 
   const handleRegradeAll = () => {
     if (!itemId) return;
-    Modal.confirm({
+    modal.confirm({
       title: `Chấm lại ${items.length} bài nộp?`,
       content:
         'Tất cả bài nộp sẽ được chấm lại theo bộ tiêu chí hiện tại. Điểm chấm tay sẽ bị xóa. Không thể hoàn tác.',
@@ -151,6 +154,15 @@ const SubmissionsManage: React.FC = () => {
 
   return (
     <View style={styles.page}>
+      {modalHolder}
+      <AdminGuide
+        title="xem và chấm bài nộp"
+        steps={[
+          'Chọn loại bài (thực hành hoặc trắc nghiệm) rồi chọn bài cần xem ở ô chọn bài.',
+          'Danh sách bài nộp của học viên hiện bên dưới; bấm vào một bài nộp để xem chi tiết và kết quả chấm.',
+          'Với bài thực hành, có thể chấm lại hoặc ghi đè điểm trong màn hình chi tiết.',
+        ]}
+      />
       <View style={styles.headerBlock}>
         <Text style={styles.title}>Bài nộp của học viên</Text>
         <Text style={styles.subtitle}>

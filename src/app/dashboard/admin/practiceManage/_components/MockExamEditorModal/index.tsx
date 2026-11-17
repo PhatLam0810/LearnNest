@@ -109,6 +109,7 @@ const MockExamEditorModal: React.FC<Props> = ({ open, exam, onClose }) => {
         <Form.Item
           label="Môn"
           name="subject"
+          extra="Môn chỉ để phân loại đề (bài trong đề là bài thực hành chấm file Word/Excel). Đề trắc nghiệm AI/Tiếng Anh có giờ đếm ngược: tạo ở Luyện tập → Trắc Nghiệm ABCD."
           rules={[{ required: true }]}
           initialValue="Excel">
           <Select
@@ -122,6 +123,7 @@ const MockExamEditorModal: React.FC<Props> = ({ open, exam, onClose }) => {
         <Form.Item
           label="Thời lượng (phút)"
           name="durationMinutes"
+          extra="Học viên thấy đồng hồ đếm ngược theo số phút này; hết giờ bài tự nộp."
           rules={[{ required: true, message: 'Nhập thời lượng' }]}
           initialValue={30}>
           <InputNumber min={1} style={{ width: '100%' }} />

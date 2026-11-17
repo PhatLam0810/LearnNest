@@ -85,6 +85,8 @@ const StatBox = ({
 );
 
 const OverviewManage: React.FC = () => {
+  // modal.confirm() tĩnh không hiện ở trang này: dùng hook (cần {modalHolder}).
+  const [modal, modalHolder] = Modal.useModal();
   const router = useRouter();
   const { data: qnaStats } = adminQuery.useGetQuestionStatsQuery();
   const qnaPending = qnaStats?.openCount ?? 0;
@@ -120,7 +122,7 @@ const OverviewManage: React.FC = () => {
   };
 
   const handleRemindDeadline = (row: OverviewDeadline) => {
-    Modal.confirm({
+    modal.confirm({
       title: 'Gửi email nhắc nộp bài?',
       content: `Gửi email và thông báo trong ứng dụng tới học viên lớp ${row.className} chưa nộp "${row.taskTitle}". Không thể thu hồi sau khi gửi.`,
       okText: 'Gửi nhắc',
@@ -141,7 +143,7 @@ const OverviewManage: React.FC = () => {
 
   const handleRemindAll = () => {
     const pending = (data?.deadlines ?? []).filter(d => d.submitted < d.total);
-    Modal.confirm({
+    modal.confirm({
       title: 'Gửi email nhắc tất cả?',
       content: `Có ${pending.length} bài giao còn học viên chưa nộp. Hệ thống gửi lần lượt cho từng lớp. Không thể thu hồi sau khi gửi.`,
       okText: 'Gửi nhắc tất cả',
@@ -165,7 +167,7 @@ const OverviewManage: React.FC = () => {
   };
 
   const handleEmailWeekly = () => {
-    Modal.confirm({
+    modal.confirm({
       title: 'Gửi tóm tắt tuần qua email?',
       content: 'Bản tóm tắt được gửi tới email của tài khoản bạn đang dùng.',
       okText: 'Gửi',
@@ -284,6 +286,7 @@ const OverviewManage: React.FC = () => {
 
   return (
     <View style={styles.wrap}>
+      {modalHolder}
       <View style={styles.statRow}>
         <StatBox
           label="Đăng ký mới (7 ngày)"

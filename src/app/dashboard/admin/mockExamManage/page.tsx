@@ -9,6 +9,7 @@ import { adminQuery } from '~mdAdmin/redux';
 import { MockExam } from '~mdDashboard/types/practice';
 import { FilteredEmptyState, ThemedTable } from '~mdAdmin/components';
 import MockExamEditorModal from '../practiceManage/_components/MockExamEditorModal';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import styles from './styles';
 
 const SUBJECT_OPTIONS = [
@@ -155,6 +156,17 @@ const MockExamManage = () => {
 
   return (
     <View style={styles.container}>
+      <AdminGuide
+        title="tạo đề thi thử MOS"
+        steps={[
+          'Bấm "Tạo đề thi thử".',
+          'Nhập Tên đề, chọn Môn (Word / Excel / Word + Excel) và Thời lượng (phút) tự quy định.',
+          'Chọn các Bài thực hành đưa vào đề (đã tạo ở Khóa Học & Bài Giảng → Bài thực hành), sắp xếp thứ tự.',
+          'Bật Xuất bản để học viên thấy đề ở trang Luyện tập → MOS. Tắt = bản nháp.',
+          'Sửa hoặc Xóa đề bằng nút ở mỗi dòng.',
+        ]}
+        note="Học viên làm bài có đồng hồ đếm ngược, hết giờ bài tự nộp. Đề trắc nghiệm AI/Tiếng Anh có giờ: tạo ở Luyện tập → Trắc Nghiệm ABCD (ô Thời gian làm bài)."
+      />
       {/* Tiêu đề & Giới thiệu */}
       <View style={styles.headerBlock}>
         <View style={styles.headerTextGroup}>
