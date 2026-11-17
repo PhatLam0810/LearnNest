@@ -80,12 +80,19 @@ const LibraryManage: React.FC<{ autoEditId?: string }> = ({ autoEditId }) => {
     },
   ];
 
+  // Tải đủ bài học TRƯỚC rồi mới mở hộp sửa: mở với object thiếu field
+  // (chỉ có _id) làm form đọc type/title = undefined và sập trang.
+  const { data: autoEditLibrary } = adminQuery.useGetLibraryByIdQuery(
+    autoEditId ?? '',
+    { skip: !autoEditId },
+  );
   useEffect(() => {
-    if (autoEditId) {
-      setDataEdit({ _id: autoEditId } as Library);
+    if (autoEditId && autoEditLibrary?._id === autoEditId) {
+      setDataEdit(autoEditLibrary as Library);
+      setSelectedItem(autoEditLibrary as Library);
       setIsVisibleModalUpdate(true);
     }
-  }, [autoEditId]);
+  }, [autoEditId, autoEditLibrary]);
 
   useEffect(() => {
     if (divRef.current) {
