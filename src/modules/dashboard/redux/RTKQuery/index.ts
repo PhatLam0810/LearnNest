@@ -177,6 +177,11 @@ export const dashboardQuery = baseQuery.injectEndpoints({
       query: libraryId => `quiz-play/library/${libraryId}`,
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    getPracticeSubjects: builder.query<{ key: string; label: string }[], void>({
+      query: () => 'quiz-play/subjects',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'PracticeSubject', id: 'LIST' }],
+    }),
     getSubjectQuizzes: builder.query<PlayQuizSummary[], string>({
       query: subject => `quiz-play/subject/${subject}`,
       transformResponse: (res: AxiosResponse<any>) => res.data,

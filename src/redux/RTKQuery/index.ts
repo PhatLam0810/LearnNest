@@ -40,6 +40,7 @@ export const baseQuery = createApi({
   // CourseRating: submitCourseRating (mutation) cần tự làm getCourseRating
   // (query) refetch lại điểm trung bình mới ngay sau khi gửi đánh giá.
   tagTypes: [
+    'PracticeSubject',
     'PracticeTask',
     'ReminderLog',
     'CourseRating',

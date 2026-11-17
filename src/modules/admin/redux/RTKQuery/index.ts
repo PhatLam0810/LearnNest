@@ -62,6 +62,7 @@ import {
   RemindClassResult,
   SelectableUser,
   OverridePracticePayload,
+  PracticeSubjectItem,
   PracticeSubmissionDetail,
   QuizResultDetail,
   RegradeTaskResult,
@@ -1282,6 +1283,35 @@ export const adminQuery = baseQuery.injectEndpoints({
         { type: 'Quiz', id },
         { type: 'Quiz', id: 'LIST' },
       ],
+    }),
+    // ---- Mục của trang Luyện tập (AI, Tiếng Anh...) ----
+    getPracticeSubjects: builder.query<PracticeSubjectItem[], void>({
+      query: () => 'quiz/subjects',
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      providesTags: [{ type: 'PracticeSubject', id: 'LIST' }],
+    }),
+    createPracticeSubject: builder.mutation<PracticeSubjectItem, string>({
+      query: label => ({
+        url: 'quiz/subjects',
+        method: 'POST',
+        body: { label },
+      }),
+      invalidatesTags: [{ type: 'PracticeSubject', id: 'LIST' }],
+    }),
+    renamePracticeSubject: builder.mutation<
+      PracticeSubjectItem,
+      { key: string; label: string }
+    >({
+      query: ({ key, label }) => ({
+        url: `quiz/subjects/${key}`,
+        method: 'PUT',
+        body: { label },
+      }),
+      invalidatesTags: [{ type: 'PracticeSubject', id: 'LIST' }],
+    }),
+    deletePracticeSubject: builder.mutation<void, string>({
+      query: key => ({ url: `quiz/subjects/${key}`, method: 'DELETE' }),
+      invalidatesTags: [{ type: 'PracticeSubject', id: 'LIST' }],
     }),
     getQuestionBank: builder.query<QuestionBankItem[], string | void>({
       query: search => ({

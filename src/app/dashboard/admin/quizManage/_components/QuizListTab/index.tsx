@@ -9,16 +9,19 @@ import { Quiz } from '~mdAdmin/redux/RTKQuery/type';
 import {
   ContentToolbar,
   FilteredEmptyState,
+  PracticeSubjectsModal,
   QuizBuilderModal,
   ThemedTable,
 } from '~mdAdmin/components';
-import { subjectLabel } from '~mdAdmin/utils/practiceSubjects';
+import { usePracticeSubjects } from '~mdAdmin/utils/practiceSubjects';
 import pageStyles from '../../styles';
 import styles from './styles';
 
 const buttonStyle = { width: 'auto', height: 40 } as const;
 
 const QuizListTab: React.FC = () => {
+  const { labelOf: subjectLabel } = usePracticeSubjects();
+  const [isSubjectsOpen, setIsSubjectsOpen] = useState(false);
   const {
     data: quizzes,
     isFetching,
@@ -153,7 +156,14 @@ const QuizListTab: React.FC = () => {
         addLabel="Tạo bài tập"
         onAdd={openCreate}
       />
+      <AppButton style={buttonStyle} onClick={() => setIsSubjectsOpen(true)}>
+        Quản lý mục luyện tập
+      </AppButton>
       {renderContent()}
+      <PracticeSubjectsModal
+        open={isSubjectsOpen}
+        onClose={() => setIsSubjectsOpen(false)}
+      />
 
       <QuizBuilderModal
         isVisible={isBuilderOpen}

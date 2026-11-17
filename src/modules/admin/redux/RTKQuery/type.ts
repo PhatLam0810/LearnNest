@@ -428,6 +428,11 @@ export interface QuizQuestion {
   bankItemId?: string;
 }
 
+export interface PracticeSubjectItem {
+  key: string;
+  label: string;
+}
+
 export interface Quiz {
   _id: string;
   title: string;

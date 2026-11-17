@@ -14,7 +14,7 @@ import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
 import { CreateQuizPayload, Quiz } from '~mdAdmin/redux/RTKQuery/type';
 import { Library } from '~mdDashboard/types';
-import { PRACTICE_QUIZ_SUBJECTS } from '~mdAdmin/utils/practiceSubjects';
+import { usePracticeSubjects } from '~mdAdmin/utils/practiceSubjects';
 import styles from './styles';
 
 interface QuizBuilderModalProps {
@@ -36,6 +36,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
   initialQuestions,
 }) => {
   const isEdit = !!editing;
+  const { options: subjectOptions } = usePracticeSubjects();
   const { isMobile } = useResponsive();
   const [form] = Form.useForm();
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
@@ -208,8 +209,8 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                     extra="Hiện ở trang Luyện tập của học viên, đúng mục đã chọn.">
                     <Select
                       allowClear
-                      placeholder="Chọn mục (AI...)"
-                      options={PRACTICE_QUIZ_SUBJECTS}
+                      placeholder="Chọn mục luyện tập"
+                      options={subjectOptions}
                     />
                   </Form.Item>
                   <Form.Item

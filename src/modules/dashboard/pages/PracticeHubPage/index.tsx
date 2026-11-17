@@ -7,7 +7,8 @@ import { dashboardQuery } from '~mdDashboard/redux';
 import { QuizSummaryItems } from '~mdDashboard/components/LibraryQuizList';
 import {
   DEFAULT_PRACTICE_TAB,
-  PRACTICE_HUB_TABS,
+  MOS_TAB,
+  PracticeHubTab,
 } from '~mdDashboard/constants/practiceSubjects';
 import PracticeListPage from '../PracticeListPage';
 import styles from './styles';
@@ -42,9 +43,16 @@ const PracticeHubPage: React.FC = () => {
   const router = useRouter();
   const params = useSearchParams();
   const requested = params.get('mode');
-  const active =
-    PRACTICE_HUB_TABS.find(t => t.key === requested) ??
-    PRACTICE_HUB_TABS.find(t => t.key === DEFAULT_PRACTICE_TAB)!;
+  const { data: subjects } = dashboardQuery.useGetPracticeSubjectsQuery();
+  const tabs: PracticeHubTab[] = [
+    MOS_TAB,
+    ...(subjects ?? []).map(s => ({
+      key: s.key,
+      label: s.label,
+      quizSubject: s.key,
+    })),
+  ];
+  const active = tabs.find(t => t.key === requested) ?? MOS_TAB;
 
   return (
     <View>
@@ -55,7 +63,7 @@ const PracticeHubPage: React.FC = () => {
         <Segmented
           aria-label="Chọn mục luyện tập"
           value={active.key}
-          options={PRACTICE_HUB_TABS.map(t => ({
+          options={tabs.map(t => ({
             value: t.key,
             label: t.label,
           }))}
