@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Text } from 'react-native-web';
-import { Input, List, Modal, Space } from 'antd';
+import { Button, Input, List, Modal, Space } from 'antd';
 import AppButton from '@components/AppButton';
 import { messageApi } from '@hooks';
 import { adminQuery } from '~mdAdmin/redux';
@@ -100,28 +100,38 @@ const PracticeSubjectsModal: React.FC<{
               actions={
                 editKey === s.key
                   ? [
-                      <button
+                      <Button
                         key="save"
-                        disabled={renaming}
+                        size="small"
+                        type="primary"
+                        loading={renaming}
                         onClick={handleRename}>
                         Lưu
-                      </button>,
-                      <button key="cancel" onClick={() => setEditKey(null)}>
+                      </Button>,
+                      <Button
+                        key="cancel"
+                        size="small"
+                        onClick={() => setEditKey(null)}>
                         Hủy
-                      </button>,
+                      </Button>,
                     ]
                   : [
-                      <button
+                      <Button
                         key="edit"
+                        size="small"
                         onClick={() => {
                           setEditKey(s.key);
                           setEditLabel(s.label);
                         }}>
                         Sửa
-                      </button>,
-                      <button key="del" onClick={() => setDeleting(s)}>
+                      </Button>,
+                      <Button
+                        key="del"
+                        size="small"
+                        danger
+                        onClick={() => setDeleting(s)}>
                         Xóa
-                      </button>,
+                      </Button>,
                     ]
               }>
               {editKey === s.key ? (

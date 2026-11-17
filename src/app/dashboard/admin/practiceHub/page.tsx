@@ -2,7 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { View } from 'react-native-web';
-import { AdminGuide, ContentTab, ContentTabStrip } from '~mdAdmin/components';
+import AppButton from '@components/AppButton';
+import {
+  AdminGuide,
+  ContentTab,
+  ContentTabStrip,
+  PracticeSubjectsModal,
+} from '~mdAdmin/components';
 import { usePracticeSubjects } from '~mdAdmin/utils/practiceSubjects';
 import PracticeManage from '../practiceManage';
 import { PracticeLessonManage } from '../lessonManage/_components';
@@ -36,6 +42,7 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
   const sub = params.get('sub');
   const editId = params.get('edit') || undefined;
   const [activeKey, setActiveKey] = useState(sub || initialTab);
+  const [isSubjectsOpen, setIsSubjectsOpen] = useState(false);
   useEffect(() => {
     if (sub) setActiveKey(sub);
   }, [sub]);
@@ -97,9 +104,21 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
         steps={[
           'Mỗi thẻ ở trên là một mục của trang Luyện tập học viên: MOS (bài thực hành, phần thực hành, đề thi thử) và các mục trắc nghiệm như AI, Tiếng Anh.',
           'Bấm vào thẻ để xem các bài đã tạo ở mục đó; dùng Cập nhật / Xóa ở mỗi dòng và nút Tạo để thêm bài mới.',
-          'Ở thẻ trắc nghiệm, "Tạo bài tập" sẽ tạo sẵn bài thuộc đúng mục đang xem. Muốn thêm mục mới (vd Tiếng Anh) bấm "Quản lý mục luyện tập".',
+          'Ở thẻ trắc nghiệm, "Tạo bài tập" sẽ tạo sẵn bài thuộc đúng mục đang xem. Muốn thêm mục mới (Tiếng Anh, Canva...) bấm nút "Thêm / sửa mục luyện tập" ở đầu trang: mục mới tự hiện thành thẻ ở đây và thành tab ở trang Luyện tập của học viên.',
           'Giao đề MOS cho lớp: mục "Giao Đề Thực Hành (MOS)" ở thanh bên.',
         ]}
+      />
+      <View style={{ flexDirection: 'row', paddingBottom: 12 }}>
+        <AppButton
+          type="primary"
+          style={{ width: 'auto', height: 40 }}
+          onClick={() => setIsSubjectsOpen(true)}>
+          + Thêm / sửa mục luyện tập (Tiếng Anh, Canva...)
+        </AppButton>
+      </View>
+      <PracticeSubjectsModal
+        open={isSubjectsOpen}
+        onClose={() => setIsSubjectsOpen(false)}
       />
       <ContentTabStrip
         tabs={tabs}
