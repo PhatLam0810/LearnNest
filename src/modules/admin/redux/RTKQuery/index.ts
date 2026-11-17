@@ -1071,6 +1071,19 @@ export const adminQuery = baseQuery.injectEndpoints({
         { type: 'ClassAssignment', id: classId },
       ],
     }),
+    updateClassAssignmentDue: builder.mutation<
+      void,
+      { classId: string; assignmentId: string; dueDate: string }
+    >({
+      query: ({ classId, assignmentId, dueDate }) => ({
+        url: `admin/practice-classes/${classId}/assignments/${assignmentId}`,
+        method: 'PUT',
+        body: { dueDate },
+      }),
+      invalidatesTags: (_result, _error, { classId }) => [
+        { type: 'ClassAssignment', id: classId },
+      ],
+    }),
     removeClassAssignment: builder.mutation<
       void,
       { classId: string; assignmentId: string }

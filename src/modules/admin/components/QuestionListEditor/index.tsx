@@ -184,6 +184,15 @@ const QuestionListEditor: React.FC<Props> = ({
             )}
           </View>
 
+          {q.type === 'dragdrop' && (
+            <Text
+              style={{ color: 'var(--color-text-muted)', paddingBottom: 8 }}>
+              Kéo thả: gõ {'{{1}}'}, {'{{2}}'}... vào nội dung câu hỏi để tạo ô
+              trống. Mỗi đáp án chọn &quot;Ô số mấy&quot; nó điền vào. Đáp án để
+              &quot;Nhiễu&quot; (không chọn ô) là đáp án gây nhiễu: học viên vẫn
+              thấy nhưng không thuộc ô nào, dùng để đánh lừa.
+            </Text>
+          )}
           <View
             style={[styles.answerBlock, isMobile && styles.answerBlockMobile]}>
             <View style={styles.answersList}>
@@ -194,7 +203,8 @@ const QuestionListEditor: React.FC<Props> = ({
                       allowClear
                       value={a.blankIndex}
                       placeholder="Nhiễu"
-                      aria-label="Ô trống của đáp án này"
+                      aria-label="Ô trống của đáp án này (để trống nếu là đáp án nhiễu)"
+                      notFoundContent="Chưa có ô trống: gõ {{1}}, {{2}}... vào nội dung câu hỏi trước"
                       style={styles.blankSelect}
                       options={[...new Set(blankNumbers(q.questionText))]
                         .sort((x, y) => x - y)

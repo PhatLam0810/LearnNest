@@ -43,7 +43,7 @@ const PracticeHubPage: React.FC = () => {
   const router = useRouter();
   const params = useSearchParams();
   const requested = params.get('mode');
-  const { data: subjects } = dashboardQuery.useGetPracticeSubjectsQuery();
+  const { data: subjects } = dashboardQuery.useGetPracticeHubTabsQuery();
   const tabs: PracticeHubTab[] = [
     MOS_TAB,
     ...(subjects ?? []).map(s => ({

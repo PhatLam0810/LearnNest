@@ -49,6 +49,30 @@ const GiaoBaiPage: React.FC = () => {
   const [assignBulk, { isLoading: isAssigning }] =
     adminQuery.useAssignTaskToClassesBulkMutation();
   const [removeAssignment] = adminQuery.useRemoveClassAssignmentMutation();
+  const [updateDue, { isLoading: isSavingDue }] =
+    adminQuery.useUpdateClassAssignmentDueMutation();
+  const [editingDue, setEditingDue] = useState<LessonAssignmentItem | null>(
+    null,
+  );
+  const [newDue, setNewDue] = useState<Dayjs | null>(null);
+  const handleSaveDue = async () => {
+    if (!editingDue || !newDue) return;
+    try {
+      await updateDue({
+        classId: editingDue.classId,
+        assignmentId: editingDue.assignmentId,
+        dueDate: newDue.toISOString(),
+      }).unwrap();
+      messageApi.success('Đã đổi hạn nộp');
+      setEditingDue(null);
+      refetchAssignments();
+    } catch (e) {
+      messageApi.error(
+        (e as { data?: { message?: string } })?.data?.message ||
+          'Đổi hạn nộp thất bại',
+      );
+    }
+  };
 
   const classes = classesRes?.items || [];
   const isFormIncomplete = !classIds.length || !taskId || !dueDate;
@@ -146,14 +170,26 @@ const GiaoBaiPage: React.FC = () => {
       title: 'Hành động',
       key: 'action',
       align: 'right',
-      width: 120,
+      width: 200,
       render: (_: unknown, r) => (
-        <button
-          type="button"
-          style={styles.deleteButton as React.CSSProperties}
-          onClick={() => handleRemove(r)}>
-          Xóa
-        </button>
+        <View
+          style={{ flexDirection: 'row', gap: 12, justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            style={styles.deleteButton as React.CSSProperties}
+            onClick={() => {
+              setEditingDue(r);
+              setNewDue(dayjs(r.dueDate));
+            }}>
+            Sửa hạn nộp
+          </button>
+          <button
+            type="button"
+            style={styles.deleteButton as React.CSSProperties}
+            onClick={() => handleRemove(r)}>
+            Xóa
+          </button>
+        </View>
       ),
     },
   ];
@@ -203,15 +239,35 @@ const GiaoBaiPage: React.FC = () => {
   return (
     <View style={styles.page}>
       {modalHolder}
+      <Modal
+        title="Sửa hạn nộp"
+        open={!!editingDue}
+        okText="Lưu"
+        cancelText="Hủy"
+        confirmLoading={isSavingDue}
+        okButtonProps={{ disabled: !newDue }}
+        onCancel={() => setEditingDue(null)}
+        onOk={handleSaveDue}>
+        <Text>{`Bài "${editingDue?.taskTitle}" của lớp ${editingDue?.className}`}</Text>
+        <DatePicker
+          size="large"
+          aria-label="Hạn nộp mới"
+          style={{ width: '100%', marginTop: 12 }}
+          value={newDue}
+          onChange={setNewDue}
+          format="DD/MM/YYYY HH:mm"
+          showTime={{ format: 'HH:mm' }}
+        />
+      </Modal>
       <AdminGuide
         title="giao đề thực hành cho lớp"
         steps={[
           'Chọn Khóa học.',
           'Chọn một hoặc nhiều Lớp thực hành thuộc khóa đó (chưa có lớp thì tạo ở tab Lớp Học Thực Hành).',
           'Chọn Đề thực hành và Hạn nộp, rồi bấm "Giao bài".',
-          'Danh sách bên dưới là các bài đã giao. Bấm Xóa để thu hồi một bài giao (bài nộp của học viên vẫn được giữ).',
+          'Danh sách bên dưới là các bài đã giao. Bấm Sửa hạn nộp để đổi hạn, bấm Xóa để thu hồi một bài giao (bài nộp của học viên vẫn được giữ).',
         ]}
-        note="Học viên thấy bài ở mục Bài được giao. Muốn đổi hạn nộp: xóa bài giao rồi giao lại."
+        note="Học viên thấy bài ở mục Bài được giao. Muốn đổi hạn nộp: bấm Sửa hạn nộp ở dòng bài giao."
       />
       <View style={styles.headerBlock}>
         <Text style={styles.title}>Giao bài</Text>
