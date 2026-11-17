@@ -15,6 +15,7 @@ import { useResponsive } from '@/styles/responsive';
 import LibraryDetailItem, {
   LibraryDetailItemHandle,
 } from '~mdDashboard/components/LibraryDetailItem';
+import LibraryQuizList from '~mdDashboard/components/LibraryQuizList';
 import PracticeTaskContent from '~mdDashboard/components/PracticeTaskContent';
 import CurriculumRail, {
   CurriculumRailSkeleton,
@@ -532,6 +533,7 @@ const ModuleDetailPage = () => {
                 onWatchFinish={onWatchFinish}
                 onClickSubmit={handleSubmit}
               />
+              <LibraryQuizList libraryId={selectedLibrary?._id} />
               <Tabs
                 items={[
                   {
@@ -590,6 +592,7 @@ const ModuleDetailPage = () => {
                 <Text style={styles.description}>
                   {selectedLibrary?.description}
                 </Text>
+                <LibraryQuizList libraryId={selectedLibrary?._id} />
                 {!taskId && selectedLibrary && (
                   <Tabs
                     items={[

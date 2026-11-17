@@ -12,6 +12,7 @@ import {
   QuizBuilderModal,
   ThemedTable,
 } from '~mdAdmin/components';
+import { subjectLabel } from '~mdAdmin/utils/practiceSubjects';
 import pageStyles from '../../styles';
 import styles from './styles';
 
@@ -66,10 +67,17 @@ const QuizListTab: React.FC = () => {
       key: 'title',
     },
     {
+      title: 'Mục luyện tập',
+      key: 'subject',
+      render: (_: unknown, r: Quiz) => subjectLabel(r.subject) || '—',
+    },
+    {
       title: 'Bài học',
       key: 'libraryTitle',
       render: (_: unknown, r: Quiz) =>
-        typeof r.libraryId === 'object' ? r.libraryId.title : '—',
+        r.libraryId && typeof r.libraryId === 'object'
+          ? r.libraryId.title
+          : '—',
     },
     {
       title: 'Số câu',

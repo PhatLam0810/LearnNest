@@ -71,16 +71,17 @@ export default async function HomePage() {
         <div className="landing__hero-text">
           <div className="landing__hero-tag">
             <Sparkles size={16} className="text-secondary" />
-            <span>Nền tảng Luyện thi MOS & CNTT chuẩn Đại học Văn Hiến</span>
+            <span>Nền tảng học tập số chuẩn Đại học Văn Hiến</span>
           </div>
           <h1>
-            Chinh Phục Chứng Chỉ MOS & Kỹ Năng Số Với{' '}
+            Học Word, Excel, AI & Tiếng Anh Cùng{' '}
             <span className="text-gradient">Trợ Lý AI Thực Chiến</span>
           </h1>
           <p>
-            LearnNest đồng hành cùng sinh viên VHU bứt phá điểm số chuẩn đầu ra:
-            thực hành Word & Excel sát đề Certiport, nhận feedback chấm điểm tự
-            động sau 3 giây và theo dõi tiến độ rõ ràng từng ngày.
+            LearnNest đồng hành cùng sinh viên VHU nâng kỹ năng số và ngoại ngữ:
+            luyện Word & Excel sát đề MOS, học AI ứng dụng, rèn Tiếng Anh qua
+            trắc nghiệm theo chủ đề, nhận phản hồi tự động và theo dõi tiến độ
+            rõ ràng từng ngày.
           </p>
           <div className="landing__hero-ctas">
             <Link
@@ -91,7 +92,7 @@ export default async function HomePage() {
             <Link
               href="/login"
               className="landing__btn landing__btn--outline landing__btn--large">
-              Trải nghiệm thi thử MOS
+              Đăng nhập tài khoản
             </Link>
           </div>
 
@@ -137,7 +138,7 @@ export default async function HomePage() {
           <div className="landing__hero-img-wrap">
             <img
               src="/images/BannerScreen1.png"
-              alt="LearnNest MOS & IT Learning Platform"
+              alt="LearnNest - nền tảng học Word, Excel, AI và Tiếng Anh"
               className="landing__hero-main-img"
             />
 
@@ -177,23 +178,40 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 3. INTERACTIVE PRODUCT SHOWCASE (Mô Phỏng Phòng Thi MOS & AI Grading) */}
-      <section className="landing__showcase-section">
+      {/* 3. SOCIAL PROOF / VHU STUDENT TESTIMONIALS */}
+      <section className="landing__testimonials-section">
         <div className="landing__container">
           <Reveal>
             <div className="landing__section-head">
-              <span className="section-pill">TRỰC QUAN & THỰC CHIẾN</span>
-              <h2>Trải Nghiệm Phòng Thi MOS Ngay Trên Web</h2>
+              <span className="section-pill">CẢM NHẬN SINH VIÊN</span>
+              <h2>Sinh Viên Đại Học Văn Hiến Nói Gì Về LearnNest?</h2>
               <p>
-                Giao diện mô phỏng sát đề thi quốc tế Certiport cùng công nghệ
-                AI phân tích trực tiếp cấu trúc file Word (.docx) và Excel
-                (.xlsx).
+                Câu chuyện thật từ các bạn sinh viên đã trải nghiệm kỳ thi MOS
+                tại Đại học Văn Hiến.
               </p>
             </div>
           </Reveal>
 
-          <Reveal delay={0.2}>
-            <LandingProductShowcase />
+          <Reveal>
+            <div className="interview-video">
+              {/* preload="none": file ~13MB chỉ tải khi người xem bấm phát. */}
+              <video
+                controls
+                playsInline
+                preload="none"
+                poster="/videos/phong-van-sinh-vien.jpg"
+                aria-label="Sinh viên Đại học Văn Hiến chia sẻ kinh nghiệm thi MOS"
+                className="interview-video__player">
+                <source
+                  src="/videos/phong-van-sinh-vien.mp4"
+                  type="video/mp4"
+                />
+              </video>
+              <p className="interview-video__caption">
+                Chia sẻ từ các bạn sinh viên đã trải nghiệm kỳ thi MOS tại VHU:
+                cách ôn tập, giữ tâm lý và những lưu ý khi làm bài.
+              </p>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -222,7 +240,7 @@ export default async function HomePage() {
                   <Target size={24} />
                 </div>
                 <strong>{stats.totalPracticeTasks}+</strong>
-                <span>Bài tập thực hành MOS</span>
+                <span>Bài tập thực hành</span>
               </div>
               <div className="landing__stat">
                 <div className="stat-icon-wrap stat-icon-wrap--warning">
@@ -242,10 +260,10 @@ export default async function HomePage() {
           <Reveal>
             <div className="landing__section-head">
               <span className="section-pill">TÍNH NĂNG VƯỢT TRỘI</span>
-              <h2>Mọi Công Cụ Bạn Cần Để Đạt Điểm Tuyệt Đối</h2>
+              <h2>Mọi Công Cụ Bạn Cần Để Học Tốt Và Đạt Điểm Cao</h2>
               <p>
-                Được nghiên cứu và tối ưu riêng cho chương trình Tin học Đại
-                Cương & Ôn thi MOS tại VHU.
+                Từ luyện thi MOS Word & Excel đến học AI và Tiếng Anh, tất cả
+                được tối ưu riêng cho sinh viên Đại học Văn Hiến.
               </p>
             </div>
           </Reveal>
@@ -308,8 +326,9 @@ export default async function HomePage() {
                 </div>
                 <h3>Trợ Lý AI Coach Đồng Hành 24/7</h3>
                 <p>
-                  Phân tích lỗi sai từng công thức, giải thích cặn kẽ tại sao
-                  file bị trừ điểm và đề xuất bài tập khắc phục ngay lập tức.
+                  Phân tích lỗi sai, giải thích cặn kẽ vì sao bị trừ điểm và đề
+                  xuất bài tập khắc phục ngay lập tức, từ Excel đến AI và Tiếng
+                  Anh.
                 </p>
                 <div className="mini-chat-bubble">
                   <div className="chat-avatar">AI</div>
@@ -365,13 +384,14 @@ export default async function HomePage() {
                 <div className="landing__feature-icon landing__feature-icon--lib">
                   <Library size={28} />
                 </div>
-                <h3>Kho Tài Nguyên Độc Quyền</h3>
+                <h3>Học Đa Lĩnh Vực, Một Nơi Duy Nhất</h3>
                 <p>
-                  Toàn bộ slide bài giảng, video hướng dẫn thao tác chi tiết và
-                  bộ đề ôn tập được cập nhật liên tục theo chuẩn mới nhất.
+                  Bài giảng video, tài liệu và bộ câu hỏi trắc nghiệm được chia
+                  rõ theo từng môn, mở rộng dần để bạn học mọi kỹ năng cần thiết
+                  ở cùng một tài khoản.
                 </p>
                 <div className="mini-resource-tag">
-                  <span>📚 50+ Tài liệu PDF & Đề thi mẫu</span>
+                  <span>📚 Word · Excel · AI · Tiếng Anh</span>
                 </div>
               </div>
             </Reveal>
@@ -379,40 +399,23 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 6. SOCIAL PROOF / VHU STUDENT TESTIMONIALS */}
-      <section className="landing__testimonials-section">
+      {/* 6. INTERACTIVE PRODUCT SHOWCASE (Mô Phỏng Phòng Thi MOS & AI Grading) */}
+      <section className="landing__showcase-section">
         <div className="landing__container">
           <Reveal>
             <div className="landing__section-head">
-              <span className="section-pill">CẢM NHẬN SINH VIÊN</span>
-              <h2>Sinh Viên Đại Học Văn Hiến Nói Gì Về LearnNest?</h2>
+              <span className="section-pill">THỰC HÀNH MOS</span>
+              <h2>Trải Nghiệm Phòng Thi MOS Mô Phỏng Ngay Trên Web</h2>
               <p>
-                Câu chuyện thật từ các bạn sinh viên đã trải nghiệm kỳ thi MOS
-                tại Đại học Văn Hiến.
+                Giao diện mô phỏng sát đề thi quốc tế Certiport cùng công nghệ
+                AI phân tích trực tiếp cấu trúc file Word (.docx) và Excel
+                (.xlsx).
               </p>
             </div>
           </Reveal>
 
-          <Reveal>
-            <div className="interview-video">
-              {/* preload="none": file ~13MB chỉ tải khi người xem bấm phát. */}
-              <video
-                controls
-                playsInline
-                preload="none"
-                poster="/videos/phong-van-sinh-vien.jpg"
-                aria-label="Sinh viên Đại học Văn Hiến chia sẻ kinh nghiệm thi MOS"
-                className="interview-video__player">
-                <source
-                  src="/videos/phong-van-sinh-vien.mp4"
-                  type="video/mp4"
-                />
-              </video>
-              <p className="interview-video__caption">
-                Chia sẻ từ các bạn sinh viên đã trải nghiệm kỳ thi MOS tại VHU:
-                cách ôn tập, giữ tâm lý và những lưu ý khi làm bài.
-              </p>
-            </div>
+          <Reveal delay={0.2}>
+            <LandingProductShowcase />
           </Reveal>
         </div>
       </section>
@@ -426,11 +429,10 @@ export default async function HomePage() {
               <div className="cta-shape cta-shape--2" />
               <div className="landing__cta-content">
                 <span className="cta-pill">ĐĂNG KÝ HOÀN TOÀN MIỄN PHÍ</span>
-                <h2>Sẵn Sàng Chinh Phục Điểm Tuyệt Đối MOS Hôm Nay?</h2>
+                <h2>Sẵn Sàng Nâng Cấp Kỹ Năng Của Bạn Hôm Nay?</h2>
                 <p>
                   Tham gia cùng hơn 2,500+ sinh viên Đại học Văn Hiến bứt phá kỹ
-                  năng số, nhận chứng chỉ quốc tế và hoàn thành chuẩn đầu ra dễ
-                  dàng.
+                  năng số, tiếng Anh và hoàn thành chuẩn đầu ra dễ dàng.
                 </p>
                 <div className="cta-action-group">
                   <Link

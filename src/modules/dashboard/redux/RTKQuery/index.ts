@@ -24,6 +24,10 @@ import {
   MyOverview,
   MyQuestionListResponse,
   MyQuizResultDetail,
+  PlayQuiz,
+  PlayQuizSummary,
+  QuestionResponse,
+  QuizSubmitResult,
   MyResultsParams,
   MyResultsResponse,
   NotificationListResponse,
@@ -169,6 +173,29 @@ export const dashboardQuery = baseQuery.injectEndpoints({
     }),
     // Bài nộp là bản ghi bất biến (mỗi lần làm lại tạo _id mới) nên không cần
     // tag/invalidate; BE chỉ trả cho đúng chủ bài nộp.
+    getLibraryQuizzes: builder.query<PlayQuizSummary[], string>({
+      query: libraryId => `quiz-play/library/${libraryId}`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getSubjectQuizzes: builder.query<PlayQuizSummary[], string>({
+      query: subject => `quiz-play/subject/${subject}`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    getPlayQuiz: builder.query<PlayQuiz, string>({
+      query: id => `quiz-play/${id}`,
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    submitPlayQuiz: builder.mutation<
+      QuizSubmitResult,
+      { id: string; responses: QuestionResponse[] }
+    >({
+      query: ({ id, responses }) => ({
+        url: `quiz-play/${id}/submit`,
+        method: 'POST',
+        body: { responses },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
     getMyQuizResult: builder.query<MyQuizResultDetail, string>({
       query: id => `lesson/results/${id}`,
       transformResponse: (res: AxiosResponse<any>) => res.data,

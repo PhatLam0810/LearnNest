@@ -14,8 +14,11 @@ export interface DeleteAdminRoleParams {
 
 export interface CreateUserParams {
   email: string;
-  fullName: string;
-  studentId: string;
+  // true = tạo tài khoản quản trị: chỉ cần email + password.
+  isAdmin?: boolean;
+  password?: string;
+  fullName?: string;
+  studentId?: string;
   phoneNumber?: string;
   class?: string;
   faculty?: string;
@@ -428,7 +431,10 @@ export interface QuizQuestion {
 export interface Quiz {
   _id: string;
   title: string;
-  libraryId: string | { _id: string; title: string };
+  // Có thể không gắn bài học (bài thuộc 1 mục Luyện tập).
+  libraryId?: string | { _id: string; title: string };
+  // Mục của trang Luyện tập (vd 'ai').
+  subject?: string;
   questions: QuizQuestion[];
   timeLimitMinutes?: number;
   passThresholdPercent: number;
@@ -440,7 +446,8 @@ export interface Quiz {
 
 export interface CreateQuizPayload {
   title: string;
-  libraryId: string;
+  libraryId?: string;
+  subject?: string;
   questions: QuizQuestion[];
   timeLimitMinutes?: number;
   passThresholdPercent: number;

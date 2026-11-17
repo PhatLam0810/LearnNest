@@ -42,10 +42,21 @@ export const ADMIN_NAV = [
     label: 'Quản lý đào tạo',
     items: [
       { tab: '3', label: 'Khóa Học & Bài Giảng', Icon: BookOpenOutlined },
-      { tab: '11', label: 'Giao Bài Tập', Icon: CarryOutOutlined },
       { tab: '13', label: 'Bài Nộp & Chấm Điểm', Icon: FileTextOutlined },
-      { tab: '12', label: 'Ngân Hàng Câu Hỏi', Icon: QuestionCircleOutlined },
+    ],
+  },
+  {
+    // Mọi thứ liên quan trang Luyện tập của học viên: MOS (thực hành, thi thử)
+    // và các mục trắc nghiệm ABCD (AI, ...).
+    label: 'Luyện tập',
+    items: [
+      { tab: '11', label: 'Giao Đề Thực Hành (MOS)', Icon: CarryOutOutlined },
       { tab: '10', label: 'Đề Thi Thử MOS', Icon: ExperimentOutlined },
+      {
+        tab: '12',
+        label: 'Trắc Nghiệm ABCD & Ngân Hàng Câu Hỏi',
+        Icon: QuestionCircleOutlined,
+      },
     ],
   },
   {

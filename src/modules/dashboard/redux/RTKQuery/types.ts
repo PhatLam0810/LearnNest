@@ -516,3 +516,66 @@ export interface MyClassItem {
   termLabel: string;
   courses: MyClassCourse[];
 }
+
+// ---- Bài tập trắc nghiệm 3 dạng (BE: /quiz-play) ----
+export type PlayQuestionType = 'single' | 'multiple' | 'dragdrop';
+
+export interface PlayAnswer {
+  // Chỉ số gốc của đáp án trong câu hỏi - bài nộp trỏ theo đó (đáp án có thể bị trộn thứ tự).
+  index: number;
+  text: string;
+}
+
+export interface PlayQuestion {
+  index: number;
+  type: PlayQuestionType;
+  questionText: string;
+  blanks?: number;
+  answers: PlayAnswer[];
+}
+
+export interface PlayQuiz {
+  _id: string;
+  title: string;
+  timeLimitMinutes: number | null;
+  passThresholdPercent: number;
+  maxAttempts: number | null;
+  attemptsUsed: number;
+  questions: PlayQuestion[];
+}
+
+export interface PlayQuizSummary {
+  _id: string;
+  title: string;
+  questionCount: number;
+  timeLimitMinutes: number | null;
+  passThresholdPercent: number;
+  maxAttempts: number | null;
+  attemptsUsed: number;
+  bestPercent: number | null;
+  passed: boolean;
+}
+
+export interface QuestionResponse {
+  questionIndex: number;
+  selected?: number[];
+  placements?: Record<string, number>;
+}
+
+export interface QuestionReview {
+  index: number;
+  type: PlayQuestionType;
+  correct: boolean;
+  correctIndexes?: number[];
+  correctPlacements?: Record<string, number>;
+  explanation: string | null;
+}
+
+export interface QuizSubmitResult {
+  correctCount: number;
+  totalQuestions: number;
+  percent: number;
+  passed: boolean;
+  passThresholdPercent: number;
+  review: QuestionReview[];
+}

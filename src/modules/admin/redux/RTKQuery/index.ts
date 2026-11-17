@@ -22,6 +22,7 @@ import {
   CreateMockExamPayload,
   CreateQuizPayload,
   GenerateDraftResult,
+  QuizQuestion,
   Quiz,
   QuestionBankItem,
   CreatePracticeClassPayload,
@@ -327,6 +328,17 @@ export const adminQuery = baseQuery.injectEndpoints({
         body: params,
       }),
       transformResponse: (res: any) => res.data,
+    }),
+    // Cấp / gỡ quyền Admin cho tài khoản đã có.
+    setUserAdminRole: builder.mutation<
+      void,
+      { userId: string; isAdmin: boolean }
+    >({
+      query: ({ userId, isAdmin }) => ({
+        url: `admin/users/${userId}/admin-role`,
+        method: 'POST',
+        body: { isAdmin },
+      }),
     }),
     createUser: builder.mutation({
       query: (params: CreateUserParams) => ({
@@ -935,6 +947,14 @@ export const adminQuery = baseQuery.injectEndpoints({
       transformResponse: (res: AxiosResponse<any>) => res.data,
       invalidatesTags: [{ type: 'Class', id: 'LIST' }],
     }),
+    // Xoá hẳn lớp thực hành (BE gỡ bài giao + quan hệ khóa, giữ tiến độ học viên).
+    deleteClass: builder.mutation<void, string>({
+      query: classId => ({
+        url: `admin/practice-classes/${classId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Class', id: 'LIST' }],
+    }),
     updateClass: builder.mutation<
       ClassItem,
       { classId: string; body: UpdateClassBody }
@@ -1202,6 +1222,31 @@ export const adminQuery = baseQuery.injectEndpoints({
       query: id => ({ url: `quiz/${id}`, method: 'GET' }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
       providesTags: (_result, _error, id) => [{ type: 'Quiz', id }],
+    }),
+    // Thêm/sửa/xoá câu hỏi trực tiếp trong Ngân hàng câu hỏi.
+    createBankQuestions: builder.mutation<
+      QuestionBankItem[],
+      { questions: QuizQuestion[] }
+    >({
+      query: body => ({ url: 'quiz/question-bank', method: 'POST', body }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [{ type: 'QuestionBank', id: 'LIST' }],
+    }),
+    updateBankQuestion: builder.mutation<
+      QuestionBankItem,
+      { id: string; body: QuizQuestion }
+    >({
+      query: ({ id, body }) => ({
+        url: `quiz/question-bank/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+      invalidatesTags: [{ type: 'QuestionBank', id: 'LIST' }],
+    }),
+    deleteBankQuestion: builder.mutation<void, string>({
+      query: id => ({ url: `quiz/question-bank/${id}`, method: 'DELETE' }),
+      invalidatesTags: [{ type: 'QuestionBank', id: 'LIST' }],
     }),
     // Sinh bản nháp câu hỏi từ ảnh/PDF/zip bằng Gemini (không lưu gì).
     generateQuizDraft: builder.mutation<GenerateDraftResult, FormData>({

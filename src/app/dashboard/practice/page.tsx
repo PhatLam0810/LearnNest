@@ -1,7 +1,13 @@
 'use client';
 
-import PracticeListPage from '~mdDashboard/pages/PracticeListPage';
+import { Suspense } from 'react';
+import PracticeHubPage from '~mdDashboard/pages/PracticeHubPage';
 
-const Page = () => <PracticeListPage />;
+// useSearchParams (chọn mục) cần Suspense khi prerender.
+const Page = () => (
+  <Suspense fallback={null}>
+    <PracticeHubPage />
+  </Suspense>
+);
 
 export default Page;

@@ -42,3 +42,11 @@
   margin-top: 16px;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3); /* Thêm bóng cho sider */
 }
+
+/* Hàng tài khoản quản trị trong bảng người dùng */
+.admin-page .user-row-admin > td {
+  background: var(--color-surface-subtle);
+}
+.admin-page .user-row-admin > td:first-child {
+  box-shadow: inset 3px 0 0 var(--color-vhu-primary);
+}

@@ -122,6 +122,11 @@ const styles = StyleSheet.create({
     borderColor: 'var(--color-border)',
     borderRadius: 12,
   },
+  // Cùng thuộc tính borderColor với actionButton để ghi đè gọn, không lẫn longhand.
+  dangerAction: {
+    color: 'var(--color-error)',
+    borderColor: 'var(--color-error)',
+  },
 });
 
 export default styles;

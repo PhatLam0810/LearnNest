@@ -13,7 +13,13 @@ import {
   Card,
   Segmented,
   InputNumber,
+  Dropdown,
+  Radio,
+  Tag,
 } from 'antd';
+import type { MenuProps } from 'antd';
+import { ControlOutlined, MoreOutlined } from '@components/AppIcon';
+import { useAppSelector } from '@redux';
 import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
 import { adminQuery } from '~mdAdmin/redux';
@@ -47,7 +53,11 @@ const UserManage = () => {
     filter,
   } = useAppPagination<UserItem>({
     apiUrl: 'user/getListUser',
+    params: { pageSize: 10 },
   });
+  const myId = useAppSelector(
+    state => state.authReducer.tokenInfo?.userProfile?._id,
+  );
 
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
@@ -57,6 +67,14 @@ const UserManage = () => {
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
   const [createUserForm] = Form.useForm<CreateUserParams>();
+  const isCreatingAdmin = !!Form.useWatch('isAdmin', createUserForm);
+  const [setAdminRole, { isLoading: isChangingRole }] =
+    adminQuery.useSetUserAdminRoleMutation();
+  // Hộp xác nhận dạng khai báo: Modal.confirm() không hiện ở trang này.
+  const [roleChange, setRoleChange] = useState<{
+    user: UserItem;
+    isAdmin: boolean;
+  } | null>(null);
   const [isModalDeleteUser, setModalDeleteUser] = useState(false);
   const [infoUser, setInfoUser] = useState<UserItem>(null);
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
@@ -157,29 +175,133 @@ const UserManage = () => {
   const handleCreateUser = async (value: any) => {
     try {
       const res = await createUser(value).unwrap();
-      const payload: any = {
-        accounts: [res],
-      };
-      await sendEmails(payload).unwrap();
+      // Admin tự đặt mật khẩu nên không gửi email kích hoạt.
+      if (!value.isAdmin) {
+        await sendEmails({ accounts: [res] } as any).unwrap();
+      }
       refresh();
+      createUserForm.resetFields();
       setIsModalCreateUserOpen(false);
-      messageApi.success('Tạo user thành công');
+      messageApi.success(
+        value.isAdmin ? 'Đã tạo tài khoản Admin' : 'Tạo user thành công',
+      );
     } catch (error) {
-      messageApi.error(error?.data?.message);
+      messageApi.error(error?.data?.message || 'Tạo tài khoản thất bại');
     }
   };
+
+  const adminLevel = (u: UserItem) =>
+    typeof u.role?.level === 'number' && u.role.level <= 2
+      ? u.role.level
+      : null;
+
+  const confirmSetAdmin = (user: UserItem, isAdmin: boolean) =>
+    setRoleChange({ user, isAdmin });
+
+  const applyRoleChange = async () => {
+    if (!roleChange) return;
+    try {
+      await setAdminRole({
+        userId: roleChange.user._id,
+        isAdmin: roleChange.isAdmin,
+      }).unwrap();
+      messageApi.success(
+        roleChange.isAdmin ? 'Đã cấp quyền Admin' : 'Đã gỡ quyền Admin',
+      );
+      setRoleChange(null);
+      refresh();
+    } catch (error) {
+      messageApi.error((error as any)?.data?.message || 'Đổi quyền thất bại');
+    }
+  };
+
+  const actionItems = (record: UserItem): MenuProps['items'] => {
+    const level = adminLevel(record);
+    const isSelf = record._id === myId;
+    const items: MenuProps['items'] = [
+      {
+        key: 'profile',
+        label: 'Hồ sơ học tập',
+        onClick: () => setProfileUserId(record._id),
+      },
+      {
+        key: 'grant',
+        label: 'Cấp Premium',
+        onClick: () => setGrantUser(record),
+      },
+    ];
+    if (isActivePremium(record)) {
+      items.push({
+        key: 'revoke',
+        label: 'Thu hồi Premium',
+        onClick: () => handleRevokePremium(record._id),
+      });
+    }
+    // Admin cấp cao (level 1) và chính mình: không đổi quyền ở đây.
+    const locked = isSelf || (level !== null && level < 2);
+    items.push(
+      { type: 'divider' },
+      level === null
+        ? {
+            key: 'make-admin',
+            label: 'Cấp quyền Admin',
+            disabled: isSelf,
+            onClick: () => confirmSetAdmin(record, true),
+          }
+        : {
+            key: 'remove-admin',
+            label: 'Gỡ quyền Admin',
+            disabled: locked,
+            onClick: () => confirmSetAdmin(record, false),
+          },
+      { type: 'divider' },
+      {
+        key: 'delete',
+        label: 'Xóa Tài khoản',
+        danger: true,
+        disabled: isSelf,
+        onClick: () => {
+          setInfoUser(record);
+          setModalDeleteUser(true);
+        },
+      },
+    );
+    return items;
+  };
+
   const columns: TableProps<UserItem>['columns'] = [
     {
       title: 'Họ và tên',
       dataIndex: 'fullName',
       key: 'fullName',
+      render: (name: string, record: UserItem) => {
+        const level = adminLevel(record);
+        return (
+          <Space size={8}>
+            <span>{name || record.email}</span>
+            {level !== null && (
+              <Tag
+                color={level < 2 ? 'purple' : 'blue'}
+                icon={<ControlOutlined size={12} hoverMorph={false} />}>
+                {record.role?.name || 'Admin'}
+              </Tag>
+            )}
+          </Space>
+        );
+      },
     },
     {
       title: 'Loại',
       dataIndex: 'userType',
       key: 'userType',
-      render: (v?: 'student' | 'guest') =>
-        v === 'guest' ? (
+      render: (v: 'student' | 'guest' | undefined, record: UserItem) =>
+        adminLevel(record) !== null ? (
+          <StateTag
+            label="Quản trị viên"
+            color="var(--color-vhu-primary)"
+            bg="var(--color-surface-subtle)"
+          />
+        ) : v === 'guest' ? (
           <StateTag
             label="Khách"
             color="var(--color-warning)"
@@ -197,6 +319,21 @@ const UserManage = () => {
       title: 'Mã sinh viên',
       dataIndex: 'studentId',
       key: 'studentId',
+      // Vừa đủ "211A290041"; dài hơn thì cắt bằng "...", rê chuột xem đầy đủ.
+      render: (v?: string) => (
+        <span
+          title={v}
+          style={{
+            display: 'inline-block',
+            maxWidth: '11ch',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            verticalAlign: 'bottom',
+          }}>
+          {v}
+        </span>
+      ),
     },
     {
       title: 'Email',
@@ -243,26 +380,21 @@ const UserManage = () => {
     },
     {
       key: 'action',
+      width: 56,
+      align: 'center',
+      // Ghim bên phải: bảng rộng phải kéo ngang, nút thao tác luôn nằm trong tầm mắt.
+      fixed: 'right',
       render: (record: UserItem) => (
-        <Space>
-          <Button onClick={() => setProfileUserId(record._id)}>
-            Hồ sơ học tập
-          </Button>
-          <Button onClick={() => setGrantUser(record)}>Cấp Premium</Button>
-          {isActivePremium(record) && (
-            <Button onClick={() => handleRevokePremium(record._id)}>
-              Thu hồi Premium
-            </Button>
-          )}
+        <Dropdown
+          trigger={['click']}
+          menu={{ items: actionItems(record) }}
+          placement="bottomRight">
           <Button
-            danger
-            onClick={() => {
-              setInfoUser(record);
-              setModalDeleteUser(true);
-            }}>
-            Xóa Tài khoản
-          </Button>
-        </Space>
+            type="text"
+            aria-label={`Thao tác với ${record.fullName || record.email}`}
+            icon={<MoreOutlined size={20} hoverMorph={false} />}
+          />
+        </Dropdown>
       ),
     },
   ];
@@ -335,6 +467,9 @@ const UserManage = () => {
             columns={columns}
             dataSource={listItem}
             rowKey={record => record._id}
+            rowClassName={record =>
+              adminLevel(record) !== null ? 'user-row-admin' : ''
+            }
             rowSelection={{
               selectedRowKeys: selectedKeys,
               onChange: keys => setSelectedKeys(keys),
@@ -349,7 +484,7 @@ const UserManage = () => {
             }}
             pagination={{
               current: currentData?.pageNum,
-              pageSize: currentData?.pageSize,
+              pageSize: 10,
               total: currentData?.totalRecords,
               showSizeChanger: false,
             }}
@@ -363,77 +498,96 @@ const UserManage = () => {
         title=" Tạo tài khoản"
         open={isModalCreateUserOpen}
         onCancel={() => setIsModalCreateUserOpen(false)}
-        onOk={() => handleCreateUser(createUserForm.getFieldsValue())}
+        onOk={() =>
+          createUserForm
+            .validateFields()
+            .then(handleCreateUser)
+            .catch(() => undefined)
+        }
         confirmLoading={isLoadingCreateUser}>
-        <Form form={createUserForm} layout="vertical">
-          <Form.Item
-            label="Họ và Tên"
-            name="fullName"
-            rules={[
-              {
-                required: true,
-                message: 'Nhập họ và tên',
-              },
-            ]}>
-            <Input />
+        <Form
+          form={createUserForm}
+          layout="vertical"
+          initialValues={{ isAdmin: false }}>
+          <Form.Item label="Loại tài khoản" name="isAdmin">
+            <Radio.Group>
+              <Radio value={false}>Học viên</Radio>
+              <Radio value={true}>Quản trị viên (Admin)</Radio>
+            </Radio.Group>
           </Form.Item>
-
+          {!isCreatingAdmin && (
+            <Form.Item
+              label="Họ và Tên"
+              name="fullName"
+              rules={[{ required: true, message: 'Nhập họ và tên' }]}>
+              <Input />
+            </Form.Item>
+          )}
           <Form.Item
             label="Email"
             name="email"
             rules={[
-              {
-                required: true,
-                message: 'Nhập email',
-              },
+              { required: true, message: 'Nhập email' },
+              { type: 'email', message: 'Email không hợp lệ' },
             ]}>
             <Input />
           </Form.Item>
-          <Form.Item
-            label="Mã sinh viên"
-            name="studentId"
-            rules={[
-              {
-                required: true,
-                message: 'Nhập mã sinh viên',
-              },
-            ]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Mã lớp"
-            name="class"
-            rules={[
-              {
-                required: true,
-                message: 'Nhập mã lớp',
-              },
-            ]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Ngành"
-            name="major"
-            rules={[
-              {
-                required: true,
-                message: 'Nhập ngành',
-              },
-            ]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Khoa"
-            name="faculty"
-            rules={[
-              {
-                required: true,
-                message: 'Nhập khoa',
-              },
-            ]}>
-            <Input />
-          </Form.Item>
+          {isCreatingAdmin ? (
+            <Form.Item
+              label="Mật khẩu"
+              name="password"
+              rules={[
+                { required: true, message: 'Nhập mật khẩu' },
+                { min: 8, message: 'Mật khẩu cần ít nhất 8 ký tự' },
+              ]}>
+              <Input.Password
+                autoComplete="new-password"
+                placeholder="Ít nhất 8 ký tự"
+              />
+            </Form.Item>
+          ) : (
+            <>
+              <Form.Item
+                label="Mã sinh viên"
+                name="studentId"
+                rules={[{ required: true, message: 'Nhập mã sinh viên' }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Mã lớp"
+                name="class"
+                rules={[{ required: true, message: 'Nhập mã lớp' }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Ngành"
+                name="major"
+                rules={[{ required: true, message: 'Nhập ngành' }]}>
+                <Input />
+              </Form.Item>
+              <Form.Item
+                label="Khoa"
+                name="faculty"
+                rules={[{ required: true, message: 'Nhập khoa' }]}>
+                <Input />
+              </Form.Item>
+            </>
+          )}
         </Form>
+      </Modal>
+      <Modal
+        title={roleChange?.isAdmin ? 'Cấp quyền Admin?' : 'Gỡ quyền Admin?'}
+        open={!!roleChange}
+        okText={roleChange?.isAdmin ? 'Cấp quyền' : 'Gỡ quyền'}
+        cancelText="Hủy"
+        confirmLoading={isChangingRole}
+        onCancel={() => setRoleChange(null)}
+        onOk={applyRoleChange}>
+        <Text>
+          {roleChange?.isAdmin
+            ? `${roleChange.user.fullName || roleChange.user.email} sẽ vào được khu Quản trị và không còn thấy giao diện học viên.`
+            : `${roleChange?.user.fullName || roleChange?.user.email} sẽ trở lại là người dùng thường.`}
+        </Text>
       </Modal>
       <Modal
         title="Cấp Premium"

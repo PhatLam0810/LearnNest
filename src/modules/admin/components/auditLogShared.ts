@@ -15,6 +15,11 @@ export type AuditLogItem = {
 export const ACTION_LABEL: Record<string, string> = {
   'user.create': 'Tạo người dùng',
   'user.delete': 'Xóa người dùng',
+  'user.setAdminRole': 'Cấp/gỡ quyền Admin',
+  'admin.practiceClass.delete': 'Xóa lớp học thực hành',
+  'questionBank.create': 'Thêm câu hỏi vào ngân hàng',
+  'questionBank.update': 'Sửa câu hỏi trong ngân hàng',
+  'questionBank.delete': 'Xóa câu hỏi khỏi ngân hàng',
   'user.role.grant': 'Cấp quyền admin',
   'user.role.revoke': 'Gỡ quyền admin',
   'user.import.bulk': 'Import hàng loạt người dùng',

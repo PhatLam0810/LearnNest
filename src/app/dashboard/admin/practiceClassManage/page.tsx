@@ -41,6 +41,7 @@ const PracticeClassManage: React.FC = () => {
   const [editing, setEditing] = useState<ClassItem | undefined>();
   const [detailId, setDetailId] = useState<string | undefined>();
   const [archivingItem, setArchivingItem] = useState<ClassItem | null>(null);
+  const [deletingItem, setDeletingItem] = useState<ClassItem | null>(null);
 
   const { data, isFetching, isError, refetch } = adminQuery.useGetClassesQuery({
     status: status === 'all' ? undefined : status,
@@ -49,6 +50,8 @@ const PracticeClassManage: React.FC = () => {
     pageSize: PAGE_SIZE,
   });
   const [updateClass] = adminQuery.useUpdateClassMutation();
+  const [deleteClass, { isLoading: isDeleting }] =
+    adminQuery.useDeleteClassMutation();
   const [exportReport, { isLoading: isExporting }] =
     adminQuery.useExportClassesReportMutation();
   const items = data?.items ?? [];
@@ -89,6 +92,17 @@ const PracticeClassManage: React.FC = () => {
   };
 
   const confirmArchive = (item: ClassItem) => setArchivingItem(item);
+
+  const handleDelete = async () => {
+    if (!deletingItem) return;
+    try {
+      await deleteClass(deletingItem._id).unwrap();
+      messageApi.success('Đã xóa lớp học');
+      setDeletingItem(null);
+    } catch (err: unknown) {
+      messageApi.error(apiErrorMessage(err, 'Xóa lớp học thất bại'));
+    }
+  };
 
   const handleExport = async () => {
     try {
@@ -176,6 +190,18 @@ const PracticeClassManage: React.FC = () => {
                 : confirmArchive(r)
             }>
             {r.status === 'archived' ? 'Bỏ lưu trữ' : 'Lưu trữ'}
+          </button>
+          <button
+            type="button"
+            aria-label={`Xóa lớp ${r.code || r.name}`}
+            style={
+              {
+                ...styles.actionButton,
+                ...styles.dangerAction,
+              } as React.CSSProperties
+            }
+            onClick={() => setDeletingItem(r)}>
+            Xóa
           </button>
         </View>
       ),
@@ -334,6 +360,22 @@ const PracticeClassManage: React.FC = () => {
         <Text style={styles.mutedText}>
           Lớp đã lưu trữ không thêm được học viên mới. Dữ liệu học viên và bài
           giao vẫn được giữ, bạn có thể khôi phục lớp bất cứ lúc nào.
+        </Text>
+      </Modal>
+      <Modal
+        title={`Xóa lớp ${deletingItem?.code || deletingItem?.name}?`}
+        open={!!deletingItem}
+        okText="Xóa lớp"
+        cancelText="Hủy"
+        okButtonProps={{ danger: true, loading: isDeleting }}
+        onCancel={() => setDeletingItem(null)}
+        onOk={handleDelete}>
+        <Text style={styles.mutedText}>
+          Lớp có {deletingItem?.memberCount ?? 0} học viên sẽ bị xóa vĩnh viễn,
+          kèm các bài đã giao cho lớp và liên kết lớp - khóa (học viên mất quyền
+          vào các khóa chỉ dành riêng cho lớp này). Tài khoản, tiến độ học và
+          điểm của học viên được giữ nguyên. Không thể hoàn tác; nếu chỉ muốn ẩn
+          lớp, hãy dùng &quot;Lưu trữ&quot;.
         </Text>
       </Modal>
     </View>
