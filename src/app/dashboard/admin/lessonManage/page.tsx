@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { View } from 'react-native-web';
 import styles from './styles';
 import { ModuleManage, LessonManage, LibraryManage } from './_components';
@@ -15,11 +16,13 @@ const tabs: ContentTab[] = [
   { key: '4', label: 'Bài học' },
 ];
 
-const tabContent: Record<string, React.ReactNode> = {
+const tabContent = (
+  editLibraryId?: string,
+): Record<string, React.ReactNode> => ({
   '1': <LessonManage />,
   '2': <ModuleManage />,
-  '4': <LibraryManage />,
-};
+  '4': <LibraryManage autoEditId={editLibraryId} />,
+});
 
 const guides: Record<
   string,
@@ -53,12 +56,16 @@ const guides: Record<
       'Trong cửa sổ mở ra: nhập tên bài tập, thêm câu hỏi (chọn 1 / chọn nhiều / kéo thả) hoặc tạo từ ảnh/PDF bằng AI, đặt thời gian và điểm đạt, rồi Lưu.',
       'Học viên sẽ thấy bài tập ở cuối trang bài học đó.',
     ],
-    note: 'Sửa hoặc xóa bài tập đã gắn: vào "Luyện tập → Quản Lý Bài Luyện Tập" (thẻ của mục tương ứng).',
+    note: 'Sửa hoặc xóa bài tập đã gắn: vào "Luyện tập → Quản Lý Bài Luyện Tập" → thẻ "Trắc nghiệm gắn bài học".',
   },
 };
 
 const LessonAdmin: React.FC = () => {
-  const [activeKey, setActiveKey] = useState('1');
+  const editLibraryId = useSearchParams().get('editLibrary') || undefined;
+  const [activeKey, setActiveKey] = useState(editLibraryId ? '4' : '1');
+  useEffect(() => {
+    if (editLibraryId) setActiveKey('4');
+  }, [editLibraryId]);
 
   return (
     <View style={styles.container}>
@@ -69,7 +76,7 @@ const LessonAdmin: React.FC = () => {
       />
       <View style={styles.tabBody}>
         {guides[activeKey] ? <AdminGuide {...guides[activeKey]} /> : null}
-        {tabContent[activeKey]}
+        {tabContent(editLibraryId)[activeKey]}
       </View>
     </View>
   );

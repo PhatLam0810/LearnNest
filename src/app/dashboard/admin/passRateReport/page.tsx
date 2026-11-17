@@ -2,6 +2,8 @@
 import React from 'react';
 import { Text, View } from 'react-native-web';
 import { Table, TableProps, Tag, Statistic, Card } from 'antd';
+import { useRouter } from 'next/navigation';
+import { asButton } from '@/utils/asButton';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PassRateReportRow } from '~mdDashboard/redux/RTKQuery/types';
 import AdminGuide from '~mdAdmin/components/AdminGuide';
@@ -13,6 +15,14 @@ import StatCard from '../../home/_components/StatCard';
 // admin thấy nội dung nào cần xem lại độ khó sau khi ngưỡng đạt được siết
 // lên 80% cho cả 2 loại bài. Xem LessonService.getPassRateReport (BE).
 const PassRateReport: React.FC = () => {
+  const router = useRouter();
+  // Bấm vào bài: thực hành -> trình sửa bài thực hành; trắc nghiệm -> sửa bài học chứa bài kiểm tra.
+  const openEditor = (r: PassRateReportRow) =>
+    router.push(
+      r.type === 'practice'
+        ? `/dashboard/admin?tab=16&sub=mos-tasks&edit=${r.id}`
+        : `/dashboard/admin?tab=3&editLibrary=${r.id}`,
+    );
   const { data, isFetching } = dashboardQuery.useGetPassRateReportQuery();
 
   const passRateColor = (rate: number) => {
@@ -27,8 +37,17 @@ const PassRateReport: React.FC = () => {
       dataIndex: 'name',
       key: 'name',
       render: (_: unknown, r: PassRateReportRow) => (
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <Text style={{ fontSize: 14 }}>{r.name}</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 8,
+            cursor: 'pointer',
+          }}
+          {...asButton(() => openEditor(r), `Sửa bài ${r.name}`)}>
+          <Text style={{ fontSize: 14, textDecorationLine: 'underline' }}>
+            {r.name}
+          </Text>
           <Tag color={r.type === 'practice' ? 'orange' : 'blue'}>
             {r.type === 'practice' ? 'Thực hành' : 'Trắc nghiệm'}
           </Tag>
@@ -78,7 +97,7 @@ const PassRateReport: React.FC = () => {
           steps={[
             'Xem Tổng lượt làm bài, Tỉ lệ đạt chung và Ngưỡng đạt hiện tại ở các ô trên cùng.',
             'Bảng bên dưới theo từng bài: Lượt làm, Lượt đạt, Tỉ lệ đạt và Điểm TB.',
-            'Bài có tỉ lệ đạt thấp bất thường thường là bài quá khó hoặc đề có lỗi: mở bài đó để rà lại.',
+            'Bài có tỉ lệ đạt thấp bất thường thường là bài quá khó hoặc đề có lỗi: bấm vào tên bài để mở trang sửa (bài thực hành mở trình sửa đề, bài trắc nghiệm mở trình sửa bài học chứa bài kiểm tra), sửa rồi Lưu là có hiệu lực ngay.',
           ]}
         />
         <div className="pass-rate-report-summary-row">

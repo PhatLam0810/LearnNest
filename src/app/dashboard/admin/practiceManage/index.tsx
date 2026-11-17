@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native-web';
 import { Modal, Select, Space, Tag } from 'antd';
 import { messageApi } from '@hooks';
@@ -18,7 +18,8 @@ import PracticeTaskEditorDrawer from './_components/PracticeTaskEditorDrawer';
 import PracticeSubmissionsModal from './_components/PracticeSubmissionsModal';
 import styles from './styles';
 
-const PracticeManage = () => {
+// autoEditId: mở sẵn trình sửa của bài này (link từ Báo Cáo Ngưỡng Đạt).
+const PracticeManage: React.FC<{ autoEditId?: string }> = ({ autoEditId }) => {
   const [subjectFilter, setSubjectFilter] = useState<
     PracticeSubject | undefined
   >();
@@ -42,6 +43,13 @@ const PracticeManage = () => {
   const filteredData = (data || []).filter(task =>
     task.title.toLowerCase().includes(search.toLowerCase()),
   );
+
+  useEffect(() => {
+    if (autoEditId) {
+      setEditingTaskId(autoEditId);
+      setIsDrawerOpen(true);
+    }
+  }, [autoEditId]);
 
   const openCreate = () => {
     setEditingTaskId(undefined);

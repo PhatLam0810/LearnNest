@@ -16,7 +16,8 @@ import { Library } from '~mdDashboard/types';
 import CreateLibraryModal from '~mdAdmin/components/CreateLibraryModal';
 import QuizBuilderModal from '~mdAdmin/components/QuizBuilderModal';
 
-const LibraryManage = () => {
+// autoEditId: mở sẵn modal sửa bài học này (link từ Báo Cáo Ngưỡng Đạt).
+const LibraryManage: React.FC<{ autoEditId?: string }> = ({ autoEditId }) => {
   const divRef = useRef(null);
 
   const [height, setHeight] = useState(0);
@@ -78,6 +79,13 @@ const LibraryManage = () => {
       ),
     },
   ];
+
+  useEffect(() => {
+    if (autoEditId) {
+      setDataEdit({ _id: autoEditId } as Library);
+      setIsVisibleModalUpdate(true);
+    }
+  }, [autoEditId]);
 
   useEffect(() => {
     if (divRef.current) {

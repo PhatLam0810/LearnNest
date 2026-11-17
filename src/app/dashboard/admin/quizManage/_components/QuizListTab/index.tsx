@@ -18,6 +18,9 @@ import { usePracticeSubjects } from '~mdAdmin/utils/practiceSubjects';
 import pageStyles from '../../styles';
 import styles from './styles';
 
+// subject đặc biệt: bài trắc nghiệm gắn vào bài học (không thuộc mục luyện tập nào).
+export const LESSON_LINKED = '__lesson';
+
 const buttonStyle = { width: 'auto', height: 40 } as const;
 
 const QuizListTab: React.FC<{ subject?: string }> = ({ subject }) => {
@@ -39,7 +42,8 @@ const QuizListTab: React.FC<{ subject?: string }> = ({ subject }) => {
 
   const filtered = (quizzes || []).filter(
     q =>
-      (!subject || q.subject === subject) &&
+      (!subject ||
+        (subject === LESSON_LINKED ? !q.subject : q.subject === subject)) &&
       q.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
@@ -182,7 +186,7 @@ const QuizListTab: React.FC<{ subject?: string }> = ({ subject }) => {
       <QuizBuilderModal
         isVisible={isBuilderOpen}
         editing={editing}
-        presetSubject={subject}
+        presetSubject={subject === LESSON_LINKED ? undefined : subject}
         onClose={() => setIsBuilderOpen(false)}
       />
 

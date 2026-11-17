@@ -1,12 +1,15 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { View } from 'react-native-web';
 import { AdminGuide, ContentTab, ContentTabStrip } from '~mdAdmin/components';
 import { usePracticeSubjects } from '~mdAdmin/utils/practiceSubjects';
 import PracticeManage from '../practiceManage';
 import { PracticeLessonManage } from '../lessonManage/_components';
 import MockExamManage from '../mockExamManage/page';
-import QuizListTab from '../quizManage/_components/QuizListTab';
+import QuizListTab, {
+  LESSON_LINKED,
+} from '../quizManage/_components/QuizListTab';
 import QuestionBankTab from '../quizManage/_components/QuestionBankTab';
 import pageStyles from '../lessonManage/styles';
 import '../lessonManage/styles.scss';
@@ -17,6 +20,10 @@ const MOS_TABS: ContentTab[] = [
   { key: 'mos-exams', label: 'MOS · Đề thi thử' },
 ];
 const BANK_TAB: ContentTab = { key: 'bank', label: 'Ngân hàng câu hỏi' };
+const LESSON_TAB: ContentTab = {
+  key: 'lesson-quizzes',
+  label: 'Trắc nghiệm gắn bài học',
+};
 
 // Một chỗ quản lý mọi bài luyện tập đã tạo, chia theo mục giống trang Luyện
 // tập của học viên: MOS (thực hành, thi thử) và mỗi mục trắc nghiệm (AI...).
@@ -24,7 +31,14 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
   initialTab = 'mos-tasks',
 }) => {
   const { options } = usePracticeSubjects();
-  const [activeKey, setActiveKey] = useState(initialTab);
+  const params = useSearchParams();
+  // Link từ Báo Cáo Ngưỡng Đạt: ?sub=mos-tasks&edit=<id> mở sẵn trình sửa.
+  const sub = params.get('sub');
+  const editId = params.get('edit') || undefined;
+  const [activeKey, setActiveKey] = useState(sub || initialTab);
+  useEffect(() => {
+    if (sub) setActiveKey(sub);
+  }, [sub]);
 
   const tabs: ContentTab[] = [
     ...MOS_TABS,
@@ -32,6 +46,7 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
       key: `s:${o.value}`,
       label: `${o.label} · Trắc nghiệm`,
     })),
+    LESSON_TAB,
     BANK_TAB,
   ];
 
@@ -60,7 +75,11 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
   };
 
   const renderBody = () => {
-    if (activeKey === 'mos-tasks') return <PracticeManage />;
+    if (activeKey === 'mos-tasks')
+      return <PracticeManage autoEditId={editId} />;
+    if (activeKey === 'lesson-quizzes') {
+      return <QuizListTab subject={LESSON_LINKED} />;
+    }
     if (activeKey === 'mos-parts') return <PracticeLessonManage />;
     if (activeKey === 'mos-exams') return <MockExamManage />;
     if (activeKey === 'bank') return <QuestionBankTab />;
