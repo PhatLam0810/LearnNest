@@ -21,6 +21,7 @@ import {
 import ThemedTable from '~mdAdmin/components/ThemedTable';
 import { apiErrorMessage } from '~mdAdmin/components/practiceClassShared';
 import { downloadBlob } from '~mdAdmin/components/submissionShared';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import styles from './styles';
 
 const buttonStyle = { width: 'auto', height: 40 } as const;
@@ -287,6 +288,16 @@ const OverviewManage: React.FC = () => {
   return (
     <View style={styles.wrap}>
       {modalHolder}
+      <AdminGuide
+        title="xem tổng quan hệ thống"
+        steps={[
+          'Các ô trên cùng: Đăng ký mới (7 ngày), Tỉ lệ hoàn thành khóa TB, Có nguy cơ bỏ học, Hạn nộp trong 7 ngày.',
+          'Thẻ "Học viên có nguy cơ bỏ học": xem ai lâu chưa học và gửi email nhắc từng người hoặc nhắc tất cả (có hộp xác nhận trước khi gửi).',
+          'Thẻ "Lịch hạn nộp": các bài giao sắp đến hạn và số học viên đã nộp, có nút nhắc nộp bài.',
+          'Thẻ "Tóm tắt tuần này": gửi bản tóm tắt tuần qua email của tài khoản bạn đang dùng.',
+          'Thẻ "Hộp thư hỏi đáp": số câu hỏi chờ trả lời.',
+        ]}
+      />
       <View style={styles.statRow}>
         <StatBox
           label="Đăng ký mới (7 ngày)"

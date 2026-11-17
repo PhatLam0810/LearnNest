@@ -12,6 +12,7 @@ import {
   CommentReportStatus,
   CommentReportUser,
 } from '~mdAdmin/redux/RTKQuery/type';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import styles from './styles';
 
 const REASON_LABEL: Record<string, string> = {
@@ -238,6 +239,15 @@ const CommentReportsManage: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <AdminGuide
+        title="xử lý báo cáo vi phạm"
+        steps={[
+          'Mỗi dòng là một bình luận bị học viên báo cáo.',
+          '"Ẩn bình luận": ẩn bình luận vi phạm.',
+          '"Cảnh báo người dùng": gửi cảnh báo tới người viết (mỗi bình luận cảnh báo một lần).',
+          '"Bỏ qua": báo cáo không có vi phạm.',
+        ]}
+      />
       <View style={styles.headerRow}>
         <Text style={styles.title}>Báo Cáo Vi Phạm</Text>
         <Segmented

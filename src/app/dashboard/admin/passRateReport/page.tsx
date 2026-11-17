@@ -4,6 +4,7 @@ import { Text, View } from 'react-native-web';
 import { Table, TableProps, Tag, Statistic, Card } from 'antd';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { PassRateReportRow } from '~mdDashboard/redux/RTKQuery/types';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import './styles.scss';
 import StatCard from '../../home/_components/StatCard';
 
@@ -72,6 +73,14 @@ const PassRateReport: React.FC = () => {
   return (
     <div className="pass-rate-report-page">
       <View style={{ padding: 8, gap: 16 }}>
+        <AdminGuide
+          title="báo cáo ngưỡng đạt"
+          steps={[
+            'Xem Tổng lượt làm bài, Tỉ lệ đạt chung và Ngưỡng đạt hiện tại ở các ô trên cùng.',
+            'Bảng bên dưới theo từng bài: Lượt làm, Lượt đạt, Tỉ lệ đạt và Điểm TB.',
+            'Bài có tỉ lệ đạt thấp bất thường thường là bài quá khó hoặc đề có lỗi: mở bài đó để rà lại.',
+          ]}
+        />
         <div className="pass-rate-report-summary-row">
           <View
             style={{

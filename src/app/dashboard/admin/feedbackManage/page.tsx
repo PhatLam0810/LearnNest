@@ -9,6 +9,7 @@ import { adminQuery } from '~mdAdmin/redux';
 import { UserAvatar } from '@components';
 import FeedbackReplyModal from '~mdAdmin/components/FeedbackReplyModal';
 import { FeedbackItem } from '~mdDashboard/types';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import styles from './styles';
 
 const CATEGORY_META: Record<
@@ -47,6 +48,14 @@ const FeedbackManage: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <AdminGuide
+        title="xử lý phản hồi người dùng"
+        steps={[
+          'Mỗi dòng là một phản hồi kèm phân loại.',
+          'Bấm "Trả lời" để soạn lời phản hồi gửi cho người dùng.',
+          'Bấm "Đánh dấu xử lý" khi đã xong.',
+        ]}
+      />
       <View style={styles.headerRow}>
         <Text style={styles.title}>Phản Hồi Người Dùng</Text>
       </View>

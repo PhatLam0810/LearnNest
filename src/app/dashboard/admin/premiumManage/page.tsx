@@ -15,6 +15,7 @@ import {
 } from '@/modules/premium/redux/types';
 import PendingOrders from './PendingOrders';
 import RevenueReport from './RevenueReport';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import styles from './styles';
 
 const PLAN_OPTIONS = [
@@ -65,6 +66,18 @@ const PremiumManage = () => {
 
   return (
     <View style={styles.container}>
+      <AdminGuide
+        title="quản lý Premium"
+        steps={[
+          'Xem doanh thu và số người đang Premium ở khung báo cáo đầu trang.',
+          'Đơn chuyển khoản chờ xác nhận: hệ thống tự cấp Premium khi tiền về. Chỉ bấm "Xác nhận đã nhận tiền" khi đã thấy tiền trong sao kê mà hệ thống chưa tự cấp.',
+          'Tạo mã kích hoạt: chọn Gói, nhập Số lượng (1-200), bấm "Tạo mã" rồi sao chép mã phát cho học viên.',
+          'Cấp hoặc thu hồi Premium cho từng người: tab Quản Trị Người Dùng, menu ⋯ ở cuối dòng.',
+        ]}
+        note={
+          'Xác nhận nhầm sẽ cấp Premium miễn phí, hãy kiểm tra sao kê trước.'
+        }
+      />
       <View>
         <Text role="heading" aria-level={2} style={styles.pageTitle}>
           Premium

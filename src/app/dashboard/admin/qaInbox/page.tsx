@@ -11,6 +11,7 @@ import { adminQuery } from '~mdAdmin/redux';
 import { AnswerInfo, QuestionItem } from '~mdAdmin/services/api/type';
 import QnaInboxList from '~mdAdmin/components/QnaInboxList';
 import QnaInboxDetail from '~mdAdmin/components/QnaInboxDetail';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import styles from './styles';
 
 type StatusFilter = 'open' | 'answered' | 'dismissed' | 'all';
@@ -158,6 +159,14 @@ const QaInbox: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <AdminGuide
+        title="trả lời câu hỏi của học viên"
+        steps={[
+          'Ba ô trên cùng: số câu chờ trả lời, thời gian trả lời trung bình, số câu quá 24 giờ chưa trả lời.',
+          'Chọn bộ lọc rồi bấm vào một câu hỏi trong danh sách để xem chi tiết.',
+          'Nhập nội dung và bấm "Gửi trả lời" để trả lời học viên.',
+        ]}
+      />
       <Text style={styles.title}>Hộp Thư Hỏi Đáp</Text>
 
       <View style={styles.statsRow}>
