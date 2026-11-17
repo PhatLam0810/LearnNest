@@ -25,6 +25,8 @@ interface QuizBuilderModalProps {
   // câu hỏi - mỗi câu giữ bankItemId để BE tăng usageCount thay vì tạo bản
   // ghi bank trùng lặp (xem quiz.service.ts syncQuestionBank).
   initialQuestions?: QuestionDraft[];
+  // Mở từ 1 bài học: gắn sẵn bài học đó (bài mới).
+  presetLibrary?: { _id: string; title: string };
 }
 
 const buttonStyle = { width: 'auto', height: 44 } as const;
@@ -34,6 +36,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
   onClose,
   editing,
   initialQuestions,
+  presetLibrary,
 }) => {
   const isEdit = !!editing;
   const { options: subjectOptions } = usePracticeSubjects();
@@ -78,6 +81,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
       );
     } else {
       form.resetFields();
+      if (presetLibrary) form.setFieldsValue({ libraryId: presetLibrary._id });
       setQuestions(
         (initialQuestions ?? []).map(q => ({ ...q, type: inferType(q) })),
       );
@@ -223,7 +227,12 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                       placeholder="Chọn bài học"
                       filterOption={false}
                       onSearch={searchLibraries}
-                      options={(libraries || []).map(lib => ({
+                      options={[
+                        ...(presetLibrary ? [presetLibrary] : []),
+                        ...(libraries || []).filter(
+                          lib => lib._id !== presetLibrary?._id,
+                        ),
+                      ].map(lib => ({
                         value: lib._id,
                         label: lib.title,
                       }))}

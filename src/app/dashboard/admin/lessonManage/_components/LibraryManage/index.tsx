@@ -14,6 +14,7 @@ import { Library } from '~mdDashboard/types';
 // Import thẳng, không qua barrel ~mdAdmin/components - modal kéo theo
 // AddLibraryContent (tiptap + CSS side-effect).
 import CreateLibraryModal from '~mdAdmin/components/CreateLibraryModal';
+import QuizBuilderModal from '~mdAdmin/components/QuizBuilderModal';
 
 const LibraryManage = () => {
   const divRef = useRef(null);
@@ -25,6 +26,7 @@ const LibraryManage = () => {
   const [dataEdit, setDataEdit] = useState<Library | null>(null);
   const [isVisibleModalUpdate, setIsVisibleModalUpdate] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [quizFor, setQuizFor] = useState<Library | null>(null);
 
   const { listItem, currentData, refresh, fetchData, search } =
     useAppPagination<Library>({
@@ -35,19 +37,19 @@ const LibraryManage = () => {
 
   const columns: TableProps<Library>['columns'] = [
     {
-      title: 'Title',
+      title: 'Tên bài học',
       dataIndex: 'title',
       key: 'title',
     },
     {
-      title: 'Type',
+      title: 'Loại',
       dataIndex: 'type',
       key: 'type',
     },
     {
-      title: 'Action',
+      title: 'Hành động',
       key: 'action',
-      width: 260,
+      width: 360,
       render: (_, record) => (
         <Space size={10} onClick={e => e.stopPropagation()}>
           <button
@@ -57,6 +59,11 @@ const LibraryManage = () => {
               setOpenDelete(true);
             }}>
             <Text style={styles.actionButtonText}>Xóa</Text>
+          </button>
+          <button
+            style={styles.actionButton}
+            onClick={() => setQuizFor(record)}>
+            <Text style={styles.actionButtonText}>Gắn bài tập</Text>
           </button>
           <button
             style={styles.actionButton}
@@ -153,6 +160,12 @@ const LibraryManage = () => {
         }}>
         <Text>{`Xóa bài học: ${selectedItem?.title}`}</Text>
       </Modal>
+
+      <QuizBuilderModal
+        isVisible={!!quizFor}
+        presetLibrary={quizFor ?? undefined}
+        onClose={() => setQuizFor(null)}
+      />
 
       {/* 1 modal cho cả tạo (dataEdit=null) lẫn cập nhật. dataEdit giữ nguyên
           sau khi đóng để tiêu đề không nhảy về "Thêm bài học" lúc đang mờ dần. */}

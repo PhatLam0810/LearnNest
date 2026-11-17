@@ -8,6 +8,7 @@ import { QuestionBankItem } from '~mdAdmin/redux/RTKQuery/type';
 import { messageApi } from '@hooks';
 import {
   BankQuestionModal,
+  AdminGuide,
   ContentToolbar,
   FilteredEmptyState,
   QuizBuilderModal,
@@ -178,6 +179,14 @@ const QuestionBankTab: React.FC = () => {
 
   return (
     <View style={pageStyles.tabContent}>
+      <AdminGuide
+        title="ngân hàng câu hỏi"
+        steps={[
+          'Bấm "Thêm câu hỏi", chọn dạng (chọn 1 / chọn nhiều / kéo thả), nhập đề và đáp án, tích đáp án đúng. Có thể thêm nhiều câu một lần hoặc tạo bằng AI từ ảnh/PDF.',
+          'Dùng Sửa / Xóa ở mỗi dòng để chỉnh câu hỏi. Xóa câu trong ngân hàng không ảnh hưởng bài tập đã dùng câu đó.',
+          'Tích chọn các câu cần dùng rồi bấm "Chèn vào bài tập mới" để tạo bài tập từ các câu đã chọn.',
+        ]}
+      />
       <ContentToolbar
         searchPlaceholder="Tìm kiếm câu hỏi"
         onSearch={setSearchQuery}

@@ -8,6 +8,7 @@ import { adminQuery } from '~mdAdmin/redux';
 import { Quiz } from '~mdAdmin/redux/RTKQuery/type';
 import {
   ContentToolbar,
+  AdminGuide,
   FilteredEmptyState,
   PracticeSubjectsModal,
   QuizBuilderModal,
@@ -150,6 +151,17 @@ const QuizListTab: React.FC = () => {
 
   return (
     <View style={pageStyles.tabContent}>
+      <AdminGuide
+        title="tạo bài tập trắc nghiệm"
+        steps={[
+          'Bấm "Tạo bài tập" và nhập tên bài tập.',
+          'Chọn "Mục luyện tập" (AI, Tiếng Anh...) để bài hiện ở trang Luyện tập của học viên, hoặc gắn vào một bài học. Cần chọn ít nhất một trong hai.',
+          'Thêm câu hỏi: chọn dạng (chọn 1 / chọn nhiều / kéo thả), nhập đáp án và tích đáp án đúng. Hoặc bấm tạo bằng AI từ ảnh/PDF/zip rồi xem lại bản nháp.',
+          'Đặt Thời gian làm bài (phút), Điểm đạt (%), số lượt làm tối đa, có trộn câu hay không. Để trống thời gian = không giới hạn.',
+          'Bấm Lưu. Dùng Cập nhật / Xóa ở mỗi dòng để sửa hoặc xóa.',
+          'Muốn thêm mục mới (vd Tiếng Anh): bấm "Quản lý mục luyện tập".',
+        ]}
+      />
       <ContentToolbar
         searchPlaceholder="Tìm kiếm bài tập"
         onSearch={setSearchQuery}
