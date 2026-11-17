@@ -29,6 +29,7 @@ import { authQuery } from '~mdAuth/redux/RTKQuery';
 import dynamic from 'next/dynamic';
 import StatCard from '../../home/_components/StatCard';
 import StateTag from '~mdAdmin/components/StateTag';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import UserBulkActions from '~mdAdmin/components/UserBulkActions';
 import StudentProfileDrawer from '~mdAdmin/components/StudentProfileDrawer';
 import { messageApi } from '@hooks';
@@ -75,6 +76,33 @@ const UserManage = () => {
     user: UserItem;
     isAdmin: boolean;
   } | null>(null);
+  const [updateUserInfo, { isLoading: isSavingInfo }] =
+    adminQuery.useUpdateUserInfoMutation();
+  const [editUser, setEditUser] = useState<UserItem | null>(null);
+  const [editForm] = Form.useForm();
+  const openEditUser = (u: UserItem) => {
+    setEditUser(u);
+    editForm.setFieldsValue({
+      fullName: u.fullName,
+      class: u.class,
+      faculty: u.faculty,
+      major: u.major,
+      phoneNumber: u.phoneNumber,
+    });
+  };
+  const handleSaveInfo = async () => {
+    if (!editUser) return;
+    try {
+      const values = await editForm.validateFields();
+      await updateUserInfo({ userId: editUser._id, ...values }).unwrap();
+      messageApi.success('Đã cập nhật thông tin');
+      setEditUser(null);
+      refresh();
+    } catch (e) {
+      const msg = (e as { data?: { message?: string } })?.data?.message;
+      if (msg) messageApi.error(msg);
+    }
+  };
   const [isModalDeleteUser, setModalDeleteUser] = useState(false);
   const [infoUser, setInfoUser] = useState<UserItem>(null);
   const [profileUserId, setProfileUserId] = useState<string | null>(null);
@@ -223,6 +251,11 @@ const UserManage = () => {
         key: 'profile',
         label: 'Hồ sơ học tập',
         onClick: () => setProfileUserId(record._id),
+      },
+      {
+        key: 'edit-info',
+        label: 'Sửa thông tin',
+        onClick: () => openEditUser(record),
       },
       {
         key: 'grant',
@@ -403,6 +436,17 @@ const UserManage = () => {
   return (
     <View style={styles.container}>
       {contextHolder}
+      <AdminGuide
+        title="quản trị người dùng"
+        steps={[
+          'Tìm người dùng bằng ô tìm kiếm; lọc theo loại tài khoản (Quản trị viên / Sinh viên VHU / Khách).',
+          'Bấm dấu ⋯ ở cuối dòng để mở menu: Hồ sơ học tập, Sửa thông tin, Cấp / Thu hồi Premium, Cấp / Gỡ quyền Admin, Xóa tài khoản.',
+          'Sửa thông tin: đổi họ tên, mã lớp, khoa, ngành, số điện thoại rồi Lưu (email và mã sinh viên không đổi ở đây).',
+          'Cấp Premium: nhập số ngày, số ngày được cộng dồn vào hạn hiện có.',
+          'Tạo tài khoản mới: bấm "+ Tạo tài khoản" (hoặc dùng tab "Tạo / Nhập Người Dùng" để nhập hàng loạt bằng Excel).',
+        ]}
+        note="Tài khoản Admin có dấu hiệu riêng trong bảng. Xóa tài khoản không thể hoàn tác."
+      />
       <StudentProfileDrawer
         userId={profileUserId}
         onClose={() => setProfileUserId(null)}
@@ -611,6 +655,35 @@ const UserManage = () => {
           value={grantDays}
           onChange={v => setGrantDays(v ?? 30)}
         />
+      </Modal>
+      <Modal
+        title="Sửa thông tin người dùng"
+        open={!!editUser}
+        okText="Lưu"
+        cancelText="Hủy"
+        confirmLoading={isSavingInfo}
+        onCancel={() => setEditUser(null)}
+        onOk={handleSaveInfo}>
+        <Form form={editForm} layout="vertical">
+          <Form.Item
+            label="Họ và tên"
+            name="fullName"
+            rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}>
+            <Input maxLength={100} />
+          </Form.Item>
+          <Form.Item label="Mã lớp" name="class">
+            <Input maxLength={100} />
+          </Form.Item>
+          <Form.Item label="Khoa" name="faculty">
+            <Input maxLength={100} />
+          </Form.Item>
+          <Form.Item label="Ngành" name="major">
+            <Input maxLength={100} />
+          </Form.Item>
+          <Form.Item label="Số điện thoại" name="phoneNumber">
+            <Input maxLength={20} />
+          </Form.Item>
+        </Form>
       </Modal>
       <Modal
         title="Xác nhận xóa tài khoản"

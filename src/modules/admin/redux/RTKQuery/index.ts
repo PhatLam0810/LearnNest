@@ -330,6 +330,24 @@ export const adminQuery = baseQuery.injectEndpoints({
       }),
       transformResponse: (res: any) => res.data,
     }),
+    // Admin sửa hồ sơ (họ tên, lớp, khoa, ngành, SĐT).
+    updateUserInfo: builder.mutation<
+      void,
+      {
+        userId: string;
+        fullName?: string;
+        class?: string;
+        faculty?: string;
+        major?: string;
+        phoneNumber?: string;
+      }
+    >({
+      query: ({ userId, ...body }) => ({
+        url: `admin/users/${userId}`,
+        method: 'PUT',
+        body,
+      }),
+    }),
     // Cấp / gỡ quyền Admin cho tài khoản đã có.
     setUserAdminRole: builder.mutation<
       void,

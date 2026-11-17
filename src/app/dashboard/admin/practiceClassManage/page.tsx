@@ -14,6 +14,7 @@ import ClassFormModal from '~mdAdmin/components/ClassFormModal';
 import CreateClassModal from '~mdAdmin/components/CreateClassModal';
 import PracticeClassDetailModal from '~mdAdmin/components/PracticeClassDetailModal';
 import StateTag from '~mdAdmin/components/StateTag';
+import AdminGuide from '~mdAdmin/components/AdminGuide';
 import {
   CLASS_ENTITY_STATUS,
   apiErrorMessage,
@@ -292,6 +293,15 @@ const PracticeClassManage: React.FC = () => {
 
   return (
     <View style={styles.page}>
+      <AdminGuide
+        title="lớp học thực hành"
+        steps={[
+          'Bấm "Tạo lớp học" (hoặc "Tạo lớp và giao bài" để giao đề ngay), nhập Mã lớp, Tên lớp, Học kỳ, Ghi chú.',
+          'Bấm vào một lớp để mở chi tiết: thêm học viên, giao bài, nhắc học viên, xuất danh sách.',
+          'Sửa: đổi tên, học kỳ, ghi chú, hoặc lưu trữ lớp khi kết thúc học kỳ.',
+          'Xóa: xóa lớp cùng các bài đã giao cho lớp đó. Tài khoản, tiến độ học và bài nộp của học viên vẫn được giữ.',
+        ]}
+      />
       <View style={styles.toolbarRow}>
         <View style={styles.toolbarLeft}>
           <Input.Search
