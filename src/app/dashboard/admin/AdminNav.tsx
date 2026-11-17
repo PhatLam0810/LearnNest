@@ -50,13 +50,8 @@ export const ADMIN_NAV = [
     // và các mục trắc nghiệm ABCD (AI, ...).
     label: 'Luyện tập',
     items: [
+      { tab: '16', label: 'Quản Lý Bài Luyện Tập', Icon: ExperimentOutlined },
       { tab: '11', label: 'Giao Đề Thực Hành (MOS)', Icon: CarryOutOutlined },
-      { tab: '10', label: 'Đề Thi Thử MOS', Icon: ExperimentOutlined },
-      {
-        tab: '12',
-        label: 'Trắc Nghiệm ABCD & Ngân Hàng Câu Hỏi',
-        Icon: QuestionCircleOutlined,
-      },
     ],
   },
   {

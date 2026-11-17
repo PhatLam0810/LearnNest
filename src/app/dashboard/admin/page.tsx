@@ -17,8 +17,7 @@ import AuditLogManage from './auditLogManage/page';
 import CommentReportsManage from './commentReportsManage/page';
 import QaInbox from './qaInbox/page';
 import PassRateReport from './passRateReport/page';
-import MockExamManage from './mockExamManage/page';
-import QuizManagePage from './quizManage/page';
+import PracticeHub from './practiceHub/page';
 import SubmissionsManage from './submissionsManage/page';
 import PracticeClassManage from './practiceClassManage/page';
 import OverviewManage from './overviewManage/page';
@@ -36,9 +35,10 @@ const PANES: Record<string, React.ReactNode> = {
   '3': <LessonAdmin />,
   '4': <LessonLearnersOverview />,
   '11': <GiaoBaiPage />,
-  '12': <QuizManagePage />,
+  '12': <PracticeHub initialTab="bank" />,
+  '16': <PracticeHub />,
   '13': <SubmissionsManage />,
-  '10': <MockExamManage />,
+  '10': <PracticeHub initialTab="mos-exams" />,
   '15': <PremiumManage />,
   '9': <PassRateReport />,
   '8': <QaInbox />,

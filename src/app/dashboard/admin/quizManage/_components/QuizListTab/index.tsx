@@ -20,7 +20,7 @@ import styles from './styles';
 
 const buttonStyle = { width: 'auto', height: 40 } as const;
 
-const QuizListTab: React.FC = () => {
+const QuizListTab: React.FC<{ subject?: string }> = ({ subject }) => {
   const { labelOf: subjectLabel } = usePracticeSubjects();
   const [isSubjectsOpen, setIsSubjectsOpen] = useState(false);
   const {
@@ -37,8 +37,10 @@ const QuizListTab: React.FC = () => {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [deleting, setDeleting] = useState<Quiz | null>(null);
 
-  const filtered = (quizzes || []).filter(q =>
-    q.title.toLowerCase().includes(searchQuery.toLowerCase()),
+  const filtered = (quizzes || []).filter(
+    q =>
+      (!subject || q.subject === subject) &&
+      q.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const openCreate = () => {
@@ -120,7 +122,7 @@ const QuizListTab: React.FC = () => {
         </View>
       );
     }
-    if (!isFetching && !quizzes?.length && !searchQuery) {
+    if (!isFetching && !filtered.length && !searchQuery) {
       return (
         <View style={pageStyles.stateWrap}>
           <Text style={pageStyles.emptyText}>Chưa có bài tập nào.</Text>
@@ -180,6 +182,7 @@ const QuizListTab: React.FC = () => {
       <QuizBuilderModal
         isVisible={isBuilderOpen}
         editing={editing}
+        presetSubject={subject}
         onClose={() => setIsBuilderOpen(false)}
       />
 

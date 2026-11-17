@@ -2,13 +2,7 @@
 import React, { useState } from 'react';
 import { View } from 'react-native-web';
 import styles from './styles';
-import {
-  ModuleManage,
-  LessonManage,
-  LibraryManage,
-  PracticeLessonManage,
-} from './_components';
-import PracticeManage from '../practiceManage';
+import { ModuleManage, LessonManage, LibraryManage } from './_components';
 import { AdminGuide, ContentTabStrip, ContentTab } from '~mdAdmin/components';
 // Vẫn cần cho các tab CHƯA chuyển sang ThemedTable (giữ header bảng xanh
 // brand + nút search trắng-trên-xanh qua CSS toàn cục theo route này) - bỏ
@@ -19,16 +13,12 @@ const tabs: ContentTab[] = [
   { key: '1', label: 'Khóa học' },
   { key: '2', label: 'Phần học' },
   { key: '4', label: 'Bài học' },
-  { key: '5', label: 'Bài thực hành' },
-  { key: '6', label: 'Phần thực hành' },
 ];
 
 const tabContent: Record<string, React.ReactNode> = {
   '1': <LessonManage />,
   '2': <ModuleManage />,
   '4': <LibraryManage />,
-  '5': <PracticeManage />,
-  '6': <PracticeLessonManage />,
 };
 
 const guides: Record<
@@ -63,25 +53,7 @@ const guides: Record<
       'Trong cửa sổ mở ra: nhập tên bài tập, thêm câu hỏi (chọn 1 / chọn nhiều / kéo thả) hoặc tạo từ ảnh/PDF bằng AI, đặt thời gian và điểm đạt, rồi Lưu.',
       'Học viên sẽ thấy bài tập ở cuối trang bài học đó.',
     ],
-    note: 'Sửa hoặc xóa bài tập đã gắn: vào "Luyện tập → Trắc Nghiệm ABCD & Ngân Hàng Câu Hỏi".',
-  },
-  '5': {
-    title: 'tạo đề thực hành Word/Excel',
-    steps: [
-      'Bấm "Thêm đề thực hành".',
-      'Chọn Môn (Word/Excel), nhập Tiêu đề, Độ khó và đề bài.',
-      'Đặt tiêu chí chấm cho file học viên nộp.',
-      'Bật Xuất bản khi đã sẵn sàng cho học viên, rồi Lưu.',
-    ],
-    note: 'Giao đề cho lớp ở "Luyện tập → Giao Đề Thực Hành (MOS)".',
-  },
-  '6': {
-    title: 'tạo phần thực hành',
-    steps: [
-      'Bấm "Tạo phần thực hành mới", nhập Tên và Mô tả, rồi Lưu.',
-      'Thêm các phần con và chọn các bài thực hành đưa vào từng phần.',
-      'Dùng Cập nhật / Xóa ở mỗi dòng để sửa hoặc xóa.',
-    ],
+    note: 'Sửa hoặc xóa bài tập đã gắn: vào "Luyện tập → Quản Lý Bài Luyện Tập" (thẻ của mục tương ứng).',
   },
 };
 

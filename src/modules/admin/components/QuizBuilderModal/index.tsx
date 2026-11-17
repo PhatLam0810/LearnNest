@@ -27,6 +27,8 @@ interface QuizBuilderModalProps {
   initialQuestions?: QuestionDraft[];
   // Mở từ 1 bài học: gắn sẵn bài học đó (bài mới).
   presetLibrary?: { _id: string; title: string };
+  // Mở từ tab của 1 mục luyện tập: gắn sẵn mục đó (bài mới).
+  presetSubject?: string;
 }
 
 const buttonStyle = { width: 'auto', height: 44 } as const;
@@ -37,6 +39,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
   editing,
   initialQuestions,
   presetLibrary,
+  presetSubject,
 }) => {
   const isEdit = !!editing;
   const { options: subjectOptions } = usePracticeSubjects();
@@ -81,6 +84,7 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
       );
     } else {
       form.resetFields();
+      if (presetSubject) form.setFieldsValue({ subject: presetSubject });
       if (presetLibrary) form.setFieldsValue({ libraryId: presetLibrary._id });
       setQuestions(
         (initialQuestions ?? []).map(q => ({ ...q, type: inferType(q) })),
