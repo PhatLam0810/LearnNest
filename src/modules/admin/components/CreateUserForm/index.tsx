@@ -26,12 +26,26 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onCreated }) => {
   const handleSubmit = async (values: CreateUserParams) => {
     setSubmitting(true);
     try {
-      const account = await createUser(values).unwrap();
+      // Học viên để trống mật khẩu = dùng MSSV; mật khẩu này được gửi qua email.
+      const plainPassword = values.password || values.studentId;
+      const account = await createUser({
+        ...values,
+        password: values.password || undefined,
+      }).unwrap();
       // Tài khoản admin do người tạo tự đặt mật khẩu nên không gửi email kích hoạt.
       if (values.isAdmin) {
         messageApi.success('Đã tạo tài khoản Admin');
       } else {
-        await sendEmails({ accounts: [account] }).unwrap();
+        await sendEmails({
+          accounts: [
+            {
+              email: account.email,
+              fullName: account.fullName,
+              username: account.studentId,
+              password: plainPassword,
+            },
+          ],
+        }).unwrap();
         messageApi.success('Đã tạo tài khoản và gửi email kích hoạt');
       }
       form.resetFields();
@@ -54,7 +68,7 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onCreated }) => {
         <Text style={styles.subtitle}>
           {isAdmin
             ? 'Tài khoản Admin chỉ cần email và mật khẩu do bạn đặt, không gửi email.'
-            : 'Hệ thống tự sinh mật khẩu và gửi email kích hoạt cho người dùng.'}
+            : 'Mật khẩu để trống sẽ là MSSV. Sau khi tạo, hệ thống gửi tài khoản và mật khẩu về email học viên.'}
         </Text>
       </View>
 
@@ -115,6 +129,21 @@ const CreateUserForm: React.FC<CreateUserFormProps> = ({ onCreated }) => {
                 rules={[{ required: true, message: 'Nhập mã sinh viên' }]}
                 style={{ marginBottom: 0 }}>
                 <Input placeholder="221B0000" style={INPUT_STYLE} />
+              </Form.Item>
+              <Form.Item
+                label={
+                  <Text style={styles.fieldLabel}>
+                    Mật khẩu (để trống = dùng MSSV)
+                  </Text>
+                }
+                name="password"
+                rules={[{ min: 8, message: 'Mật khẩu cần ít nhất 8 ký tự' }]}
+                style={{ marginBottom: 0 }}>
+                <Input.Password
+                  placeholder="Mặc định là MSSV"
+                  autoComplete="new-password"
+                  style={INPUT_STYLE}
+                />
               </Form.Item>
               <Form.Item
                 label={<Text style={styles.fieldLabel}>Số điện thoại</Text>}
