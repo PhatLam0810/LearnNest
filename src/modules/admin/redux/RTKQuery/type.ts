@@ -893,3 +893,30 @@ export interface LearningProfile {
   courses: LearningProfileCourse[];
   recentActivity: LearningProfileActivity[];
 }
+
+// Phiên luyện tập trên app MOS (máy học viên) được đồng bộ lên web.
+export interface MosSessionItem {
+  _id: string;
+  userId: { _id: string; studentId: string; fullName?: string; class?: string };
+  pack: string;
+  mode?: string;
+  state?: string;
+  startedAt?: string;
+  updatedAt: string;
+  projectsDone: number;
+  passed: number;
+  failed: number;
+  needReview: number;
+}
+
+export interface MosSessionList {
+  items: MosSessionItem[];
+  total: number;
+  pageSize: number;
+}
+
+export interface SetMosAccessPayload {
+  studentIds: string[];
+  enabled: boolean;
+  expiresAt?: string;
+}

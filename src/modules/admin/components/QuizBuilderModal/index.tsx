@@ -244,7 +244,8 @@ const QuizBuilderModal: React.FC<QuizBuilderModalProps> = ({
                   </Form.Item>
                   <Form.Item
                     label="Thời gian làm bài (phút)"
-                    name="timeLimitMinutes">
+                    name="timeLimitMinutes"
+                    extra="Điền số phút để thành ĐỀ THI THỬ có đồng hồ đếm ngược, hết giờ tự nộp. Để trống = bài luyện tập không giới hạn giờ.">
                     <InputNumber min={1} style={styles.fullWidth} />
                   </Form.Item>
                   <Form.Item

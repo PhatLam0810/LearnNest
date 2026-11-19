@@ -7,6 +7,7 @@ import {
   AdminGuide,
   ContentTab,
   ContentTabStrip,
+  MosAppTab,
   PracticeSubjectsModal,
 } from '~mdAdmin/components';
 import { usePracticeSubjects } from '~mdAdmin/utils/practiceSubjects';
@@ -26,6 +27,7 @@ const MOS_TABS: ContentTab[] = [
   { key: 'mos-exams', label: 'MOS · Đề thi thử' },
 ];
 const BANK_TAB: ContentTab = { key: 'bank', label: 'Ngân hàng câu hỏi' };
+const APP_TAB: ContentTab = { key: 'mos-app', label: 'Lịch sử học trên app' };
 const LESSON_TAB: ContentTab = {
   key: 'lesson-quizzes',
   label: 'Trắc nghiệm gắn bài học',
@@ -51,10 +53,11 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
     ...MOS_TABS,
     ...options.map(o => ({
       key: `s:${o.value}`,
-      label: `${o.label} · Trắc nghiệm`,
+      label: `${o.label} · Bài tập & đề thi thử`,
     })),
     LESSON_TAB,
     BANK_TAB,
+    APP_TAB,
   ];
 
   const tabGuide: Record<
@@ -70,6 +73,15 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
         'Bật Xuất bản khi đã sẵn sàng cho học viên, rồi Lưu.',
       ],
       note: 'Giao đề cho lớp ở mục "Giao Đề Thực Hành (MOS)".',
+    },
+    'mos-app': {
+      title: 'theo dõi học viên học trên app MOS',
+      steps: [
+        'Học viên đăng nhập app MOS bằng đúng MSSV (hoặc email) và mật khẩu của tài khoản LearnNest.',
+        'Bấm "Cấp / thu quyền dùng app MOS", dán danh sách MSSV rồi bấm Bật quyền (có thể đặt hạn dùng). Học viên chưa được bật sẽ bị app từ chối.',
+        'Mỗi lần học viên nộp một Project trên app, kết quả tự hiện ở bảng này (đạt / chưa đạt / cần xem).',
+        'Đề thực hành Word/Excel tạo ở thẻ "MOS · Bài thực hành" (nhớ bật Xuất bản) sẽ tự hiện ở mục "Đề từ web" của app, học viên nộp file và web chấm.',
+      ],
     },
     'mos-parts': {
       title: 'tạo phần thực hành',
@@ -87,6 +99,7 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
     if (activeKey === 'lesson-quizzes') {
       return <QuizListTab subject={LESSON_LINKED} />;
     }
+    if (activeKey === 'mos-app') return <MosAppTab />;
     if (activeKey === 'mos-parts') return <PracticeLessonManage />;
     if (activeKey === 'mos-exams') return <MockExamManage />;
     if (activeKey === 'bank') return <QuestionBankTab />;
@@ -103,6 +116,7 @@ const PracticeHub: React.FC<{ initialTab?: string }> = ({
         title="quản lý bài luyện tập"
         steps={[
           'Mỗi thẻ ở trên là một mục của trang Luyện tập học viên: MOS (bài thực hành, phần thực hành, đề thi thử) và các mục trắc nghiệm như AI, Tiếng Anh.',
+          'Đề thi thử có giờ đếm ngược cho AI, Canva... cũng tạo ở thẻ của mục đó: bấm "Tạo bài tập" rồi điền ô "Thời gian làm bài (phút)" (để trống = luyện tập không giới hạn giờ). Riêng thẻ "MOS · Đề thi thử" là đề thi thử Word/Excel chấm file.',
           'Bấm vào thẻ để xem các bài đã tạo ở mục đó; dùng Cập nhật / Xóa ở mỗi dòng và nút Tạo để thêm bài mới.',
           'Ở thẻ trắc nghiệm, "Tạo bài tập" sẽ tạo sẵn bài thuộc đúng mục đang xem. Muốn thêm mục mới (Tiếng Anh, Canva...) bấm nút "Thêm / sửa mục luyện tập" ở đầu trang: mục mới tự hiện thành thẻ ở đây và thành tab ở trang Luyện tập của học viên.',
           'Giao đề MOS cho lớp: mục "Giao Đề Thực Hành (MOS)" ở thanh bên.',

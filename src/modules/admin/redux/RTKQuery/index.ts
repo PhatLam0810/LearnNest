@@ -63,6 +63,8 @@ import {
   SelectableUser,
   OverridePracticePayload,
   PracticeSubjectItem,
+  MosSessionList,
+  SetMosAccessPayload,
   PracticeSubmissionDetail,
   QuizResultDetail,
   RegradeTaskResult,
@@ -1314,6 +1316,18 @@ export const adminQuery = baseQuery.injectEndpoints({
         { type: 'Quiz', id },
         { type: 'Quiz', id: 'LIST' },
       ],
+    }),
+    // ---- App MOS trên máy học viên ----
+    getMosSessions: builder.query<MosSessionList, number>({
+      query: page => ({ url: 'mos/admin/sessions', params: { page } }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
+    setMosAccess: builder.mutation<
+      { updated: number; notFound: string[] },
+      SetMosAccessPayload
+    >({
+      query: body => ({ url: 'mos/admin/access', method: 'PUT', body }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
     // ---- Mục của trang Luyện tập (AI, Tiếng Anh...) ----
     getPracticeSubjects: builder.query<PracticeSubjectItem[], void>({

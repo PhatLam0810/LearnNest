@@ -10,5 +10,6 @@ export { default as CreateCourseModal } from './CreateCourseModal';
 export { default as QuizBuilderModal } from './QuizBuilderModal';
 export { default as QuizAiDraftModal } from './QuizAiDraftModal';
 export { default as PracticeSubjectsModal } from './PracticeSubjectsModal';
+export { default as MosAppTab } from './MosAppTab';
 export { default as BankQuestionModal } from './BankQuestionModal';
 export { default as AdminGuide } from './AdminGuide';

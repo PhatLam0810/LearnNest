@@ -90,6 +90,14 @@ const QuizListTab: React.FC<{ subject?: string }> = ({ subject }) => {
           : '—',
     },
     {
+      title: 'Thời gian',
+      key: 'timeLimit',
+      render: (_: unknown, r: Quiz) =>
+        r.timeLimitMinutes
+          ? `${r.timeLimitMinutes} phút (thi thử)`
+          : 'Không giới hạn',
+    },
+    {
       title: 'Số câu',
       key: 'questionCount',
       render: (_: unknown, r: Quiz) => r.questions.length,
