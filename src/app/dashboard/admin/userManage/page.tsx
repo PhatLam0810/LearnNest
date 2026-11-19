@@ -62,6 +62,14 @@ const UserManage = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
+  const [mosOnly, setMosOnly] = useState(false);
+  const buildFilter = (type?: string, mos = false) =>
+    type || mos
+      ? {
+          ...(type ? { userType: type } : {}),
+          ...(mos ? { mosAccess: true } : {}),
+        }
+      : undefined;
   const [exportUsers, { isLoading: isExporting }] =
     adminQuery.useExportUsersMutation();
   const tableWrapRef = useRef<HTMLDivElement>(null);
@@ -132,7 +140,7 @@ const UserManage = () => {
     try {
       const blob = await exportUsers({
         search: searchTerm || undefined,
-        filter: typeFilter ? { userType: typeFilter } : undefined,
+        filter: buildFilter(typeFilter, mosOnly),
       }).unwrap();
       downloadBlob(blob, 'nguoi-dung.xlsx');
     } catch {
@@ -404,6 +412,20 @@ const UserManage = () => {
         ),
     },
     {
+      title: 'Quyền app MOS',
+      key: 'mosAccess',
+      render: (record: UserItem) =>
+        record.mosAccess ? (
+          <Text>
+            {record.mosExpiresAt
+              ? `Đã cấp, đến ${dayjs(record.mosExpiresAt).format('DD/MM/YYYY')}`
+              : 'Đã cấp'}
+          </Text>
+        ) : (
+          <Text>Chưa cấp</Text>
+        ),
+    },
+    {
       title: 'Ngày tạo',
       dataIndex: 'createdAt',
       key: 'createdAt',
@@ -483,12 +505,25 @@ const UserManage = () => {
           onChange={v => {
             const next = v === 'all' ? undefined : (v as string);
             setTypeFilter(next);
-            filter(next ? { userType: next } : undefined);
+            filter(buildFilter(next, mosOnly));
           }}
           options={[
             { value: 'all', label: 'Tất cả' },
             { value: 'student', label: 'Sinh viên VHU' },
             { value: 'guest', label: 'Khách' },
+          ]}
+        />
+        <Segmented
+          aria-label="Lọc theo quyền dùng app MOS"
+          defaultValue="all"
+          onChange={v => {
+            const next = v === 'mos';
+            setMosOnly(next);
+            filter(buildFilter(typeFilter, next));
+          }}
+          options={[
+            { value: 'all', label: 'Mọi quyền app' },
+            { value: 'mos', label: 'Đã cấp quyền app MOS' },
           ]}
         />
         <Button onClick={handleExport} loading={isExporting}>

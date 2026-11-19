@@ -8,6 +8,9 @@ export interface UserItem {
   // Premium: BE trả premiumExpiresAt; isPremium chỉ để hiển thị (còn hạn hay không).
   isPremium?: boolean;
   premiumExpiresAt?: string;
+  // Quyền dùng app luyện tập MOS trên máy (admin cấp).
+  mosAccess?: boolean;
+  mosExpiresAt?: string;
   createdAt: string;
   updatedAt: string;
   __v: number;
