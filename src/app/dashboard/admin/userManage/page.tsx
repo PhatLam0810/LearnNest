@@ -116,6 +116,25 @@ const UserManage = () => {
   const [revokePremium] = useRevokePremiumMutation();
   const [grantUser, setGrantUser] = useState<UserItem>(null);
   const [grantDays, setGrantDays] = useState(30);
+  const [resetTarget, setResetTarget] = useState<UserItem>(null);
+  const [resetPassword, { isLoading: isResetting }] =
+    adminQuery.useResetUserPasswordsMutation();
+  const handleResetPassword = async () => {
+    try {
+      const r = await resetPassword({ userIds: [resetTarget._id] }).unwrap();
+      const issue = [...r.skipped, ...r.failed][0];
+      if (r.reset > 0) {
+        messageApi.success(
+          `Đã đặt mật khẩu mới và gửi về ${resetTarget.email}`,
+        );
+      } else {
+        messageApi.error(issue?.reason || 'Không đặt lại được mật khẩu');
+      }
+      setResetTarget(null);
+    } catch (error) {
+      messageApi.error(error?.data?.message || 'Đặt lại mật khẩu thất bại');
+    }
+  };
   const [mosUser, setMosUser] = useState<UserItem>(null);
   const [mosDays, setMosDays] = useState(30);
   const [extendMos, { isLoading: isExtendingMos }] =
@@ -283,6 +302,11 @@ const UserManage = () => {
         key: 'grant',
         label: 'Cấp Premium',
         onClick: () => setGrantUser(record),
+      },
+      {
+        key: 'reset-password',
+        label: 'Đặt mật khẩu mới',
+        onClick: () => setResetTarget(record),
       },
       {
         key: 'mos',
@@ -484,6 +508,7 @@ const UserManage = () => {
           'Bấm dấu ⋯ ở cuối dòng để mở menu: Hồ sơ học tập, Sửa thông tin, Cấp / Thu hồi Premium, Cấp / Gỡ quyền Admin, Xóa tài khoản.',
           'Sửa thông tin: đổi họ tên, mã lớp, khoa, ngành, số điện thoại rồi Lưu (email và mã sinh viên không đổi ở đây).',
           'Cấp Premium: nhập số ngày, số ngày được cộng dồn vào hạn hiện có.',
+          'Đặt mật khẩu mới: chọn "Đặt mật khẩu mới" ở menu ⋯; hệ thống tự sinh mật khẩu và gửi về email học viên (không hiển thị cho admin). Chọn nhiều người để đặt hàng loạt.',
           'Cấp quyền app MOS: chọn "Cấp quyền app MOS" ở menu ⋯, nhập số ngày. Nếu đã cấp thì mục này thành "Gia hạn app MOS" và số ngày cộng dồn vào hạn còn lại; nếu đã hết hạn thì tính từ hôm nay. Có nút Thu hồi để khóa ngay.',
           'Tạo tài khoản mới: bấm "+ Tạo tài khoản" (hoặc dùng tab "Tạo / Nhập Người Dùng" để nhập hàng loạt bằng Excel).',
         ]}
@@ -614,6 +639,18 @@ const UserManage = () => {
           {roleChange?.isAdmin
             ? `${roleChange.user.fullName || roleChange.user.email} sẽ vào được khu Quản trị và không còn thấy giao diện học viên.`
             : `${roleChange?.user.fullName || roleChange?.user.email} sẽ trở lại là người dùng thường.`}
+        </Text>
+      </Modal>
+      <Modal
+        title="Đặt mật khẩu mới?"
+        open={!!resetTarget}
+        okText="Đặt và gửi email"
+        cancelText="Hủy"
+        confirmLoading={isResetting}
+        onCancel={() => setResetTarget(null)}
+        onOk={handleResetPassword}>
+        <Text>
+          {`Hệ thống tự sinh mật khẩu mới cho ${resetTarget?.fullName || resetTarget?.email} và gửi về ${resetTarget?.email}. Mật khẩu cũ mất hiệu lực, các thiết bị đang đăng nhập bị đăng xuất, và học viên được yêu cầu đổi mật khẩu khi đăng nhập web.`}
         </Text>
       </Modal>
       <Modal
