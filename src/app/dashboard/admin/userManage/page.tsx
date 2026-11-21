@@ -14,7 +14,6 @@ import {
   Segmented,
   InputNumber,
   Dropdown,
-  Radio,
   Tag,
 } from 'antd';
 import type { MenuProps } from 'antd';
@@ -24,7 +23,7 @@ import { useAppPagination } from '@hooks';
 import { UserItem } from '~mdDashboard/types';
 import { adminQuery } from '~mdAdmin/redux';
 import dayjs from 'dayjs';
-import { CreateUserParams } from '~mdAdmin/redux/RTKQuery/type';
+import CreateUserForm from '~mdAdmin/components/CreateUserForm';
 import { authQuery } from '~mdAuth/redux/RTKQuery';
 import dynamic from 'next/dynamic';
 import StatCard from '../../home/_components/StatCard';
@@ -75,8 +74,6 @@ const UserManage = () => {
   const tableWrapRef = useRef<HTMLDivElement>(null);
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [isModalCreateUserOpen, setIsModalCreateUserOpen] = useState(false);
-  const [createUserForm] = Form.useForm<CreateUserParams>();
-  const isCreatingAdmin = !!Form.useWatch('isAdmin', createUserForm);
   const [setAdminRole, { isLoading: isChangingRole }] =
     adminQuery.useSetUserAdminRoleMutation();
   // Hộp xác nhận dạng khai báo: Modal.confirm() không hiện ở trang này.
@@ -119,10 +116,45 @@ const UserManage = () => {
   const [revokePremium] = useRevokePremiumMutation();
   const [grantUser, setGrantUser] = useState<UserItem>(null);
   const [grantDays, setGrantDays] = useState(30);
+  const [mosUser, setMosUser] = useState<UserItem>(null);
+  const [mosDays, setMosDays] = useState(30);
+  const [extendMos, { isLoading: isExtendingMos }] =
+    adminQuery.useExtendMosAccessMutation();
+  const [setMosAccess, { isLoading: isRevokingMos }] =
+    adminQuery.useSetMosAccessMutation();
+  const mosExpired = (u?: UserItem) =>
+    !!u?.mosAccess &&
+    !!u.mosExpiresAt &&
+    dayjs(u.mosExpiresAt).isBefore(dayjs());
+  const handleExtendMos = async () => {
+    try {
+      const r = await extendMos({
+        userId: mosUser._id,
+        days: mosDays,
+      }).unwrap();
+      messageApi.success(
+        `Đã cấp quyền app MOS đến ${dayjs(r.mosExpiresAt).format('DD/MM/YYYY')}`,
+      );
+      setMosUser(null);
+      refresh();
+    } catch (error) {
+      messageApi.error(error?.data?.message || 'Cấp quyền app MOS thất bại');
+    }
+  };
+  const handleRevokeMos = async () => {
+    try {
+      await setMosAccess({
+        studentIds: [mosUser.studentId],
+        enabled: false,
+      }).unwrap();
+      messageApi.success('Đã thu hồi quyền app MOS');
+      setMosUser(null);
+      refresh();
+    } catch (error) {
+      messageApi.error(error?.data?.message || 'Thu hồi thất bại');
+    }
+  };
   const { Search } = Input;
-  const [createUser, { isLoading: isLoadingCreateUser }] =
-    adminQuery.useCreateUserMutation();
-  const [sendEmails] = adminQuery.useSendImportEmailsMutation();
   const contextHolder = null;
 
   // Card "Tạo người dùng mới" ở tab "Tạo Người Dùng" (CreateUserForm) là 1
@@ -208,24 +240,6 @@ const UserManage = () => {
       messageApi.error(error?.data?.message || 'Thu hồi thất bại');
     }
   };
-  const handleCreateUser = async (value: any) => {
-    try {
-      const res = await createUser(value).unwrap();
-      // Admin tự đặt mật khẩu nên không gửi email kích hoạt.
-      if (!value.isAdmin) {
-        await sendEmails({ accounts: [res] } as any).unwrap();
-      }
-      refresh();
-      createUserForm.resetFields();
-      setIsModalCreateUserOpen(false);
-      messageApi.success(
-        value.isAdmin ? 'Đã tạo tài khoản Admin' : 'Tạo user thành công',
-      );
-    } catch (error) {
-      messageApi.error(error?.data?.message || 'Tạo tài khoản thất bại');
-    }
-  };
-
   const adminLevel = (u: UserItem) =>
     typeof u.role?.level === 'number' && u.role.level <= 2
       ? u.role.level
@@ -269,6 +283,11 @@ const UserManage = () => {
         key: 'grant',
         label: 'Cấp Premium',
         onClick: () => setGrantUser(record),
+      },
+      {
+        key: 'mos',
+        label: record.mosAccess ? 'Gia hạn app MOS' : 'Cấp quyền app MOS',
+        onClick: () => setMosUser(record),
       },
     ];
     if (isActivePremium(record)) {
@@ -418,7 +437,7 @@ const UserManage = () => {
         record.mosAccess ? (
           <Text>
             {record.mosExpiresAt
-              ? `Đã cấp, đến ${dayjs(record.mosExpiresAt).format('DD/MM/YYYY')}`
+              ? `${mosExpired(record) ? 'Hết hạn' : 'Đã cấp, đến'} ${dayjs(record.mosExpiresAt).format('DD/MM/YYYY')}`
               : 'Đã cấp'}
           </Text>
         ) : (
@@ -465,6 +484,7 @@ const UserManage = () => {
           'Bấm dấu ⋯ ở cuối dòng để mở menu: Hồ sơ học tập, Sửa thông tin, Cấp / Thu hồi Premium, Cấp / Gỡ quyền Admin, Xóa tài khoản.',
           'Sửa thông tin: đổi họ tên, mã lớp, khoa, ngành, số điện thoại rồi Lưu (email và mã sinh viên không đổi ở đây).',
           'Cấp Premium: nhập số ngày, số ngày được cộng dồn vào hạn hiện có.',
+          'Cấp quyền app MOS: chọn "Cấp quyền app MOS" ở menu ⋯, nhập số ngày. Nếu đã cấp thì mục này thành "Gia hạn app MOS" và số ngày cộng dồn vào hạn còn lại; nếu đã hết hạn thì tính từ hôm nay. Có nút Thu hồi để khóa ngay.',
           'Tạo tài khoản mới: bấm "+ Tạo tài khoản" (hoặc dùng tab "Tạo / Nhập Người Dùng" để nhập hàng loạt bằng Excel).',
         ]}
         note="Tài khoản Admin có dấu hiệu riêng trong bảng. Xóa tài khoản không thể hoàn tác."
@@ -574,85 +594,13 @@ const UserManage = () => {
       {/* Modal hiện thông tin user */}
 
       <Modal
-        title=" Tạo tài khoản"
+        title="Tạo tài khoản"
         open={isModalCreateUserOpen}
         onCancel={() => setIsModalCreateUserOpen(false)}
-        onOk={() =>
-          createUserForm
-            .validateFields()
-            .then(handleCreateUser)
-            .catch(() => undefined)
-        }
-        confirmLoading={isLoadingCreateUser}>
-        <Form
-          form={createUserForm}
-          layout="vertical"
-          initialValues={{ isAdmin: false }}>
-          <Form.Item label="Loại tài khoản" name="isAdmin">
-            <Radio.Group>
-              <Radio value={false}>Học viên</Radio>
-              <Radio value={true}>Quản trị viên (Admin)</Radio>
-            </Radio.Group>
-          </Form.Item>
-          {!isCreatingAdmin && (
-            <Form.Item
-              label="Họ và Tên"
-              name="fullName"
-              rules={[{ required: true, message: 'Nhập họ và tên' }]}>
-              <Input />
-            </Form.Item>
-          )}
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: 'Nhập email' },
-              { type: 'email', message: 'Email không hợp lệ' },
-            ]}>
-            <Input />
-          </Form.Item>
-          {isCreatingAdmin ? (
-            <Form.Item
-              label="Mật khẩu"
-              name="password"
-              rules={[
-                { required: true, message: 'Nhập mật khẩu' },
-                { min: 8, message: 'Mật khẩu cần ít nhất 8 ký tự' },
-              ]}>
-              <Input.Password
-                autoComplete="new-password"
-                placeholder="Ít nhất 8 ký tự"
-              />
-            </Form.Item>
-          ) : (
-            <>
-              <Form.Item
-                label="Mã sinh viên"
-                name="studentId"
-                rules={[{ required: true, message: 'Nhập mã sinh viên' }]}>
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="Mã lớp"
-                name="class"
-                rules={[{ required: true, message: 'Nhập mã lớp' }]}>
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="Ngành"
-                name="major"
-                rules={[{ required: true, message: 'Nhập ngành' }]}>
-                <Input />
-              </Form.Item>
-              <Form.Item
-                label="Khoa"
-                name="faculty"
-                rules={[{ required: true, message: 'Nhập khoa' }]}>
-                <Input />
-              </Form.Item>
-            </>
-          )}
-        </Form>
+        footer={null}
+        width={760}>
+        {/* Cùng một form với tab "Tạo Người Dùng" để hai nơi không lệch nhau. */}
+        <CreateUserForm onCreated={() => setIsModalCreateUserOpen(false)} />
       </Modal>
       <Modal
         title={roleChange?.isAdmin ? 'Cấp quyền Admin?' : 'Gỡ quyền Admin?'}
@@ -667,6 +615,44 @@ const UserManage = () => {
             ? `${roleChange.user.fullName || roleChange.user.email} sẽ vào được khu Quản trị và không còn thấy giao diện học viên.`
             : `${roleChange?.user.fullName || roleChange?.user.email} sẽ trở lại là người dùng thường.`}
         </Text>
+      </Modal>
+      <Modal
+        title={mosUser?.mosAccess ? 'Gia hạn app MOS' : 'Cấp quyền app MOS'}
+        open={!!mosUser}
+        onCancel={() => setMosUser(null)}
+        okText={mosUser?.mosAccess ? 'Gia hạn' : 'Cấp quyền'}
+        cancelText="Hủy"
+        confirmLoading={isExtendingMos}
+        onOk={handleExtendMos}>
+        <p>
+          Học viên <b>{mosUser?.fullName || mosUser?.email}</b>
+          {mosUser?.mosAccess
+            ? mosUser.mosExpiresAt
+              ? mosExpired(mosUser)
+                ? ` đã hết hạn từ ${dayjs(mosUser.mosExpiresAt).format('DD/MM/YYYY')}; hạn mới tính từ hôm nay.`
+                : ` đang có quyền đến ${dayjs(mosUser.mosExpiresAt).format('DD/MM/YYYY')}; số ngày được cộng dồn vào hạn này.`
+              : ' đang có quyền không giới hạn; hạn mới tính từ hôm nay.'
+            : ' chưa có quyền dùng app MOS.'}
+        </p>
+        <label htmlFor="mos-days">Số ngày (1-3650)</label>
+        <InputNumber
+          id="mos-days"
+          size="large"
+          min={1}
+          max={3650}
+          style={{ width: '100%', marginTop: 8 }}
+          value={mosDays}
+          onChange={v => setMosDays(v ?? 30)}
+        />
+        {mosUser?.mosAccess ? (
+          <Button
+            danger
+            style={{ marginTop: 12 }}
+            loading={isRevokingMos}
+            onClick={handleRevokeMos}>
+            Thu hồi quyền ngay
+          </Button>
+        ) : null}
       </Modal>
       <Modal
         title="Cấp Premium"

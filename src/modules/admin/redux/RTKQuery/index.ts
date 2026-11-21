@@ -1322,6 +1322,17 @@ export const adminQuery = baseQuery.injectEndpoints({
       query: page => ({ url: 'mos/admin/sessions', params: { page } }),
       transformResponse: (res: AxiosResponse<any>) => res.data,
     }),
+    extendMosAccess: builder.mutation<
+      { mosExpiresAt: string },
+      { userId: string; days: number }
+    >({
+      query: ({ userId, days }) => ({
+        url: `mos/admin/users/${userId}/extend`,
+        method: 'PUT',
+        body: { days },
+      }),
+      transformResponse: (res: AxiosResponse<any>) => res.data,
+    }),
     setMosAccess: builder.mutation<
       { updated: number; notFound: string[] },
       SetMosAccessPayload
