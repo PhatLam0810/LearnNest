@@ -4,6 +4,10 @@ import { Text, View } from 'react-native-web';
 import { Checkbox, Radio, Skeleton } from 'antd';
 import { useParams, useRouter } from 'next/navigation';
 import AppButton from '@components/AppButton';
+import { useResponsive } from '@/styles/responsive';
+import ExamSidebar, {
+  ExamItemState,
+} from '~mdDashboard/components/ExamSidebar';
 import { messageApi } from '@hooks';
 import { dashboardQuery } from '~mdDashboard/redux';
 import type {
@@ -40,6 +44,9 @@ const QuizPlayPage: React.FC = () => {
   const [responses, setResponses] = useState<Responses>({});
   const [result, setResult] = useState<QuizSubmitResult | null>(null);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+  // Bài không đặt giờ thì đếm lên thời gian đã làm.
+  const [elapsed, setElapsed] = useState(0);
+  const { isDesktop } = useResponsive();
   const submitted = useRef(false);
 
   const attemptsLeft = quiz?.maxAttempts
@@ -54,7 +61,14 @@ const QuizPlayPage: React.FC = () => {
     setResult(null);
     submitted.current = false;
     setSecondsLeft(quiz.timeLimitMinutes ? quiz.timeLimitMinutes * 60 : null);
+    setElapsed(0);
   }, [quiz?._id, quiz?.attemptsUsed]);
+
+  useEffect(() => {
+    if (!quiz || quiz.timeLimitMinutes || result) return;
+    const t = setInterval(() => setElapsed(s => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [quiz, result]);
 
   const setResponse = (index: number, patch: Partial<QuestionResponse>) =>
     setResponses(prev => ({
@@ -172,126 +186,147 @@ const QuizPlayPage: React.FC = () => {
         </View>
       )}
 
-      {!outOfAttempts && secondsLeft !== null && !result && (
-        <Text
-          role="timer"
-          style={{
-            ...styles.timer,
-            ...(secondsLeft <= 60 ? styles.timerWarn : null),
-          }}>
-          Còn lại {fmt(Math.max(secondsLeft, 0))}
-        </Text>
-      )}
+      <View
+        style={{
+          ...styles.layout,
+          ...(isDesktop ? null : styles.layoutStack),
+        }}>
+        <View style={styles.main}>
+          {!outOfAttempts &&
+            quiz.questions.map((q, pos) => {
+              const r = responses[q.index];
+              const review = reviewByIndex.get(q.index);
+              const locked = !!result;
+              return (
+                <View
+                  key={q.index}
+                  {...({ nativeID: `quiz-q-${pos}` } as object)}
+                  style={{ ...styles.card, ...styles.cardAnchor }}>
+                  <View style={styles.qHeader}>
+                    <Text style={styles.qIndex}>{pos + 1}.</Text>
+                    {q.type !== 'dragdrop' && (
+                      <Text style={styles.qText}>{q.questionText}</Text>
+                    )}
+                    {q.type === 'dragdrop' && (
+                      <Text style={styles.qText}>Điền vào ô trống</Text>
+                    )}
+                  </View>
+                  {review && (
+                    <Text
+                      style={review.correct ? styles.passed : styles.failed}>
+                      {review.correct ? 'Đúng' : 'Chưa đúng'}
+                    </Text>
+                  )}
 
-      {!outOfAttempts &&
-        quiz.questions.map((q, pos) => {
-          const r = responses[q.index];
-          const review = reviewByIndex.get(q.index);
-          const locked = !!result;
-          return (
-            <View key={q.index} style={styles.card}>
-              <View style={styles.qHeader}>
-                <Text style={styles.qIndex}>{pos + 1}.</Text>
-                {q.type !== 'dragdrop' && (
-                  <Text style={styles.qText}>{q.questionText}</Text>
-                )}
-                {q.type === 'dragdrop' && (
-                  <Text style={styles.qText}>Điền vào ô trống</Text>
-                )}
-              </View>
-              {review && (
-                <Text style={review.correct ? styles.passed : styles.failed}>
-                  {review.correct ? 'Đúng' : 'Chưa đúng'}
-                </Text>
-              )}
-
-              {q.type === 'single' && (
-                <Radio.Group
-                  disabled={locked}
-                  value={r?.selected?.[0]}
-                  onChange={e =>
-                    setResponse(q.index, { selected: [e.target.value] })
-                  }
-                  style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {q.answers.map(a => (
-                    <Radio
-                      key={a.index}
-                      value={a.index}
+                  {q.type === 'single' && (
+                    <Radio.Group
+                      disabled={locked}
+                      value={r?.selected?.[0]}
+                      onChange={e =>
+                        setResponse(q.index, { selected: [e.target.value] })
+                      }
                       style={{
-                        ...styles.option,
-                        ...(review?.correctIndexes?.includes(a.index)
-                          ? styles.optionCorrect
-                          : r?.selected?.includes(a.index) && review
-                            ? styles.optionWrong
-                            : null),
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 8,
                       }}>
-                      {a.text}
-                    </Radio>
-                  ))}
-                </Radio.Group>
-              )}
+                      {q.answers.map(a => (
+                        <Radio
+                          key={a.index}
+                          value={a.index}
+                          style={{
+                            ...styles.option,
+                            ...(review?.correctIndexes?.includes(a.index)
+                              ? styles.optionCorrect
+                              : r?.selected?.includes(a.index) && review
+                                ? styles.optionWrong
+                                : null),
+                          }}>
+                          {a.text}
+                        </Radio>
+                      ))}
+                    </Radio.Group>
+                  )}
 
-              {q.type === 'multiple' && (
-                <View style={{ gap: 8 }}>
-                  <Text style={styles.qHint}>Chọn tất cả đáp án đúng</Text>
-                  {q.answers.map(a => {
-                    const on = r?.selected?.includes(a.index) ?? false;
-                    return (
-                      <Checkbox
-                        key={a.index}
-                        disabled={locked}
-                        checked={on}
-                        style={{
-                          ...styles.option,
-                          ...(review?.correctIndexes?.includes(a.index)
-                            ? styles.optionCorrect
-                            : on && review
-                              ? styles.optionWrong
-                              : null),
-                        }}
-                        onChange={e => {
-                          const cur = r?.selected ?? [];
-                          setResponse(q.index, {
-                            selected: e.target.checked
-                              ? [...cur, a.index]
-                              : cur.filter(i => i !== a.index),
-                          });
-                        }}>
-                        {a.text}
-                      </Checkbox>
-                    );
-                  })}
+                  {q.type === 'multiple' && (
+                    <View style={{ gap: 8 }}>
+                      <Text style={styles.qHint}>Chọn tất cả đáp án đúng</Text>
+                      {q.answers.map(a => {
+                        const on = r?.selected?.includes(a.index) ?? false;
+                        return (
+                          <Checkbox
+                            key={a.index}
+                            disabled={locked}
+                            checked={on}
+                            style={{
+                              ...styles.option,
+                              ...(review?.correctIndexes?.includes(a.index)
+                                ? styles.optionCorrect
+                                : on && review
+                                  ? styles.optionWrong
+                                  : null),
+                            }}
+                            onChange={e => {
+                              const cur = r?.selected ?? [];
+                              setResponse(q.index, {
+                                selected: e.target.checked
+                                  ? [...cur, a.index]
+                                  : cur.filter(i => i !== a.index),
+                              });
+                            }}>
+                            {a.text}
+                          </Checkbox>
+                        );
+                      })}
+                    </View>
+                  )}
+
+                  {q.type === 'dragdrop' && (
+                    <DragDropQuestion
+                      text={q.questionText}
+                      answers={q.answers}
+                      value={r?.placements ?? {}}
+                      onChange={placements =>
+                        setResponse(q.index, { placements })
+                      }
+                      review={review}
+                    />
+                  )}
+
+                  {review?.explanation && (
+                    <Text style={styles.explanation}>{review.explanation}</Text>
+                  )}
                 </View>
-              )}
-
-              {q.type === 'dragdrop' && (
-                <DragDropQuestion
-                  text={q.questionText}
-                  answers={q.answers}
-                  value={r?.placements ?? {}}
-                  onChange={placements => setResponse(q.index, { placements })}
-                  review={review}
-                />
-              )}
-
-              {review?.explanation && (
-                <Text style={styles.explanation}>{review.explanation}</Text>
-              )}
-            </View>
-          );
-        })}
-
-      {!result && !outOfAttempts && (
-        <View style={styles.actions}>
-          <AppButton
-            type="primary"
-            style={styles.button}
-            loading={isSubmitting}
-            onClick={() => handleSubmit()}>
-            Nộp bài ({answeredCount}/{quiz.questions.length} câu đã làm)
-          </AppButton>
+              );
+            })}
         </View>
-      )}
+        {!outOfAttempts && (
+          <View style={isDesktop ? styles.side : styles.sideStack}>
+            <ExamSidebar
+              timerLabel={
+                secondsLeft !== null ? 'Thời gian còn lại' : 'Thời gian đã làm'
+              }
+              timerText={fmt(
+                secondsLeft !== null ? Math.max(secondsLeft, 0) : elapsed,
+              )}
+              warn={secondsLeft !== null && secondsLeft <= 60 && !result}
+              answeredCount={answeredCount}
+              items={quiz.questions.map((q): ExamItemState => {
+                const review = reviewByIndex.get(q.index);
+                if (review) return review.correct ? 'correct' : 'wrong';
+                return isAnswered(q, responses[q.index]) ? 'answered' : 'idle';
+              })}
+              onJump={pos =>
+                document
+                  .getElementById(`quiz-q-${pos}`)
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              }
+              onSubmit={result ? undefined : () => handleSubmit()}
+              submitting={isSubmitting}
+            />
+          </View>
+        )}
+      </View>
     </View>
   );
 };

@@ -1,7 +1,8 @@
 'use client';
 import React from 'react';
 import { Text, View } from 'react-native-web';
-import { Segmented, Skeleton } from 'antd';
+import { Skeleton } from 'antd';
+import { asButton } from '@/utils/asButton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { dashboardQuery } from '~mdDashboard/redux';
 import { QuizSummaryItems } from '~mdDashboard/components/LibraryQuizList';
@@ -60,22 +61,43 @@ const PracticeHubPage: React.FC = () => {
         <Text role="heading" aria-level={1} style={styles.title}>
           Luyện tập
         </Text>
-        <Segmented
-          aria-label="Chọn mục luyện tập"
-          value={active.key}
-          options={tabs.map(t => ({
-            value: t.key,
-            label: t.label,
-          }))}
-          onChange={v =>
-            router.replace(
-              v === DEFAULT_PRACTICE_TAB
-                ? '/dashboard/practice'
-                : `/dashboard/practice?mode=${v}`,
-              { scroll: false },
-            )
-          }
-        />
+        <View
+          style={styles.tabs}
+          {...({
+            role: 'tablist',
+            'aria-label': 'Chọn mục luyện tập',
+          } as object)}>
+          {tabs.map(t => {
+            const selected = t.key === active.key;
+            return (
+              <View
+                key={t.key}
+                {...asButton(
+                  () =>
+                    router.replace(
+                      t.key === DEFAULT_PRACTICE_TAB
+                        ? '/dashboard/practice'
+                        : `/dashboard/practice?mode=${t.key}`,
+                      { scroll: false },
+                    ),
+                  t.label,
+                )}
+                {...({ role: 'tab', 'aria-selected': selected } as object)}
+                style={{
+                  ...styles.tab,
+                  ...(selected ? styles.tabActive : null),
+                }}>
+                <Text
+                  style={{
+                    ...styles.tabText,
+                    ...(selected ? styles.tabTextActive : null),
+                  }}>
+                  {t.label}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
       </View>
       {active.quizSubject ? (
         <SubjectQuizzes subject={active.quizSubject} label={active.label} />

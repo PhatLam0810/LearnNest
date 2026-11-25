@@ -33,7 +33,7 @@ const CARD = {
 const styles = StyleSheet.create({
   page: {
     width: '100%',
-    maxWidth: 820,
+    maxWidth: 1180,
     alignSelf: 'center',
     paddingTop: 24,
     paddingBottom: 48,
@@ -50,6 +50,13 @@ const styles = StyleSheet.create({
   },
   timerWarn: { color: 'var(--color-error)' },
   card: { ...CARD },
+  // Chừa chỗ cho thanh đầu trang khi cuộn tới câu từ lưới số câu.
+  cardAnchor: { scrollMarginTop: 88 },
+  layout: { flexDirection: 'row', gap: 20, alignItems: 'flex-start' },
+  layoutStack: { flexDirection: 'column-reverse', alignItems: 'stretch' },
+  main: { flex: 1, minWidth: 0, gap: 16 },
+  side: { width: 300, position: 'sticky', top: 88 },
+  sideStack: { width: '100%' },
   qHeader: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
   qIndex: {
     ...typography.body2,

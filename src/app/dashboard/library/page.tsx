@@ -377,10 +377,10 @@ const LibraryList = () => {
           onClick={closeModal}>
           <View
             style={{
-              width: isMobile ? '100%' : isTablet ? '92%' : '86%',
-              height: isMobile ? '82%' : '88%',
-              maxWidth: 1200,
-              maxHeight: '92vh',
+              width: isMobile ? '100%' : isTablet ? '96%' : '94%',
+              height: isMobile ? '90%' : '95%',
+              maxWidth: 1500,
+              maxHeight: '97vh',
               backgroundColor: '#fff',
               borderRadius: isMobile ? 10 : 16,
               overflow: 'hidden',

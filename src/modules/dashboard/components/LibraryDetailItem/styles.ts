@@ -207,6 +207,17 @@ const styles = StyleSheet.create({
     scrollbarWidth: 'none',
   },
 
+  quizLayout: {
+    flexDirection: 'row',
+    height: '100%',
+    width: '100%',
+    backgroundColor: 'var(--color-surface-page)',
+  },
+  quizLayoutMobile: { flexDirection: 'column-reverse' },
+  quizMain: { flex: 1, minWidth: 0, width: 'auto' },
+  quizSide: { width: 320, padding: 16, paddingLeft: 0 },
+  quizSideMobile: { width: '100%', paddingLeft: 16, paddingBottom: 0 },
+
   quizContainerMobile: {
     padding: 12,
   },
@@ -265,74 +276,6 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     fontWeight: '600',
     fontSize: 14,
-  },
-
-  quizNavGridCard: {
-    backgroundColor: 'var(--color-surface)',
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 16,
-    marginBottom: 24,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-  },
-
-  quizNavGridTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: 'var(--color-text-primary)',
-    marginBottom: 12,
-  },
-
-  quizNavGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
-  },
-
-  quizNavGridItem: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: 'var(--color-surface-subtle)',
-    borderWidth: 1,
-    borderColor: 'var(--color-border)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-  },
-
-  quizNavGridItemAnswered: {
-    backgroundColor: 'var(--color-vhu-primary)',
-    borderColor: 'var(--color-vhu-primary)',
-  },
-
-  quizNavGridItemCurrent: {
-    borderColor: 'var(--color-vhu-secondary)',
-    borderWidth: 2,
-    backgroundColor: 'var(--color-warning-bg)',
-  },
-
-  quizNavGridItemText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'var(--color-text-muted)',
-  },
-
-  quizNavGridItemTextAnswered: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: 'var(--color-text-on-primary)',
-  },
-
-  quizSubmitFromGridButton: {
-    height: 42,
-    borderRadius: 12,
-    paddingLeft: 24,
-    paddingRight: 24,
-    fontWeight: '600',
-    backgroundColor: 'var(--color-vhu-secondary)',
-    borderWidth: 0,
   },
 
   quizFlagButtonActive: {
