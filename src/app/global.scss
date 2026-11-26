@@ -267,6 +267,31 @@ body {
 .hide-default-radio .ant-radio {
   display: none;
 }
+// Đáp án trắc nghiệm (QuizPlayPage): ẩn chấm tròn nhưng vẫn giữ input để dùng
+// bàn phím; viền focus nằm trên cả dòng đáp án.
+.quiz-option {
+  width: 100%;
+  .ant-radio {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  > span:last-child {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding-inline: 0;
+  }
+  &:hover {
+    border-color: var(--color-vhu-accent) !important;
+  }
+  &:focus-within {
+    outline: 2px solid var(--color-border-focus);
+    outline-offset: 2px;
+  }
+}
 .ant-table-cell {
   font-family: $font-lexend;
 }

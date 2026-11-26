@@ -203,7 +203,7 @@ const QuizPlayPage: React.FC = () => {
                   {...({ nativeID: `quiz-q-${pos}` } as object)}
                   style={{ ...styles.card, ...styles.cardAnchor }}>
                   <View style={styles.qHeader}>
-                    <Text style={styles.qIndex}>{pos + 1}.</Text>
+                    <Text style={styles.qIndex}>{pos + 1}</Text>
                     {q.type !== 'dragdrop' && (
                       <Text style={styles.qText}>{q.questionText}</Text>
                     )}
@@ -230,21 +230,33 @@ const QuizPlayPage: React.FC = () => {
                         flexDirection: 'column',
                         gap: 8,
                       }}>
-                      {q.answers.map(a => (
-                        <Radio
-                          key={a.index}
-                          value={a.index}
-                          style={{
-                            ...styles.option,
-                            ...(review?.correctIndexes?.includes(a.index)
-                              ? styles.optionCorrect
-                              : r?.selected?.includes(a.index) && review
-                                ? styles.optionWrong
-                                : null),
-                          }}>
-                          {a.text}
-                        </Radio>
-                      ))}
+                      {q.answers.map((a, i) => {
+                        const on = r?.selected?.includes(a.index) ?? false;
+                        return (
+                          <Radio
+                            key={a.index}
+                            value={a.index}
+                            className="quiz-option"
+                            style={{
+                              ...styles.option,
+                              ...(on ? styles.optionSelected : null),
+                              ...(review?.correctIndexes?.includes(a.index)
+                                ? styles.optionCorrect
+                                : on && review
+                                  ? styles.optionWrong
+                                  : null),
+                            }}>
+                            <span
+                              style={{
+                                ...styles.letter,
+                                ...(on ? styles.letterSelected : null),
+                              }}>
+                              {String.fromCharCode(65 + i)}
+                            </span>
+                            <span style={styles.optionText}>{a.text}</span>
+                          </Radio>
+                        );
+                      })}
                     </Radio.Group>
                   )}
 
@@ -258,8 +270,10 @@ const QuizPlayPage: React.FC = () => {
                             key={a.index}
                             disabled={locked}
                             checked={on}
+                            className="quiz-option"
                             style={{
                               ...styles.option,
+                              ...(on ? styles.optionSelected : null),
                               ...(review?.correctIndexes?.includes(a.index)
                                 ? styles.optionCorrect
                                 : on && review
@@ -274,7 +288,7 @@ const QuizPlayPage: React.FC = () => {
                                   : cur.filter(i => i !== a.index),
                               });
                             }}>
-                            {a.text}
+                            <span style={styles.optionText}>{a.text}</span>
                           </Checkbox>
                         );
                       })}
