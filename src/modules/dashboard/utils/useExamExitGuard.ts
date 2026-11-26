@@ -8,6 +8,16 @@ import { useRouter } from 'next/navigation';
 // mọi trang làm bài có cùng hành vi.
 // `stayKey`: chuỗi có trong URL của chính trang làm bài (điều hướng nội bộ
 // trong trang thì không chặn).
+// Mục điều hướng ngoài trang làm bài: menu thanh bên (cả bản ngăn kéo trên
+// điện thoại), nút/link trên header, mục trong menu thả xuống của header.
+const NAV_CLICK_SELECTOR = [
+  '.ant-menu-item',
+  '.ant-dropdown-menu-item',
+  '.app-header [role="button"]',
+  '.app-header button',
+  '.ant-drawer [role="button"]',
+].join(', ');
+
 export function useExamExitGuard(
   active: boolean,
   stayKey: string,
@@ -17,6 +27,7 @@ export function useExamExitGuard(
   const [showExitWarning, setShowExitWarning] = useState(false);
   const allowExitRef = useRef(false);
   const pendingNavUrl = useRef<string | null>(null);
+  const pendingClick = useRef<HTMLElement | null>(null);
 
   // 1. Đóng tab / tải lại
   useEffect(() => {
@@ -78,7 +89,26 @@ export function useExamExitGuard(
 
     const handleAnchorClick = (e: MouseEvent) => {
       if (allowExitRef.current) return;
-      const target = (e.target as HTMLElement).closest('a');
+      const clicked = e.target as HTMLElement;
+      // Menu thanh bên / header gọi router.push trong onClick: App Router đổi
+      // trang TRƯỚC khi gọi history.pushState nên chặn ở pushState là quá
+      // muộn. Chặn ngay cú click, xác nhận xong thì click lại phần tử đó.
+      const navItem = clicked.closest(NAV_CLICK_SELECTOR);
+      if (
+        navItem &&
+        !navItem.closest('.ant-modal-root, .ant-dropdown-trigger') &&
+        !navItem.matches(
+          '[aria-haspopup], .ant-dropdown-trigger, [aria-label="Mở menu điều hướng"]',
+        )
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        pendingNavUrl.current = null;
+        pendingClick.current = navItem as HTMLElement;
+        setShowExitWarning(true);
+        return;
+      }
+      const target = clicked.closest('a');
       if (!target?.href) return;
       // Không chặn tải file, link blob, hoặc mở tab mới
       if (
@@ -118,10 +148,14 @@ export function useExamExitGuard(
     confirmExit: () => {
       allowExitRef.current = true;
       setShowExitWarning(false);
-      router.push(pendingNavUrl.current || fallbackUrl);
+      const el = pendingClick.current;
+      pendingClick.current = null;
+      if (el) el.click();
+      else router.push(pendingNavUrl.current || fallbackUrl);
     },
     cancelExit: () => {
       pendingNavUrl.current = null;
+      pendingClick.current = null;
       setShowExitWarning(false);
     },
     // Gọi trước khi tự điều hướng hợp lệ (vd sau khi nộp bài).
