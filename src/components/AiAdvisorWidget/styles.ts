@@ -132,8 +132,9 @@ export default StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 9999,
-    backgroundColor: '#1d418a',
-    color: '#fff',
+    // Icon Bot có màu xanh cố định -> nền sáng để icon nổi rõ.
+    backgroundColor: 'var(--color-info-bg)',
+    color: 'var(--color-vhu-primary)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

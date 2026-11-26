@@ -21,15 +21,6 @@ const styles = StyleSheet.create({
   tabActive: { backgroundColor: 'var(--color-info-bg)' },
   tabText: { ...typography.body2, color: 'var(--color-text-body)' },
   tabTextActive: { color: 'var(--color-vhu-primary)', fontWeight: '600' },
-  quizWrap: {
-    width: '100%',
-    paddingTop: 16,
-    paddingBottom: 48,
-    paddingLeft: 24,
-    paddingRight: 24,
-    gap: 12,
-  },
-  hint: { ...typography.body2, color: 'var(--color-text-muted)' },
 });
 
 export default styles;
