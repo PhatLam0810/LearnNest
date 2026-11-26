@@ -42,6 +42,8 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    // Không giãn các hàng khi lưới ít câu (minHeight lớn hơn nội dung).
+    alignContent: 'flex-start',
     gap: 6,
     maxHeight: 'calc(100vh - 380px)',
     minHeight: 120,
