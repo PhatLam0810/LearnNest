@@ -323,6 +323,7 @@ const QuizPlayPage: React.FC = () => {
               }
               onSubmit={result ? undefined : () => handleSubmit()}
               submitting={isSubmitting}
+              compact={!isDesktop}
             />
           </View>
         )}

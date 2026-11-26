@@ -38,6 +38,25 @@ const styles = StyleSheet.create({
   },
   timeWarn: { color: 'var(--color-error)' },
   submit: { width: '100%', height: 44 },
+  submitCompact: {
+    width: 'auto',
+    height: 40,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  compactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  toggle: { cursor: 'pointer', paddingTop: 2, paddingBottom: 2 },
+  toggleText: {
+    ...typography.caption,
+    fontWeight: '600',
+    color: 'var(--color-vhu-primary)',
+  },
+  gridCompact: { maxHeight: '35vh', minHeight: 0 },
   hint: { ...typography.caption, color: 'var(--color-text-body)' },
   grid: {
     flexDirection: 'row',

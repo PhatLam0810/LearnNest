@@ -1245,6 +1245,7 @@ const LibraryDetailItem = forwardRef<
                   )}
                   onJump={setCurrentQuestionIndex}
                   onSubmit={handleSubmit}
+                  compact={isMobile}
                 />
               </View>
             </View>

@@ -33,12 +33,10 @@ const CARD = {
 const styles = StyleSheet.create({
   page: {
     width: '100%',
-    maxWidth: 1180,
-    alignSelf: 'center',
     paddingTop: 24,
     paddingBottom: 48,
-    paddingLeft: 16,
-    paddingRight: 16,
+    paddingLeft: 24,
+    paddingRight: 24,
     gap: 16,
   },
   title: { ...typography.titleL, color: 'var(--color-text-primary)' },

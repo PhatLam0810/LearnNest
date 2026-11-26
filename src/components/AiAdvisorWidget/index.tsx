@@ -1,7 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { View, Text, TouchableOpacity } from 'react-native-web';
 import { useAppSelector } from '@redux';
 import { dashboardQuery } from '~mdDashboard/redux';
 import {
@@ -161,7 +160,9 @@ const AiAdvisorWidget: React.FC = () => {
           30% { transform: translateY(-4px); opacity: 1; }
         }
         .ai-advisor-dot { animation: ai-advisor-bounce 1.1s infinite ease-in-out; }
-        .ai-advisor-input::placeholder { color: #9aa8c7; }
+        .ai-advisor-input::placeholder { color: #6b7280; }
+        .ai-advisor-input:focus { border-color: var(--color-vhu-primary) !important; }
+        @media (max-width: 600px) { .ai-advisor-fab-text { display: none; } }
       `}</style>
       {open && (
         <div style={styles.panel}>
@@ -177,6 +178,7 @@ const AiAdvisorWidget: React.FC = () => {
             </div>
             <button
               type="button"
+              aria-label="Đóng"
               style={styles.headerCloseBtn}
               onClick={() => setOpen(false)}>
               <CloseOutlined />
@@ -364,12 +366,21 @@ const AiAdvisorWidget: React.FC = () => {
         </div>
       )}
 
-      <TouchableOpacity style={styles.fab}>
-        <View onClick={() => setOpen(o => !o)} style={styles.fabInner}>
+      <button
+        type="button"
+        aria-label={open ? 'Đóng AI Tư Vấn' : 'Mở AI Tư Vấn'}
+        aria-expanded={open}
+        style={styles.fab}
+        onClick={() => setOpen(o => !o)}>
+        {/* View của react-native-web bỏ qua `color`, icon từng bị tối màu
+            trên nền xanh đậm - đặt màu trực tiếp trên vòng tròn trắng. */}
+        <span style={styles.fabIcon}>
           {open ? <CloseOutlined /> : <RobotOutlined />}
-          <Text style={styles.fabText}>AI Tư Vấn</Text>
-        </View>
-      </TouchableOpacity>
+        </span>
+        <span className="ai-advisor-fab-text" style={styles.fabText}>
+          AI Tư Vấn
+        </span>
+      </button>
     </div>
   );
 };
