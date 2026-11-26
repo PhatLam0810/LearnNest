@@ -11,6 +11,7 @@ import PracticeTaskContent, {
 import CommentSection from '@components/CommentSection';
 import { useResponsive } from '@/styles/responsive';
 import { asButton } from '@/utils/asButton';
+import { useExamExitGuard } from '~mdDashboard/utils/useExamExitGuard';
 import styles from './styles';
 
 const { Countdown } = Statistic;
@@ -26,9 +27,6 @@ const subjectLabel = (s: string) => (s === 'Mixed' ? 'Word + Excel' : s);
 const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   const router = useRouter();
   const { isMobile } = useResponsive();
-  const [showExitWarning, setShowExitWarning] = useState(false);
-  const allowExitRef = React.useRef(false);
-  const pendingNavUrl = React.useRef<string | null>(null);
 
   const { data, isFetching, refetch } =
     dashboardQuery.useGetMockExamAttemptQuery(attemptId, {
@@ -41,118 +39,8 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
 
   const isInProgress = data?.status === 'in_progress';
 
-  // 1. Chặn close tab / reload khi đang thi
-  useEffect(() => {
-    if (!isInProgress) return;
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (allowExitRef.current) return;
-      e.preventDefault();
-      e.returnValue = '';
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [isInProgress]);
-
-  // 2. Chặn nút Back / Forward của Chrome (popstate)
-  useEffect(() => {
-    if (!isInProgress) return;
-
-    window.history.pushState({ mockExamGuard: true }, '', window.location.href);
-
-    const onPopState = () => {
-      if (allowExitRef.current) return;
-      window.history.pushState(
-        { mockExamGuard: true },
-        '',
-        window.location.href,
-      );
-      pendingNavUrl.current = '/dashboard/practice';
-      setShowExitWarning(true);
-    };
-
-    window.addEventListener('popstate', onPopState);
-    return () => {
-      window.removeEventListener('popstate', onPopState);
-    };
-  }, [isInProgress]);
-
-  // 3. Chặn mọi router navigation (cả khi click item trong sidebar dashboard, header, hay code gọi router.push/replace)
-  useEffect(() => {
-    if (!isInProgress) return;
-
-    const originalPushState = window.history.pushState.bind(window.history);
-    const originalReplaceState = window.history.replaceState.bind(
-      window.history,
-    );
-
-    const checkAndIntercept = (
-      originalFn: (
-        data: any,
-        unused: string,
-        url?: string | URL | null,
-      ) => void,
-      data: any,
-      unused: string,
-      url?: string | URL | null,
-    ) => {
-      if (allowExitRef.current) {
-        return originalFn(data, unused, url);
-      }
-
-      if (url) {
-        const dest = typeof url === 'string' ? url : url.toString();
-        if (dest && !dest.includes(attemptId)) {
-          pendingNavUrl.current = dest;
-          setShowExitWarning(true);
-          return;
-        }
-      }
-      return originalFn(data, unused, url);
-    };
-
-    window.history.pushState = (data, unused, url) => {
-      checkAndIntercept(originalPushState, data, unused, url);
-    };
-
-    window.history.replaceState = (data, unused, url) => {
-      checkAndIntercept(originalReplaceState, data, unused, url);
-    };
-
-    // Bắt thêm click vào tất cả thẻ <a> (như các link trong sidebar dashboard)
-    const handleAnchorClick = (e: MouseEvent) => {
-      if (allowExitRef.current) return;
-      const target = (e.target as HTMLElement).closest('a');
-      if (target && target.href) {
-        // Không chặn nút download file gốc, link blob, hoặc tab mới
-        if (
-          target.hasAttribute('download') ||
-          target.getAttribute('target') === '_blank' ||
-          target.href.startsWith('blob:') ||
-          target.protocol === 'blob:'
-        ) {
-          return;
-        }
-        try {
-          const url = new URL(target.href);
-          if (!url.pathname.includes(attemptId)) {
-            e.preventDefault();
-            e.stopPropagation();
-            pendingNavUrl.current = url.pathname + url.search;
-            setShowExitWarning(true);
-          }
-        } catch {
-          // ignore invalid URLs
-        }
-      }
-    };
-    document.addEventListener('click', handleAnchorClick, true);
-
-    return () => {
-      window.history.pushState = originalPushState;
-      window.history.replaceState = originalReplaceState;
-      document.removeEventListener('click', handleAnchorClick, true);
-    };
-  }, [isInProgress, attemptId]);
+  const { showExitWarning, requestExit, confirmExit, cancelExit, allowExit } =
+    useExamExitGuard(isInProgress, attemptId, '/dashboard/practice');
 
   // Tự chọn bài đầu tiên khi load xong đề
   useEffect(() => {
@@ -176,7 +64,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
   const handleSubmit = async (isAutoExpire = false) => {
     try {
       await submitAttempt(attemptId).unwrap();
-      allowExitRef.current = true;
+      allowExit();
       if (isAutoExpire) {
         messageApi.warning('Đã hết giờ làm bài! Hệ thống đã tự động nộp bài.');
       } else {
@@ -186,18 +74,6 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
     } catch {
       messageApi.error('Nộp bài thi thất bại, vui lòng thử lại');
     }
-  };
-
-  const handleConfirmExit = () => {
-    allowExitRef.current = true;
-    setShowExitWarning(false);
-    const dest = pendingNavUrl.current || '/dashboard/practice';
-    router.push(dest);
-  };
-
-  const handleCancelExit = () => {
-    pendingNavUrl.current = null;
-    setShowExitWarning(false);
   };
 
   if (isFetching && !data) {
@@ -239,8 +115,8 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
         okText="Thoát"
         cancelText="Tiếp tục thi"
         okButtonProps={{ danger: true }}
-        onCancel={handleCancelExit}
-        onOk={handleConfirmExit}>
+        onCancel={cancelExit}
+        onOk={confirmExit}>
         <p>
           Bài thi đang trong tiến trình. Nếu thoát bây giờ,{' '}
           <strong>kết quả các bài chưa nộp sẽ không được ghi nhận</strong>. Thời
@@ -253,8 +129,7 @@ const MockExamAttemptPage: React.FC<Props> = ({ attemptId }) => {
         <View style={styles.headerLeft}>
           <View
             style={styles.backButton}
-            onClick={() => setShowExitWarning(true)}
-            {...asButton(() => setShowExitWarning(true), 'Thoát bài thi')}>
+            {...asButton(requestExit, 'Thoát bài thi')}>
             <Text style={styles.backButtonText}>← Thoát</Text>
           </View>
 

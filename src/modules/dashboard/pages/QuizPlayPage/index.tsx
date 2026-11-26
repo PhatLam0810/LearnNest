@@ -1,10 +1,12 @@
 'use client';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Text, View } from 'react-native-web';
-import { Checkbox, Radio, Skeleton } from 'antd';
+import { Checkbox, Modal, Radio, Skeleton } from 'antd';
 import { useParams, useRouter } from 'next/navigation';
 import AppButton from '@components/AppButton';
 import { useResponsive } from '@/styles/responsive';
+import { asButton } from '@/utils/asButton';
+import { useExamExitGuard } from '~mdDashboard/utils/useExamExitGuard';
 import ExamSidebar, {
   ExamItemState,
 } from '~mdDashboard/components/ExamSidebar';
@@ -53,6 +55,12 @@ const QuizPlayPage: React.FC = () => {
     ? quiz.maxAttempts - quiz.attemptsUsed
     : null;
   const outOfAttempts = attemptsLeft !== null && attemptsLeft <= 0;
+  // Đang làm bài (chưa nộp) thì rời trang phải xác nhận, giống đề thi thử MOS.
+  const exitGuard = useExamExitGuard(
+    !!quiz && !result && !outOfAttempts,
+    quizId,
+    '/dashboard/practice',
+  );
 
   // Mỗi lần có đề mới (vào trang / làm lại) thì đặt lại bài làm + đồng hồ.
   useEffect(() => {
@@ -138,8 +146,37 @@ const QuizPlayPage: React.FC = () => {
     isAnswered(q, responses[q.index]),
   ).length;
 
+  const inProgress = !result && !outOfAttempts;
   return (
     <View style={styles.page}>
+      <Modal
+        title="Thoát bài làm?"
+        open={exitGuard.showExitWarning}
+        okText="Thoát"
+        cancelText="Tiếp tục làm bài"
+        okButtonProps={{ danger: true }}
+        onCancel={exitGuard.cancelExit}
+        onOk={exitGuard.confirmExit}>
+        <p>
+          Bài làm đang trong tiến trình. Nếu thoát bây giờ,{' '}
+          <strong>
+            các câu đã chọn sẽ không được lưu và bài chưa được nộp
+          </strong>
+          .
+        </p>
+      </Modal>
+      <View
+        style={styles.backButton}
+        {...asButton(
+          inProgress
+            ? exitGuard.requestExit
+            : () => router.push('/dashboard/practice'),
+          inProgress ? 'Thoát bài làm' : 'Quay lại',
+        )}>
+        <Text style={styles.backButtonText}>
+          {inProgress ? '← Thoát' : '← Quay lại'}
+        </Text>
+      </View>
       <Text role="heading" aria-level={1} style={styles.title}>
         {quiz.title}
       </Text>
